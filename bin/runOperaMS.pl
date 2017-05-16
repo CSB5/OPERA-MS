@@ -22,10 +22,19 @@ use Getopt::Std;
 getopts('r:'); # r=1 -> run cmds in run_exe, else only print
 
 # Paths to programs used in script
-my $bundler_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/FOR_OPERA/bundler"; 
-my $opera_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/FOR_OPERA/opera";
-my $sigma_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/SIGMA++/1.5_debug/sigma";
-my $compute_n50_path = "/home/bertrandd/X_SCRIPTS/scaffold_stats_opt.pl";
+#my $bundler_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/FOR_OPERA/bundler"; 
+#my $opera_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/FOR_OPERA/opera";
+#my $sigma_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/SIGMA++/1.5_debug/sigma";
+#my $compute_n50_path = "/home/bertrandd/X_SCRIPTS/scaffold_stats_opt.pl";
+
+#TODO add a way for users to specify the path maybe?
+my $main_direct = getcwd;
+$main_direct .= "\/";
+
+my $bundler_path = $main_direct . "bin/bundler"; 
+my $opera_path = $main_direct . "bin/opera";
+my $sigma_path = $main_direct . "bin/sigma";
+my $compute_n50_path = $main_direct . "bin/scaffold_stats_opt.pl";
 
 
 

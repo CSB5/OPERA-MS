@@ -93,6 +93,8 @@ if ($flag_help) {
         exit 0;
 }
 if (!defined($contigFile)) {
+        my $cmd = 'pwd';
+        print STDERR "\n".$cmd."\n";
         print "contigs fasta file needs to be specified\n";
         exit 0;
 }

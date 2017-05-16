@@ -49,13 +49,20 @@ run_exe($command);
 $command = "mkdir -p $lr_output_dir";
 run_exe($command);
 
-$command= "OPERA-LG_v2.1.0/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $lr_output_dir --num-of-processors 20 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.1.0/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2";
+#Use for:
+#mapping of short reads => bwa
+#mapping of long reads => blasr
+#compute long read links
+#run opera NO NEED 
+#===> add an option --link that does not run opera
+$command= "OPERA-LG_v2.1.0/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $lr_output_dir --num-of-processors 20 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS/OPERA-LG_v2.1.0/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2";
 #$command= "$qsub -N opera-lr -b y /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.0.6/bin/OPERA-long-read.pl --contig-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/MOCK_20/ASSEMBLY/MEGAHIT/final.contigs_soap.fa --kmer 100 --long-read-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/NANOPORE/LIBRARY/POOL/POOL_all/POOL.fa --output-prefix opera --output-directory OPERA_LG/OPERA-long-read/MEGAHIT/NANOPORE_ALL/ --num-of-processors 20 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.0.6/bin/"
 run_exe($command);
 #}
 
 ### Softlink opera.bam
 #
+#NOT REQUIRED CAN BE REMOVE IF REPLACE BY PATH IN $lr_output_dir/opera.bam
 $command="ln -s $lr_output_dir/opera.bam $output_dir/contigs.bam";
 run_exe($command);
 
@@ -64,7 +71,13 @@ run_exe($command);
 
 ### runOperaMS
 ##
-$command = "perl bin/OperaMS-run.sh $opera_ms_config_file $output_dir";
+#$command = "perl bin/OperaMS-run.sh $opera_ms_config_file $output_dir";
+#SIGMA on short reads
+#bundling of short reads (can be use if fix the problem with short reads)
+#Run SIGMA
+#Run OPERA NO NEED
+#===> add an option --no-opera that does not run opera
+$command = "perl bin/runOperaMS.pl $opera_ms_config_file >> $output_dir/run_log.txt 2>&1";
 run_exe($command);
 
 my $lr_output_dir_sed = $lr_output_dir;
