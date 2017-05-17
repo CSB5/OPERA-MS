@@ -8,6 +8,10 @@ use Switch;
 use Getopt::Std;
 
 ###to update code for multi lib
+if ( @ARGV == 0 ){
+    print "Please input the correct arguments. Refer to the documentation for more information. \n";
+    exit 0;
+}
 
 my $output_dir=$ARGV[0];
 my $opera_ms_config_file = $output_dir."/OPERA-MS.config";
@@ -17,6 +21,21 @@ my $illum_read1=$ARGV[3];       #/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENO
 my $illum_read2=$ARGV[4];       #/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/ILLUMINA/mock20.R2.fastq.gz
 my $contigs_file=$ARGV[5];
 my $kmer_size = 60;
+
+if (!defined($contigs_file)){
+    print "contigs file not found.\n";
+    exit 0;
+}
+
+if (!defined($illum_read1)){
+    print "illumina read_1 file not found.\n";
+    exit 0;
+}
+
+if (!defined($illum_read2)){
+    print "illumina read_2 file not found. \n";
+    exit 0;
+}
 
 #my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -V -l mem_free=20G,h_rt=500:0:0 -pe OpenMP 20";
 my $command;
@@ -55,7 +74,7 @@ run_exe($command);
 #compute long read links
 #run opera NO NEED 
 #===> add an option --link that does not run opera
-$command= "OPERA-LG_v2.1.0/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $lr_output_dir --num-of-processors 20 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS/OPERA-LG_v2.1.0/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2";
+$command= "OPERA-LG_v2.1.0/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $lr_output_dir --num-of-processors 20 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS/OPERA-LG_v2.1.0/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --skip-opera=1";
 #$command= "$qsub -N opera-lr -b y /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.0.6/bin/OPERA-long-read.pl --contig-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/MOCK_20/ASSEMBLY/MEGAHIT/final.contigs_soap.fa --kmer 100 --long-read-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/NANOPORE/LIBRARY/POOL/POOL_all/POOL.fa --output-prefix opera --output-directory OPERA_LG/OPERA-long-read/MEGAHIT/NANOPORE_ALL/ --num-of-processors 20 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.0.6/bin/"
 run_exe($command);
 #}

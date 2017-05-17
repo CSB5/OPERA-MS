@@ -44,7 +44,7 @@ my $samtools_dir = "";
 my $short_read_maptool = "bwa";
 my $kmer_size = 100;
 my $flag_help;
-
+my $skip_opera = 0;
 
 my $help_message = "
 
@@ -63,6 +63,7 @@ Options:
 	--illumina-read1: fasta file of illumina read1
 	--illumina-read2: fasta file of illumina read2
         --help : prints this message
+    --skip-opera :set to 1 to skip running OPERA-LG and just uses the script for processing purposes. (Default set to 0)
 ";
 
 if ( @ARGV == 0 ) {
@@ -85,7 +86,8 @@ GetOptions(
     "short-read-tooldir=s" => \$short_read_tooldir,
     "illumina-read1=s"      => \$illum_read1,
     "illumina-read2=s"      => \$illum_read2,
-    "help"       => \$flag_help
+    "help"       => \$flag_help,
+    "skip-opera=i" => \$skip_opera
 ) or die("Error in command line arguments.\n");
 
 if ($flag_help) {
@@ -284,15 +286,19 @@ for (my $i = 0; $i <= 5; $i++){
     close(OUT);
 }
 
-#
-# create configure file
-&CreateConfigFile( $contigFile, "", @allEdgeFiles );
+if (!$skip_opera){
 
-# run opera
-&run_exe( "${operaDir}OPERA-LG config > log" );
+    #
+    # create configure file
+    &CreateConfigFile( $contigFile, "", @allEdgeFiles );
 
-#Link to the result file
-&run_exe("ln -s results/scaffoldSeq.fasta scaffoldSeq.fasta");
+    # run opera
+    &run_exe( "${operaDir}OPERA-LG config > log" );
+
+    #Link to the result file
+    &run_exe("ln -s results/scaffoldSeq.fasta scaffoldSeq.fasta");
+
+}
 
 sub extract_edge{
     my ($all_edge_file) = @_;
