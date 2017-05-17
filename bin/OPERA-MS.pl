@@ -134,8 +134,7 @@ if ( @ARGV == 1){
 else{
 
     $output_dir=$ARGV[0];
-    $opera_ms_config_file = $output_dir."/".$runOperaMS_config_name;
-    $long_read_file=$ARGV[1];    #/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/NANOPORE/LIBRARY/POOL/POOL_all/POOL.fa
+        $long_read_file=$ARGV[1];    #/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/NANOPORE/LIBRARY/POOL/POOL_all/POOL.fa
     $lr_output_dir =$ARGV[2];    #OPERA_LG/OPERA-long-read/MEGAHIT/NANOPORE_ALL/
     $illum_read1=$ARGV[3];       #/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/ILLUMINA/mock20.R1.fastq.gz
     $illum_read2=$ARGV[4];       #/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/ILLUMINA/mock20.R2.fastq.gz
@@ -143,9 +142,10 @@ else{
     $kmer_size = 60;
 }
 
-$output_dir = $main_direct . $output_dir if (substr($output_dir, 0, 1) ne "/");
+$opera_ms_config_file = $output_dir."/".$runOperaMS_config_name;
+$output_dir = $main_direct . $output_dir."/" if (substr($output_dir, 0, 1) ne "/");
 $long_read_file = $main_direct . $long_read_file if(substr($long_read_file, 0, 1) ne "/");
-$lr_output_dir = $main_direct . $lr_output_dir if(substr($lr_output_dir, 0, 1) ne  "/");
+$lr_output_dir = $main_direct . $lr_output_dir."/" if(substr($lr_output_dir, 0, 1) ne  "/");
 $illum_read1 = $main_direct . $illum_read1 if(substr($illum_read1, 0, 1) ne "/");
 $illum_read2= $main_direct . $illum_read2 if(substr($illum_read2, 0, 1) ne "/");
 $contigs_file = $main_direct . $contigs_file if(substr($contigs_file, 0, 1) ne "/");
