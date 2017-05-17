@@ -53,8 +53,6 @@ if( ! -e $long_read_file) {
     die "\nError : $long_read_file - long read file does not exist\n"
 }
 
-print $contigs_file;
-
 my $command = "perl bin/OPERA-MS.pl $output_dir $long_read_file $lr_output_dir $illum_read1 $illum_read2 $contigs_file";
 run_exe($command);
 

@@ -44,7 +44,8 @@ my($opera_ms_config_file) = @ARGV;
 my($contigs_file, %LIB, $samtools_path, $mapping_files, $sigma_contigs_file,
 	$output_dir, $bundle_size_thresh, $kmer_size, $contigs_file_type, 
 	$contig_len_thr, $contig_edge_len, 
-	$contig_window_len, $pdist_type);
+	$contig_window_len, $pdist_type,
+    $skip_opera);
 my $num_LIB = 0;
 
 print STDERR "\nReading config file: ".$opera_ms_config_file."\n"; 
@@ -57,7 +58,7 @@ while(<$opera_ms_cf>) {
 	    $config_option = $split_line[0];
 
 	    switch ($config_option) {
-
+            
 	    	case "CONTIGS_FILE" {
 				$contigs_file = File::Spec->rel2abs($split_line[1]);
 				if (! -e $contigs_file) {
@@ -107,7 +108,7 @@ while(<$opera_ms_cf>) {
 	    	case "SAMTOOLS" {
 	    		$samtools_path = $split_line[1];
 	    		if (! -e $samtools_path) {
-	    			die "Samtoos not found at: ".$samtools_path."\n";
+	    			die "Samtools not found at: ".$samtools_path."\n";
 	    		}
 	    	}
 
@@ -146,8 +147,27 @@ while(<$opera_ms_cf>) {
 				$pdist_type = $split_line[1];
 	    	}
 
-	    	else {
-		    die "Config option: ".$config_option." unknown";
+            case "SKIP_OPERA" {
+                $skip_opera = $split_line[1];
+                if($skip_opera != 1 && $skip_opera != 0){
+                    die "SKIP_OPERA must be equal to either 1 (skip) or 0 (don't skip)";
+                }
+            }
+
+            case "LONG_READ_OUTPUT_DIR"{
+            }
+
+            case "LONG_READ_FILE"{
+            }
+
+            case "ILLUMINA_READ_1"{
+            }
+
+            case "ILLUMINA_READ_2"{
+            }
+
+            else {
+                die "Config option: ".$config_option." unknown";
 	    	}	
 	    }
 	}
@@ -276,8 +296,6 @@ if (0 && !defined $sigma_contigs_file) {			#coverage not computed
 }
 
 
-
-
 ############################## OPERA ##############################
 
 # Extract filtered files, mean, and standard deviation for constructing
@@ -324,6 +342,13 @@ unless (-d $opera_output_folder){
 }
 my $opera_config_file = "opera.config"; 
 &construct_opera_config_file($contigs_file, $opera_output_folder, \%opera_filtered_files, $opera_output_folder."/".$opera_config_file);
+
+#If we decide to skip actually running opera - Used in the OPERA-MS.pl script.
+if($skip_opera){
+    die "Opera portion of runOperaMS skipped.";
+}
+
+
 run_exe("$opera_path $opera_output_folder/opera.config > $results_folder/log.txt");
 
 #$res_file = "$results_folder/scaffoldSeq.fasta";

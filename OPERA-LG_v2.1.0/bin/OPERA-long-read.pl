@@ -286,13 +286,14 @@ for (my $i = 0; $i <= 5; $i++){
     close(OUT);
 }
 
+
+# create configure file
+&CreateConfigFile( $contigFile, "", @allEdgeFiles );
+
+
 if (!$skip_opera){
 
-    #
-    # create configure file
-    &CreateConfigFile( $contigFile, "", @allEdgeFiles );
-
-    # run opera
+        # run opera
     &run_exe( "${operaDir}OPERA-LG config > log" );
 
     #Link to the result file
