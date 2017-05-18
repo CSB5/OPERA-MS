@@ -112,6 +112,18 @@ while(<$opera_ms_cf>) {
 	    		}
 	    	}
 
+            case "BLASR_DIR"{
+                    $blasr_dir = $split_line[1];
+            }
+
+            case "SHORT_READ_TOOL"{
+                $short_read_maptool = $split_line[1];
+            }
+
+            case "SHORT_READ_TOOL_DIR"{
+                $short_read_tool_dir = $split_line[1];
+            }
+
 	    	case "SIGMA_CONTIGS_FILE" {
 				$sigma_contigs_file = File::Spec->rel2abs($split_line[1]); 
 				if(! -e $sigma_contigs_file) {
