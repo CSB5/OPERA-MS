@@ -17,7 +17,8 @@ use Cwd;
 use File::Spec; 
 use Switch; 
 use Getopt::Std;
-
+use File::Spec::Functions qw(rel2abs);
+use File::Basename;
 
 getopts('r:'); # r=1 -> run cmds in run_exe, else only print
 
@@ -31,10 +32,12 @@ getopts('r:'); # r=1 -> run cmds in run_exe, else only print
 my $main_direct = getcwd;
 $main_direct .= "\/";
 
-my $bundler_path = $main_direct . "bin/bundler"; 
-my $opera_path = $main_direct . "bin/opera";
-my $sigma_path = $main_direct . "bin/sigma";
-my $compute_n50_path = $main_direct . "bin/scaffold_stats_opt.pl";
+my $bin_dir = dirname(rel2abs($0)) . "/";
+
+my $bundler_path = $bin_dir . "bundler"; 
+my $opera_path = $bin_dir . "opera";
+my $sigma_path = $bin_dir . "sigma";
+my $compute_n50_path = $bin_dir . "scaffold_stats_opt.pl";
 
 
 
@@ -176,6 +179,9 @@ while(<$opera_ms_cf>) {
             }
 
             case "ILLUMINA_READ_2"{
+            }
+
+            case "OPERA_VERSION"{
             }
 
             else {

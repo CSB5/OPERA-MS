@@ -695,7 +695,7 @@ sub checkMapping{
     my %edge_distance_support = ();my @sorted_distance_ori = ();my @all_distance_ori = ();
     my ($distance_ID, $best_support);
     foreach $key (keys(%edge_read_info)) {
-	print STDERR "\n *** *** contig pair $key\n";
+#	print STDERR "\n *** *** contig pair $key\n";
 	#Compute the support and edge distance as well as the orientation
 	#Constructure a array that contain the distance as well as the orientation of the 2 contigs involve in the edge
 	%edge_distance_support = ();
@@ -725,7 +725,7 @@ sub checkMapping{
 	for(my $i = 0; $i < @sorted_distance_ori; $i++){
 	    $distance = $sorted_distance_ori[$i]->[0];
 	    $edge = $sorted_distance_ori[$i]->[1];
-	    print STDERR " *** $edge the dist $distance\n";
+##	    print STDERR " *** $edge the dist $distance\n";
 	    $distance_ID = -1;
 	    if(exists $edge_distance_support{$edge}){
 		for(my $j = 0; $j < @{$edge_distance_support{$edge}}; $j++){
@@ -738,7 +738,7 @@ sub checkMapping{
 	    }
 	    if($distance_ID == -1){
 		#New edge distance
-		print STDERR " ------------ new distance\n";
+##		print STDERR " ------------ new distance\n";
 		$edge_distance_support{$edge} = () if(! exists $edge_distance_support{$edge});
 		push(@{$edge_distance_support{$edge}}, [$distance, $distance, 1]);
 		$nb_edge_distance++;
