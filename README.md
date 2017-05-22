@@ -54,12 +54,12 @@ This is an example of a config file :
 CONTIGS_FILE_TYPE SOAPdenovo #SOAPdenovo and Velvet are supported
 CONTIGS_FILE /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS/test_files/final.contigs_soap.fa #We can use absolute or relative paths. #This is an absolute path.
 LONG_READ_OUTPUT_DIR long-read1 #This is a relative path. This will output long reads to cwd/long-read1
-OUTPUT_DIR results/test1/
 LONG_READ_FILE test_files/POOL.fa
 ILLUMINA_READ_1 test_files/mock1000.R1.fastq.gz
 ILLUMINA_READ_2 test_files/mock1000.R2.fastq.gz
 SAMTOOLS /home/usr/software/ #Optional, comment out if samtools is in PATH.
 BLASR_DIR /home/usr/software #Optional, comment out if blasr is in PATH.
+BWA_DIR /home/usr/software #Optional, comment out if bwa is in PATH.
 OPERA_VERSION OPERA-LG_v2.1.0
 CONTIG_LEN_THR 500
 CONTIG_EDGE_LEN 80
@@ -74,8 +74,6 @@ All relative paths are relative to the current working directory of your termina
 - **CONTIGS_FILE_TYPE** : `SOAPdenovo` __or__ `Velvet` - The assembler of the input contigs file. Only these two are supported currently.
 
 - **CONTIGS_FILE** : `path/to/contigs.fa` - A path to the contigs file.
-
-- **LONG_READ_OUTPUT_DIR** : `path/to/directory` - Where the results of the long read processing will go.
 
 - **OUTPUT_DIR** : `path/to/results` - Where the final results of OPERA-MS will go.
 
