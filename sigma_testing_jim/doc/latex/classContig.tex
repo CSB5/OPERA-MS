@@ -1,0 +1,261 @@
+\hypertarget{classContig}{
+\section{Contig Class Reference}
+\label{classContig}\index{Contig@{Contig}}
+}
+
+
+A class for representing contigs in the assembly graph.  
+
+
+{\ttfamily \#include $<$/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/contig.h$>$}\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classContig_abe1938f8abac2eed8350479b0ab2990d}{Contig} (std::string id, int length)
+\begin{DoxyCompactList}\small\item\em Constructs a contig. \item\end{DoxyCompactList}\item 
+\hyperlink{classContig_a56e3c05b8d1bba09b873df68ea119873}{Contig} (std::string id, int length, int left\_\-edge, int right\_\-edge, int num\_\-windows)
+\begin{DoxyCompactList}\small\item\em Constructs a contig from previously extracted contig information. \item\end{DoxyCompactList}\item 
+\hyperlink{classContig_a1e51c10e7db2939f1dc600ca20ec5e2b}{$\sim$Contig} ()
+\item 
+std::string \hyperlink{classContig_a01b2b4e2acbc8157c4a2e17e837a5805}{id} () const 
+\begin{DoxyCompactList}\small\item\em Getter for id. \item\end{DoxyCompactList}\item 
+int \hyperlink{classContig_a71da417bc339dbb8e9b13990c2cbb871}{length} () const 
+\begin{DoxyCompactList}\small\item\em Getter for length. \item\end{DoxyCompactList}\item 
+int \hyperlink{classContig_a578d98d1d77ae2f994b07cfc0db62779}{modified\_\-length} () const 
+\begin{DoxyCompactList}\small\item\em Getter for modifed length. \item\end{DoxyCompactList}\item 
+int \hyperlink{classContig_a6ce973add14cd9ad93d3911dbd2cd6e9}{left\_\-edge} () const 
+\begin{DoxyCompactList}\small\item\em Getter for starting point of the first window. \item\end{DoxyCompactList}\item 
+int \hyperlink{classContig_afcc79b673b2e617997a2abbc543dbd05}{right\_\-edge} () const 
+\begin{DoxyCompactList}\small\item\em Getter for ending point of the last window. \item\end{DoxyCompactList}\item 
+int \hyperlink{classContig_a8401c01f72a0d890894feec48e397511}{num\_\-windows} () const 
+\begin{DoxyCompactList}\small\item\em Getter for number of windows. \item\end{DoxyCompactList}\item 
+int $\ast$ \hyperlink{classContig_abaae9169895892b8f5f64d45ff9e83d2}{sum\_\-read\_\-counts} () const 
+\begin{DoxyCompactList}\small\item\em Getter for sum of read counts for all samples. \item\end{DoxyCompactList}\item 
+int $\ast$$\ast$ \hyperlink{classContig_aea68c04bfd7422be6e11fa6f8ca12804}{read\_\-counts} () const 
+\begin{DoxyCompactList}\small\item\em Getter for sum of read counts for all windows. \item\end{DoxyCompactList}\item 
+\hyperlink{classCluster}{Cluster} $\ast$ \hyperlink{classContig_aff0179a2d1010e85316f6f842fe01ae2}{cluster} () const 
+\begin{DoxyCompactList}\small\item\em Getter for cluster containing this contig. \item\end{DoxyCompactList}\item 
+void \hyperlink{classContig_af3467f4ccb8e5db1eb86c96d40f38421}{set\_\-cluster} (\hyperlink{classCluster}{Cluster} $\ast$cluster)
+\begin{DoxyCompactList}\small\item\em Setter for cluster containing this contig. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classContig_ab1d6cdbcc3b964b8a671a214180e163f}{initReadCounts} ()
+\begin{DoxyCompactList}\small\item\em Initializes read counts for all samples and windows to 0. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::string \hyperlink{classContig_af2fd571bd7cb1dd9c7c4d0558b19e429}{id\_\-}
+\item 
+int \hyperlink{classContig_a7b13f9fa4a6e4637bcffa3d53f0f2bce}{length\_\-}
+\item 
+int \hyperlink{classContig_aa6684a56e15ee58bd476f540d374a533}{modified\_\-length\_\-}
+\item 
+int \hyperlink{classContig_a7b69a4c23403447450fa33c5d4734445}{left\_\-edge\_\-}
+\item 
+int \hyperlink{classContig_ae519dc1dad2c15acc493931e84601416}{right\_\-edge\_\-}
+\item 
+int \hyperlink{classContig_a79d35bdfd6b2150fad6de897e79707eb}{num\_\-windows\_\-}
+\item 
+int $\ast$ \hyperlink{classContig_aa612a7c9009a74dd27f8585c0685a7f1}{sum\_\-read\_\-counts\_\-}
+\item 
+int $\ast$$\ast$ \hyperlink{classContig_acefd28d0aa305b2ab14be6e7df92aa5f}{read\_\-counts\_\-}
+\item 
+\hyperlink{classCluster}{Cluster} $\ast$ \hyperlink{classContig_a6471f93dd7c670423724e1ad8daf119a}{cluster\_\-}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A class for representing contigs in the assembly graph. Represents a contig in the assembly graph including additional information obtained from read mapping. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classContig_abe1938f8abac2eed8350479b0ab2990d}{
+\index{Contig@{Contig}!Contig@{Contig}}
+\index{Contig@{Contig}!Contig@{Contig}}
+\subsubsection[{Contig}]{\setlength{\rightskip}{0pt plus 5cm}Contig::Contig (std::string {\em id}, \/  int {\em length})}}
+\label{classContig_abe1938f8abac2eed8350479b0ab2990d}
+
+
+Constructs a contig. 
+\begin{DoxyParams}{Parameters}
+\item[{\em id}]id \item[{\em length}]length \end{DoxyParams}
+\hypertarget{classContig_a56e3c05b8d1bba09b873df68ea119873}{
+\index{Contig@{Contig}!Contig@{Contig}}
+\index{Contig@{Contig}!Contig@{Contig}}
+\subsubsection[{Contig}]{\setlength{\rightskip}{0pt plus 5cm}Contig::Contig (std::string {\em id}, \/  int {\em length}, \/  int {\em left\_\-edge}, \/  int {\em right\_\-edge}, \/  int {\em num\_\-windows})}}
+\label{classContig_a56e3c05b8d1bba09b873df68ea119873}
+
+
+Constructs a contig from previously extracted contig information. 
+\begin{DoxyParams}{Parameters}
+\item[{\em id}]id \item[{\em length}]length \item[{\em left\_\-edge}]starting point of the first window \item[{\em right\_\-edge}]ending point of the last window \item[{\em num\_\-windows}]number of windows \end{DoxyParams}
+\hypertarget{classContig_a1e51c10e7db2939f1dc600ca20ec5e2b}{
+\index{Contig@{Contig}!$\sim$Contig@{$\sim$Contig}}
+\index{$\sim$Contig@{$\sim$Contig}!Contig@{Contig}}
+\subsubsection[{$\sim$Contig}]{\setlength{\rightskip}{0pt plus 5cm}Contig::$\sim$Contig ()}}
+\label{classContig_a1e51c10e7db2939f1dc600ca20ec5e2b}
+Default destructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classContig_aff0179a2d1010e85316f6f842fe01ae2}{
+\index{Contig@{Contig}!cluster@{cluster}}
+\index{cluster@{cluster}!Contig@{Contig}}
+\subsubsection[{cluster}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cluster} $\ast$ Contig::cluster () const}}
+\label{classContig_aff0179a2d1010e85316f6f842fe01ae2}
+
+
+Getter for cluster containing this contig. During the construction of clustering trees, this is the root cluster containing this contig. After computing models, this is the final cluster this contig is assigned to.
+
+\begin{DoxyReturn}{Returns}
+cluster containing this contig 
+\end{DoxyReturn}
+\hypertarget{classContig_a01b2b4e2acbc8157c4a2e17e837a5805}{
+\index{Contig@{Contig}!id@{id}}
+\index{id@{id}!Contig@{Contig}}
+\subsubsection[{id}]{\setlength{\rightskip}{0pt plus 5cm}std::string Contig::id () const}}
+\label{classContig_a01b2b4e2acbc8157c4a2e17e837a5805}
+
+
+Getter for id. \begin{DoxyReturn}{Returns}
+id 
+\end{DoxyReturn}
+\hypertarget{classContig_ab1d6cdbcc3b964b8a671a214180e163f}{
+\index{Contig@{Contig}!initReadCounts@{initReadCounts}}
+\index{initReadCounts@{initReadCounts}!Contig@{Contig}}
+\subsubsection[{initReadCounts}]{\setlength{\rightskip}{0pt plus 5cm}void Contig::initReadCounts ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_ab1d6cdbcc3b964b8a671a214180e163f}
+
+
+Initializes read counts for all samples and windows to 0. \hypertarget{classContig_a6ce973add14cd9ad93d3911dbd2cd6e9}{
+\index{Contig@{Contig}!left\_\-edge@{left\_\-edge}}
+\index{left\_\-edge@{left\_\-edge}!Contig@{Contig}}
+\subsubsection[{left\_\-edge}]{\setlength{\rightskip}{0pt plus 5cm}int Contig::left\_\-edge () const}}
+\label{classContig_a6ce973add14cd9ad93d3911dbd2cd6e9}
+
+
+Getter for starting point of the first window. \begin{DoxyReturn}{Returns}
+starting point of the first window 
+\end{DoxyReturn}
+\hypertarget{classContig_a71da417bc339dbb8e9b13990c2cbb871}{
+\index{Contig@{Contig}!length@{length}}
+\index{length@{length}!Contig@{Contig}}
+\subsubsection[{length}]{\setlength{\rightskip}{0pt plus 5cm}int Contig::length () const}}
+\label{classContig_a71da417bc339dbb8e9b13990c2cbb871}
+
+
+Getter for length. \begin{DoxyReturn}{Returns}
+length 
+\end{DoxyReturn}
+\hypertarget{classContig_a578d98d1d77ae2f994b07cfc0db62779}{
+\index{Contig@{Contig}!modified\_\-length@{modified\_\-length}}
+\index{modified\_\-length@{modified\_\-length}!Contig@{Contig}}
+\subsubsection[{modified\_\-length}]{\setlength{\rightskip}{0pt plus 5cm}int Contig::modified\_\-length () const}}
+\label{classContig_a578d98d1d77ae2f994b07cfc0db62779}
+
+
+Getter for modifed length. \begin{DoxyReturn}{Returns}
+modifed length 
+\end{DoxyReturn}
+\hypertarget{classContig_a8401c01f72a0d890894feec48e397511}{
+\index{Contig@{Contig}!num\_\-windows@{num\_\-windows}}
+\index{num\_\-windows@{num\_\-windows}!Contig@{Contig}}
+\subsubsection[{num\_\-windows}]{\setlength{\rightskip}{0pt plus 5cm}int Contig::num\_\-windows () const}}
+\label{classContig_a8401c01f72a0d890894feec48e397511}
+
+
+Getter for number of windows. \begin{DoxyReturn}{Returns}
+number of windows 
+\end{DoxyReturn}
+\hypertarget{classContig_aea68c04bfd7422be6e11fa6f8ca12804}{
+\index{Contig@{Contig}!read\_\-counts@{read\_\-counts}}
+\index{read\_\-counts@{read\_\-counts}!Contig@{Contig}}
+\subsubsection[{read\_\-counts}]{\setlength{\rightskip}{0pt plus 5cm}int $\ast$$\ast$ Contig::read\_\-counts () const}}
+\label{classContig_aea68c04bfd7422be6e11fa6f8ca12804}
+
+
+Getter for sum of read counts for all windows. \begin{DoxyReturn}{Returns}
+sum of read counts for all windows 
+\end{DoxyReturn}
+\hypertarget{classContig_afcc79b673b2e617997a2abbc543dbd05}{
+\index{Contig@{Contig}!right\_\-edge@{right\_\-edge}}
+\index{right\_\-edge@{right\_\-edge}!Contig@{Contig}}
+\subsubsection[{right\_\-edge}]{\setlength{\rightskip}{0pt plus 5cm}int Contig::right\_\-edge () const}}
+\label{classContig_afcc79b673b2e617997a2abbc543dbd05}
+
+
+Getter for ending point of the last window. \begin{DoxyReturn}{Returns}
+ending point of the last window 
+\end{DoxyReturn}
+\hypertarget{classContig_af3467f4ccb8e5db1eb86c96d40f38421}{
+\index{Contig@{Contig}!set\_\-cluster@{set\_\-cluster}}
+\index{set\_\-cluster@{set\_\-cluster}!Contig@{Contig}}
+\subsubsection[{set\_\-cluster}]{\setlength{\rightskip}{0pt plus 5cm}void Contig::set\_\-cluster ({\bf Cluster} $\ast$ {\em cluster})}}
+\label{classContig_af3467f4ccb8e5db1eb86c96d40f38421}
+
+
+Setter for cluster containing this contig. 
+\begin{DoxyParams}{Parameters}
+\item[{\em cluster}]cluster containing this contig \end{DoxyParams}
+\hypertarget{classContig_abaae9169895892b8f5f64d45ff9e83d2}{
+\index{Contig@{Contig}!sum\_\-read\_\-counts@{sum\_\-read\_\-counts}}
+\index{sum\_\-read\_\-counts@{sum\_\-read\_\-counts}!Contig@{Contig}}
+\subsubsection[{sum\_\-read\_\-counts}]{\setlength{\rightskip}{0pt plus 5cm}int $\ast$ Contig::sum\_\-read\_\-counts () const}}
+\label{classContig_abaae9169895892b8f5f64d45ff9e83d2}
+
+
+Getter for sum of read counts for all samples. \begin{DoxyReturn}{Returns}
+sum of read counts for all samples 
+\end{DoxyReturn}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classContig_a6471f93dd7c670423724e1ad8daf119a}{
+\index{Contig@{Contig}!cluster\_\-@{cluster\_\-}}
+\index{cluster\_\-@{cluster\_\-}!Contig@{Contig}}
+\subsubsection[{cluster\_\-}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cluster}$\ast$ {\bf Contig::cluster\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_a6471f93dd7c670423724e1ad8daf119a}
+\hyperlink{classCluster}{Cluster} containing this contig. \hypertarget{classContig_af2fd571bd7cb1dd9c7c4d0558b19e429}{
+\index{Contig@{Contig}!id\_\-@{id\_\-}}
+\index{id\_\-@{id\_\-}!Contig@{Contig}}
+\subsubsection[{id\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf Contig::id\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_af2fd571bd7cb1dd9c7c4d0558b19e429}
+Id. \hypertarget{classContig_a7b69a4c23403447450fa33c5d4734445}{
+\index{Contig@{Contig}!left\_\-edge\_\-@{left\_\-edge\_\-}}
+\index{left\_\-edge\_\-@{left\_\-edge\_\-}!Contig@{Contig}}
+\subsubsection[{left\_\-edge\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Contig::left\_\-edge\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_a7b69a4c23403447450fa33c5d4734445}
+Starting point of the first window. \hypertarget{classContig_a7b13f9fa4a6e4637bcffa3d53f0f2bce}{
+\index{Contig@{Contig}!length\_\-@{length\_\-}}
+\index{length\_\-@{length\_\-}!Contig@{Contig}}
+\subsubsection[{length\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Contig::length\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_a7b13f9fa4a6e4637bcffa3d53f0f2bce}
+Length. \hypertarget{classContig_aa6684a56e15ee58bd476f540d374a533}{
+\index{Contig@{Contig}!modified\_\-length\_\-@{modified\_\-length\_\-}}
+\index{modified\_\-length\_\-@{modified\_\-length\_\-}!Contig@{Contig}}
+\subsubsection[{modified\_\-length\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Contig::modified\_\-length\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_aa6684a56e15ee58bd476f540d374a533}
+Modified length. \hypertarget{classContig_a79d35bdfd6b2150fad6de897e79707eb}{
+\index{Contig@{Contig}!num\_\-windows\_\-@{num\_\-windows\_\-}}
+\index{num\_\-windows\_\-@{num\_\-windows\_\-}!Contig@{Contig}}
+\subsubsection[{num\_\-windows\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Contig::num\_\-windows\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_a79d35bdfd6b2150fad6de897e79707eb}
+Number of windows. \hypertarget{classContig_acefd28d0aa305b2ab14be6e7df92aa5f}{
+\index{Contig@{Contig}!read\_\-counts\_\-@{read\_\-counts\_\-}}
+\index{read\_\-counts\_\-@{read\_\-counts\_\-}!Contig@{Contig}}
+\subsubsection[{read\_\-counts\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int$\ast$$\ast$ {\bf Contig::read\_\-counts\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_acefd28d0aa305b2ab14be6e7df92aa5f}
+Sum of read counts for all windows. \hypertarget{classContig_ae519dc1dad2c15acc493931e84601416}{
+\index{Contig@{Contig}!right\_\-edge\_\-@{right\_\-edge\_\-}}
+\index{right\_\-edge\_\-@{right\_\-edge\_\-}!Contig@{Contig}}
+\subsubsection[{right\_\-edge\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Contig::right\_\-edge\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_ae519dc1dad2c15acc493931e84601416}
+Ending point of the last window. \hypertarget{classContig_aa612a7c9009a74dd27f8585c0685a7f1}{
+\index{Contig@{Contig}!sum\_\-read\_\-counts\_\-@{sum\_\-read\_\-counts\_\-}}
+\index{sum\_\-read\_\-counts\_\-@{sum\_\-read\_\-counts\_\-}!Contig@{Contig}}
+\subsubsection[{sum\_\-read\_\-counts\_\-}]{\setlength{\rightskip}{0pt plus 5cm}int$\ast$ {\bf Contig::sum\_\-read\_\-counts\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classContig_aa612a7c9009a74dd27f8585c0685a7f1}
+Sum of read counts for all samples. 
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{contig_8h}{contig.h}\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{contig_8cpp}{contig.cpp}\end{DoxyCompactItemize}

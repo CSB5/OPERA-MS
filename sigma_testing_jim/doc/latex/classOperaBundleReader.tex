@@ -1,0 +1,68 @@
+\hypertarget{classOperaBundleReader}{
+\section{OperaBundleReader Class Reference}
+\label{classOperaBundleReader}\index{OperaBundleReader@{OperaBundleReader}}
+}
+
+
+Opera edges file reader.  
+
+
+{\ttfamily \#include $<$/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/edge\_\-reader.h$>$}Inheritance diagram for OperaBundleReader::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classOperaBundleReader}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classOperaBundleReader_aaaaa61f53cb7bf436f187d3c6f1e8dc1}{OperaBundleReader} ()
+\item 
+void \hyperlink{classOperaBundleReader_ad85e56642c7d4b0c65dfbb2dbbf59029}{read} (const char $\ast$edges\_\-file, const \hyperlink{contig_8h_aa2acb8d3b78def617ec4509a1f684c4e}{ContigMap} $\ast$contigs, \hyperlink{edge_8h_ad07b5df6e7cfe15cad88e3b25d48c84f}{EdgeSet} $\ast$edges, const char $\ast$skipped\_\-edges\_\-file)
+\begin{DoxyCompactList}\small\item\em Reads edge information from Opera's bundle file. \item\end{DoxyCompactList}\item 
+void \hyperlink{classOperaBundleReader_a822e6a9b0ce2d1dd9353a692f328cac6}{filter} (const char $\ast$edges\_\-file, const \hyperlink{contig_8h_aa2acb8d3b78def617ec4509a1f684c4e}{ContigMap} $\ast$contigs, const char $\ast$filtered\_\-edges\_\-file)
+\begin{DoxyCompactList}\small\item\em Filters edges from Opera's bundle file. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Opera edges file reader. Enables reading edge information from the output of \href{http://sourceforge.net/projects/operasf/}{\tt Opera's} bundling routine. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classOperaBundleReader_aaaaa61f53cb7bf436f187d3c6f1e8dc1}{
+\index{OperaBundleReader@{OperaBundleReader}!OperaBundleReader@{OperaBundleReader}}
+\index{OperaBundleReader@{OperaBundleReader}!OperaBundleReader@{OperaBundleReader}}
+\subsubsection[{OperaBundleReader}]{\setlength{\rightskip}{0pt plus 5cm}OperaBundleReader::OperaBundleReader ()}}
+\label{classOperaBundleReader_aaaaa61f53cb7bf436f187d3c6f1e8dc1}
+An empty constructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classOperaBundleReader_a822e6a9b0ce2d1dd9353a692f328cac6}{
+\index{OperaBundleReader@{OperaBundleReader}!filter@{filter}}
+\index{filter@{filter}!OperaBundleReader@{OperaBundleReader}}
+\subsubsection[{filter}]{\setlength{\rightskip}{0pt plus 5cm}void OperaBundleReader::filter (const char $\ast$ {\em edges\_\-file}, \/  const {\bf ContigMap} $\ast$ {\em contigs}, \/  const char $\ast$ {\em filtered\_\-edges\_\-file})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOperaBundleReader_a822e6a9b0ce2d1dd9353a692f328cac6}
+
+
+Filters edges from Opera's bundle file. 
+\begin{DoxyParams}{Parameters}
+\item[{\em edges\_\-file}]path to edges file \item[{\em contigs}]map with contig information \item[{\em filtered\_\-edges\_\-file}]path to filtered edges file \end{DoxyParams}
+ 
+
+Implements \hyperlink{classEdgeReader_a422beb33051ce84d62a600325aa058e1}{EdgeReader}.\hypertarget{classOperaBundleReader_ad85e56642c7d4b0c65dfbb2dbbf59029}{
+\index{OperaBundleReader@{OperaBundleReader}!read@{read}}
+\index{read@{read}!OperaBundleReader@{OperaBundleReader}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}void OperaBundleReader::read (const char $\ast$ {\em edges\_\-file}, \/  const {\bf ContigMap} $\ast$ {\em contigs}, \/  {\bf EdgeSet} $\ast$ {\em edges}, \/  const char $\ast$ {\em skipped\_\-edges\_\-file})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classOperaBundleReader_ad85e56642c7d4b0c65dfbb2dbbf59029}
+
+
+Reads edge information from Opera's bundle file. 
+\begin{DoxyParams}{Parameters}
+\item[{\em edges\_\-file}]path to edges file \item[{\em contigs}]map with contig information \item[{\em edges}]set of edges \item[{\em skipped\_\-edges\_\-file}]path to skipped edges file \end{DoxyParams}
+ 
+
+Implements \hyperlink{classEdgeReader_a3c929904fe67018b74f4c180bada33dd}{EdgeReader}.
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{edge__reader_8h}{edge\_\-reader.h}\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{edge__reader_8cpp}{edge\_\-reader.cpp}\end{DoxyCompactItemize}

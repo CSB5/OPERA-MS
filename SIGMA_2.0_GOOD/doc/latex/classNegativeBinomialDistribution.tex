@@ -1,0 +1,89 @@
+\hypertarget{classNegativeBinomialDistribution}{
+\section{NegativeBinomialDistribution Class Reference}
+\label{classNegativeBinomialDistribution}\index{NegativeBinomialDistribution@{NegativeBinomialDistribution}}
+}
+
+
+An implementation of negative binomial probability distribution.  
+
+
+{\ttfamily \#include $<$/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/probability\_\-distribution.h$>$}Inheritance diagram for NegativeBinomialDistribution::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classNegativeBinomialDistribution}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classNegativeBinomialDistribution_a2308881b292a5e00caa3549c546a8003}{NegativeBinomialDistribution} (double vmr)
+\begin{DoxyCompactList}\small\item\em Constructs a negative binomial distribution for given vmr value. \item\end{DoxyCompactList}\item 
+double \hyperlink{classNegativeBinomialDistribution_ad609aa4b6b7b3270e5e73a45a49ceb74}{logpf} (double mean, double value) const 
+\begin{DoxyCompactList}\small\item\em Computes log of pmf for given mean and value. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const double \hyperlink{classNegativeBinomialDistribution_ad36a45d72380ad6d3ae6bebc01698299}{log\_\-p}
+\item 
+const double \hyperlink{classNegativeBinomialDistribution_a0a58d5dd1b3c0013e29c9c133d5823ca}{log\_\-1mp}
+\item 
+const double \hyperlink{classNegativeBinomialDistribution_a822012e6f1c7081e07d3951da182c7e4}{xo1mx}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+An implementation of negative binomial probability distribution. Implements \href{http://en.wikipedia.org/wiki/Negative_binomial_distribution}{\tt negative binomial probability distribution}. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classNegativeBinomialDistribution_a2308881b292a5e00caa3549c546a8003}{
+\index{NegativeBinomialDistribution@{NegativeBinomialDistribution}!NegativeBinomialDistribution@{NegativeBinomialDistribution}}
+\index{NegativeBinomialDistribution@{NegativeBinomialDistribution}!NegativeBinomialDistribution@{NegativeBinomialDistribution}}
+\subsubsection[{NegativeBinomialDistribution}]{\setlength{\rightskip}{0pt plus 5cm}NegativeBinomialDistribution::NegativeBinomialDistribution (double {\em vmr})}}
+\label{classNegativeBinomialDistribution_a2308881b292a5e00caa3549c546a8003}
+
+
+Constructs a negative binomial distribution for given vmr value. 
+\begin{DoxyParams}{Parameters}
+\item[{\em vmr}]variance-\/to-\/mean ratio \end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classNegativeBinomialDistribution_ad609aa4b6b7b3270e5e73a45a49ceb74}{
+\index{NegativeBinomialDistribution@{NegativeBinomialDistribution}!logpf@{logpf}}
+\index{logpf@{logpf}!NegativeBinomialDistribution@{NegativeBinomialDistribution}}
+\subsubsection[{logpf}]{\setlength{\rightskip}{0pt plus 5cm}double NegativeBinomialDistribution::logpf (double {\em mean}, \/  double {\em value}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classNegativeBinomialDistribution_ad609aa4b6b7b3270e5e73a45a49ceb74}
+
+
+Computes log of pmf for given mean and value. 
+\begin{DoxyParams}{Parameters}
+\item[{\em mean}]mean of the distribution \item[{\em value}]value for which log of pmf is computed \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+log of pmf for given mean and value 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classProbabilityDistribution_a9ac2ee460523d2e8f77e7541c9d40ef7}{ProbabilityDistribution}.
+
+\subsection{Member Data Documentation}
+\hypertarget{classNegativeBinomialDistribution_a0a58d5dd1b3c0013e29c9c133d5823ca}{
+\index{NegativeBinomialDistribution@{NegativeBinomialDistribution}!log\_\-1mp@{log\_\-1mp}}
+\index{log\_\-1mp@{log\_\-1mp}!NegativeBinomialDistribution@{NegativeBinomialDistribution}}
+\subsubsection[{log\_\-1mp}]{\setlength{\rightskip}{0pt plus 5cm}const double {\bf NegativeBinomialDistribution::log\_\-1mp}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classNegativeBinomialDistribution_a0a58d5dd1b3c0013e29c9c133d5823ca}
+Log probability of failure. \hypertarget{classNegativeBinomialDistribution_ad36a45d72380ad6d3ae6bebc01698299}{
+\index{NegativeBinomialDistribution@{NegativeBinomialDistribution}!log\_\-p@{log\_\-p}}
+\index{log\_\-p@{log\_\-p}!NegativeBinomialDistribution@{NegativeBinomialDistribution}}
+\subsubsection[{log\_\-p}]{\setlength{\rightskip}{0pt plus 5cm}const double {\bf NegativeBinomialDistribution::log\_\-p}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classNegativeBinomialDistribution_ad36a45d72380ad6d3ae6bebc01698299}
+Log probability of success. \hypertarget{classNegativeBinomialDistribution_a822012e6f1c7081e07d3951da182c7e4}{
+\index{NegativeBinomialDistribution@{NegativeBinomialDistribution}!xo1mx@{xo1mx}}
+\index{xo1mx@{xo1mx}!NegativeBinomialDistribution@{NegativeBinomialDistribution}}
+\subsubsection[{xo1mx}]{\setlength{\rightskip}{0pt plus 5cm}const double {\bf NegativeBinomialDistribution::xo1mx}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classNegativeBinomialDistribution_a822012e6f1c7081e07d3951da182c7e4}
+Multiplier for computing mean number of failures from mean number of successes. 
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{probability__distribution_8h}{probability\_\-distribution.h}\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{probability__distribution_8cpp}{probability\_\-distribution.cpp}\end{DoxyCompactItemize}

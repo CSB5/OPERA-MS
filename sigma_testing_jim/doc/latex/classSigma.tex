@@ -1,0 +1,222 @@
+\hypertarget{classSigma}{
+\section{Sigma Class Reference}
+\label{classSigma}\index{Sigma@{Sigma}}
+}
+
+
+Main configuration class.  
+
+
+{\ttfamily \#include $<$/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/sigma.h$>$}\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classSigma_aebecf315bb7a8fd9c55672b5d81c6385}{readConfigFile} (char $\ast$config\_\-file)
+\begin{DoxyCompactList}\small\item\em Reads the configuration file. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static std::string \hyperlink{classSigma_a27244771a8b20af2f27924fe3a6bedd6}{contigs\_\-file\_\-type}
+\item 
+static std::string \hyperlink{classSigma_a2bb972d1c9db318b5616cf2dc211fbfa}{contigs\_\-file}
+\item 
+static std::vector$<$ std::string $>$ \hyperlink{classSigma_a31a4de140e200e02a079d34d313ce618}{mapping\_\-files}
+\item 
+static std::vector$<$ std::string $>$ \hyperlink{classSigma_a30434aee9f491592a8e06c44c6e49844}{edges\_\-files}
+\item 
+static std::string \hyperlink{classSigma_a57d2b73a5f595d5a91fab60d5663b0e0}{sigma\_\-contigs\_\-file}
+\item 
+static std::string \hyperlink{classSigma_a5693c7923c23c51fb05eb6946a7adfc6}{output\_\-dir}
+\item 
+static std::vector$<$ std::string $>$ \hyperlink{classSigma_a63939e07896d76725a80c6ad94df53da}{skipped\_\-edges\_\-files}
+\item 
+static std::vector$<$ std::string $>$ \hyperlink{classSigma_add16cab45b900fff34bedc48754facfc}{filtered\_\-edges\_\-files}
+\item 
+static std::string \hyperlink{classSigma_a31669f94dd223ec178a1bdb7b818517b}{clusters\_\-file}
+\item 
+static int \hyperlink{classSigma_a898fdf105adde827c4fc00d63c056e87}{num\_\-samples}
+\item 
+static int \hyperlink{classSigma_aed71635cf9007c2df2c869dac627aa63}{contig\_\-len\_\-thr}
+\item 
+static int \hyperlink{classSigma_aa38e6db83d0cc7fb63dba03eb157c522}{contig\_\-edge\_\-len}
+\item 
+static int \hyperlink{classSigma_a388ca75430d14e589b9e99933973b454}{contig\_\-window\_\-len}
+\item 
+static std::string \hyperlink{classSigma_a475c2fd313149f708f0907b981e57b1e}{pdist\_\-type}
+\item 
+static double \hyperlink{classSigma_a8c00846e88a130c77f0e7cad5c50a187}{vmr}
+\end{DoxyCompactItemize}
+\subsection*{Static Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classSigma_ae36d3796eca2942917a455e689b1cf22}{configure} (\hyperlink{sigma_8h_a731115adbc0862ff6c28d129591ab640}{ParamsMap} $\ast$params)
+\begin{DoxyCompactList}\small\item\em Configures all parameters from the given map. \item\end{DoxyCompactList}\item 
+static int \hyperlink{classSigma_af1496b16a68d1d49110d70be6309845a}{getIntValue} (\hyperlink{sigma_8h_a731115adbc0862ff6c28d129591ab640}{ParamsMap} $\ast$params, std::string key)
+\begin{DoxyCompactList}\small\item\em Returns int value for given key. \item\end{DoxyCompactList}\item 
+static double \hyperlink{classSigma_a4d8f139e0451335bb43af4b451b3e969}{getDoubleValue} (\hyperlink{sigma_8h_a731115adbc0862ff6c28d129591ab640}{ParamsMap} $\ast$params, std::string key)
+\begin{DoxyCompactList}\small\item\em Returns double value for given key. \item\end{DoxyCompactList}\item 
+static std::string \hyperlink{classSigma_acd4df3477ab84afa7fb7572c9bf5b4df}{getStringValue} (\hyperlink{sigma_8h_a731115adbc0862ff6c28d129591ab640}{ParamsMap} $\ast$params, std::string key)
+\begin{DoxyCompactList}\small\item\em Returns string value for given key. \item\end{DoxyCompactList}\item 
+static std::vector$<$ std::string $>$ \hyperlink{classSigma_ab02fc1243a8a4bd0e462d81f27d348c8}{getVectorValue} (\hyperlink{sigma_8h_a731115adbc0862ff6c28d129591ab640}{ParamsMap} $\ast$params, std::string key)
+\begin{DoxyCompactList}\small\item\em Returns vector of values for given key. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Main configuration class. This class is used for reading the configuration file and storing configuration parameters. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classSigma_ae36d3796eca2942917a455e689b1cf22}{
+\index{Sigma@{Sigma}!configure@{configure}}
+\index{configure@{configure}!Sigma@{Sigma}}
+\subsubsection[{configure}]{\setlength{\rightskip}{0pt plus 5cm}void Sigma::configure ({\bf ParamsMap} $\ast$ {\em params})\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classSigma_ae36d3796eca2942917a455e689b1cf22}
+
+
+Configures all parameters from the given map. 
+\begin{DoxyParams}{Parameters}
+\item[{\em params}]map containing key-\/value configuration parameters \end{DoxyParams}
+\hypertarget{classSigma_a4d8f139e0451335bb43af4b451b3e969}{
+\index{Sigma@{Sigma}!getDoubleValue@{getDoubleValue}}
+\index{getDoubleValue@{getDoubleValue}!Sigma@{Sigma}}
+\subsubsection[{getDoubleValue}]{\setlength{\rightskip}{0pt plus 5cm}double Sigma::getDoubleValue ({\bf ParamsMap} $\ast$ {\em params}, \/  std::string {\em key})\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classSigma_a4d8f139e0451335bb43af4b451b3e969}
+
+
+Returns double value for given key. 
+\begin{DoxyParams}{Parameters}
+\item[{\em params}]map containing key-\/value configuration parameters \item[{\em key}]key \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+double value for given key, or 0.0 if the key does not exist 
+\end{DoxyReturn}
+\hypertarget{classSigma_af1496b16a68d1d49110d70be6309845a}{
+\index{Sigma@{Sigma}!getIntValue@{getIntValue}}
+\index{getIntValue@{getIntValue}!Sigma@{Sigma}}
+\subsubsection[{getIntValue}]{\setlength{\rightskip}{0pt plus 5cm}int Sigma::getIntValue ({\bf ParamsMap} $\ast$ {\em params}, \/  std::string {\em key})\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classSigma_af1496b16a68d1d49110d70be6309845a}
+
+
+Returns int value for given key. 
+\begin{DoxyParams}{Parameters}
+\item[{\em params}]map containing key-\/value configuration parameters \item[{\em key}]key \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int value for given key, or 0 if the key does not exist 
+\end{DoxyReturn}
+\hypertarget{classSigma_acd4df3477ab84afa7fb7572c9bf5b4df}{
+\index{Sigma@{Sigma}!getStringValue@{getStringValue}}
+\index{getStringValue@{getStringValue}!Sigma@{Sigma}}
+\subsubsection[{getStringValue}]{\setlength{\rightskip}{0pt plus 5cm}std::string Sigma::getStringValue ({\bf ParamsMap} $\ast$ {\em params}, \/  std::string {\em key})\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classSigma_acd4df3477ab84afa7fb7572c9bf5b4df}
+
+
+Returns string value for given key. 
+\begin{DoxyParams}{Parameters}
+\item[{\em params}]map containing key-\/value configuration parameters \item[{\em key}]key \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+string value for given key, or \char`\"{}-\/\char`\"{} if the key does not exist 
+\end{DoxyReturn}
+\hypertarget{classSigma_ab02fc1243a8a4bd0e462d81f27d348c8}{
+\index{Sigma@{Sigma}!getVectorValue@{getVectorValue}}
+\index{getVectorValue@{getVectorValue}!Sigma@{Sigma}}
+\subsubsection[{getVectorValue}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ std::string $>$ Sigma::getVectorValue ({\bf ParamsMap} $\ast$ {\em params}, \/  std::string {\em key})\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classSigma_ab02fc1243a8a4bd0e462d81f27d348c8}
+
+
+Returns vector of values for given key. 
+\begin{DoxyParams}{Parameters}
+\item[{\em params}]map containing key-\/value configuration parameters \item[{\em key}]key \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+vector of values for given key, or an empty vector if the key does not exist 
+\end{DoxyReturn}
+\hypertarget{classSigma_aebecf315bb7a8fd9c55672b5d81c6385}{
+\index{Sigma@{Sigma}!readConfigFile@{readConfigFile}}
+\index{readConfigFile@{readConfigFile}!Sigma@{Sigma}}
+\subsubsection[{readConfigFile}]{\setlength{\rightskip}{0pt plus 5cm}void Sigma::readConfigFile (char $\ast$ {\em config\_\-file})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_aebecf315bb7a8fd9c55672b5d81c6385}
+
+
+Reads the configuration file. 
+\begin{DoxyParams}{Parameters}
+\item[{\em config\_\-file}]path to configuration file \end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classSigma_a31669f94dd223ec178a1bdb7b818517b}{
+\index{Sigma@{Sigma}!clusters\_\-file@{clusters\_\-file}}
+\index{clusters\_\-file@{clusters\_\-file}!Sigma@{Sigma}}
+\subsubsection[{clusters\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf Sigma::clusters\_\-file}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a31669f94dd223ec178a1bdb7b818517b}
+Path to clusters file. \hypertarget{classSigma_aa38e6db83d0cc7fb63dba03eb157c522}{
+\index{Sigma@{Sigma}!contig\_\-edge\_\-len@{contig\_\-edge\_\-len}}
+\index{contig\_\-edge\_\-len@{contig\_\-edge\_\-len}!Sigma@{Sigma}}
+\subsubsection[{contig\_\-edge\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Sigma::contig\_\-edge\_\-len}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_aa38e6db83d0cc7fb63dba03eb157c522}
+\hyperlink{classContig}{Contig} edge length. \hypertarget{classSigma_aed71635cf9007c2df2c869dac627aa63}{
+\index{Sigma@{Sigma}!contig\_\-len\_\-thr@{contig\_\-len\_\-thr}}
+\index{contig\_\-len\_\-thr@{contig\_\-len\_\-thr}!Sigma@{Sigma}}
+\subsubsection[{contig\_\-len\_\-thr}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Sigma::contig\_\-len\_\-thr}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_aed71635cf9007c2df2c869dac627aa63}
+Threshold on contig length. \hypertarget{classSigma_a388ca75430d14e589b9e99933973b454}{
+\index{Sigma@{Sigma}!contig\_\-window\_\-len@{contig\_\-window\_\-len}}
+\index{contig\_\-window\_\-len@{contig\_\-window\_\-len}!Sigma@{Sigma}}
+\subsubsection[{contig\_\-window\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Sigma::contig\_\-window\_\-len}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a388ca75430d14e589b9e99933973b454}
+\hyperlink{classContig}{Contig} window length. \hypertarget{classSigma_a2bb972d1c9db318b5616cf2dc211fbfa}{
+\index{Sigma@{Sigma}!contigs\_\-file@{contigs\_\-file}}
+\index{contigs\_\-file@{contigs\_\-file}!Sigma@{Sigma}}
+\subsubsection[{contigs\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf Sigma::contigs\_\-file}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a2bb972d1c9db318b5616cf2dc211fbfa}
+Path to contigs file. \hypertarget{classSigma_a27244771a8b20af2f27924fe3a6bedd6}{
+\index{Sigma@{Sigma}!contigs\_\-file\_\-type@{contigs\_\-file\_\-type}}
+\index{contigs\_\-file\_\-type@{contigs\_\-file\_\-type}!Sigma@{Sigma}}
+\subsubsection[{contigs\_\-file\_\-type}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf Sigma::contigs\_\-file\_\-type}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a27244771a8b20af2f27924fe3a6bedd6}
+Type of contigs file. \hypertarget{classSigma_a30434aee9f491592a8e06c44c6e49844}{
+\index{Sigma@{Sigma}!edges\_\-files@{edges\_\-files}}
+\index{edges\_\-files@{edges\_\-files}!Sigma@{Sigma}}
+\subsubsection[{edges\_\-files}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ std::string $>$ {\bf Sigma::edges\_\-files}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a30434aee9f491592a8e06c44c6e49844}
+Paths to edges files. \hypertarget{classSigma_add16cab45b900fff34bedc48754facfc}{
+\index{Sigma@{Sigma}!filtered\_\-edges\_\-files@{filtered\_\-edges\_\-files}}
+\index{filtered\_\-edges\_\-files@{filtered\_\-edges\_\-files}!Sigma@{Sigma}}
+\subsubsection[{filtered\_\-edges\_\-files}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ std::string $>$ {\bf Sigma::filtered\_\-edges\_\-files}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_add16cab45b900fff34bedc48754facfc}
+Paths to filtered edges files. \hypertarget{classSigma_a31a4de140e200e02a079d34d313ce618}{
+\index{Sigma@{Sigma}!mapping\_\-files@{mapping\_\-files}}
+\index{mapping\_\-files@{mapping\_\-files}!Sigma@{Sigma}}
+\subsubsection[{mapping\_\-files}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ std::string $>$ {\bf Sigma::mapping\_\-files}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a31a4de140e200e02a079d34d313ce618}
+Paths to mapping files. \hypertarget{classSigma_a898fdf105adde827c4fc00d63c056e87}{
+\index{Sigma@{Sigma}!num\_\-samples@{num\_\-samples}}
+\index{num\_\-samples@{num\_\-samples}!Sigma@{Sigma}}
+\subsubsection[{num\_\-samples}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf Sigma::num\_\-samples}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a898fdf105adde827c4fc00d63c056e87}
+Number of samples. \hypertarget{classSigma_a5693c7923c23c51fb05eb6946a7adfc6}{
+\index{Sigma@{Sigma}!output\_\-dir@{output\_\-dir}}
+\index{output\_\-dir@{output\_\-dir}!Sigma@{Sigma}}
+\subsubsection[{output\_\-dir}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf Sigma::output\_\-dir}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a5693c7923c23c51fb05eb6946a7adfc6}
+Path to output directory. \hypertarget{classSigma_a475c2fd313149f708f0907b981e57b1e}{
+\index{Sigma@{Sigma}!pdist\_\-type@{pdist\_\-type}}
+\index{pdist\_\-type@{pdist\_\-type}!Sigma@{Sigma}}
+\subsubsection[{pdist\_\-type}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf Sigma::pdist\_\-type}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a475c2fd313149f708f0907b981e57b1e}
+Type of read count probability distribution. \hypertarget{classSigma_a57d2b73a5f595d5a91fab60d5663b0e0}{
+\index{Sigma@{Sigma}!sigma\_\-contigs\_\-file@{sigma\_\-contigs\_\-file}}
+\index{sigma\_\-contigs\_\-file@{sigma\_\-contigs\_\-file}!Sigma@{Sigma}}
+\subsubsection[{sigma\_\-contigs\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf Sigma::sigma\_\-contigs\_\-file}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a57d2b73a5f595d5a91fab60d5663b0e0}
+Path to \hyperlink{classSigma}{Sigma} contigs file. \hypertarget{classSigma_a63939e07896d76725a80c6ad94df53da}{
+\index{Sigma@{Sigma}!skipped\_\-edges\_\-files@{skipped\_\-edges\_\-files}}
+\index{skipped\_\-edges\_\-files@{skipped\_\-edges\_\-files}!Sigma@{Sigma}}
+\subsubsection[{skipped\_\-edges\_\-files}]{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$ std::string $>$ {\bf Sigma::skipped\_\-edges\_\-files}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a63939e07896d76725a80c6ad94df53da}
+Paths to skipped edges files. \hypertarget{classSigma_a8c00846e88a130c77f0e7cad5c50a187}{
+\index{Sigma@{Sigma}!vmr@{vmr}}
+\index{vmr@{vmr}!Sigma@{Sigma}}
+\subsubsection[{vmr}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf Sigma::vmr}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSigma_a8c00846e88a130c77f0e7cad5c50a187}
+Variance to mean ratio for negative binomial distribution. 
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{sigma_8h}{sigma.h}\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{sigma_8cpp}{sigma.cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,69 @@
+\hypertarget{classSAMReader}{
+\section{SAMReader Class Reference}
+\label{classSAMReader}\index{SAMReader@{SAMReader}}
+}
+
+
+SAM mapping file reader.  
+
+
+{\ttfamily \#include $<$/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/mapping\_\-reader.h$>$}Inheritance diagram for SAMReader::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classSAMReader}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSAMReader_a02e0ad94153bdfb9beb2dc809b4a6741}{SAMReader} ()
+\item 
+void \hyperlink{classSAMReader_a6c11ffaf56aa72aae2d5999cbd21de6f}{read} (const char $\ast$mapping\_\-file, int sample\_\-index, \hyperlink{contig_8h_aa2acb8d3b78def617ec4509a1f684c4e}{ContigMap} $\ast$contigs)
+\begin{DoxyCompactList}\small\item\em Reads mapping information from SAM format. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classSAMReader_a5871df65884559cc9add85881617e9c3}{readInputStream} (FILE $\ast$mapping\_\-fp, int sample\_\-index, \hyperlink{contig_8h_aa2acb8d3b78def617ec4509a1f684c4e}{ContigMap} $\ast$contigs)
+\begin{DoxyCompactList}\small\item\em Reads mapping information from .sam file or stdin. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+SAM mapping file reader. Enables reading read-\/to-\/contig mapping information from \href{http://samtools.github.io/}{\tt SAM file format}. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classSAMReader_a02e0ad94153bdfb9beb2dc809b4a6741}{
+\index{SAMReader@{SAMReader}!SAMReader@{SAMReader}}
+\index{SAMReader@{SAMReader}!SAMReader@{SAMReader}}
+\subsubsection[{SAMReader}]{\setlength{\rightskip}{0pt plus 5cm}SAMReader::SAMReader ()}}
+\label{classSAMReader_a02e0ad94153bdfb9beb2dc809b4a6741}
+An empty constructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classSAMReader_a6c11ffaf56aa72aae2d5999cbd21de6f}{
+\index{SAMReader@{SAMReader}!read@{read}}
+\index{read@{read}!SAMReader@{SAMReader}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}void SAMReader::read (const char $\ast$ {\em mapping\_\-file}, \/  int {\em sample\_\-index}, \/  {\bf ContigMap} $\ast$ {\em contigs})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSAMReader_a6c11ffaf56aa72aae2d5999cbd21de6f}
+
+
+Reads mapping information from SAM format. 
+\begin{DoxyParams}{Parameters}
+\item[{\em mapping\_\-file}]path to mapping file \item[{\em sample\_\-index}]index of sequenced sample \item[{\em contigs}]map with contig information \end{DoxyParams}
+ 
+
+Implements \hyperlink{classMappingReader_ab661f4713f0f686f5476aa796d0d7585}{MappingReader}.\hypertarget{classSAMReader_a5871df65884559cc9add85881617e9c3}{
+\index{SAMReader@{SAMReader}!readInputStream@{readInputStream}}
+\index{readInputStream@{readInputStream}!SAMReader@{SAMReader}}
+\subsubsection[{readInputStream}]{\setlength{\rightskip}{0pt plus 5cm}void SAMReader::readInputStream (FILE $\ast$ {\em mapping\_\-fp}, \/  int {\em sample\_\-index}, \/  {\bf ContigMap} $\ast$ {\em contigs})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSAMReader_a5871df65884559cc9add85881617e9c3}
+
+
+Reads mapping information from .sam file or stdin. 
+\begin{DoxyParams}{Parameters}
+\item[{\em mapping\_\-fp}].sam file/stdin pointer \item[{\em sample\_\-index}]index of sequenced sample \item[{\em contigs}]map with contig information \end{DoxyParams}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{mapping__reader_8h}{mapping\_\-reader.h}\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{mapping__reader_8cpp}{mapping\_\-reader.cpp}\end{DoxyCompactItemize}

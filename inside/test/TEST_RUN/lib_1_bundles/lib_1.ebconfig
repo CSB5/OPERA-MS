@@ -1,0 +1,14 @@
+
+output_folder=/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS/inside/test/TEST_RUN//lib_1_bundles
+
+contig_file=/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS/test_files/final.contigs_soap.fa
+
+[LIB]
+map_file=/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS/inside/test/TEST_RUN//contigs.bam
+filter_repeat=no
+
+cluster_threshold=2
+
+cluster_increased_step=5
+
+kmer=60

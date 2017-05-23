@@ -50,7 +50,7 @@ if ( @ARGV == 1){
     $OPERAMS_config_name = $ARGV[0];
     die $help_line if($ARGV[0] eq "-h");
     print STDERR "\nReading config file: ".$OPERAMS_config_name."\n";
-    die"Config file does not exist. Exiting." if(!(-e $OPERAMS_config_name)); 
+    die"Config file does not exist. Exiting.\n" if(!(-e $OPERAMS_config_name)); 
 
     open($opera_ms_cf, "<", $OPERAMS_config_name); 
 
@@ -279,20 +279,31 @@ $output_dir_sed =~ s/\//\\\//g;      #replace / with \/
 ### opera config
 #
 
-if (-d $output_dir){
-     $command = "rm -r $output_dir; mkdir $output_dir";
-}
+$command = "rm -r $output_dir;mkdir $output_dir";
 
-else {
-    $command = "mkdisdfjsdfr $output_dir";
-}
-
-$command="cat ${OPERAMS_config_name} | sed 's/CONTIGS_FILE .*/CONTIGS_FILE $contigs_file_sed/' | sed 's/MAPPING_FILES .*/MAPPING_FILES $output_dir_sed\\/contigs\.bam/' | sed 's/LIB .*/LIB $output_dir_sed\\/contigs\.bam/' | sed 's/OUTPUT_DIR .*/OUTPUT_DIR $output_dir_sed/' | sed 's/KMER_SIZE .*/KMER_SIZE $kmer_size/' > $opera_ms_config_file";
 run_exe($command);
 
+#
+#Prepare the runOperaMS.config file that is to be fed to runOperaMS
+#
+my $temp_config = $OPERAMS_config_name . "_temp";
 
+if(-e $temp_config){
+    $command = "rm $temp_config";
+    run_exe($command);
+}
 
+$command = "cp $OPERAMS_config_name $temp_config";
+run_exe($command);
+ 
+$command="echo 'LIB $output_dir_sed/contigs.bam/\n' >> $temp_config ; echo 'MAPPING_FILES $output_dir_sed/contigs.bam/' >> $temp_config";
+run_exe($command);
 
+$command="cat $temp_config | sed 's/CONTIGS_FILE .*/CONTIGS_FILE $contigs_file_sed/' | sed 's/MAPPING_FILES .*/MAPPING_FILES $output_dir_sed\\/contigs\.bam/' | sed 's/LIB .*/LIB $output_dir_sed\\/contigs\.bam/' | sed 's/OUTPUT_DIR .*/OUTPUT_DIR $output_dir_sed/' | sed 's/KMER_SIZE .*/KMER_SIZE $kmer_size/' > $opera_ms_config_file";
+run_exe($command);
+
+$command = "rm $temp_config";
+run_exe($command);
 
 ### Run opera-lr
 #
@@ -310,12 +321,13 @@ run_exe($command);
 print STDERR "\n-----STARTING LONG READ PROCESSING-----\n";
 $command= "${opera_ms_dir}${opera_version}/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $lr_output_dir --num-of-processors $num_processor --opera ${opera_ms_dir}${opera_version}/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 $samtools_dir $blasr_dir $short_read_tool_dir --skip-opera 1";
 #$command= "$qsub -N opera-lr -b y /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.0.6/bin/OPERA-long-read.pl --contig-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/MOCK_20/ASSEMBLY/MEGAHIT/final.contigs_soap.fa --kmer 100 --long-read-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/NANOPORE/LIBRARY/POOL/POOL_all/POOL.fa --output-prefix opera --output-directory OPERA_LG/OPERA-long-read/MEGAHIT/NANOPORE_ALL/ --num-of-processors 20 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.0.6/bin/"
-my $long_read_fail = run_exe($command);
 
-if($long_read_fail){
-    print "Error in the OPERA-long-read.pl script. Please see log for details.";
+run_exe($command);
+
+if($?){
+    die "Error in the long read processing. Please see log for details.\n";
 }
-#}
+
 
 ### Softlink opera.bam
 #
@@ -350,6 +362,13 @@ $output_dir_sed2 =~ s/\//\\\//g; #replace / with \/
 ### Run sigma for long read ###
 #
 # SIGMA1
+my $sigma_lr_dir = "$output_dir/contigs/sigma-long-read";
+
+if (-e $sigma_lr_dir ){
+    $command = "rm -r $sigma_lr_dir";
+    run_exe($command);
+}
+
 $command="mkdir -p $output_dir/contigs/sigma-long-read";
 run_exe($command);
 #
@@ -417,7 +436,7 @@ run_exe($command);
 #
 # OPERA 6
 #finally, run opera
-$command="${opera_ms_dir}bin/OPERA-LG $output_dir/contigs/scaffolds-long-read/opera.config > $output_dir/contigs/scaffolds-long-read/log.txt";
+$command="${opera_ms_dir}${opera_version}/bin/OPERA-LG $output_dir/contigs/scaffolds-long-read/opera.config > $output_dir/contigs/scaffolds-long-read/log.txt";
 run_exe($command);
 
 

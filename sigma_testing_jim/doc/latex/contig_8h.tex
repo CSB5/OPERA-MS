@@ -1,0 +1,47 @@
+\hypertarget{contig_8h}{
+\section{/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/contig.h File Reference}
+\label{contig_8h}\index{/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/contig.h@{/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/contig.h}}
+}
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$unordered\_\-map$>$}\par
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classContig}{Contig}
+\begin{DoxyCompactList}\small\item\em A class for representing contigs in the assembly graph. \item\end{DoxyCompactList}\item 
+class \hyperlink{classContigIO}{ContigIO}
+\begin{DoxyCompactList}\small\item\em Class containing internal contigs IO functions. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef std::unordered\_\-map$<$ std::string, \hyperlink{classContig}{Contig} $\ast$ $>$ \hyperlink{contig_8h_aa2acb8d3b78def617ec4509a1f684c4e}{ContigMap}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{contig_8h_aa1c99e9f30b09d463aeea0036cd27181}{compute\_\-vmr} (\hyperlink{contig_8h_aa2acb8d3b78def617ec4509a1f684c4e}{ContigMap} $\ast$contigs)
+\begin{DoxyCompactList}\small\item\em Computes a global read count variance-\/to-\/mean ratio on contig windows. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Typedef Documentation}
+\hypertarget{contig_8h_aa2acb8d3b78def617ec4509a1f684c4e}{
+\index{contig.h@{contig.h}!ContigMap@{ContigMap}}
+\index{ContigMap@{ContigMap}!contig.h@{contig.h}}
+\subsubsection[{ContigMap}]{\setlength{\rightskip}{0pt plus 5cm}typedef std::unordered\_\-map$<$std::string, {\bf Contig}$\ast$$>$ {\bf ContigMap}}}
+\label{contig_8h_aa2acb8d3b78def617ec4509a1f684c4e}
+A map with contig ids as keys and pointers to corresponding objects as values. 
+
+\subsection{Function Documentation}
+\hypertarget{contig_8h_aa1c99e9f30b09d463aeea0036cd27181}{
+\index{contig.h@{contig.h}!compute\_\-vmr@{compute\_\-vmr}}
+\index{compute\_\-vmr@{compute\_\-vmr}!contig.h@{contig.h}}
+\subsubsection[{compute\_\-vmr}]{\setlength{\rightskip}{0pt plus 5cm}double compute\_\-vmr ({\bf ContigMap} $\ast$ {\em contigs})}}
+\label{contig_8h_aa1c99e9f30b09d463aeea0036cd27181}
+
+
+Computes a global read count variance-\/to-\/mean ratio on contig windows. 
+\begin{DoxyParams}{Parameters}
+\item[{\em contigs}]map with contig information \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+read count variance-\/to-\/mean ratio on contig windows 
+\end{DoxyReturn}

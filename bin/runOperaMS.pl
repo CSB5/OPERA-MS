@@ -362,28 +362,30 @@ my $opera_config_file = "opera.config";
 &construct_opera_config_file($contigs_file, $opera_output_folder, \%opera_filtered_files, $opera_output_folder."/".$opera_config_file);
 
 #If we decide to skip actually running opera - Used in the OPERA-MS.pl script.
+#Always skip opera for OPERA-MS. This functionality may be useful for other purposes.
 if($skip_opera){
-    die "Opera portion of runOperaMS skipped.";
+    print STDERR "Opera portion of runOperaMS skipped.";
+    exit 0;
 }
 
 
-run_exe("$opera_path $opera_output_folder/opera.config > $results_folder/log.txt");
-
-#$res_file = "$results_folder/scaffoldSeq.fasta";
-$res_file = "$output_dir/scaffoldSeq.fasta";
-run_exe("rm -f $res_file"); #if(-e $res_file);
-run_exe("ln -s $opera_output_folder/scaffoldSeq.fasta $res_file");
-
-print STDERR "Done!\n"; 
-
-#chdir $curDir or die $!; 
-print STDERR "\nALL done.\n"; 
-print STDERR "Result file: $res_file\n\n"; 
-
-# COMPUTE N50
-print STDERR "\nComputing N50...\n";
-run_exe("perl $compute_n50_path $res_file > ".$res_file.".stats");
-print STDERR "\nDone!\n";
+#run_exe("$opera_path $opera_output_folder/opera.config > $results_folder/log.txt");
+#
+##$res_file = "$results_folder/scaffoldSeq.fasta";
+#$res_file = "$output_dir/scaffoldSeq.fasta";
+#run_exe("rm -f $res_file"); #if(-e $res_file);
+#run_exe("ln -s $opera_output_folder/scaffoldSeq.fasta $res_file");
+#
+#print STDERR "Done!\n"; 
+#
+##chdir $curDir or die $!; 
+#print STDERR "\nALL done.\n"; 
+#print STDERR "Result file: $res_file\n\n"; 
+#
+## COMPUTE N50
+#print STDERR "\nComputing N50...\n";
+#run_exe("perl $compute_n50_path $res_file > ".$res_file.".stats");
+#print STDERR "\nDone!\n";
 
 ############################## HELPERS ##############################
 
