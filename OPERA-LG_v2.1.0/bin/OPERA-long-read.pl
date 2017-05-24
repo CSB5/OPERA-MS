@@ -167,6 +167,14 @@ if ( ! -e $illum_read1 && $illum_read1 ne "NONE") {die "\nError: $illum_read1 - 
 if ( ! -e $illum_read2 && $illum_read2 ne "NONE") {die "\nError: $illum_read2 - illumina read 2 file does not exist $str_full_path\n"};
 
 if ( ! -e "$blasrDir/blasr" && $blasrDir ne "") {die "\nError: $blasrDir - blasr does not exist in the directory $str_full_path\n"};
+
+my $blasr_version = "$blasrDir/blasr --version";
+run_exe($blasr_version);
+
+if ($?){
+    die "blasr version less than 5.1. Please install the latest version. Exiting. \n";
+}
+
 #if ( ! -e "$graphmapDir/graphmap" ) {die "$! graphmap does not exist in the directory $str_full_path\n"};
 if ( ! -e "$operaDir/OPERA-LG" && $operaDir ne "") {die "\nError:$operaDir - OPERA-LG does not exist in the directory $str_full_path\n"};
 if ( ! -e "$short_read_tooldir/bwa" && $short_read_maptool eq "bwa" && $short_read_tooldir ne "") {die "\nError: $short_read_tooldir - bwa does not exist in the directory $str_full_path\n"};
@@ -187,6 +195,7 @@ if(! -e "$file_pref.map.sort"){
     #run_exe( "${blasrDir}blasr --nproc $nproc -m 1 $readsFile $contigFile  | cut -d ' ' -f1-4,7-13 | sed 's/ /\\t/g' > $file_pref.map");
     if($mapper eq "blasr"){
 	run_exe( "${blasrDir}blasr  --nproc $nproc -m 1 --minMatch 5 --bestn 10 --noSplitSubreads --advanceExactMatches 1 --nCandidates 1 --maxAnchorsPerPosition 1 --sdpTupleSize 7 $readsFile $contigFile | cut -d ' ' -f1-5,7-12 | sed 's/ /\\t/g' > $file_pref.map");
+
 	# sort mapping
 	print "Sorting mapping results...\n";
 	run_exe("sort -k1,1 -k9,9g  $file_pref.map > $file_pref.map.sort") 
@@ -749,7 +758,7 @@ sub checkMapping{
 	    }
 	}
 	
-	#print STDERR " *** ".$nb_edge_distance." number of distance or that edge\n";<STDIN>;
+	print STDERR " *** ".$nb_edge_distance." number of distance or that edge\n";<STDIN>;
 
 	#Compute the final support
 	$best_distance_ID = 0;
@@ -783,7 +792,7 @@ sub checkMapping{
 	    $read_edge_type = $edge_read_info{$key}->{"EDGE_TYPE"}->[$j];
 	    if($best_edge ne $read_edge_type ||#this read does not support the correct edge type
 	       ! (remove_standard_deviation($best_distance) <= $read_distance && $read_distance <= add_standard_deviation($best_distance))){#this read does not support the correct distance
-		print STDERR " *** Remove reads ".($edge_read_info{$key}->{"READ_LIST"}->[$splice_offset])." $read_edge_type $read_distance not in [ ".(remove_standard_deviation($best_distance))." ,".(add_standard_deviation($best_distance))."] from $best_edge $best_distance and supported by $best_support reads n\n";
+		#print STDERR " *** Remove reads ".($edge_read_info{$key}->{"READ_LIST"}->[$splice_offset])." $read_edge_type $read_distance not in [ ".(remove_standard_deviation($best_distance))." ,".(add_standard_deviation($best_distance))."] from $best_edge $best_distance and supported by $best_support reads n\n";
 		splice @{$edge_read_info{$key}->{"READ_LIST"}}, $splice_offset, 1;
 		splice @{$edge_read_info{$key}->{"COORD_CONTIG_1"}}, $splice_offset, 1;
 		splice @{$edge_read_info{$key}->{"COORD_CONTIG_2"}}, $splice_offset, 1;

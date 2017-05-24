@@ -127,6 +127,9 @@ while(<$opera_ms_cf>) {
                 $short_read_tool_dir = $split_line[1];
             }
 
+            case "VSEARCH_DIR"{
+            }
+
 	    	case "SIGMA_CONTIGS_FILE" {
 				$sigma_contigs_file = File::Spec->rel2abs($split_line[1]); 
 				if(! -e $sigma_contigs_file) {
@@ -167,9 +170,6 @@ while(<$opera_ms_cf>) {
                 if($skip_opera != 1 && $skip_opera != 0){
                     die "SKIP_OPERA must be equal to either 1 (skip) or 0 (don't skip)";
                 }
-            }
-
-            case "LONG_READ_OUTPUT_DIR"{
             }
 
             case "LONG_READ_FILE"{

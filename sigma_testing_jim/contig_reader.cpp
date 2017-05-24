@@ -26,8 +26,8 @@ long int AllReader::read(const char* contigs_file, ContigMap* contigs) {
             if(!std::getline(contigs_fp, line)){
                 if (length !=0 && length >= Sigma::contig_len_thr){
                     contigs -> insert(std::make_pair(id, new Contig(id, length)));
-                    std::cerr << length << "\n";
-                    std::cerr << id <<"\n";
+                //    std::cerr << length << "\n";
+                //    std::cerr << id <<"\n";
                 }
 
                 assembly_size += length;
@@ -43,8 +43,8 @@ long int AllReader::read(const char* contigs_file, ContigMap* contigs) {
                 assembly_size += length;
                 if (length != 0 && length >= Sigma::contig_len_thr){
                     contigs -> insert(std::make_pair(id, new Contig(id, length)));
-                    std::cerr << id << "\n";
-                    std::cerr << length << "\n";
+                //    std::cerr << id << "\n";
+                //    std::cerr << length << "\n";
 
                 }
                 id = line.substr(1, line.find(' ') - 1);
@@ -78,16 +78,12 @@ void AllReader::get_assembly_size(const char* contigs_file){
     
     if (contigs_fp.is_open()) {
         std::string line; 
-        bool eof = false;
       
          while(true){
 
            std::string line;
 
            if(!std::getline(contigs_fp, line)){
-               if (length !=0 && length >= Sigma::contig_len_thr){
-                   assembly_nb_contig++;
-               }
                assembly_size+= length;
                break;
            }

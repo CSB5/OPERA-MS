@@ -3,7 +3,7 @@ use warnings;
 use Switch;
 use Getopt::Long;
 
-my ($seq_file) = @ARGV;
+my ($seq_file, $graphmap_dir, $water_dir, $pbdagcon_dir, $bin_dir) = @ARGV;
 
 #To get the ref and seq
 my $ref = $seq_file."_r.fa";
@@ -14,7 +14,7 @@ run_exe("head -n2 $seq_file.fa > $ref;tail -n+3 $seq_file.fa > $queries");
 #run_exe("head -n4 $seq_file.fa | tail -n2 >> $queries");
 
 #Run the mapping
-run_exe("graphmap -t 1 -r $ref -d $queries | python ~lich/projects_backup/INCSeq/utils/sam2blasr.py -i - -r $ref > $mapping");
+run_exe("$graphmap_dir/graphmap -t 1 -r $ref -d $queries | python $bin_dir/sam2blasr.py -i - -r $ref > $mapping");
 #remove the graphmap indexes
 run_exe("rm $ref*gmidx*");
 #run_exe("rm $ref*gm* $ref $queries");
@@ -29,7 +29,7 @@ my $pid;
 #while($kill_res eq ""){
 while($nb_line_cons == 0){
     $cons = $seq_file."_pbdagcon.fa";
-    $cmd = "pbdagcon -t $nb_base_to_trim -c 1 -m 1 $mapping > $cons";
+    $cmd = "$pbdagcon_dir/pbdagcon -t $nb_base_to_trim -c 1 -m 1 $mapping > $cons";
     #run the command
     print STDERR " *** Running $cmd\n";
     $pid = open(my $ph, "-|", $cmd) or die $!;
@@ -55,7 +55,7 @@ run_exe("tail -n4 $seq_file.fa > $queries");
 #run_exe("tail -n4 $seq_file.fa | head -n2 >> $queries");
 $mapping = "$seq_file\_contig_cons.m5";
 #Map using Smith-Waterman alignement method
-run_exe("water -gapextend 0.5 -gapopen 10 -asequence $cons -bsequence $queries -outfile $mapping");
+run_exe("$water_dir/water -gapextend 0.5 -gapopen 10 -asequence $cons -bsequence $queries -outfile $mapping");
 #run_exe("graphmap -x illumina -t 1 -r $cons -d $queries | python ~lich/projects_backup/INCSeq/utils/sam2blasr.py -i - -r $cons > $mapping");	
 
 sub run_exe{

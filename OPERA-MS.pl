@@ -8,6 +8,7 @@ use Switch;
 use Getopt::Std;
 use File::Spec::Functions qw(rel2abs);
 use File::Basename;
+use File::Which;
 
 
 #Grab the executing directory; turn all paths into absolute paths.
@@ -18,7 +19,10 @@ my $main_dir = getcwd;
 $main_dir .= "\/";
 
 #TODO Remove in release; used for testing.
-
+my $pbdagcon_dir;
+my $water_dir;
+my $graphmap_dir;
+my $vsearch_dir;
 my $opera_version;
 my $runOperaMS_config_name = "runOperaMS.config"; #Generated config file, name can be whatever.
 my $output_dir;
@@ -65,6 +69,7 @@ if ( @ARGV == 1){
                 #Empty cases must be checked so the same config file format
                 #can be used for the runOperaMS generated config file. Empty cases indicate
                 #that this specficpscript does not need those specific instances. 
+                  
                 case "CONTIGS_FILE" {
                     $contigs_file = $split_line[1];
                 }
@@ -102,6 +107,22 @@ if ( @ARGV == 1){
              
                 }
 
+                case "VSEARCH_DIR"{
+                    $vsearch_dir = $split_line[1];
+                }
+
+                case "WATER_DIR"{
+                    $water_dir = $split_line[1];
+                }
+
+                case "GRAPHMAP_DIR"{
+                    $graphmap_dir =$split_line[1];
+                }
+
+                case "PBDAGCON_DIR"{
+                    $pbdagcon_dir = $split_line[1];
+                }
+
                 case "KMER_SIZE" {
                     $kmer_size = $split_line[1];
                     if (!defined $kmer_size) {
@@ -126,10 +147,6 @@ if ( @ARGV == 1){
 
                 case "SKIP_OPERA" {
                
-                }
-
-                case "LONG_READ_OUTPUT_DIR"{
-                    $lr_output_dir = $split_line[1];
                 }
 
                 case "LONG_READ_FILE"{
@@ -181,9 +198,8 @@ else{
 #
 if(!defined($samtools_dir)){
     $samtools_dir = "";
-
-    my $is_in_path = `which samtools`;
-    die "samtools not found in path. Exiting." if (!$is_in_path);
+    my $valid_path = which('samtools');
+    die "samtools not found in path. Exiting." if (!$valid_path);
 
 }
 
@@ -201,8 +217,9 @@ else{
 if(!defined($blasr_dir)){
     $blasr_dir = "";
 
-    my $is_in_path = `which blasr`;
-    die "blasr not found in path. Exiting." if (!$is_in_path);
+    my $valid_path = which("blasr");
+    die "blasr not found in path. Exiting." if (!$valid_path);
+
 }
 
 else{
@@ -221,8 +238,8 @@ if(!defined($short_read_maptool)){
 if(!defined($short_read_tool_dir)){
     $short_read_tool_dir= "";
 
-    my $is_in_path = "which $short_read_maptool";
-    die "$short_read_maptool not found in path. Exiting." if (!$is_in_path);
+    my $valid_path = which($short_read_maptool); 
+    die "$short_read_maptool not found in path. Exiting." if (!$valid_path);
 
 }
 
@@ -235,17 +252,90 @@ else{
     $short_read_tool_dir = "--short-read-tooldir " . $short_read_tool_dir;
 }
 
+if(!defined($vsearch_dir)){
+    $vsearch_dir = "";
+
+    my $valid_path = which("vsearch"); 
+    die "vsearch not found in path. Exiting." if (!$valid_path);
+
+}
+
+else{
+    $vsearch_dir = $main_dir . $vsearch_dir . "/" if(substr($vsearch_dir, 0, 1) ne "/");
+
+    if (! -e $vsearch_dir . "/vsearch") {
+        die "vsearch not found at: ".$vsearch_dir."\n";
+    }
+
+    $vsearch_dir = "--vsearch " . $vsearch_dir;
+}
+
+if(!defined($water_dir)){
+    $water_dir = "";
+
+    my $valid_path = which("water"); 
+    die "water not found in path. Exiting." if (!$valid_path);
+
+}
+
+else{
+    $water_dir = $main_dir . $water_dir . "/" if(substr($water_dir, 0, 1) ne "/");
+
+    if (! -e $water_dir . "/water") {
+        die "water not found at: ".$water_dir."\n";
+    }
+
+    $water_dir = "--water " . $water_dir;
+}
+
+if(!defined($graphmap_dir)){
+    $graphmap_dir = "";
+
+    my $valid_path = which("graphmap"); 
+    die "graphmap not found in path. Exiting." if (!$valid_path);
+
+}
+
+else{
+    $graphmap_dir = $main_dir . $graphmap_dir . "/" if(substr($graphmap_dir, 0, 1) ne "/");
+
+    if (! -e $graphmap_dir . "/graphmap") {
+        die "graphmap not found at: ".$graphmap_dir."\n";
+    }
+
+    $graphmap_dir = "--graphmap " . $graphmap_dir;
+}
+
+if(!defined($pbdagcon_dir)){
+    $pbdagcon_dir = "";
+
+    my $valid_path = which("pbdagcon"); 
+    die "pbdagcon not found in path. Exiting." if (!$valid_path);
+
+}
+
+else{
+    $pbdagcon_dir = $main_dir . $pbdagcon_dir . "/" if(substr($pbdagcon_dir, 0, 1) ne "/");
+
+    if (! -e $pbdagcon_dir . "/pbdagcon") {
+        die "pbdagcon not found at: ".$pbdagcon_dir."\n";
+    }
+
+    $pbdagcon_dir = "--pbdagcon " . $pbdagcon_dir;
+}
+
+
 #TODO Kill bowtie support?
 $short_read_maptool = "--short-read-maptool " . $short_read_maptool;
 $output_dir = $main_dir . $output_dir."/" if (substr($output_dir, 0, 1) ne "/");
 
 #Make paths absolute if they are not already.
 $long_read_file = $main_dir . $long_read_file if(substr($long_read_file, 0, 1) ne "/");
-$lr_output_dir = $main_dir . $lr_output_dir."/" if(substr($lr_output_dir, 0, 1) ne  "/");
 $illum_read1 = $main_dir . $illum_read1 if(substr($illum_read1, 0, 1) ne "/");
 $illum_read2= $main_dir . $illum_read2 if(substr($illum_read2, 0, 1) ne "/");
 $contigs_file = $main_dir . $contigs_file if(substr($contigs_file, 0, 1) ne "/");
 $opera_ms_config_file = $output_dir."/".$runOperaMS_config_name;
+$lr_output_dir = $output_dir."/long-read-output";
 
 if( ! -e $contigs_file) {
     die "\nError : $contigs_file - contig file does not exist\n";
@@ -446,7 +536,9 @@ run_exe($command);
 $command="less ${output_dir}/contigs/scaffolds-long-read/log.txt";
 run_exe($command);
 
-
+my $extract_args = "--edge-file $lr_output_dir/edge_read_info.dat --contig-file $contigs_file --scaffold-file $output_dir/contigs/scaffolds-long-read/scaffolds.scaf --read-file $long_read_file --script $opera_ms_dir/$opera_version/bin/ $pbdagcon_dir $vsearch_dir $water_dir $graphmap_dir --output-directory $output_dir/contigs/scaffolds-long-read/GAP_FILLING --outfile $output_dir/contigs/scaffolds-long-read/gap_stats.dat --stage ALL -num-of-processors 20 --bin $opera_ms_dir/bin"; 
+$command="perl ${opera_ms_dir}${opera_version}/bin/extract_read_sequence_xargs.pl $extract_args";
+run_exe($command);
 
 
 sub run_exe{

@@ -117,7 +117,7 @@ foreach $lib (keys %lib_to_filter){
 	    #
 	    #print STDERR " *** $c1\t$c2\n";<STDIN>;
 	    if(exists $repeat{$c1} || exists $repeat{$c2}){
-		print STDERR " *** Filter edge $c1 $c2\n";
+		#print STDERR " *** Filter edge $c1 $c2\n";
 	    }
 	    else{
 		print OUT $_;
