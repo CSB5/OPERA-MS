@@ -8,9 +8,13 @@ It uses the following strategy: a graph partitioning tool called Sigma is used t
 
 We require the following dependencies:
 
-1) samtools - (version 0.1.19 or below)
-2) bwa
-3) blasr
+1) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below).
+2) [bwa](https://github.com/lh3/bwa).
+3) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above).
+4) EMBOSS water - Smith-Waterman alignment tool.
+5) [vsearch](https://github.com/torognes/vsearch).
+6) [graphmap](https://github.com/isovic/graphmap).
+7) [pbdagcon](https://github.com/PacificBiosciences/pbdagcon).
 
 These must either be in your PATH or the path must be specified (see the Config file).
 
@@ -20,7 +24,7 @@ These must either be in your PATH or the path must be specified (see the Config 
 
 - `cd` into the OPERA-MS/ folder. For example, `cd /home/usr/OPERA-MS`.
 
-- Run the `make install` command.
+- Run the `make` command.
 
 # Running OPERA-MS
 
@@ -51,16 +55,22 @@ This is an example of a config file :
 ~~~~
 #This is a comment. 
 
-CONTIGS_FILE_TYPE SOAPdenovo #SOAPdenovo and Velvet are supported
 CONTIGS_FILE /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS/test_files/final.contigs_soap.fa #We can use absolute or relative paths. #This is an absolute path.
-LONG_READ_OUTPUT_DIR long-read1 #This is a relative path. This will output long reads to cwd/long-read1
+OUTPUT_DIR opera_ms_output/
 LONG_READ_FILE test_files/POOL.fa
 ILLUMINA_READ_1 test_files/mock1000.R1.fastq.gz
 ILLUMINA_READ_2 test_files/mock1000.R2.fastq.gz
-SAMTOOLS /home/usr/software/ #Optional, comment out if samtools is in PATH.
-BLASR_DIR /home/usr/software #Optional, comment out if blasr is in PATH.
-BWA_DIR /home/usr/software #Optional, comment out if bwa is in PATH.
+
+#SAMTOOLS_DIR/home/usr/software/ # comment out if samtools is in PATH.
+#BLASR_DIR /home/usr/software # comment out if blasr is in PATH.
+#SHORT_READ_TOOL_DIR /home/usr/software # comment out if bwa is in PATH.
+#GRAPHMAP_DIR /home/usr/software  # comment out if graphmap is in PATH.
+#WATER_DIR /home/usr/software  # comment out if water is in PATH.
+#PBDAGCON_DIR /home/usr/software  # comment out if pbdagcon is in PATH.
+#VSEARCH_DIR /home/usr/software  # comment out if vsearch is in PATH.
+
 OPERA_VERSION OPERA-LG_v2.1.0
+NUM_PROCESSOR 20
 CONTIG_LEN_THR 500
 CONTIG_EDGE_LEN 80
 CONTIG_WINDOW_LEN 340
@@ -70,8 +80,6 @@ KMER_SIZE 60
 
 ### Options 
 All relative paths are relative to the current working directory of your terminal. All paths can be chosen to be either relative or absolute.
-
-- **CONTIGS_FILE_TYPE** : `SOAPdenovo` __or__ `Velvet` - The assembler of the input contigs file. Only these two are supported currently.
 
 - **CONTIGS_FILE** : `path/to/contigs.fa` - A path to the contigs file.
 
@@ -83,11 +91,11 @@ All relative paths are relative to the current working directory of your termina
 
 - **ILLUMINA_READ_2** : `path/to/illum_read2.fa` - A path to the second complement illumina read file.
 
-- **SAMTOOLS** : `path/to/samtools_directory` - A path to the __directory containing__ the samtools executable file. Comment out if samtools is in PATH.
-
-- **BLASR_DIR** : `path/to/blasr_directory` - A path to the __directory containing__ the blasr executable file. Comment out if blasr is in PATH.
+- **(tool)_DIR** : `path/to/tool_directory` - A path to the __directory containing__ the executable file of the specific tool : e.g. blasr, bwa, vsearch. If commented out, the tool will be assumed to be in PATH.
 
 - **OPERA_VERSION** : `OPERA-LG_v2.x.x` - The version of OPERA-LG used. User should not need to change this.
+
+- **NUM_PROCESSOR** : The number of processors that this pipeline will use.
 
 - **CONTIG_LEN_THR** : `default : 0` - Threshold for contig clustering.
 
@@ -100,7 +108,9 @@ All relative paths are relative to the current working directory of your termina
 - **KMER_SIZE** : `default : 60` - The value of kmer used to produce the assembled contigs/scaffolds.
 
 
+## Outputs
 
+The outputs will be in OUTPUT_DIR/contigs/scaffolds-long-reads. TODO
 
 
 
