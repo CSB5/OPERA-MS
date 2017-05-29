@@ -47,10 +47,11 @@ my($opera_ms_config_file) = @ARGV;
 my($contigs_file, %LIB, $samtools_path, $mapping_files, $sigma_contigs_file,
 	$output_dir, $bundle_size_thresh, $kmer_size, $contigs_file_type, 
 	$contig_len_thr, $contig_edge_len, 
-	$contig_window_len, $pdist_type,
-    $skip_opera);
+	$contig_window_len, $pdist_type
+    );
 my $num_LIB = 0;
 
+$contigs_file_type = "SOAP";
 print STDERR "\nReading config file: ".$opera_ms_config_file."\n"; 
 open($opera_ms_cf, "<", $opera_ms_config_file); 
 while(<$opera_ms_cf>) {
@@ -108,7 +109,7 @@ while(<$opera_ms_cf>) {
 				$output_dir = $split_line[1];
 	    	}
 
-	    	case "SAMTOOLS" {
+	    	case "SAMTOOLS_DIR" {
 	    		$samtools_path = $split_line[1];
 	    		if (! -e $samtools_path) {
 	    			die "Samtools not found at: ".$samtools_path."\n";
@@ -120,7 +121,6 @@ while(<$opera_ms_cf>) {
             }
 
             case "SHORT_READ_TOOL"{
-                $short_read_maptool = $split_line[1];
             }
 
             case "SHORT_READ_TOOL_DIR"{
@@ -128,6 +128,15 @@ while(<$opera_ms_cf>) {
             }
 
             case "VSEARCH_DIR"{
+            }
+
+            case "GRAPHMAP_DIR"{
+            }
+
+            case "WATER_DIR"{
+            }
+
+            case "PBDAGCON_DIR"{
             }
 
 	    	case "SIGMA_CONTIGS_FILE" {
@@ -165,13 +174,6 @@ while(<$opera_ms_cf>) {
 				$pdist_type = $split_line[1];
 	    	}
 
-            case "SKIP_OPERA" {
-                $skip_opera = $split_line[1];
-                if($skip_opera != 1 && $skip_opera != 0){
-                    die "SKIP_OPERA must be equal to either 1 (skip) or 0 (don't skip)";
-                }
-            }
-
             case "LONG_READ_FILE"{
             }
 
@@ -179,9 +181,6 @@ while(<$opera_ms_cf>) {
             }
 
             case "ILLUMINA_READ_2"{
-            }
-
-            case "OPERA_VERSION"{
             }
 
             else {
@@ -222,7 +221,7 @@ unless (-d $output_dir) {
 # for running multiple library combinations simultaneously.
 # Output folder name is: $output_dir/ + all libraries names separated by "_"
 # NEED TO CHANGE THAT STUFF !!!!
-my $results_folder = $output_dir."/"."contigs";
+my $results_folder = $output_dir."/"."intermediate_files";
 
 #foreach $k (sort keys %LIB) {
 #	my $lib_size_starting_index;
@@ -295,7 +294,7 @@ print STDERR "Done!\n";
 ############################# SIGMA ##############################
 
 print STDERR "\nRunning Sigma ... \n"; 
-my $sigma_dir = "$results_folder/sigma"; 
+my $sigma_dir = "$results_folder/coverage_estimation"; 
 unless (-d $sigma_dir) {
     mkdir $sigma_dir or die $!; 
 }
@@ -305,13 +304,15 @@ construct_sigma_config_file($sigma_dir, $contigs_file_type, $contigs_file,
 	$edges_files, $sigma_contigs_file, $contig_len_thr, 
 	$contig_edge_len, $contig_window_len, $pdist_type, $bundle_size_thresh);
 
-# CHECK IF COVERAGE NEEDS TO BE COMPUTED
-if (0 && !defined $sigma_contigs_file) {			#coverage not computed
-	run_exe("$samtools_path view $mapping_files | $sigma_path $sigma_dir/sigma.config");
+run_exe("$sigma_path $sigma_dir/sigma.config");
 
-} else { 									#coverage computed
-	run_exe("$sigma_path $sigma_dir/sigma.config");
-}
+# CHECK IF COVERAGE NEEDS TO BE COMPUTED
+#if (0 && !defined $sigma_contigs_file) {			#coverage not computed
+#	run_exe("$samtools_path view $mapping_files | $sigma_path $sigma_dir/sigma.config");
+#
+#} else { 									#coverage computed
+#	run_exe("$sigma_path $sigma_dir/sigma.config");
+#}
 
 
 ############################## OPERA ##############################
@@ -361,14 +362,7 @@ unless (-d $opera_output_folder){
 my $opera_config_file = "opera.config"; 
 &construct_opera_config_file($contigs_file, $opera_output_folder, \%opera_filtered_files, $opera_output_folder."/".$opera_config_file);
 
-#If we decide to skip actually running opera - Used in the OPERA-MS.pl script.
-#Always skip opera for OPERA-MS. This functionality may be useful for other purposes.
-if($skip_opera){
-    print STDERR "Opera portion of runOperaMS skipped.";
-    exit 0;
-}
-
-
+#Uncomment if you want to run OPERA.
 #run_exe("$opera_path $opera_output_folder/opera.config > $results_folder/log.txt");
 #
 ##$res_file = "$results_folder/scaffoldSeq.fasta";
@@ -427,6 +421,7 @@ sub construct_opera_config_file {
     	print $config "\nlib_mean=$libH{$k}->[0]";
  		print $config "\nlib_std=$libH{$k}->[1]\n";	
     }
+    print $config "\nkeep_repeat=yes\n";
     print $config "\nfilter_repeat=no\n"; 
     print $config "\ncluster_threshold=$bundle_size_thresh\n";
     print $config "\ncluster_increased_step=5\n"; 
@@ -515,7 +510,7 @@ sub construct_sigma_config_file {
 	else {
 		print CONF "\npdist_type=NegativeBinomial\n";
 	}
-	
+
 	close(CONF);
  }
 

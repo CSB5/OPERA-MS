@@ -3,7 +3,16 @@ use warnings;
 use Switch;
 use Getopt::Long;
 
-my ($seq_file, $graphmap_dir, $water_dir, $pbdagcon_dir, $bin_dir) = @ARGV;
+my ($seq_file, $bin_dir, $graphmap_dir, $water_dir, $pbdagcon_dir) = @ARGV;
+
+GetOptions(
+    "seq-file=s" => \$seq_file,
+    "bin-dir=s" => \$bin_dir,
+    "graphmap=s" => \$graphmap_dir,
+    "water=s" => \$water_dir,
+    "pbdagcon=s" => \$pbdagcon_dir
+    )
+ or die("Error in command line arguments.");
 
 #To get the ref and seq
 my $ref = $seq_file."_r.fa";
@@ -14,7 +23,11 @@ run_exe("head -n2 $seq_file.fa > $ref;tail -n+3 $seq_file.fa > $queries");
 #run_exe("head -n4 $seq_file.fa | tail -n2 >> $queries");
 
 #Run the mapping
+#OLD GRAPHMAP
 run_exe("$graphmap_dir/graphmap -t 1 -r $ref -d $queries | python $bin_dir/sam2blasr.py -i - -r $ref > $mapping");
+#NEW GRAPHMAP
+#run_exe("$graphmap_dir/graphmap align -t 1 -r $ref -d $queries | python $bin_dir/sam2blasr.py -i - -r $ref > $mapping");
+
 #remove the graphmap indexes
 run_exe("rm $ref*gmidx*");
 #run_exe("rm $ref*gm* $ref $queries");

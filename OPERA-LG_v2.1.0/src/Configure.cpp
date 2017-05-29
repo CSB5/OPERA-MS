@@ -19,6 +19,7 @@ Configure::~Configure(void)
 int Configure::FILE_FORMAT = FASTA;
 int Configure::FILE_TYPE = VELVET;
 bool Configure::FILTER_REPEAT = true;
+bool Configure::KEEP_REPEAT_FULL = false;
 double Configure::REPEAT_THRESHOLD = 1.5;
 string Configure::CONTIG_FILE = "";
 int Configure::CONTIG_SIZE_THERSHOLD = 500;

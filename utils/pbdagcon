@@ -1,0 +1,6 @@
+#!/bin/bash
+export LD_LIBRARY_PATH=/mnt/software/stow/log4cpp-1.1.1/lib/:/mnt/software/src/boost_1_47_0/stage/lib/:$LD_LIBRARY_PATH
+#echo $LD_LIBRARY_PATH
+#ldd /mnt/software/src/pbdagcon/pbdagcon/src/cpp/pbdagcon
+exec /mnt/software/src/pbdagcon/pbdagcon/src/cpp/pbdagcon "$@"
+

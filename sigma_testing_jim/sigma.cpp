@@ -18,7 +18,7 @@
 #include "cluster_graph.h"
 #include "probability_distribution.h"
 
-std::string Sigma::contigs_file_type;
+//std::string Sigma::contigs_file_type;
 int Sigma::AR_TYPE;
 int Sigma::R_ESTIMATION_TYPE;
 int Sigma::COMPUTE_SCORE;
@@ -96,7 +96,7 @@ void Sigma::readConfigFile(char* config_file) {
 }
 
 void Sigma::configure(ParamsMap* params) {
-	contigs_file_type = getStringValue(params, std::string("contigs_file_type"));
+	//contigs_file_type = getStringValue(params, std::string("contigs_file_type"));
 
 	contigs_file = getStringValue(params, std::string("contigs_file"));
 	mapping_files = getVectorValue(params, std::string("mapping_files"));

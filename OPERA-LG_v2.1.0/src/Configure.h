@@ -60,7 +60,8 @@ public:
 	static const int TOO_MANY_PARTIAL_SCAFFOLDS = -2;
 	static int FILE_FORMAT;				// fasta or statistic
 	static int FILE_TYPE;				// velvet or soap
-	static bool FILTER_REPEAT;			// if need to filter the repeat contigs
+	static bool FILTER_REPEAT;			// if need to filter the repeat contigs, if false edges between repeats are removed
+	static bool KEEP_REPEAT_FULL;			// if repeat need to be kept, if set to true no contigs are set to repeat
 	static double REPEAT_THRESHOLD;		// repeat threshold, default = 1.5
 	static string CONTIG_FILE;			// the contig file
 	static int CONTIG_SIZE_THERSHOLD;	// the contig size threshold, default = 500

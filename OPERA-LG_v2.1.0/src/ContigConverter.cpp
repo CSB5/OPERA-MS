@@ -992,7 +992,8 @@ void ContigConverter::FilterRepeat( vector<Contig*> *contigs, Graph *graph ){
 	while( contigIter != contigs->end() ){
 		(*contigIter)->SetIfRepeat( false );
 
-		if( (*contigIter)->GetCov() > threshold ){
+		//Set the contig as repeat
+		if( ! Configure::KEEP_REPEAT_FULL && (*contigIter)->GetCov() > threshold ){
 			// remove repeat contigs
 			m_repeatContigs->push_back( *contigIter );
 			//(*contigIter)->SetContigType( REPEAT );

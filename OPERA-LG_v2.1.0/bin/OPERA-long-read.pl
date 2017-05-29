@@ -758,7 +758,7 @@ sub checkMapping{
 	    }
 	}
 	
-	print STDERR " *** ".$nb_edge_distance." number of distance or that edge\n";<STDIN>;
+#	print STDERR " *** ".$nb_edge_distance." number of distance or that edge\n";<STDIN>;
 
 	#Compute the final support
 	$best_distance_ID = 0;
@@ -868,6 +868,7 @@ sub CreateConfigFile{
 
     print CONF "# Contig file\n";
     print CONF "contig_file=$contigFile\n";
+#TODO This is to make sure scaffolds form when there is 0 coverage. Remove/keep in release
 
     print CONF "kmer=$kmer_size\n";
 
