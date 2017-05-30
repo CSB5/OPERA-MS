@@ -1,6 +1,6 @@
 # UNDER DEVELOPMENT
 # Introduction 
-OPERA-MS is a long read metagenomic scaffolding pipline that takes in a set of contigs in addition with both short and long reads to output near-complete individual microbial genomes in your environmental sample. 
+OPERA-MS is a long read metagenomic scaffolding pipline that takes in a set of contigs with a set of short and short long reads to output near-complete individual microbial genomes in your environmental sample. 
 
 It uses the following strategy: a graph partitioning tool called Sigma is used to decompose the metagenomic scaffolding problem into distinct single genome scaffolding problems that are then solved by the single genome scaffolder [OPERA-LG](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0951-y).
 
@@ -10,9 +10,13 @@ The long reads are then used fill the gaps between contigs to produce a final se
 
 ### Requirements
 
-- **BLASR** [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above).
+- [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above).
+
+blasr must be in the user's PATH, or alternatively, one could specify the directory in which blasr is contained in the config file. See below for more information on the config file.
 
 To install OPERA-MS, download and unzip OPERA-MS to a specified directory or `git clone https://github.com/CSB5/OPERA-MS.git`. All of the tools needed except for BLASR are distributed pre-built. See below for more information on dependencies.
+
+### Testing Installation
 
 A set of test files and a sample configuration file is provided to allow the user to test out the OPERA-MS pipeline. To test it, simply : 
 ~~~~
@@ -30,16 +34,17 @@ OPERA-MS takes in 3 inputs
 2) A long read file to be used in scaffolding (e.g. test_dataset/long_read_1.fa).
 3) Paired end reads to be used in scaffolding (e.g. test_dataset/lib_1_1.fa, test_dataset/lib_1_2.fa).
 
-## Executing OPERA-MS
+### Executing OPERA-MS
 
-To run OPERA-MS, simply run `perl /path/to/OPERA-MS/OPERA-MS.pl <config file>`. The location of the test data should be specified in the config file. See below for more information on the format of the config file. An example .config file is bundled with OPERA-MS.
+OPERA-MS requires a config file. To run OPERA-MS, input `perl /path/to/OPERA-MS/OPERA-MS.pl <config file>`. 
 
-## Specification for the Configuration file
+### Specification for the Configuration file
 
 Configuration files must be formatted in the form :
 
 ~~~~
-<OPTION1> <VALUE1>
+#One space between OPTION and VALUE
+<OPTION1> <VALUE1> 
 <OPTION2> <VALUE2>
 ...
 <OPTION2> <VALUE3>
@@ -48,10 +53,10 @@ Configuration files must be formatted in the form :
 This is an example of a config file :
 
 ~~~~
-
 #This is a comment. 
-CONTIGS_FILE /home/usr/OPERA-MS/test_files/final.contigs_soap.fa #We can use absolute or relative paths. #This is an absolute path.
-OUTPUT_DIR opera_ms_output/
+#We can use absolute or relative paths
+CONTIGS_FILE /home/usr/OPERA-MS/test_files/final.contigs_soap.fa #This is an absolute path.
+OUTPUT_DIR opera_ms_output/ #Relative path from current working directory.
 LONG_READ_FILE test_files/POOL.fa
 ILLUMINA_READ_1 test_files/mock1000.R1.fastq.gz
 ILLUMINA_READ_2 test_files/mock1000.R2.fastq.gz
@@ -87,11 +92,11 @@ All relative paths are relative to the current working directory of your termina
 - **KMER_SIZE** : `(positive integer)` - The value of kmer used to produce the assembled contigs/scaffolds.
 
 
-## Outputs
+### Outputs
 
 The outputs will be in OUTPUT_DIR. The scaffolds file before the secondary gap filling procedure is denoted __scaffoldSeq.fasta__. The scaffolds file after filling is denoted __scaffoldSeq.fasta.filled__. Intermediate files are are inside the folder __intermediate_files__. 
 
-## Dependencies
+### Dependencies
 
 We require the following dependencies:
 
@@ -100,11 +105,11 @@ We require the following dependencies:
 3) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above).
 4) [vsearch](https://github.com/torognes/vsearch).
 
-These are pre-built and packaged with OPERA-MS except for BLASR. Each binary is placed inside of the utils folder.
+These are pre-built and packaged with OPERA-MS except for BLASR. Each binary is placed inside of the __utils__ folder.
 
 If the pre-built tools do not work on the user's machine then OPERA-MS will check the user's PATH for the tool. However, the version that the user is using may be different than the one packaged. Alternatively, to specify a different directory for the dependency, edit the config file and add the line `(tool)_DIR /path/to/dir` as shown below to your config file.
 
 - **(tool)_DIR** : `path/to/tool_directory` - A path to the __directory containing__ the executable file of the specific tool : e.g. blasr, bwa, vsearch. If commented out the tool within the utils/ directory will be used. 
 
- For example, `WATER_DIR /usr/home/water_dir`.
+ For example, `BWA_DIR /usr/home/water_dir`.
 
