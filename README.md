@@ -131,6 +131,3 @@ If the pre-built tools do not work on the user's machine then OPERA-MS will chec
 - **(tool)_DIR** : `path/to/tool_directory` - A path to the __directory containing__ the executable file of the specific tool : e.g. blasr, bwa, vsearch. If commented out the tool within the utils/ directory will be used. 
 
 For example, `BWA_DIR /usr/home/water_dir`.
- 
-In addition, the user may need to install the following perl modules:
-
