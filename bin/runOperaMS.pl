@@ -123,7 +123,7 @@ while(<$opera_ms_cf>) {
             case "SHORT_READ_TOOL"{
             }
 
-            case "SHORT_READ_TOOL_DIR"{
+            case "BWA_DIR"{
                 $short_read_tool_dir = $split_line[1];
             }
 
@@ -181,6 +181,9 @@ while(<$opera_ms_cf>) {
             }
 
             case "ILLUMINA_READ_2"{
+            }
+
+            case "NUM_PROCESSOR"{
             }
 
             else {

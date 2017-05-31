@@ -1,0 +1,191 @@
+README for OPERA-LG (Optimal Paired-End Read Assembler for Large Genomes)
+
+Author: Koh Jia Yu and Denis Bertrand
+Date: 16th August 2016
+Version: 2.0.5
+
+Introduction
+OPERA (Optimal Paired-End Read Assembler) is a sequence assembly program (http://en.wikipedia.org/wiki/Sequence_assembly). It uses information from paired-end/mate-pair/long reads to order and orient the intermediate contigs/scaffolds assembled in a genome assembly project, in a process known as Scaffolding. OPERA is based on an exact algorithm that is guaranteed to minimize the discordance of scaffolds with the information provided by the paired-end/mate-pair/long reads (for further details see Gao et al, 2011).
+Note that since the original publication, we have made significant changes to OPERA (v1.0 onwards) including refinements to its basic algorithm (to reduce local errors, improve efficiency etc.) and incorporated features that are important for scaffolding large genomes (multi-library support, better repeat-handling etc.), in addition to other scalability and usability improvements (bam and gzip support, smaller memory footprint). We therefore encourage you to download and use our latest version: OPERA-LG. In our benchmarks, it has significantly improved corrected N50 and reduced the number of scaffolding errors. Furthermore, our latest release contains the wrapper script OPERA-long-read that enables scaffolding with long-reads from third-generation sequencing technologies (PacBio or Oxford Nanopore). The manuscript describing the new features and algorithms is available at Genome Biology. We look forward to getting your feedback to improve it further.
+
+Release 2.0.5
+Updated version of the wrapper script OPERA-long-read.pl for scaffolding with long-reads:
+1. Repeat detection module based on short/long reads;
+2. Able to scaffold using short-read and long-read libraries simultaneously.
+Updated version of OPERA-LG:
+1. OPERA-LG can scaffold simultaneously using edges from paired-end/mate-pair reads and long-reads.
+Updated version of the wrapper script preprocess_reads.pl
+1. Small cosmetic changes in the passage of parameters;
+2. Allows users to provide the path to samtools executables.
+
+Installation
+----------------------------------------------------------------------------------------------------
+
+Type "make install" in the root directory for OPERA-LG.
+
+Typical Usage
+----------------------------------------------------------------------------------------------------
+
+Input: 
+1) Assembled contigs/scaffolds in multi-fasta format (e.g. test_dataset/contigs.fa). 
+   Note that for Velvet and SOAPdenovo output, OPERA-LG automatically recognizes repeat 
+   contigs and filters them out. For other assemblers, the expected input is a set 
+   of non-repeat contigs.
+2) Paired-end reads to be used for scaffolding (e.g. test_dataset/lib_1_1.fa, 
+   test_dataset/lib_1_2.fa).
+
+Running OPERA-LG:
+1) Reads need to be mapped onto contigs (currently we provide a script that uses bowtie or bwa):
+
+   perl bin/preprocess_reads.pl --contig <contig-file> --illumina-read1 <read-file-1> --illumina-read2 <read-file-2> 
+   --out <output-file> (--map-tool <mapping-tool> --tool-dir <folder which contains mapping-tool binaries> --samtools-dir <folder which contains samtools binaries>)
+
+   where mapping-tool should be either bwa (default) or bowtie, read-file-1 and
+   read-file-2 contain paired-end reads in fasta or fastq format. 
+
+   Folder which contains mapping-tool binaries can specified, according to the chosen mapping-tool. 
+   If left blank, we assume that those software are on PATH.
+
+   For example:
+       perl bin/preprocess_reads.pl --contig test_dataset/contigs.fa --illumina-read1 test_dataset/lib_1_1.fa 
+       --illumina-read2 test_dataset/lib_1_2.fa --out test_dataset/lib_1.map 
+
+   The mapping file should have extension as ".sam" or ".bam", if the output format is either
+   of them. For bowtie normal format, ".map" can be used as extension.
+
+2) There are two ways to provide parameters to OPERA-LG:
+
+   (A) Using the command line
+       bin/OPERA-LG <contig-file> <mapping-files> <output-folder>
+
+       <contig-file>	       Multi-fasta contig file
+       <mapping-files>	       Comma-separated list of files containing mapping of paired-end reads
+       <output-folder>	       Folder to save the scaffold results
+       
+       For example:
+       	   bin/OPERA-LG test_dataset/contigs.fa test_dataset/lib_1.map,test_dataset/lib_2.map 
+	   test_dataset/results
+
+   (B) Using a configuration file   
+       bin/OPERA-LG <config-file>
+
+       <config-file>	       Configuration file
+
+       For example:
+       	   bin/OPERA-LG test_dataset/multiLib.config
+
+       where the configuration file provides information on the contig file, mapping files and 
+       output directory to use (see below for the format).
+
+
+Running OPERA-LG for long-reads:
+1) The wrapper script "OPERA-long-read.pl" enables OPERA-LG to scaffold contigs using short paired-end reads and long-reads from third-generation sequencing technologies. The mapping of long reads (PacBio or Oxford Nanopore) is performed using blasr. The contig links are then computed using the approach described in the Supplementary Note 2 of the OPERA-LG paper. The latest version include a 2 steps repeat detection module: (1) short-reads are mapped to the assembly and repeat contigs are flagged according to their deviation to the average assembly coverage, (2) using long-reads we detect contigs with conflicting direct neighbors and flag them as repeat.
+
+2) The wrapper can be called using the following command line:
+
+perl bin/OPERA-long-read.pl 
+
+    --contig-file <fasta file of contigs> --kmer <kmer used to produce the contigs> 
+    --illumina-read1 <fasta file of Illumina read 1> 
+    --illumina-read2 <fasta file of Illumina read 2>
+    --long-read-file <fasta file of long reads> 
+    --num-of-processors <number of processors for the mapping steps>
+    --output-prefix <prefix of output mapping file> 
+    --output-directory <output directory for scaffolding results>
+
+For example:
+
+perl bin/OPERA-long-read.pl 
+
+    --contig-file test_dataset_long_reads/contigs.fa 
+    --illumina-read1 test_dataset_long_reads/illumina_1.fastq.gz 
+    --illumina-read2 test_dataset_long_reads/illumina_2.fastq.gz
+    --long-read-file test_dataset_long_reads/nanopore.fa 
+    --output-prefix opera-lr --output-directory RESULTS
+
+3) The wrapper assumes that bwa or bowtie (one of this tool is required for the mapping of the short-read library), blasr (required for the mapping of the long-read library), samtools and OPERA-LG binaries are found in your PATH. Otherwise, you may specify the location to the binaries by adding the respective arguments to OPERA-long-read.pl : --short-read-tooldir --blasr --samtools-dir --opera. 
+
+For the short read mapping bwa is taken as the default mapper. The mapping tool can be specified using the following argument: --short_read_maptool.
+
+Output Format
+----------------------------------------------------------------------------------------------------
+
+Scaffolds output by OPERA-LG can be found in a multi-fasta file "scaffoldSeq.fasta". Summary
+assembly statistics can be found in the file "statistics". 
+
+------------------------------------------------------------------------------------------
+
+An example configuration file can be found in "test_dataset/singleLib.config". The main parameters
+that need to be specified are:
+
+   a) contig_file: a multi-fasta file containing assembled contigs/scaffolds (input to OPERA-LG).
+   b) map_file: the mapping file specifying the location of paired-end reads on the contigs/scaffolds 
+      (input to OPERA-LG; see bin/preprocess_reads.pl). 
+   c) output_folder: the directory into which all results are written.
+   d) kmer: the value of kmer used to produce the assembled contigs/scaffolds (input to OPERA-LG). If not
+      specified, OPERA-LG will try to analyze corresponding assembly file (LastGraph for Velvet assembly 
+      or <prefix>.preGraphBasic for SOAPdenovo assembly) in the same directory containing the 
+      contig_file. Kmer will be set to 100 if the file cannot be found.
+
+Test datasets
+----------------------------------------------------------------------------------------------------
+We provide 2 test datasets:
+1) test_dataset.tar.gz that contains paired-end and mate-pairs libraries that can be processed using OPERA-LG.
+2) test_dataset_long_reads.tar.gz that contains paired-end and Oxford Nanopore reads that can be processed using OPERA-long-reads.pl. Notice that we sub-sampled 3% of the full Illumina dataset to construct a toys test dataset of 1Gb. The low coverage affects the performance of the repeat detection module. The full Illumina dataset can downloaded here: https://sourceforge.net/projects/operasf/files/Test%20Dataset%20Long%20Reads/.
+
+References
+----------------------------------------------------------------------------------------------------
+
+1) To cite OPERA-LG please use the following citations:
+Song Gao, Denis Bertrand, Burton K. H. Chia and Niranjan Nagarajan. OPERA-LG: efficient and exact scaffolding of large, repeat-rich eukaryotic genomes with performance guarantees. Genome Biology, May 2016, doi: 10.1186/s13059-016-0951-y.
+
+Song Gao, Wing-Kin Sung, Niranjan Nagarajan. Opera: reconstructing optimal genomic scaffolds with 
+high-throughput paired-end sequences. Journal of Computational Biology, Sept. 2011, doi:10.1089/cmb.2011.0170.
+
+2) SourceForge Page: https://sourceforge.net/projects/operasf/
+   Mailing List (for Updates and Bug Fixes): http://lists.sourceforge.net/mailman/listinfo/operasf-updates 
+
+3) Contact: gaosong0329@gmail.com (Song GAO) and bertrandd@gis.a-star.edu.sg (Denis BERTRAND)
+
+
+History
+----------------------------------------------------------------------------------------------------
+
+Release 2.0.4 (21-Mar-2015)
+Changes from version 2.0.2:
+The new wrapper script OPERA-long-read.pl for scaffolding with long reads from third-generation sequencing technologies (PacBio or Oxford Nanopore).
+
+Release 2.0.2 (21-Mar-2015)
+Changes from version 2.0.1:
+1. Format of mapping files will be checked before analyzing. An error will be reported if the format
+   (e.g. column number) is not correct;
+2. In preprocess_reads.pl, users can specify the temporary directory for sorting mapping files (default
+   directory is current directory).
+
+Release 2.0.1 (21-Mar-2015)
+Changes from version 2.0:
+1. Polyploid sequence assembly is supported by specifying "ploidy" value in a configuration file (the coverage of haploid sequence can also be specified through "haploid_coverage", but preferred to be calculated by OPERA-LG);
+2. The minimum scaffolded contig length is max( 500, 2 * smallest pair-end library mean);
+3. Multiple libraries will be used in three groups: smaller than 1kbp, between 1kbp and 10kbp, bigger than 10kbp.
+
+Release 2.0 (2-Jul-2014)
+Changes from version 1.4: 
+1. Repetitive contigs can be scaffolded through adding "filter_repeat=no" into configuration file;
+2. Distances of edges are re-estimated based on the fact that the observed read pairs are from a truncated distribution.
+
+Release 1.4 (19-Sep-2013)
+Changes from version 1.3.1: 
+1. Search space in Opera is better prioritized to significantly reduce the number of local scaffolding errors;
+2. Multiple libraries are used simultaneously to reduce scaffolding errors further;
+3. Compressed read files (suffix is ".gz") can be handled by preprocess_reads.pl;
+4. Read mappings are now stored in the "bam" format;
+5. Opera supports the direct reading of read mappings in the "bam" format.
+
+Release 1.3.1 (15-Jan-2013)
+Changes from version 1.3: 
+Fixed a timing out bug in Opera.
+
+Release 1.3 (20-Dec-2012)
+Changes from version 1.2:
+Improved library mean and standard deviation calculation.
+

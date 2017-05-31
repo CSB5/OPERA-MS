@@ -1,0 +1,75 @@
+\hypertarget{probability__distribution_8cpp}{
+\section{/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/probability\_\-distribution.cpp File Reference}
+\label{probability__distribution_8cpp}\index{/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/probability\_\-distribution.cpp@{/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/probability\_\-distribution.cpp}}
+}
+{\ttfamily \#include $<$cstdlib$>$}\par
+{\ttfamily \#include $<$cmath$>$}\par
+{\ttfamily \#include \char`\"{}probability\_\-distribution.h\char`\"{}}\par
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static double \hyperlink{probability__distribution_8cpp_aa008ab82cd1e3a7c734abbccfdf47d25}{stirling\_\-log\_\-factorial} (double x)
+\begin{DoxyCompactList}\small\item\em Computes Stirling's series approximation of log(x!). \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{Indent}{\bf }\par
+{\em \label{_amgrpd41d8cd98f00b204e9800998ecf8427e}
+ }\begin{DoxyCompactItemize}
+\item 
+static const double \hyperlink{probability__distribution_8cpp_abb30260352ac2c99c17ad6ba1b9eec95}{LOG\_\-SQRT2PI} = 0.5 $\ast$ log(2.0 $\ast$ 3.14159265358979323846)
+\item 
+static const double \hyperlink{probability__distribution_8cpp_a281748e1c9170c319467b964e00ffdcd}{LC1} = 1.0 / 12.0
+\item 
+static const double \hyperlink{probability__distribution_8cpp_ad40081cd1b03fabc256d282bc182600c}{LC2} = -\/1.0 / 360.0
+\item 
+static const double \hyperlink{probability__distribution_8cpp_a051c91b0471cbae85672657b5784240b}{LC3} = 1.0 / 1260.0
+\item 
+static const double \hyperlink{probability__distribution_8cpp_add3817a2ccf5bb9c63838889236f4a5e}{LC4} = -\/1.0 / 1680.0
+\end{DoxyCompactItemize}
+\end{Indent}
+
+
+\subsection{Function Documentation}
+\hypertarget{probability__distribution_8cpp_aa008ab82cd1e3a7c734abbccfdf47d25}{
+\index{probability\_\-distribution.cpp@{probability\_\-distribution.cpp}!stirling\_\-log\_\-factorial@{stirling\_\-log\_\-factorial}}
+\index{stirling\_\-log\_\-factorial@{stirling\_\-log\_\-factorial}!probability_distribution.cpp@{probability\_\-distribution.cpp}}
+\subsubsection[{stirling\_\-log\_\-factorial}]{\setlength{\rightskip}{0pt plus 5cm}static double stirling\_\-log\_\-factorial (double {\em x})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{probability__distribution_8cpp_aa008ab82cd1e3a7c734abbccfdf47d25}
+
+
+Computes Stirling's series approximation of log(x!). Computes \href{http://en.wikipedia.org/wiki/Stirling%27s_approximation>}{\tt Stirling's series approximation} of log(x!) using log(x!) = log(x) + log((x-\/1)!) = log(x) + log(gamma(x)).
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em x}]value for which the approximation is computed \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Stirling's series approximation of log(x!) 
+\end{DoxyReturn}
+
+
+\subsection{Variable Documentation}
+\hypertarget{probability__distribution_8cpp_a281748e1c9170c319467b964e00ffdcd}{
+\index{probability\_\-distribution.cpp@{probability\_\-distribution.cpp}!LC1@{LC1}}
+\index{LC1@{LC1}!probability_distribution.cpp@{probability\_\-distribution.cpp}}
+\subsubsection[{LC1}]{\setlength{\rightskip}{0pt plus 5cm}const double {\bf LC1} = 1.0 / 12.0\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{probability__distribution_8cpp_a281748e1c9170c319467b964e00ffdcd}
+Constant for Stirling's series approximation of log(x!). \hypertarget{probability__distribution_8cpp_ad40081cd1b03fabc256d282bc182600c}{
+\index{probability\_\-distribution.cpp@{probability\_\-distribution.cpp}!LC2@{LC2}}
+\index{LC2@{LC2}!probability_distribution.cpp@{probability\_\-distribution.cpp}}
+\subsubsection[{LC2}]{\setlength{\rightskip}{0pt plus 5cm}const double {\bf LC2} = -\/1.0 / 360.0\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{probability__distribution_8cpp_ad40081cd1b03fabc256d282bc182600c}
+Constant for Stirling's series approximation of log(x!). \hypertarget{probability__distribution_8cpp_a051c91b0471cbae85672657b5784240b}{
+\index{probability\_\-distribution.cpp@{probability\_\-distribution.cpp}!LC3@{LC3}}
+\index{LC3@{LC3}!probability_distribution.cpp@{probability\_\-distribution.cpp}}
+\subsubsection[{LC3}]{\setlength{\rightskip}{0pt plus 5cm}const double {\bf LC3} = 1.0 / 1260.0\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{probability__distribution_8cpp_a051c91b0471cbae85672657b5784240b}
+Constant for Stirling's series approximation of log(x!). \hypertarget{probability__distribution_8cpp_add3817a2ccf5bb9c63838889236f4a5e}{
+\index{probability\_\-distribution.cpp@{probability\_\-distribution.cpp}!LC4@{LC4}}
+\index{LC4@{LC4}!probability_distribution.cpp@{probability\_\-distribution.cpp}}
+\subsubsection[{LC4}]{\setlength{\rightskip}{0pt plus 5cm}const double {\bf LC4} = -\/1.0 / 1680.0\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{probability__distribution_8cpp_add3817a2ccf5bb9c63838889236f4a5e}
+Constant for Stirling's series approximation of log(x!). \hypertarget{probability__distribution_8cpp_abb30260352ac2c99c17ad6ba1b9eec95}{
+\index{probability\_\-distribution.cpp@{probability\_\-distribution.cpp}!LOG\_\-SQRT2PI@{LOG\_\-SQRT2PI}}
+\index{LOG\_\-SQRT2PI@{LOG\_\-SQRT2PI}!probability_distribution.cpp@{probability\_\-distribution.cpp}}
+\subsubsection[{LOG\_\-SQRT2PI}]{\setlength{\rightskip}{0pt plus 5cm}const double {\bf LOG\_\-SQRT2PI} = 0.5 $\ast$ log(2.0 $\ast$ 3.14159265358979323846)\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{probability__distribution_8cpp_abb30260352ac2c99c17ad6ba1b9eec95}
+Constant for Stirling's series approximation of log(x!). 

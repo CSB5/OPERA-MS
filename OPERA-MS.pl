@@ -23,7 +23,7 @@ my $pbdagcon_dir;
 my $water_dir;
 my $graphmap_dir;
 my $vsearch_dir;
-my $opera_version = "OPERA-LG_v2.1.0";
+my $opera_version = "OPERA-LG";
 my $runOperaMS_config_name = "runOperaMS.config"; #Generated config file, name can be whatever.
 my $output_dir;
 my $opera_ms_config_file;
@@ -99,7 +99,7 @@ if ( @ARGV == 1){
                     $short_read_maptool = $split_line[1];
                 }
 
-                case "SHORT_READ_TOOL_DIR"{
+                case "BWA_DIR"{
                     $short_read_tool_dir = $split_line[1];
                 }
 
@@ -111,17 +111,18 @@ if ( @ARGV == 1){
                     $vsearch_dir = $split_line[1];
                 }
 
-                case "WATER_DIR"{
-                    $water_dir = $split_line[1];
-                }
+              #  RELEASE VERSION USES VSEARCH INSTEAD OF PBDAGCON
+              #  case "WATER_DIR"{
+              #      $water_dir = $split_line[1];
+              #  }
 
-                case "GRAPHMAP_DIR"{
-                    $graphmap_dir =$split_line[1];
-                }
+              #  case "GRAPHMAP_DIR"{
+              #      $graphmap_dir =$split_line[1];
+              #  }
 
-                case "PBDAGCON_DIR"{
-                    $pbdagcon_dir = $split_line[1];
-                }
+              #  case "PBDAGCON_DIR"{
+              #      $pbdagcon_dir = $split_line[1];
+              #  }
 
                 case "KMER_SIZE" {
                     $kmer_size = $split_line[1];
@@ -190,7 +191,6 @@ else{
 }
 
 my $inter = "intermediate_files"; 
-$short_read_maptool = "--short-read-maptool " . $short_read_maptool;
 $output_dir = $main_dir . $output_dir."/" if (substr($output_dir, 0, 1) ne "/");
 
 #Make paths absolute if they are not already.
@@ -268,7 +268,7 @@ if(!defined($short_read_tool_dir)){
 else{
     $short_read_tool_dir= $main_dir . $short_read_tool_dir. "/" if (substr($short_read_tool_dir, 0, 1) ne "/");
     if (! -e $short_read_tool_dir . "/$short_read_maptool") {
-        die "short read mapping tool not found at : ".$short_read_tool_dir."\n";
+        die "$short_read_maptool not found at : ".$short_read_tool_dir."\n";
     }
     
     $short_read_tool_dir = "--short-read-tooldir " . $short_read_tool_dir;
@@ -308,95 +308,95 @@ else{
     $vsearch_dir = "--vsearch " . $vsearch_dir;
 }
 
-if(!defined($water_dir)){
-    $vsearch_dir = "$opera_ms_dir/utils";
-    my $exe_check = "$opera_ms_dir/utils/water --version";
-    run_exe($exe_check);
+#if(!defined($water_dir)){
+#    $water_dir = "$opera_ms_dir/utils";
+#    my $exe_check = "$opera_ms_dir/utils/water --version";
+#    run_exe($exe_check);
+#
+#    if($?){
+#        print STDERR "\n water found in $opera_ms_dir/utils is not functional. Checking path for water. \n";
+#        $water_dir = "";
+#        my $valid_path = which("water"); 
+#        die "water not found in path. Exiting." if (!$valid_path);
+#    }
+#
+#    else{
+#        $water_dir = "--water " . $water_dir;
+#    }
+# 
+#
+#}
 
-    if($?){
-        print STDERR "\n water found in $opera_ms_dir/utils is not functional. Checking path for water. \n";
-        $water_dir = "";
-        my $valid_path = which("water"); 
-        die "water not found in path. Exiting." if (!$valid_path);
-    }
-
-    else{
-        $water_dir = "--water " . $water_dir;
-    }
- 
-
-}
-
-else{
-    $water_dir = $main_dir . $water_dir . "/" if(substr($water_dir, 0, 1) ne "/");
-
-    if (! -e $water_dir . "/water") {
-        die "water not found at: ".$water_dir."\n";
-    }
-
-    `$water_dir/water --version`;
-
-    if($?){
-        die "\nwater does not seem to be executable. Exiting.\n";
-    }
-    $water_dir = "--water " . $water_dir;
-}
-
-if(!defined($graphmap_dir)){
-    $graphmap_dir = "$opera_ms_dir/utils";
-    my $exe_check = "$opera_ms_dir/utils/graphmap 2>&1 | grep GraphMap";
-    run_exe($exe_check);
-
-    if($?){
-        print STDERR "\n graphmap found in $opera_ms_dir/utils is not functional. Checking path for graphmap. \n";
-        $graphmap_dir = "";
-
-        my $valid_path = which("graphmap"); 
-        die "graphmap not found in path. Exiting." if (!$valid_path);
-    }
-
-    else{
-
-        $graphmap_dir = "--graphmap " . $graphmap_dir;
-    }
-}
-
-else{
-    $graphmap_dir = $main_dir . $graphmap_dir . "/" if(substr($graphmap_dir, 0, 1) ne "/");
-
-    if (! -e $graphmap_dir . "/graphmap") {
-        die "graphmap not found at: ".$graphmap_dir."\n";
-    }
-
-    $graphmap_dir = "--graphmap " . $graphmap_dir;
-}
-
-if(!defined($pbdagcon_dir)){
-    $graphmap_dir = "$opera_ms_dir/utils";
-    my $exe_check = "$opera_ms_dir/utils/pbdagcon -h 2>&1 | grep Usage";
-    run_exe($exe_check);
-
-    if($?){
-        print STDERR "\n pbdagcon found in $opera_ms_dir/utils is not functional. Checking path for pbdagcon. \n";
-        $pbdagcon_dir = "";
-        my $valid_path = which("pbdagcon"); 
-        die "pbdagcon not found in path. Exiting." if (!$valid_path);
-    }
-    
-    else{
-        $pbdagcon_dir = "--pbdagcon " . $pbdagcon_dir;
-    }
-}
-
-else{
-    $pbdagcon_dir = $main_dir . $pbdagcon_dir . "/" if(substr($pbdagcon_dir, 0, 1) ne "/");
-
-    if (! -e $pbdagcon_dir . "/pbdagcon") {
-        die "pbdagcon not found at: ".$pbdagcon_dir."\n";
-    }
-
-    $pbdagcon_dir = "--pbdagcon " . $pbdagcon_dir;
-}
+#else{
+#    $water_dir = $main_dir . $water_dir . "/" if(substr($water_dir, 0, 1) ne "/");
+#
+#    if (! -e $water_dir . "/water") {
+#        die "water not found at: ".$water_dir."\n";
+#    }
+#
+#    `$water_dir/water --version`;
+#
+#    if($?){
+#        die "\nwater does not seem to be executable. Exiting.\n";
+#    }
+#    $water_dir = "--water " . $water_dir;
+#}
+#
+#if(!defined($graphmap_dir)){
+#    $graphmap_dir = "$opera_ms_dir/utils";
+#    my $exe_check = "$opera_ms_dir/utils/graphmap 2>&1 | grep GraphMap";
+#    run_exe($exe_check);
+#
+#    if($?){
+#        print STDERR "\n graphmap found in $opera_ms_dir/utils is not functional. Checking path for graphmap. \n";
+#        $graphmap_dir = "";
+#
+#        my $valid_path = which("graphmap"); 
+#        die "graphmap not found in path. Exiting." if (!$valid_path);
+#    }
+#
+#    else{
+#
+#        $graphmap_dir = "--graphmap " . $graphmap_dir;
+#    }
+#}
+#
+#else{
+#    $graphmap_dir = $main_dir . $graphmap_dir . "/" if(substr($graphmap_dir, 0, 1) ne "/");
+#
+#    if (! -e $graphmap_dir . "/graphmap") {
+#        die "graphmap not found at: ".$graphmap_dir."\n";
+#    }
+#
+#    $graphmap_dir = "--graphmap " . $graphmap_dir;
+#}
+#
+#if(!defined($pbdagcon_dir)){
+#    $pbdagcon_dir = "$opera_ms_dir/utils";
+#    my $exe_check = "$opera_ms_dir/utils/pbdagcon -h 2>&1 | grep Usage";
+#    run_exe($exe_check);
+#
+#    if($?){
+#        print STDERR "\n pbdagcon found in $opera_ms_dir/utils is not functional. Checking path for pbdagcon. \n";
+#        $pbdagcon_dir = "";
+#        my $valid_path = which("pbdagcon"); 
+#        die "pbdagcon not found in path. Exiting." if (!$valid_path);
+#    }
+#    
+#    else{
+#        $pbdagcon_dir = "--pbdagcon " . $pbdagcon_dir;
+#    }
+#}
+#
+#else{
+#    $pbdagcon_dir = $main_dir . $pbdagcon_dir . "/" if(substr($pbdagcon_dir, 0, 1) ne "/");
+#
+#    if (! -e $pbdagcon_dir . "/pbdagcon") {
+#        die "pbdagcon not found at: ".$pbdagcon_dir."\n";
+#    }
+#
+#    $pbdagcon_dir = "--pbdagcon " . $pbdagcon_dir;
+#}
 
 
 if( ! -e $contigs_file) {
@@ -614,7 +614,7 @@ my $extract_args = "--edge-file $lr_output_dir/edge_read_info.dat --contig-file 
 $command="perl ${opera_ms_dir}${opera_version}/bin/extract_read_sequence_xargs.pl $extract_args";
 run_exe($command);
 
-$command = "mv $output_dir/lib_* $output_dir/$inter";
+$command = "mv $output_dir/lib_* $output_dir/$inter; rm -r $output_dir/$inter/scaffolds";
 run_exe($command);
 
 $command = "rm $output_dir/contigs.bam; ln -s $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled $output_dir/scaffoldSeq.fasta.filled";

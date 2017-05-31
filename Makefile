@@ -4,13 +4,13 @@ install: sigma opera
 clean : sigmaclean operaclean
 
 sigma: 
-	cd sigma_testing_jim&&make;
+	cd SIGMA&&make;
 
 opera: 
-	cd OPERA-LG_v2.1.0&&make install;
+	cd OPERA-LG&&make install;
 
 sigmaclean:
-	cd sigma_testing_jim&&make clean;
+	cd SIGMA&&make clean;
 
 operaclean:
-	cd OPERA-LG_v2.1.0&&make clean;
+	cd OPERA-LG&&make clean;

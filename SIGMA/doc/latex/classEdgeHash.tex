@@ -1,0 +1,52 @@
+\hypertarget{classEdgeHash}{
+\section{EdgeHash Class Reference}
+\label{classEdgeHash}\index{EdgeHash@{EdgeHash}}
+}
+
+
+Function object class for computing hash values for \hyperlink{classEdge}{Edge} objects.  
+
+
+{\ttfamily \#include $<$/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/edge.h$>$}\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+size\_\-t \hyperlink{classEdgeHash_a508a037c057f0fc8b6ce38cc14aa24be}{operator()} (const \hyperlink{classEdge}{Edge} \&edge) const 
+\begin{DoxyCompactList}\small\item\em Computes hash value for given edge. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::hash$<$ std::string $>$ \hyperlink{classEdgeHash_ad792d3023aeb1aa2b561e6b3a777f992}{string\_\-hash\_\-}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Function object class for computing hash values for \hyperlink{classEdge}{Edge} objects. Function object class for computing hash values for scaffold edges based on ids of contigs incident to the edges. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classEdgeHash_a508a037c057f0fc8b6ce38cc14aa24be}{
+\index{EdgeHash@{EdgeHash}!operator()@{operator()}}
+\index{operator()@{operator()}!EdgeHash@{EdgeHash}}
+\subsubsection[{operator()}]{\setlength{\rightskip}{0pt plus 5cm}size\_\-t EdgeHash::operator() (const {\bf Edge} \& {\em edge}) const}}
+\label{classEdgeHash_a508a037c057f0fc8b6ce38cc14aa24be}
+
+
+Computes hash value for given edge. 
+\begin{DoxyParams}{Parameters}
+\item[{\em edge}]edge \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+hash value for given edge 
+\end{DoxyReturn}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classEdgeHash_ad792d3023aeb1aa2b561e6b3a777f992}{
+\index{EdgeHash@{EdgeHash}!string\_\-hash\_\-@{string\_\-hash\_\-}}
+\index{string\_\-hash\_\-@{string\_\-hash\_\-}!EdgeHash@{EdgeHash}}
+\subsubsection[{string\_\-hash\_\-}]{\setlength{\rightskip}{0pt plus 5cm}std::hash$<$std::string$>$ {\bf EdgeHash::string\_\-hash\_\-}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classEdgeHash_ad792d3023aeb1aa2b561e6b3a777f992}
+Default hash function object for strings. 
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{edge_8h}{edge.h}\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{edge_8cpp}{edge.cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,41 @@
+\hypertarget{classEdgeComparator}{
+\section{EdgeComparator Class Reference}
+\label{classEdgeComparator}\index{EdgeComparator@{EdgeComparator}}
+}
+
+
+Function object class for less-\/than inequality comparison of \hyperlink{classEdge}{Edge} objects.  
+
+
+{\ttfamily \#include $<$/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/edge.h$>$}\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classEdgeComparator_afbaf589ea30c37ec90302f68d67e2a6d}{operator()} (const \hyperlink{classEdge}{Edge} \&edge1, const \hyperlink{classEdge}{Edge} \&edge2) const 
+\begin{DoxyCompactList}\small\item\em Computes if the first edge compares less than the second edge. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Function object class for less-\/than inequality comparison of \hyperlink{classEdge}{Edge} objects. Function object class for less-\/than inequality comparison of scaffold edges based on their distances. It is used as a comparator for the priority queue of edges. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classEdgeComparator_afbaf589ea30c37ec90302f68d67e2a6d}{
+\index{EdgeComparator@{EdgeComparator}!operator()@{operator()}}
+\index{operator()@{operator()}!EdgeComparator@{EdgeComparator}}
+\subsubsection[{operator()}]{\setlength{\rightskip}{0pt plus 5cm}bool EdgeComparator::operator() (const {\bf Edge} \& {\em edge1}, \/  const {\bf Edge} \& {\em edge2}) const}}
+\label{classEdgeComparator_afbaf589ea30c37ec90302f68d67e2a6d}
+
+
+Computes if the first edge compares less than the second edge. Computes if the first edge compares less than the second edge (i.e. whether the first edge has larger distance then the second edge and thus a lower priority).
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em edge1}]first edge \item[{\em edge2}]second edge \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the first edge has larger distance than the second edge, false otherwise 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files:\begin{DoxyCompactItemize}
+\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{edge_8h}{edge.h}\item 
+/mnt/ScratchPool/bertrandd/OPERA\_\-MS/OperaMS2.0/SIGMA++/1.4/\hyperlink{edge_8cpp}{edge.cpp}\end{DoxyCompactItemize}
