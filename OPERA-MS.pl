@@ -200,7 +200,7 @@ $illum_read1 = $main_dir . $illum_read1 if(substr($illum_read1, 0, 1) ne "/");
 $illum_read2= $main_dir . $illum_read2 if(substr($illum_read2, 0, 1) ne "/");
 $contigs_file = $main_dir . $contigs_file if(substr($contigs_file, 0, 1) ne "/");
 $opera_ms_config_file = $output_dir."/".$runOperaMS_config_name;
-$lr_output_dir = $output_dir."/$inter/long-read-mapping";
+$lr_output_dir = $output_dir."/$inter/read-mapping";
 
 #
 #Check if dependencies are found. Otherwise, die.

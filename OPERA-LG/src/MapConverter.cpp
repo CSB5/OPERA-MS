@@ -48,7 +48,7 @@ int MapConverter::AnalyzeMultiLib( string fileName, list<PetLibrary*> *libs  ){
 		return -1;
 		}*/
 	//Export the mapping based edges if any
-	AnalyzeBowtieMultiLib( libs );
+	//AnalyzeBowtieMultiLib( libs );
 	//Add any OPERA edge file to libs
 	AnalyzeOperaMultiLib( libs );
 	return 1;
