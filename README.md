@@ -35,13 +35,13 @@ A set of test files and a sample configuration file is provided to allow the use
 cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config
 ~~~~
-This will assemble a small mock-genome in the folder __OPERA-MS/sample_output__. In STDERR one should see the following statistics after scrolling up:
+This will assemble a small mock-genome in the folder __OPERA-MS/sample_output__. One should see the following statistics after completion :
 
 ~~~~
 Scaffold statistics:
-	N50: 59.21 Kb
-	Total length: 4.48 Mb
-	Longest scaffold: 188.90 Kb
+	N50: 330.47 Kb
+	Total length: 9.33 Mb
+	Longest scaffold: 1.57 Mb
 ~~~~
 
 # Running OPERA-MS
