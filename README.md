@@ -1,4 +1,3 @@
-# UNDER DEVELOPMENT
 # Introduction 
 OPERA-MS is a long read metagenomic scaffolding pipline that takes in a set of contigs with a set of short and short long reads to output near-complete individual microbial genomes in your environmental sample. 
 
@@ -9,12 +8,25 @@ The long reads are then used fill the gaps between contigs to produce a final se
 # Installation
 
 ### Requirements
-
 - [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above).
 
-blasr must be in the user's PATH, or alternatively, one could specify the directory in which blasr is contained in the config file. See below for more information on the config file.
+ blasr must be in the user's PATH, or alternatively, one could specify the directory in which blasr is contained in the    config file. See below for more information on the config file.
 
-To install OPERA-MS, download and unzip OPERA-MS to a specified directory or `git clone https://github.com/CSB5/OPERA-MS.git`. All of the tools needed except for BLASR are distributed pre-built. See below for more information on dependencies.
+#### Perl Modules
+- [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
+
+- [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
+
+To install OPERA-MS, download and unzip OPERA-MS to a specified directory or `git clone https://github.com/CSB5/OPERA-MS.git`.
+
+All of the tools needed except for BLASR are distributed pre-built. See below for more information on dependencies.
+
+~~~~
+cd /path/to/OPERA-MS
+make
+~~~~
+
+This will build SIGMA and OPERA-LG.
 
 ### Testing Installation
 
@@ -23,7 +35,14 @@ A set of test files and a sample configuration file is provided to allow the use
 cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config
 ~~~~
-This will assemble a small mock-genome in the folder __OPERA-MS/sample_output__.
+This will assemble a small mock-genome in the folder __OPERA-MS/sample_output__. In STDERR one should see the following statistics after scrolling up:
+
+~~~~
+Scaffold statistics:
+	N50: 59.21 Kb
+	Total length: 4.48 Mb
+	Longest scaffold: 188.90 Kb
+~~~~
 
 # Running OPERA-MS
 
@@ -81,13 +100,13 @@ All relative paths are relative to the current working directory of your termina
 
 - **ILLUMINA_READ_2** : `path/to/illum_read2.fa` - A path to the second complement illumina read file.
 
-- **NUM_PROCESSOR** : The number of processors that this pipeline will use.
+- **NUM_PROCESSOR** : `(positive integer)` - The number of processors that this pipeline will use.
 
 - **CONTIG_LEN_THR** : `default : 500` - Threshold for contig clustering. Smaller contigs will not be considered for clustering.
 
 - **CONTIG_EDGE_LEN** : `default : 80` - When calculating coverage of contigs using SIGMA, this number of bases will not be considered from each end of the contig. This is to remove to biases due to reads not matching the edges of contigs. 
 
-- **CONTIG_WINDOW_LEN** : `340` - The window in which coverage is computed by SIGMA for clustering. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value.q
+- **CONTIG_WINDOW_LEN** : `340` - The window in which coverage is computed by SIGMA for clustering. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value.
 
 - **KMER_SIZE** : `(positive integer)` - The value of kmer used to produce the assembled contigs/scaffolds.
 
@@ -111,5 +130,4 @@ If the pre-built tools do not work on the user's machine then OPERA-MS will chec
 
 - **(tool)_DIR** : `path/to/tool_directory` - A path to the __directory containing__ the executable file of the specific tool : e.g. blasr, bwa, vsearch. If commented out the tool within the utils/ directory will be used. 
 
- For example, `BWA_DIR /usr/home/water_dir`.
-
+For example, `BWA_DIR /usr/home/water_dir`.
