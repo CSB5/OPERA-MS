@@ -619,7 +619,7 @@ run_exe($command);
 $command = "rm $output_dir/contigs.bam; ln -s $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled $output_dir/scaffoldSeq.fasta.filled";
 run_exe($command);
 
-$command="less ${output_dir}/$inter/opera_long_read/log.txt";
+$command="less ${output_dir}/$inter/opera_long_read/statistics";
 run_exe($command);
 
 print STDERR "\n*************OPERA-MS DONE***************\n";
