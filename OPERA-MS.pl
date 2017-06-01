@@ -11,6 +11,7 @@ use File::Basename;
 use File::Which;
 
 
+
 #Grab the executing directory; turn all paths into absolute paths.
 my $opera_ms_dir = dirname(rel2abs($0)) . "/";
 print $opera_ms_dir  . "\n";
@@ -607,19 +608,19 @@ run_exe($command);
 $command="rm $output_dir/scaffoldSeq.fasta; rm $output_dir/scaffoldSeq.fasta.stats; ln -s $output_dir/$inter/opera_long_read/scaffoldSeq.fasta $output_dir/scaffoldSeq.fasta";
 run_exe($command);
 
-$command="less ${output_dir}/$inter/opera_long_read/log.txt";
-run_exe($command);
 
 my $extract_args = "--edge-file $lr_output_dir/edge_read_info.dat --contig-file $contigs_file --scaffold-file $output_dir/$inter/opera_long_read/scaffolds.scaf --read-file $long_read_file --script $opera_ms_dir/$opera_version/bin/ $pbdagcon_dir $vsearch_dir $water_dir $graphmap_dir --output-directory $output_dir/$inter/opera_long_read/GAP_FILLING --outfile $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled --stage ALL -num-of-processors $num_processor --bin $opera_ms_dir/bin"; 
 $command="perl ${opera_ms_dir}${opera_version}/bin/extract_read_sequence_xargs.pl $extract_args";
 run_exe($command);
 
-$command = "mv $output_dir/lib_* $output_dir/$inter; rm -r $output_dir/$inter/scaffolds";
+$command = "mv $output_dir/lib_* $output_dir/$inter; rm -r $output_dir/$inter/scaffolds; mv $output_dir/runOperaMS.config $output_dir/$inter/";
 run_exe($command);
 
 $command = "rm $output_dir/contigs.bam; ln -s $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled $output_dir/scaffoldSeq.fasta.filled";
 run_exe($command);
 
+$command="less ${output_dir}/$inter/opera_long_read/log.txt";
+run_exe($command);
 
 print STDERR "\n*************OPERA-MS DONE***************\n";
 

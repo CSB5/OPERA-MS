@@ -488,14 +488,12 @@ sub read_scaffold_file{
 	    
 	    #print STDERR " *** EDGE tested $edge_ID $gap_length\n";
 	    
-	    if(1 || $gap_length > 9){
-		#print STDERR " *** EDGE selected $edge_ID $gap_length\n";<STDIN>;
-		$edge_info{$edge_ID} = {"GAP_LENGTH", $gap_length, "READ_TO_EXTRACT", 0, "READ_EXTRACTED", 0, "SEQ", "", "COORD", "", "CONTIG_SEQ", "", "EDGE_ORI", $edge_ori, "CONTIG_GAPFILLING", []};#be carreful with conflicting edges that have the same contig pair
-		$nb_selected_edges++;
-		$contig_to_edge{$contig_1}->{$edge_ID} = "1:$contig_1_ori";
-		$contig_to_edge{$contig_2}->{$edge_ID} = "2:$contig_2_ori";
-	    }
-
+	    #print STDERR " *** EDGE selected $edge_ID $gap_length\n";<STDIN>;
+	    $edge_info{$edge_ID} = {"GAP_LENGTH", $gap_length, "READ_TO_EXTRACT", 0, "READ_EXTRACTED", 0, "SEQ", "", "COORD", "", "CONTIG_SEQ", "", "EDGE_ORI", $edge_ori, "CONTIG_GAPFILLING", []};#be carreful with conflicting edges that have the same contig pair
+	    $nb_selected_edges++;
+	    $contig_to_edge{$contig_1}->{$edge_ID} = "1:$contig_1_ori";
+	    $contig_to_edge{$contig_2}->{$edge_ID} = "2:$contig_2_ori";
+	    
 	    #For the next gap
 	    $contig_1 = $contig_2;
 	    $contig_1_ori = $contig_2_ori;
@@ -537,7 +535,7 @@ sub write_filled_gap_scaffold{
     my ($contig_1, $contig_1_ori, $contig_2, $contig_2_ori, $scaff_name, $gap_seq);
     $contig_2 = "";$contig_1 = "";
     my $gap_filled_stats = "";
-    my $contig_trimming_length = 0;#This is used to remove stating sequences of a contig when 2 contigs are overlapping
+    my $contig_trimming_length = 0;#This is used to remove starting sequences of a contig when 2 contigs are overlapping
     print STDERR " *** Read the scaffold file and fill gaps\n";
     while(<FILE>){
 	chop $_;
