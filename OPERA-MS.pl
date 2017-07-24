@@ -20,7 +20,7 @@ my $main_dir = getcwd;
 $main_dir .= "\/";
 
 #TODO Remove in release; used for testing.
-my $pbdagcon_dir;
+my $racon_dir;
 my $water_dir;
 my $graphmap_dir;
 my $vsearch_dir;
@@ -112,18 +112,17 @@ if ( @ARGV == 1){
                     $vsearch_dir = $split_line[1];
                 }
 
-              #  RELEASE VERSION USES VSEARCH INSTEAD OF PBDAGCON
-              #  case "WATER_DIR"{
-              #      $water_dir = $split_line[1];
-              #  }
+                case "WATER_DIR"{
+                    $water_dir = $split_line[1];
+                }
 
-              #  case "GRAPHMAP_DIR"{
-              #      $graphmap_dir =$split_line[1];
-              #  }
+                case "GRAPHMAP_DIR"{
+                    $graphmap_dir =$split_line[1];
+                }
 
-              #  case "PBDAGCON_DIR"{
-              #      $pbdagcon_dir = $split_line[1];
-              #  }
+                case "RACON_DIR"{
+                    $racon_dir = $split_line[1];
+                }
 
                 case "KMER_SIZE" {
                     $kmer_size = $split_line[1];
@@ -211,7 +210,7 @@ if(!defined($samtools_dir)){
     run_exe($exe_check);
 
     if ($?){
-        print STDERR "\n samtools found in $opera_ms_dir/utils is not functional. Checking path for samtools. \n";
+        print STDERR "\nsamtools found in $opera_ms_dir/utils is not functional. Checking path for samtools. \n";
         $samtools_dir = "";
         my $valid_path = which('samtools');
         die "samtools not found in path. Exiting." if (!$valid_path);
@@ -256,7 +255,7 @@ if(!defined($short_read_tool_dir)){
     run_exe($exe_check);
 
     if($?){
-        print STDERR "\n bwa found in $opera_ms_dir/utils is not functional. Checking path for bwa. \n";
+        print STDERR "\nbwa found in $opera_ms_dir/utils is not functional. Checking path for bwa. \n";
         $short_read_tool_dir= "";
         my $valid_path = which($short_read_maptool); 
         die "$short_read_maptool not found in path. Exiting." if (!$valid_path);
@@ -281,7 +280,7 @@ if(!defined($vsearch_dir)){
     run_exe($exe_check);
 
     if ($?){
-        print STDERR "\n vsearch found in $opera_ms_dir/utils is not functional. Checking path for vsearch. \n";
+        print STDERR "\nvsearch found in $opera_ms_dir/utils is not functional. Checking path for vsearch. \n";
         $vsearch_dir = "";
         my $valid_path = which("vsearch"); 
         die "vsearch not found in path. Exiting." if (!$valid_path);
@@ -309,95 +308,96 @@ else{
     $vsearch_dir = "--vsearch " . $vsearch_dir;
 }
 
-#if(!defined($water_dir)){
-#    $water_dir = "$opera_ms_dir/utils";
-#    my $exe_check = "$opera_ms_dir/utils/water --version";
-#    run_exe($exe_check);
-#
-#    if($?){
-#        print STDERR "\n water found in $opera_ms_dir/utils is not functional. Checking path for water. \n";
-#        $water_dir = "";
-#        my $valid_path = which("water"); 
-#        die "water not found in path. Exiting." if (!$valid_path);
-#    }
-#
-#    else{
-#        $water_dir = "--water " . $water_dir;
-#    }
-# 
-#
-#}
+if(!defined($water_dir)){
+    $water_dir = "$opera_ms_dir/utils";
+    my $exe_check = "$opera_ms_dir/utils/water --version";
+    run_exe($exe_check);
 
-#else{
-#    $water_dir = $main_dir . $water_dir . "/" if(substr($water_dir, 0, 1) ne "/");
-#
-#    if (! -e $water_dir . "/water") {
-#        die "water not found at: ".$water_dir."\n";
-#    }
-#
-#    `$water_dir/water --version`;
-#
-#    if($?){
-#        die "\nwater does not seem to be executable. Exiting.\n";
-#    }
-#    $water_dir = "--water " . $water_dir;
-#}
-#
-#if(!defined($graphmap_dir)){
-#    $graphmap_dir = "$opera_ms_dir/utils";
-#    my $exe_check = "$opera_ms_dir/utils/graphmap 2>&1 | grep GraphMap";
-#    run_exe($exe_check);
-#
-#    if($?){
-#        print STDERR "\n graphmap found in $opera_ms_dir/utils is not functional. Checking path for graphmap. \n";
-#        $graphmap_dir = "";
-#
-#        my $valid_path = which("graphmap"); 
-#        die "graphmap not found in path. Exiting." if (!$valid_path);
-#    }
-#
-#    else{
-#
-#        $graphmap_dir = "--graphmap " . $graphmap_dir;
-#    }
-#}
-#
-#else{
-#    $graphmap_dir = $main_dir . $graphmap_dir . "/" if(substr($graphmap_dir, 0, 1) ne "/");
-#
-#    if (! -e $graphmap_dir . "/graphmap") {
-#        die "graphmap not found at: ".$graphmap_dir."\n";
-#    }
-#
-#    $graphmap_dir = "--graphmap " . $graphmap_dir;
-#}
-#
-#if(!defined($pbdagcon_dir)){
-#    $pbdagcon_dir = "$opera_ms_dir/utils";
-#    my $exe_check = "$opera_ms_dir/utils/pbdagcon -h 2>&1 | grep Usage";
-#    run_exe($exe_check);
-#
-#    if($?){
-#        print STDERR "\n pbdagcon found in $opera_ms_dir/utils is not functional. Checking path for pbdagcon. \n";
-#        $pbdagcon_dir = "";
-#        my $valid_path = which("pbdagcon"); 
-#        die "pbdagcon not found in path. Exiting." if (!$valid_path);
-#    }
-#    
-#    else{
-#        $pbdagcon_dir = "--pbdagcon " . $pbdagcon_dir;
-#    }
-#}
-#
-#else{
-#    $pbdagcon_dir = $main_dir . $pbdagcon_dir . "/" if(substr($pbdagcon_dir, 0, 1) ne "/");
-#
-#    if (! -e $pbdagcon_dir . "/pbdagcon") {
-#        die "pbdagcon not found at: ".$pbdagcon_dir."\n";
-#    }
-#
-#    $pbdagcon_dir = "--pbdagcon " . $pbdagcon_dir;
-#}
+    if($?){
+        print STDERR "\nwater found in $opera_ms_dir/utils is not functional. Checking path for water. \n";
+        $water_dir = "";
+        my $valid_path = which("water"); 
+        die "water not found in path. Exiting." if (!$valid_path);
+    }
+
+    else{
+        $water_dir = "--water " . $water_dir;
+    }
+ 
+
+}
+
+else{
+    $water_dir = $main_dir . $water_dir . "/" if(substr($water_dir, 0, 1) ne "/");
+
+    if (! -e $water_dir . "/water") {
+        die "water not found at: ".$water_dir."\n";
+    }
+
+    `$water_dir/water --version`;
+
+    if($?){
+        die "\nwater does not seem to be executable. Exiting.\n";
+    }
+    $water_dir = "--water " . $water_dir;
+}
+
+if(!defined($graphmap_dir)){
+    $graphmap_dir = "$opera_ms_dir/utils";
+    my $exe_check = "$opera_ms_dir/utils/graphmap 2>&1 | grep GraphMap";
+    run_exe($exe_check);
+
+    if($?){
+        print STDERR "\n graphmap found in $opera_ms_dir/utils is not functional. Checking path for graphmap. \n";
+        $graphmap_dir = "";
+
+        my $valid_path = which("graphmap"); 
+        die "graphmap not found in path. Exiting." if (!$valid_path);
+    }
+
+    else{
+
+        $graphmap_dir = "--graphmap " . $graphmap_dir;
+    }
+}
+
+else{
+    $graphmap_dir = $main_dir . $graphmap_dir . "/" if(substr($graphmap_dir, 0, 1) ne "/");
+
+    if (! -e $graphmap_dir . "/graphmap") {
+        die "graphmap not found at: ".$graphmap_dir."\n";
+    }
+
+    $graphmap_dir = "--graphmap " . $graphmap_dir;
+}
+
+#We used to use pbdagcon.
+if(!defined($racon_dir)){
+    $racon_dir = "$opera_ms_dir/utils";
+    my $exe_check = "$opera_ms_dir/utils/racon 2>&1 | grep Options";
+    run_exe($exe_check);
+
+    if($?){
+        print STDERR "\n racon found in $opera_ms_dir/utils is not functional. Checking path for racon. \n";
+        $racon_dir = "";
+        my $valid_path = which("racon"); 
+        die "racon not found in path. Exiting." if (!$valid_path);
+    }
+    
+    else{
+        $racon_dir = "--racon " . $racon_dir;
+    }
+}
+
+else{
+    $racon_dir = $main_dir . $racon_dir . "/" if(substr($racon_dir, 0, 1) ne "/");
+
+    if (! -e $racon_dir . "/racon") {
+        die "racon not found at: ".$racon_dir."\n";
+    }
+
+    $racon_dir = "--racon " . $racon_dir;
+}
 
 
 if( ! -e $contigs_file) {
@@ -439,25 +439,6 @@ run_exe($command);
 #
 #Prepare the runOperaMS.config file that is to be fed to runOperaMS
 #
-#my $temp_config = $OPERAMS_config_name . "_temp";
-#
-#if(-e $temp_config){
-#    $command = "rm $temp_config";
-#    run_exe($command);
-#}
-#
-#$command = "cp $OPERAMS_config_name $temp_config";
-#run_exe($command);
-# 
-#$command="echo 'LIB $output_dir_sed/contigs.bam/\n' >> $temp_config ; echo 'MAPPING_FILES $output_dir_sed/contigs.bam/' >> $temp_config";
-#run_exe($command);
-#
-#$command="cat $temp_config | sed 's/CONTIGS_FILE .*/CONTIGS_FILE $contigs_file_sed/' | sed 's/MAPPING_FILES .*/MAPPING_FILES $output_dir_sed\\/contigs\.bam/' | sed 's/LIB .*/LIB $output_dir_sed\\/contigs\.bam/' | sed 's/OUTPUT_DIR .*/OUTPUT_DIR $output_dir_sed/' | sed 's/KMER_SIZE .*/KMER_SIZE $kmer_size/' > $opera_ms_config_file";
-#run_exe($command);
-#
-#$command = "rm $temp_config";
-#run_exe($command);
-
 
 $command = "cp $OPERAMS_config_name $opera_ms_config_file";
 run_exe($command);
@@ -480,9 +461,7 @@ run_exe($command);
 #mapping of short reads => bwa
 #mapping of long reads => blasr
 #compute long read links
-#run opera NO NEED <= DONE : Jim 
-#TODO be careful OPERA-LG_v2.1.0 name
-#===> add an option --link that does not run opera <= DONE : Jim. Set --skip-opera = 1
+
 print STDERR "\n-----STARTING LONG READ PROCESSING-----\n";
 $command= "${opera_ms_dir}${opera_version}/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $lr_output_dir --num-of-processors $num_processor --opera ${opera_ms_dir}${opera_version}/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 $samtools_dir $blasr_dir $short_read_tool_dir --skip-opera 1";
 #$command= "$qsub -N opera-lr -b y /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.0.6/bin/OPERA-long-read.pl --contig-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/MOCK_20/ASSEMBLY/MEGAHIT/final.contigs_soap.fa --kmer 100 --long-read-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/DATA/MOCK_20/NANOPORE/LIBRARY/POOL/POOL_all/POOL.fa --output-prefix opera --output-directory OPERA_LG/OPERA-long-read/MEGAHIT/NANOPORE_ALL/ --num-of-processors 20 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/OPERA_LONG_READ/OPERA-LG_v2.0.6/bin/"
@@ -609,7 +588,7 @@ $command="rm $output_dir/scaffoldSeq.fasta; rm $output_dir/scaffoldSeq.fasta.sta
 run_exe($command);
 
 
-my $extract_args = "--edge-file $lr_output_dir/edge_read_info.dat --contig-file $contigs_file --scaffold-file $output_dir/$inter/opera_long_read/scaffolds.scaf --read-file $long_read_file --script $opera_ms_dir/$opera_version/bin/ $pbdagcon_dir $vsearch_dir $water_dir $graphmap_dir --output-directory $output_dir/$inter/opera_long_read/GAP_FILLING --outfile $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled --stage ALL -num-of-processors $num_processor --bin $opera_ms_dir/bin"; 
+my $extract_args = "--edge-file $lr_output_dir/edge_read_info.dat --contig-file $contigs_file --scaffold-file $output_dir/$inter/opera_long_read/scaffolds.scaf --read-file $long_read_file --script $opera_ms_dir/$opera_version/bin/ $vsearch_dir $water_dir $graphmap_dir $racon_dir --output-directory $output_dir/$inter/opera_long_read/GAP_FILLING --outfile $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled --stage ALL -num-of-processors $num_processor --bin $opera_ms_dir/bin"; 
 $command="perl ${opera_ms_dir}${opera_version}/bin/extract_read_sequence_xargs.pl $extract_args";
 run_exe($command);
 

@@ -156,7 +156,7 @@ void OperaBundleReader::filter(const char* edges_file, const ContigMap* contigs,
     	if ((lib_mean + lib_stdev) <= 3000) {
     		edge_bundle_size_thr = 2;
     	} else {
-    		edge_bundle_size_thr = 5;
+    		edge_bundle_size_thr = 2;
     	}
 
 
