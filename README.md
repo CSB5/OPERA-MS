@@ -9,8 +9,11 @@ The long reads are then used fill the gaps between contigs to produce a final se
 
 ### Requirements
 - [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above).
+- [racon](https://github.com/isovic/racon) 
 
- blasr must be in the user's PATH, or alternatively, one could specify the directory in which blasr is contained in the    config file. See below for more information on the config file.
+ blasr and racon must be in the user's PATH, or alternatively, one could specify the directory in which blasr/racon is contained by modifying the config file. See below for more information on the format of the config file.
+ 
+ 
 
 #### Perl Modules
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
@@ -119,15 +122,17 @@ The outputs will be in OUTPUT_DIR. The scaffolds file before the secondary gap f
 
 We require the following dependencies:
 
-1) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below).
-2) [bwa](https://github.com/lh3/bwa).
-3) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above).
-4) [vsearch](https://github.com/torognes/vsearch).
+1) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below)
+2) [bwa](https://github.com/lh3/bwa)
+3) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above)
+4) [EMBOSS Suite - water](http://emboss.sourceforge.net/)
+5) [graphmap](https://github.com/isovic/graphmap) - (version 3.0 and above)
+6) [racon](https://github.com/isovic/racon) 
 
-These are pre-built and packaged with OPERA-MS except for BLASR. Each binary is placed inside of the __utils__ folder.
+These are pre-built and packaged with OPERA-MS except for blasr and racon. Each binary is placed inside of the __utils__ folder.
 
-If the pre-built tools do not work on the user's machine then OPERA-MS will check the user's PATH for the tool. However, the version that the user is using may be different than the one packaged. Alternatively, to specify a different directory for the dependency, edit the config file and add the line `(tool)_DIR /path/to/dir` as shown below to your config file.
+If the pre-built tools do not work on the user's machine then OPERA-MS will check the user's PATH for the tool. However, the version that the user is using may be different than the one packaged. Alternatively, to specify a different directory for the dependency, edit the config file and add the line `(tool)_DIR /path/to/dir` as shown below to your config file. Available options include BWA_DIR, BLASR_DIR, WATER_DIR, RACON_DIR, GRAPHMAP_DIR, SAMTOOLS_DIR.
 
-- **(tool)_DIR** : `path/to/tool_directory` - A path to the __directory containing__ the executable file of the specific tool : e.g. blasr, bwa, vsearch. If commented out the tool within the utils/ directory will be used. 
+- **(tool)_DIR** : `path/to/tool_directory` - A path to the __directory containing__ the executable file of the specific tool. Otherwise, the tool within the utils/ directory will be used. 
 
-For example, `BWA_DIR /usr/home/water_dir`.
+For example, `WATER_DIR /usr/home/water_dir/`. 
