@@ -14,17 +14,24 @@ GetOptions(
     )
  or die("Error in command line arguments.");
 
-if (defined $graphmap_dir){
+if (defined $graphmap_dir and $graphmap_dir ne ""){
     $graphmap_dir .= "/";
 }
 else{
     $graphmap_dir = "";
 }
-if (defined $water_dir){
+if (defined $water_dir and $water_dir ne ""){
     $water_dir .= "/";
 }
 else{
     $water_dir = "";
+}
+
+if(defined $racon_dir and $racon_dir ne ""){
+    $racon_dir .= "/";
+}
+else{
+    $racon_dir = "";
 }
 
 #To get the ref and seq
@@ -56,7 +63,7 @@ run_exe("rm $ref*gmidx*");
 my $cons;
 
 $cons = $seq_file."_racon.fa";
-my $cmd = "$racon_dir/racon --sam $queries $mapping $ref $cons"; 
+my $cmd = "${racon_dir}racon --sam $queries $mapping $ref $cons"; 
 run_exe($cmd);
 
 #mapping of the contig to the consensus to get the exact position of the bondaries

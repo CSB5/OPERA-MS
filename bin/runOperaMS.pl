@@ -136,7 +136,7 @@ while(<$opera_ms_cf>) {
             case "WATER_DIR"{
             }
 
-            case "PBDAGCON_DIR"{
+            case "RACON_DIR"{
             }
 
 	    	case "SIGMA_CONTIGS_FILE" {

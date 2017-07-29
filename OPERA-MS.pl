@@ -1,4 +1,3 @@
-
 #!/usr/bin/perl
 use strict;
 use warnings;
@@ -42,8 +41,8 @@ my $blasr_dir;
 my $short_read_tool_dir;
 my $short_read_maptool = "bwa";
 my $num_processor = 20;
-my $help_line = "To configure OPERA-MS, please look at the example config file inside the OPERA-MS folder.\nUsage: \n\npath/OPERA-MS/OPERA-MS.pl <config_file>\n\nNote that the config file must be inside the path/OPERA-MS directory.\n";
-my $incorrect_arguments="Please input the correct arguments. Refer to the documentation for more information or use:\n\n path/OPERA-MS/OPERA-MS.pl -h. \n\n";
+my $help_line = "\nTo configure OPERA-MS, please look at the example config file inside the OPERA-MS folder.\nUsage: \n\npath/OPERA-MS/OPERA-MS.pl <config_file>\n\nNote that the config file must be inside the path/OPERA-MS directory.\n";
+my $incorrect_arguments="\nPlease input the correct arguments. Refer to the documentation for more information or use:\n\n path/OPERA-MS/OPERA-MS.pl -h. \n\n";
 
 
 if ( @ARGV == 0 ){
@@ -204,6 +203,10 @@ $lr_output_dir = $output_dir."/$inter/read-mapping";
 #
 #Check if dependencies are found. Otherwise, die.
 #
+if (! -e "$opera_ms_dir/bin/bundler" or
+    ! -e "$opera_ms_dir/OPERA-LG/bin/OPERA-LG"){
+    die "bundler and OPERA-LG not found. Please make install before running OPERA-MS.\n";
+}
 if(!defined($samtools_dir)){
     $samtools_dir = "$opera_ms_dir/utils";
     my $exe_check = "$opera_ms_dir/utils/samtools 2>&1 | grep Version";
@@ -274,39 +277,39 @@ else{
     $short_read_tool_dir = "--short-read-tooldir " . $short_read_tool_dir;
 }
 
-if(!defined($vsearch_dir)){
-    $vsearch_dir = "$opera_ms_dir/utils";
-    my $exe_check = "$opera_ms_dir/utils/vsearch --version";
-    run_exe($exe_check);
-
-    if ($?){
-        print STDERR "\nvsearch found in $opera_ms_dir/utils is not functional. Checking path for vsearch. \n";
-        $vsearch_dir = "";
-        my $valid_path = which("vsearch"); 
-        die "vsearch not found in path. Exiting." if (!$valid_path);
-
-    }
-
-    else{
-        $vsearch_dir = "--vsearch " . $vsearch_dir;
-    }
-}
-
-else{
-    $vsearch_dir = $main_dir . $vsearch_dir . "/" if(substr($vsearch_dir, 0, 1) ne "/");
-
-    if (! -e $vsearch_dir . "/vsearch") {
-        die "vsearch not found at: ".$vsearch_dir."\n";
-    }
-
-    `$vsearch_dir/vsearch --version`;
-    
-    if ($?){
-        die "\nvsearch does not seem to be executable. Exiting.\n";
-    }
-
-    $vsearch_dir = "--vsearch " . $vsearch_dir;
-}
+#if(!defined($vsearch_dir)){
+#    $vsearch_dir = "$opera_ms_dir/utils";
+#    my $exe_check = "$opera_ms_dir/utils/vsearch --version";
+#    run_exe($exe_check);
+#
+#    if ($?){
+#        print STDERR "\nvsearch found in $opera_ms_dir/utils is not functional. Checking path for vsearch. \n";
+#        $vsearch_dir = "";
+#        my $valid_path = which("vsearch"); 
+#        die "vsearch not found in path. Exiting." if (!$valid_path);
+#
+#    }
+#
+#    else{
+#        $vsearch_dir = "--vsearch " . $vsearch_dir;
+#    }
+#}
+#
+#else{
+#    $vsearch_dir = $main_dir . $vsearch_dir . "/" if(substr($vsearch_dir, 0, 1) ne "/");
+#
+#    if (! -e $vsearch_dir . "/vsearch") {
+#        die "vsearch not found at: ".$vsearch_dir."\n";
+#    }
+#
+#    `$vsearch_dir/vsearch --version`;
+#    
+#    if ($?){
+#        die "\nvsearch does not seem to be executable. Exiting.\n";
+#    }
+#
+#    $vsearch_dir = "--vsearch " . $vsearch_dir;
+#}
 
 if(!defined($water_dir)){
     $water_dir = "$opera_ms_dir/utils";
@@ -382,6 +385,7 @@ if(!defined($racon_dir)){
         $racon_dir = "";
         my $valid_path = which("racon"); 
         die "racon not found in path. Exiting." if (!$valid_path);
+
     }
     
     else{
@@ -432,7 +436,7 @@ $output_dir_sed =~ s/\//\\\//g;      #replace / with \/
 ### opera config
 #
 
-$command = "rm -r $output_dir;mkdir -p $output_dir";
+$command = "rm -r $output_dir/$inter;mkdir -p $output_dir";
 
 run_exe($command);
 
@@ -588,7 +592,7 @@ $command="rm $output_dir/scaffoldSeq.fasta; rm $output_dir/scaffoldSeq.fasta.sta
 run_exe($command);
 
 
-my $extract_args = "--edge-file $lr_output_dir/edge_read_info.dat --contig-file $contigs_file --scaffold-file $output_dir/$inter/opera_long_read/scaffolds.scaf --read-file $long_read_file --script $opera_ms_dir/$opera_version/bin/ $vsearch_dir $water_dir $graphmap_dir $racon_dir --output-directory $output_dir/$inter/opera_long_read/GAP_FILLING --outfile $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled --stage ALL -num-of-processors $num_processor --bin $opera_ms_dir/bin"; 
+my $extract_args = "--edge-file $lr_output_dir/edge_read_info.dat --contig-file $contigs_file --scaffold-file $output_dir/$inter/opera_long_read/scaffolds.scaf --read-file $long_read_file --script $opera_ms_dir/$opera_version/bin/ $water_dir $graphmap_dir $racon_dir --output-directory $output_dir/$inter/opera_long_read/GAP_FILLING --outfile $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled --stage ALL -num-of-processors $num_processor --bin $opera_ms_dir/bin"; 
 $command="perl ${opera_ms_dir}${opera_version}/bin/extract_read_sequence_xargs.pl $extract_args";
 run_exe($command);
 

@@ -51,6 +51,14 @@ if(!(-e $read_file)){
     die "READ FILE NOT FOUND \n";
 }
 
+if(!(defined $racon_dir)){
+    $racon_dir = "";
+}
+
+else{
+    $racon_dir = "--racon " . $racon_dir;
+}
+
 if(!(defined $water_dir)){
     $water_dir = "";
 }
@@ -132,7 +140,7 @@ print STDERR " *** Starting the sequence extraction\n";#<STDIN>;
 #run_exe("rm -r $ana_dir");
 run_exe("rm -rf $ana_dir/LOG");
 run_exe("mkdir -p $ana_dir/LOG");
-
+my $run_racon_log = "$ana_dir/LOG/run_racon_log.txt";
 
 #Structure that indicate sequence required to fill the gap between the 2 contigs involvolved in the edge
 my %edge_info = ();
@@ -148,7 +156,7 @@ my $cmp_multi_edge = 1;my $str_multi = "";
 #open(FILE, "head -n5 $scaffold_file |");
 read_scaffold_file($scaffold_file);
 
-print STDERR " *** nb edges selected for gapfilling $nb_selected_edges\n";#<STDIN>;
+print STDERR " *** Number of edges selected for gapfilling $nb_selected_edges\n";#<STDIN>;
 
 #Get the read and the coordinates of the gaps
 open(FILE, $edge_file_info);
@@ -447,7 +455,7 @@ while(<READ_FILE>){
 		print OUT $edge_info{$edge_ID}->{"COORD"};
 		close(OUT);
 
-		print OUT_CMD "$vsearch_dir/vsearch --cluster_fast $edge_file.fa -id 0 --msaout $edge_file\_cons.fa -uc $edge_file\_cons.dat\n";
+		#print OUT_CMD "$vsearch_dir/vsearch --cluster_fast $edge_file.fa -id 0 --msaout $edge_file\_cons.fa -uc $edge_file\_cons.dat\n";
 		print OUT_CMD "$script_dir/run_racon.pl --seq-file $edge_file --bin-dir $bin_dir $racon_dir $graphmap_dir $water_dir \n";
 		#run_exe("$qsub -l mem_free=2G,h_rt=00:05:0 -pe OpenMP 1 -N vsearch -e $ana_dir/LOG/$edge_ID.err -o $ana_dir/LOG/$edge_ID.run -b y vsearch --cluster_fast $edge_file.fa -id 0 --msaout $edge_file\_cons.fa -uc $edge_file\_cons.dat");
 		#run_exe("$qsub  -l mem_free=10G,h_rt=00:05:0 -pe OpenMP 2 -N pbdagcon -e $ana_dir/LOG/$edge_ID.err -o $ana_dir/LOG/$edge_ID.run -b y $script_dir/run_pbdagcon.pl --seq-file $edge_file --bin-dir $bin_dir --isfastq $is_fastq $graphmap_dir $water_dir $pbdagcon_dir");#<STDIN>;
@@ -496,10 +504,10 @@ close(READ_FILE);
 close(OUT_STATS);
 
 #Run the sequence consensus calling
-print STDERR " *** Run vsearch and pndagcon for sequence consensus calling\n";
+print STDERR " *** Run racon for sequence consensus calling\n";
 #run_exe("cat $cmd_file | xargs -L 1 -P $nb_process bash &> /dev/null \n");
 #run_exe("cat $cmd_file | xargs -L 1 -P $nb_process bash \n");
-run_exe("cat $cmd_file | xargs -L 1 -P $nb_process -I COMMAND sh -c \"COMMAND\"");
+run_exe("cat $cmd_file | xargs -L 1 -P $nb_process -I COMMAND sh -c \"COMMAND\" 2> $run_racon_log");
 #to produce the filled gap scaffolds
 write_filled_gap_scaffold();
 
@@ -633,11 +641,10 @@ sub write_filled_gap_scaffold{
 	    $edge_ID = join("-vs-", @contig_order);
 	    $gap_seq = extract_gap_seq($edge_ID);
 
-        #if($gap_seq eq ""){
-        #    print STDERR "**** GAP NOT FILLED BY RACON, ($edge_ID) *****";
-        #}
+        if($gap_seq eq ""){
+            print STDERR "**** GAP NOT FILLED BY RACON, ($edge_ID) *****";
+        }
 
-	    $gap_seq = extract_gap_seq_vsearch($edge_ID) if($gap_seq eq "");#padagcon was not able to get the gap we use vsearch concensus to fill it
 	    $gap_filled_stats = "NA";#the gap is not filled
         my $gap_diff_large = "";
 	    if($gap_seq ne ""){
@@ -962,6 +969,13 @@ sub run_exe{
     $run = 1;
     print STDERR $exe."\n";;
     print STDERR `$exe` if($run);
+}
+
+sub run_exe_racon{
+    open (RAC_LOG,">", $run_racon_log); 
+    my ($exe) = @_;
+    print RAC_LOG `$exe`; 
+    close (RAC_LOG);
 }
 
 #vsearch --cluster_fast S288C/FINAL_TEST/GAP_FILLING/171068_171204.fa -id 0 --msaout cons.txt -uc cons.dat
