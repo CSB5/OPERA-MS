@@ -20,6 +20,8 @@ The long reads are then used fill the gaps between contigs to produce a final se
 
 - [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
 
+- [File::Which](https://metacpan.org/pod/File::Which)
+
 To install OPERA-MS, download and unzip OPERA-MS to a specified directory or `git clone https://github.com/CSB5/OPERA-MS.git`.
 
 All of the tools needed except for BLASR are distributed pre-built. See below for more information on dependencies.
