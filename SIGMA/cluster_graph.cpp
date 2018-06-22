@@ -34,6 +34,19 @@ ClusterGraph::ClusterGraph(ContigMap* contigs, EdgeQueue* edges) {
 		}
 
 		edges->pop();
+
+        for(int i = 0; i < (int) edges->size(); ++i){
+
+            if(edges->size() < num_edges_to_resort){
+                break;
+            }
+
+            Edge resort_edge = edges->top();
+            edges->pop();
+            resort_edge.computeDistanceCluster();
+
+            edges->push(resort_edge);
+        }
 	}
 
 	updateClusters();
@@ -249,7 +262,7 @@ void ClusterGraph::output_clusters(Cluster* cluster, double cs, double un_cs) {
 	//FILE *output_file = fopen(output_clusters_file_path.c_str(), "a");
 	
 	//fprintf(output_file, "%d\t%d\t%d\t%f\t", cluster, cluster->child1(), cluster->child2(), cluster->score());
-	fprintf(output_file_debug, "%d\t%d\t%d\t%f\t%f\t", cluster, cluster->child1(), cluster->child2(), cs, un_cs);
+	fprintf(output_file_debug, "%s\t%s\t%s\t%f\t%f\t", (*(cluster->get_ID())).c_str(), (*(cluster->child1()->get_ID())).c_str(), (*(cluster->child2()->get_ID())).c_str(), cs, un_cs);
 
 	//To write the contig idea in case of a leaf
 	if(cluster->num_contigs() == 1){
@@ -279,7 +292,7 @@ void ClusterGraph::computeClusterScore(Cluster* cluster, const ProbabilityDistri
 		double cluster_dispersion = 0.0;
 		if (Sigma::USE_WINDOW == 1) {
 			cluster_read_count = cluster->arrival_rates()[sample_index] * Sigma::contig_window_len;
-			cluster_dispersion = Sigma::R;
+			cluster_dispersion = Sigma::R_VALUE;
 		}
 
 		for (int contig_index = 0; contig_index < cluster->num_contigs(); ++contig_index) {
@@ -287,7 +300,7 @@ void ClusterGraph::computeClusterScore(Cluster* cluster, const ProbabilityDistri
 
 			if (Sigma::USE_WINDOW == 0) {
 				cluster_read_count = cluster->arrival_rates()[sample_index] * contig->modified_length();
-				cluster_dispersion = Sigma::R*contig->modified_length();
+				cluster_dispersion = Sigma::R_VALUE*contig->modified_length();
 				//fprintf(stdout, " *** global R: %f, cluster_dispersion: %f\n", Sigma::R, cluster_dispersion);
 				score += prob_dist->logpf(cluster_read_count, cluster_dispersion, contig->sum_read_counts()[sample_index]);
 			} else {
@@ -356,12 +369,12 @@ void ClusterGraph::computeClusterModel(Cluster* cluster) {
 		cluster->set_model_score(cluster->score());
 		cluster->set_connected(true);
 		//To correct to get the full true
-		output_clusters(cluster, cluster->score(), cluster->score());
+		//output_clusters(cluster, cluster->score(), cluster->score());
 	} else {
 		double connected_score = cluster->score();
 		double disconnected_score = cluster->child1()->model_score() + cluster->child2()->model_score();
 
-		output_clusters(cluster, connected_score, disconnected_score);
+		//output_clusters(cluster, connected_score, disconnected_score);
 
 		if (connected_score >= disconnected_score){// - Sigma::SPLITTING_PENALTY) {
 			cluster->set_model_score(connected_score);
@@ -397,7 +410,7 @@ void ClusterGraph::saveClusters(const char* clusters_file_path) {
 
 			if (cluster->connected()) {
 				//Output the cluster ID were the cut have been made
-				output_clusters(cluster, -1, -1);
+				//output_clusters(cluster, -1, -1);
 				for (int contig_index = 0; contig_index < cluster->num_contigs(); ++contig_index) {
 					Contig* contig = cluster->contigs()[contig_index];
 

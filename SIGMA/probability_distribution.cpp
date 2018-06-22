@@ -65,7 +65,7 @@ double NegativeBinomialDistribution::logpf(double mean, double dispersion, doubl
 	//TO DO
 	//This computation can be splited to improve running time
 	return dispersion * log(dispersion / (dispersion + mean)) + //Compute once
-		lgammal(dispersion + k) + //Sum of the 2 sons
+		lgamma(dispersion + k) + //Sum of the 2 sons
 		k * log(mean / (dispersion + mean)) - //k * compute once
 		lgamma(k + 1) -	//Sum of the 2 sons
 		lgamma(dispersion); //Compute once globaly
@@ -73,5 +73,4 @@ double NegativeBinomialDistribution::logpf(double mean, double dispersion, doubl
 	/*return R_ * log(R_ / (R_ + mean)) + stirling_log_factorial(R_ + k - 1) + 
 		   k * log(mean / (R_ + mean)) - stirling_log_factorial(k) -
 		   stirling_log_factorial(R_ - 1);*/
-	 
 }

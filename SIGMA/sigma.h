@@ -55,7 +55,7 @@ public:
 
 	static std::string pdist_type; /**< Type of read count probability distribution. */
 
-	static double R; /**< Dispersion parameter R for negative binomial distribution. */
+	static double R_VALUE; /**< Dispersion parameter R for negative binomial distribution. */
 
 private:
 	/**

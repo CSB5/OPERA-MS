@@ -52,6 +52,8 @@ public:
 	 */
 	void computeDistance();
 
+    void computeDistanceCluster();
+
 	/**
 	 * @brief Tests if the two given edges are equal.
 	 *

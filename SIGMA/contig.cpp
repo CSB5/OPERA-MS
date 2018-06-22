@@ -2,11 +2,14 @@
 
 #include <algorithm>
 #include <vector>
+#include <map>
 
 #include <iostream>
 #include <fstream>
 
 #include <math.h>
+
+#include <random>
 
 #include "contig.h"
 
@@ -121,24 +124,24 @@ void ContigIO::load_contigs(const char* sigma_contigs_file_path, ContigMap* cont
 	FILE* sigma_contigs_fp = fopen(sigma_contigs_file_path, "r");
 
 	if (sigma_contigs_fp != NULL) {
-		fscanf(sigma_contigs_fp, "%d %d %d %d\n", &Sigma::num_samples, &Sigma::contig_len_thr, &Sigma::contig_edge_len, &Sigma::contig_window_len);
+		if( fscanf(sigma_contigs_fp, "%d %d %d %d\n", &Sigma::num_samples, &Sigma::contig_len_thr, &Sigma::contig_edge_len, &Sigma::contig_window_len) );
 
 		while (!feof(sigma_contigs_fp)) {
 			char id[256];
 			int length, left_edge, right_edge, num_windows;
 
-			fscanf(sigma_contigs_fp, "%s\t%d\t%d\t%d\t%d\n", id, &length, &left_edge, &right_edge, &num_windows);
+			if( fscanf(sigma_contigs_fp, "%s\t%d\t%d\t%d\t%d\n", id, &length, &left_edge, &right_edge, &num_windows) );
 
 			Contig* contig = new Contig(id, length, left_edge, right_edge, num_windows);
 
 			for (int sample_index = 0; sample_index < Sigma::num_samples; ++sample_index) {
-				fscanf(sigma_contigs_fp, "%d\n", &contig->sum_read_counts()[sample_index]);
+				if( fscanf(sigma_contigs_fp, "%d\n", &contig->sum_read_counts()[sample_index]) );
 
 				for (int window_index = 0; window_index < contig->num_windows(); ++window_index) {
-					fscanf(sigma_contigs_fp, "%d ", &contig->read_counts()[sample_index][window_index]);
+					if( fscanf(sigma_contigs_fp, "%d ", &contig->read_counts()[sample_index][window_index]) );
 				}
 
-				fscanf(sigma_contigs_fp, "\n");
+				if( fscanf(sigma_contigs_fp, "\n") );
 			}
 
 			contigs->insert(std::make_pair(id, contig));
@@ -160,6 +163,7 @@ double compute_R(ContigMap* contigs) {
 	
 	double numerator = 0;
 	double denominator = 0;
+
 	
 	double current_R = 0;
 	double max_R = 0.001;
@@ -173,31 +177,38 @@ double compute_R(ContigMap* contigs) {
 
 		if (contig->length() < 10000) continue;
 
+		//fprintf(stderr, " *** contig length %d",contig->length());
+		
 		for (int sample_index = 0; sample_index < Sigma::num_samples; ++sample_index) {
 			int* read_counts = contig->read_counts()[sample_index];
-
+			
 			double mean = 0.0;
 
 			for (int window_index = 0; window_index < contig->num_windows(); ++window_index) {
 				mean += read_counts[window_index];
 			}
-
+			
 			mean /= contig->num_windows();
 
 			double variance = 0.0;
-
+			
 			for (int window_index = 0; window_index < contig->num_windows(); ++window_index) {
 				variance += (read_counts[window_index] - mean) * (read_counts[window_index] - mean);
 			}
 
 			variance /= contig->num_windows();
+            
+			//fprintf(stderr, "%f\t%f\n", mean, variance);
 			
 			if(denominator == 0){
 				min_R = current_R;
 			}
-
-			numerator += pow(mean, 4);
-			denominator += pow(mean, 2) * variance - pow(mean, 3);
+			
+			if(variance - mean > 0){
+				numerator += pow(mean, 4);
+				denominator += pow(mean, 2) * variance - pow(mean, 3);
+			}
+			
 
 			current_R = pow(mean, 2) / ( variance - mean);
 			if(current_R > max_R){
@@ -217,7 +228,7 @@ double compute_R(ContigMap* contigs) {
 	
 
 	double res = -1;
-	if(Sigma::R_ESTIMATION_TYPE == 1){
+	/*if(Sigma::R_ESTIMATION_TYPE == 1){
 		res = least_square_R;
 	}
 	else if(Sigma::R_ESTIMATION_TYPE == 2){
@@ -229,13 +240,58 @@ double compute_R(ContigMap* contigs) {
 
 	if(Sigma::USE_WINDOW == 0){
 		res = res / Sigma::contig_window_len;//need to be fixed
-	}
+		}*/
 	
-	//res = 3;//min_R;
 	res = min_R;
-	//res = 1.1;
-	fprintf(stderr, " *** Global R: min_R %f least square %f max_R %f\n *** RES: %f\n", min_R, least_square_R, max_R, res);
-
+	
+	std::string r_estimation_file = Sigma::output_dir + "/r_estimate_value.dat";   
+	FILE* r_estimate = fopen(r_estimation_file.c_str(), "w");
+	fprintf(r_estimate, "%f\t%f\n", min_R, least_square_R);
+	fclose(r_estimate);
+	
+	fprintf(stderr, " *** Global R: min_R %f least square %f  max_R %f\n *** RES: %f\n", min_R, least_square_R, max_R, res);
+	
+	
 	return res;
 }
 
+//?// New additions from here.
+
+int sample_dist( std::map< int, int > dist, int x_val ){
+
+    int sample_val;
+
+    if( dist.find( x_val ) != dist.end() ){
+        sample_val = dist[ x_val ];
+    }
+    else {
+        int l = x_val-1;
+        int r = x_val+1;
+        while( l != -1 ){
+            if( dist.find(l) != dist.end() ) {
+                break;
+            }
+            l--;
+        }
+        while( r < dist.rbegin()->first + 1 ){
+            if( dist.find(r) != dist.end() ) {
+                break;
+            }
+            r++;
+        }
+
+        if( l != -1 && r < dist.rbegin()->first + 1){
+            sample_val =  (dist[l] + dist[r])/2;
+        }
+        else if( l != -1) {
+            sample_val =  dist[l];
+        }
+        else if( r < dist.rbegin()->first + 1 ){
+            sample_val =  dist[r];
+        }
+        else{
+            sample_val = -1;
+        }
+    }
+    return sample_val;
+}

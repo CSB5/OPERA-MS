@@ -12,7 +12,7 @@ ContigReader::~ContigReader() {}
 AllReader::AllReader(){}
 
 long int AllReader::read(const char* contigs_file, ContigMap* contigs) {
-    int length;
+    int length = 0;
     long int assembly_size = 0;
     std::string id; 
 
@@ -35,7 +35,7 @@ long int AllReader::read(const char* contigs_file, ContigMap* contigs) {
             }
 
             if(line[0] != '>'){
-                length += line.size();
+                length += (int) line.size();
             }
 
             else{
@@ -63,15 +63,16 @@ long int AllReader::read(const char* contigs_file, ContigMap* contigs) {
     FILE* assembly_size_file = fopen(assembly_size_name.c_str(), "w");
     if (assembly_size_file != NULL) {
         fprintf(assembly_size_file, "%ld\n", assembly_size);
+        fclose(assembly_size_file);
     }
-    fclose(assembly_size_file);
+    
     
     return assembly_size;
    
 }
 
 void AllReader::get_assembly_size(const char* contigs_file){
-    int length;
+    int length = 0;
     long int assembly_size = 0;
     long int assembly_nb_contig = 0;
     std::ifstream contigs_fp(contigs_file);
@@ -89,7 +90,7 @@ void AllReader::get_assembly_size(const char* contigs_file){
            }
 
            if(line[0] != '>'){
-               length += line.size();
+               length += (int) line.size();
            }
 
            else{
@@ -113,9 +114,10 @@ void AllReader::get_assembly_size(const char* contigs_file){
     if (assembly_size_file != NULL) {
         fprintf(assembly_size_file, "%ld\n", assembly_size);
         fprintf(assembly_size_file, "%ld\n", assembly_nb_contig);
+        fclose(assembly_size_file);
     }
 
-    fclose(assembly_size_file);
+    
     
     Sigma::total_assembly_size = assembly_size;
     Sigma::total_assembly_nb_contig = assembly_nb_contig;
@@ -141,7 +143,7 @@ long int SOAPdenovoReader::read(const char* contigs_file, ContigMap* contigs) {
                     contigs->insert(std::make_pair(id, new Contig(id, length)));
                 }
             } else {
-                fscanf(contigs_fp, "%*[^\n]\n");
+                if( fscanf(contigs_fp, "%*[^\n]\n") );
             }
         }
 
@@ -155,8 +157,9 @@ long int SOAPdenovoReader::read(const char* contigs_file, ContigMap* contigs) {
     FILE* assembly_size_file = fopen(assembly_size_name.c_str(), "w");
     if (assembly_size_file != NULL) {
         fprintf(assembly_size_file, "%ld\n", assembly_size);
+        fclose(assembly_size_file);
     }
-    fclose(assembly_size_file);
+    
     
     return assembly_size;
 }
@@ -175,7 +178,7 @@ void SOAPdenovoReader::get_assembly_size(const char* contigs_file) {
                 assembly_size += length;
                 assembly_nb_contig++;
             } else {
-                fscanf(contigs_fp, "%*[^\n]\n");
+                if( fscanf(contigs_fp, "%*[^\n]\n") );
             }
         }
 
@@ -190,8 +193,8 @@ void SOAPdenovoReader::get_assembly_size(const char* contigs_file) {
     if (assembly_size_file != NULL) {
         fprintf(assembly_size_file, "%ld\n", assembly_size);
         fprintf(assembly_size_file, "%ld\n", assembly_nb_contig);
+        fclose(assembly_size_file);
     }
-    fclose(assembly_size_file);
     
     Sigma::total_assembly_size = assembly_size;
     Sigma::total_assembly_nb_contig = assembly_nb_contig;
@@ -217,7 +220,7 @@ long int RAYReader::read(const char* contigs_file, ContigMap* contigs) {
                     contigs->insert(std::make_pair(id, new Contig(id, length)));
                 }
             } else {
-                fscanf(contigs_fp, "%*[^\n]\n");
+                if( fscanf(contigs_fp, "%*[^\n]\n") );
             }
         }
 
@@ -231,8 +234,9 @@ long int RAYReader::read(const char* contigs_file, ContigMap* contigs) {
     FILE* assembly_size_file = fopen(assembly_size_name.c_str(), "w");
     if (assembly_size_file != NULL) {
         fprintf(assembly_size_file, "%ld\n", assembly_size);
+        fclose(assembly_size_file);
     }
-    fclose(assembly_size_file);
+    
     
     return assembly_size;
 }
@@ -251,7 +255,7 @@ void RAYReader::get_assembly_size(const char* contigs_file) {
                 assembly_size += length;
                 assembly_nb_contig++;
             } else {
-                fscanf(contigs_fp, "%*[^\n]\n");
+                if( fscanf(contigs_fp, "%*[^\n]\n") );
             }
         }
 
@@ -266,8 +270,9 @@ void RAYReader::get_assembly_size(const char* contigs_file) {
     if (assembly_size_file != NULL) {
         fprintf(assembly_size_file, "%ld\n", assembly_size);
         fprintf(assembly_size_file, "%ld\n", assembly_nb_contig);
+        fclose(assembly_size_file);
     }
-    fclose(assembly_size_file);
+    
     
     Sigma::total_assembly_size = assembly_size;
     Sigma::total_assembly_nb_contig = assembly_nb_contig;
@@ -295,7 +300,7 @@ long int VelvetReader::read(const char* contigs_file, ContigMap* contigs) {
                     contigs->insert(std::make_pair(id, new Contig(id, length)));
                 }
             } else {
-                fscanf(contigs_fp, "%*[^\n]\n");
+                if( fscanf(contigs_fp, "%*[^\n]\n") );
             }
         }
 
@@ -310,8 +315,9 @@ long int VelvetReader::read(const char* contigs_file, ContigMap* contigs) {
     FILE* assembly_size_file = fopen(assembly_size_name.c_str(), "w");
     if (assembly_size_file != NULL) {
         fprintf(assembly_size_file, "%ld\n", assembly_size);
+        fclose(assembly_size_file);
     }
-    fclose(assembly_size_file);
+    
 
     return assembly_size;
 }
@@ -331,7 +337,7 @@ void VelvetReader::get_assembly_size(const char* contigs_file) {
                 assembly_size += length;
                 assembly_nb_contig++;
             } else {
-                fscanf(contigs_fp, "%*[^\n]\n");
+                if( fscanf(contigs_fp, "%*[^\n]\n") );
             }
         }
 
@@ -346,8 +352,8 @@ void VelvetReader::get_assembly_size(const char* contigs_file) {
     FILE* assembly_size_file = fopen(assembly_size_name.c_str(), "w");
     if (assembly_size_file != NULL) {
         fprintf(assembly_size_file, "%ld\n", assembly_size);
+        fclose(assembly_size_file);
     }
-    fclose(assembly_size_file);
     
     Sigma::total_assembly_size = assembly_size;
     Sigma::total_assembly_nb_contig = assembly_nb_contig;

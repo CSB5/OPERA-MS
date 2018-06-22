@@ -66,6 +66,8 @@ private:
 	 */
 	void updateClusters();
 
+    const static int num_edges_to_resort = 50;
+
 	/**
 	 * @brief Computes score for the cluster based on given probability distribution.
 	 *
