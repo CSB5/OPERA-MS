@@ -60,7 +60,7 @@ void OperaBundleReader::read(const char* edges_file, const ContigMap* contigs, E
 	//fprintf(stderr, "\n\nLibrary %s has cutoff %d\n\n", edge_log.c_str(), edge_bundle_size_thr);
 
 		while (!feof(edges_fp)) {
-			fscanf(edges_fp, "%[^\n]\n", line);
+			if( fscanf(edges_fp, "%[^\n]\n", line) );
 
 			// [ID1]\t[ORIENTATION1]\t[ID2]\t[ORIENTATION2]\t[DISTANCE]\t[STDEV]\t[SIZE]\n
 			if (sscanf(line, "%s\t%*c\t%s\t%*c\t%d\t%d\t%d%*[^\n]", id1, id2, &distance, &stdev, &size) == 5) {
@@ -82,6 +82,7 @@ void OperaBundleReader::read(const char* edges_file, const ContigMap* contigs, E
 					if (contig1 != contig2 &&
 					    (arrival_rate_ratio_th == 0 || !(ar1 > ar2 * arrival_rate_ratio_th || ar2 > ar1 * arrival_rate_ratio_th))
 					    ) {
+//                        fprintf(stderr, "EDGE READ SUCCESS : %s\n", line);
 						edges->insert(Edge(contig1, contig2));
 					}
 					else{
@@ -95,6 +96,10 @@ void OperaBundleReader::read(const char* edges_file, const ContigMap* contigs, E
 					fprintf(skipped_edges_fp, "%s\t%d\n", line, skip_flag);
 				}
 			}
+
+            else{
+//                fprintf(stderr, "EDGE NOT READ SUCCESSFULLY: %s\n", line);
+            }
 		}
 
 		fclose(skipped_edges_fp);
@@ -162,7 +167,7 @@ void OperaBundleReader::filter(const char* edges_file, const ContigMap* contigs,
 
 
 		while (!feof(edges_fp)) {
-			fscanf(edges_fp, "%[^\n]\n", line);
+			if( fscanf(edges_fp, "%[^\n]\n", line) );
 
 			// [ID1]\t[ORIENTATION1]\t[ID2]\t[ORIENTATION2]\t[DISTANCE]\t[STDEV]\t[SIZE]\n
 

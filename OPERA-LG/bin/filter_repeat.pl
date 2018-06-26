@@ -2,7 +2,7 @@
 use warnings;
 use Getopt::Long;
 
-my ($bam_file, $repeat_file) = @ARGV;
+my ($bam_file, $repeat_file, $samtools_dir) = @ARGV;
 
 my %repeat = ();
 open(FILE, $repeat_file);
@@ -12,7 +12,7 @@ while(<FILE>){
 }
 close(FILE);
 
-open(FILE, "samtools view -h $bam_file |");
+open(FILE, "${samtools_dir}samtools view -h $bam_file |");
 while(<FILE>){
     @line = split(/\t/, $_);
     $contig = $line[2];

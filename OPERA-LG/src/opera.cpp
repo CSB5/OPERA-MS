@@ -118,7 +118,7 @@ bool opera::CheckFileExist(){
 	}
 	
 	// check mapping file
-	for( int i = 0; i < Configure::MULTI_LIB_INFO->size(); i++ )
+	for( int i = 0; i < (int) Configure::MULTI_LIB_INFO->size(); i++ )
 	{
 		ifstream mapReader( Configure::MULTI_LIB_INFO->at( i )->GetFileName().c_str() );
 
@@ -127,9 +127,13 @@ bool opera::CheckFileExist(){
 			cout<<"ERROR: Cannot open "<<Configure::MULTI_LIB_INFO->at( i )->GetFileName()<<" file"<<endl;
 			return false;
 		}
+
+		mapReader.close();
 	}
-	
+	contigReader.close();
 	return true;
+
+
 }
 
 // read real position file
@@ -143,6 +147,7 @@ int opera::ReadRealPositionFile( string fileName ){
 		return -1;
 	}
 
+/*
 	string line;					
 	vector<string> *contents = new vector<string>;		
 	
@@ -168,7 +173,8 @@ int opera::ReadRealPositionFile( string fileName ){
 				c->SetReferenceOri( MINUS );
 		}
 
-		/*reference_mapping *newMapping = new reference_mapping;
+		// Old commented part
+		reference_mapping *newMapping = new reference_mapping;
 		newMapping->m_contigName = contents->at( 0 );
 		newMapping->m_referenceGenomeName = contents->at( 3 );
 		newMapping->m_referenceStartPos = atoi( contents->at( 4 ).c_str() ); 
@@ -179,13 +185,16 @@ int opera::ReadRealPositionFile( string fileName ){
 			newMapping->m_referenceOri = MINUS;
 		newMapping->m_referenceIndex = id++;
 
-		m_realMapping->insert( pair<string, reference_mapping*> ( contents->at( 0 ), newMapping ) );*/
+		m_realMapping->insert( pair<string, reference_mapping*> ( contents->at( 0 ), newMapping ) );
 	}
 
 	contents->clear();
 	delete contents;
-	
+*/	
 	realPositionReader.close();
+
+	return 1;
+
 }
 
 // comparison, not case sensitive.
@@ -208,9 +217,13 @@ void opera::LabelContigsUsingMapping( list<Contig*> *subgraph ){
 // start doing scaffolding
 // return -1 if failed
 int opera::StartScaffold(){
-	int finishedScaffold = 0;
-	int abandendGraph = 0;
-	int abandendNode = 0;
+
+	#ifdef DEBUG
+		int finishedScaffold = 0;
+	#endif
+
+	//int abandendGraph = 0;
+	//int abandendNode = 0;
 	bool ifIncreaseThreshold;
 	int numOfSpecial = 1;
 	m_totalNumberOfNodes = m_graph->GetNumOfContigs();
@@ -236,7 +249,7 @@ int opera::StartScaffold(){
 		// set all contigs unassigned nodes iterator to null
 		//cerr<<"Scaffolding a subgraph with "<<subgraph->size()<<" nodes\n";
 #ifdef LOG
-		fprintf( logFile, "Scaffolding a subgraph with %d nodes...\n", subgraph->size() );
+		fprintf( logFile, "Scaffolding a subgraph with %d nodes...\n", (int) subgraph->size() );
 		fflush( logFile );
 		//cout<<"Scaffolding a subgraph with "<<subgraph->size()<<" nodes\n";
 #endif
@@ -361,7 +374,7 @@ int opera::StartScaffold(){
 		//cerr<<"Creating initial scaffold\n";
 		Clear();
 		PartialScaffold *currentScaffold = CreateInitialScaffold( subgraph, numOfContig );
-		PartialScaffold *head = currentScaffold;
+		//PartialScaffold *head = currentScaffold;
 		//cerr<<"Finish creating initial scaffold\n";
 
 		int numberOfScaffold = 0;
@@ -418,7 +431,7 @@ int opera::StartScaffold(){
 
 #ifdef LOG
 				fprintf( logFile, "Increase cluster threshold for current subgraph to %d.\n", minClusterSize + Configure::INCREASED_DELTA );
-				fprintf( logFile, "Total nodes in subgraph: %d\n", subgraph->size() );
+				fprintf( logFile, "Total nodes in subgraph: %d\n", (int) subgraph->size() );
 				fflush( logFile );
 
 				// output the graph information
@@ -577,7 +590,7 @@ int opera::StartScaffold(){
 		GenerateResults( scafs, result );
 		//cerr<<"finish generating results\n";
 
-		for( int i = 0; i < scafs->size(); i++ ){
+		for( int i = 0; i < (int) scafs->size(); i++ ){
 			scafs->at( i )->clear();
 			delete scafs->at( i );
 		}
@@ -608,7 +621,8 @@ int opera::StartScaffold(){
 		cout<<"finish "<<itos( finishedScaffold )<<" subgraph"<<endl;
 #endif
 		subgraph->clear();
-		for( int i = 0; i < numberOfScaffold; i++ )
+		//for( int i = 0; i < numberOfScaffold; i++ )
+		for( int i = 0; i < numOfScaffold; i++ )
 			delete result[ i ];
 		delete[] result;
 		// delete scaffold
@@ -858,6 +872,13 @@ void opera::GenUnassigndNodesForInitialScaffold( StartPoint **allStart, int numO
 			//InsertContigIntoUnassignedNodeSet( pair );
 		}
 
+		//?// Change added
+		for( int i = 0; i < num; i++ ){
+			delete allStarts[i];
+		}
+		delete[] allStarts;
+
+
 
 		newUnassignedNodes->clear();   delete newUnassignedNodes;
 		possibleContig->clear();  delete possibleContig;
@@ -871,10 +892,10 @@ PartialScaffold* opera::CreateInitialScaffold( list<Contig*> *subgraph, int numO
 {
 	StartPoint **allStart;
 	int num = 0;
-	int type;
+	//int type;
 
 	allStart = new StartPoint*[ numOfContig * 2 ];
-	type = ALL;
+	//type = ALL;
 
 	list<Contig*>::const_iterator iter;
 	for( iter = subgraph->begin(); iter != subgraph->end(); iter++ ){
@@ -1173,7 +1194,7 @@ void opera::SeparateScaffolds( list<Contig*> *subgraph, int &numberOfScaf, vecto
 #endif
 
 	scafID = -1;
-	for( int i = 0; i < scafSets.size(); i++ ){
+	for( int i = 0; i < (int) scafSets.size(); i++ ){
 		if( scafSets.at( i )->size() > 0 ){
 			scafID++;
 			for( set<Contig*>::iterator tempIter = scafSets.at( i )->begin(); tempIter != scafSets.at( i )->end(); tempIter++ ){
@@ -1226,10 +1247,10 @@ void opera::SeparateScaffolds( list<Contig*> *subgraph, int &numberOfScaf, vecto
 	// generate scaffolds
 	tempPS = currentScaffold;
 	int contigOrderID = 0;
-	int numberOfGaps = 0;
+	//int numberOfGaps = 0;
 
 	int numOfContig = 0;
-	Contig *lastAddedContig = NULL;
+	//Contig *lastAddedContig = NULL;
 	while( tempPS->GetParent() != NULL ){
 		if( tempPS->IfEmptyScaffold() ){
 			// it is a new scaffold
@@ -1264,7 +1285,7 @@ void opera::SeparateScaffolds( list<Contig*> *subgraph, int &numberOfScaf, vecto
 
 		tempPS = tempPS->GetParent();
 		numOfContig++;
-		lastAddedContig = addedContig;
+		//lastAddedContig = addedContig;
 		//cout<<addedContig->GetName()<<"\t"<<addedContig->GetOri()<<endl;
 	}
 	
@@ -1984,7 +2005,7 @@ void opera::GenUnassigndNodes( PartialScaffold *p, bool isStart, bool ifRecalcul
 
 				// set the distance if this is for the first scaffold
 				if( isStart || ifRecalculate ){
-					int tempDis = 0;
+					//int tempDis = 0;
 					if( otherContig->IfCalculated() ){
 						// already have a distance, check if need to combine the distances
 						//otherContig->AddDistance( edge->GetDis() );
@@ -2335,7 +2356,7 @@ bool opera::AddContigToScaffold( PartialScaffold *&p, int maxUnhappyEdge, Contig
 				if( abs( endContig->GetSubgraphReferenceIndex() - addContig->GetSubgraphReferenceIndex() ) != 1 ){
 					fprintf( logFile, "WARNING: The next contig %s is not the adjacent one of the previous contig %s in this graph\n", 
 						 addContig->GetName().c_str(), endContig->GetName().c_str() );
-					fprintf( logFile, "Distance of this contig is %d.\n", addContig->GetDistance() );
+					fprintf( logFile, "Distance of this contig is %d.\n", (int) addContig->GetDistance() );
 					//cerr<<"WARNING: The next contig "<<addContig->GetName()<<" is not the adjacent one of the previous contig"
 					//    <<endContig->GetName()<<" in this graph\n";
 					//cerr<<"Distance of this contig is "<<addContig->GetDistance()<<endl;
@@ -2825,7 +2846,7 @@ bool opera::CheckDanglingEdgeHappiness( PET *edge, Contig *newContig, int ori ){
 	// check if distance is happy
 		// first, find the node in active region
 	Contig *activeNode = edge->GetOtherContig( newContig );
-	Contig *endContig = *m_activeRegion->rbegin();		// the last contig in active region
+	//Contig *endContig = *m_activeRegion->rbegin();		// the last contig in active region
 
 	list<Contig*>::reverse_iterator countIter = m_activeRegion->rbegin();
 	int count = 0;
@@ -3505,7 +3526,7 @@ void opera::GenerateResults( PartialScaffold *p, ScaffoldResult **&results, int 
 	//fflush( logFile );
 
 	// generate scaffold
-	PartialScaffold *tail = p;
+	//PartialScaffold *tail = p;
 	string scaffoldResult = "";
 	double scaffoldLength = 0;
 	double scaffoldLengthWithGap = 0;
@@ -3649,7 +3670,7 @@ void opera::RemoveRepeats( vector<Contig*> *scafs ){
 			}
 
 			Contig *nextOccu = NULL;
-			for( int i = index + 1; i < scafs->size(); i++ ){
+			for( int i = index + 1; i < (int) scafs->size(); i++ ){
 				if( scafs->at( i )->GetName() == repeat->GetName() && scafs->at( i )->GetOri() == repeatOri ){
 					nextOccu = scafs->at( i );
 					break;
@@ -3697,14 +3718,14 @@ void opera::RemoveRepeats( vector<Contig*> *scafs ){
 void opera::AssignRepetitiveEdges( list<PET*> *edges, Contig *repeat ){
 	//cerr<<"assign repetitive edges\n";
 	for( list<PET*>::iterator iter = edges->begin(); iter != edges->end(); iter++ ){
-		int repeatPos;
+		//int repeatPos;
 		Contig *originalRepeat;
 		if( (*iter)->GetStartContig()->GetName() == repeat->GetName() ){
-			repeatPos = PLUS;
+			//repeatPos = PLUS;
 			originalRepeat = (*iter)->GetStartContig();
 		}
 		else{
-			repeatPos = MINUS;
+			//repeatPos = MINUS;
 			originalRepeat = (*iter)->GetEndContig();
 		}
 
@@ -3729,7 +3750,7 @@ void opera::AssignRepetitiveEdges( list<PET*> *edges, Contig *repeat ){
 
 void opera::GenerateResults( vector<vector<Contig*>*> *scafs, ScaffoldResult **&results ){
 	// calculate gap
-	for( int i = 0; i < scafs->size(); i++ ){
+	for( int i = 0; i < (int) scafs->size(); i++ ){
 		if( scafs->at( i )->size() == 1 ){
 			//cout<<"singleton\n";
 			scafs->at( i )->at( 0 )->SetGap( 0 );
@@ -3752,7 +3773,7 @@ void opera::GenerateResults( vector<vector<Contig*>*> *scafs, ScaffoldResult **&
 		// set left and right position for each contig
 		double sumLength = 0;
 		double sumLengthWithGap = 0;
-		for( int j = 0; j < scafs->at( i )->size(); j++ ){
+		for( int j = 0; j < (int) scafs->at( i )->size(); j++ ){
 			scafs->at( i )->at( j )->SetRightDis( sumLength );
 			scafs->at( i )->at( j )->SetRightDisWithGap( sumLengthWithGap );
 			sumLength += scafs->at( i )->at( j )->GetLength() - scafs->at( i )->at( j )->GetRemovedDis();
@@ -3777,7 +3798,7 @@ void opera::GenerateResults( vector<vector<Contig*>*> *scafs, ScaffoldResult **&
 	//fflush( logFile );
 	
 	// generate scaffold
-	for( int i = 0; i < scafs->size(); i++ ){
+	for( int i = 0; i < (int) scafs->size(); i++ ){
 		//cout<<"Handle "<<i<<" scaf\n";
 		//fprintf( logFile, "Handle %d scaffold\n", i );
 		//fflush( logFile );
@@ -3788,11 +3809,9 @@ void opera::GenerateResults( vector<vector<Contig*>*> *scafs, ScaffoldResult **&
 		double scaffoldLength = 0;
 		double scaffoldLengthWithGap = 0;
 		double scaffoldCov = 0;		// the average coverage of scaffolds
-		double endScaffoldPos = currentScaf->at( 0 )->GetStartPosition()
-			+ currentScaf->at( 0 )->GetLength() - currentScaf->at( 0 )->GetRemovedDis()- 1;
-		double endScaffoldPosWithGap = currentScaf->at( 0 )->GetStartPositionWithGap() 
-			+ currentScaf->at( 0 )->GetLengthWithGap() - currentScaf->at( 0 )->GetRemovedDis() - 1;
-		for( int j = 0; j < currentScaf->size(); j++ ){
+		//double endScaffoldPos = currentScaf->at( 0 )->GetStartPosition() + currentScaf->at( 0 )->GetLength() - currentScaf->at( 0 )->GetRemovedDis()- 1;
+		//double endScaffoldPosWithGap = currentScaf->at( 0 )->GetStartPositionWithGap() + currentScaf->at( 0 )->GetLengthWithGap() - currentScaf->at( 0 )->GetRemovedDis() - 1;
+		for( int j = 0; j < (int) currentScaf->size(); j++ ){
 			//cout<<"\tgenerating "<<j<<" string\n";
 			// generate the scaffold string
 			Contig *addedContig = currentScaf->at( j );
@@ -3818,11 +3837,11 @@ void opera::GenerateResults( vector<vector<Contig*>*> *scafs, ScaffoldResult **&
 			scaffoldCov += addedContig->GetCov() * (addedContig->GetLength() - addedContig->GetRemovedDis() );
 
 			// calculate the left and right distance of contig
-			double leftDis = addedContig->GetStartPosition() - 1;
-			double rightDis = endScaffoldPos - addedContig->GetStartPosition() - addedContig->GetLength() - addedContig->GetRemovedDis() + 1;
-			double leftDisWithGap = addedContig->GetStartPositionWithGap() - 1;
-			double rightDisWithGap = endScaffoldPosWithGap - addedContig->GetStartPositionWithGap() - addedContig->GetLengthWithGap() 
-				+ addedContig->GetRemovedDis() + 1;
+			//double leftDis = addedContig->GetStartPosition() - 1;
+			//double rightDis = endScaffoldPos - addedContig->GetStartPosition() - addedContig->GetLength() - addedContig->GetRemovedDis() + 1;
+			//double leftDisWithGap = addedContig->GetStartPositionWithGap() - 1;
+			//double rightDisWithGap = endScaffoldPosWithGap - addedContig->GetStartPositionWithGap() - addedContig->GetLengthWithGap() 
+				//+ addedContig->GetRemovedDis() + 1;
 
 			//addedContig->SetLeftDis( leftDis );
 			//addedContig->SetRightDis( rightDis );
@@ -3875,7 +3894,7 @@ string opera::AddScaffoldString( string newString, string oldString ){
 	string result = newString;
 	if( newEnd.at( 0 ) == oldStart.at( 0 ) && newEnd.at( 1 ) == oldStart.at( 1 ) ){
 		//cerr<<"find same repeat"<<newEnd.at( 0 )<<"\n";
-		for( int i = 1; i < tempOld.size(); i++ ){
+		for( int i = 1; i < (int) tempOld.size(); i++ ){
 			result += "\n" + tempOld.at( i );
 		}
 	}
@@ -3900,7 +3919,7 @@ void opera::CalculateGap( vector<Contig*> *contigs, int numberOfGaps ){
 	Matrix<double> G, CE, CI;
 	Vector<double> g0, ce0, ci0, x;
 	//int n, m, p;
-	double sum = 0.0;
+	//double sum = 0.0;
 
 	G.resize( numberOfGaps, numberOfGaps );
 	g0.resize( numberOfGaps );
@@ -4102,7 +4121,7 @@ void opera::CalculateGap( vector<Contig*> *contigs, int numberOfGaps ){
 
 	// set the gap sizes to contigs
 	contigs->at( 0 )->SetGap( 0 );
-	for( int id = 1; id < contigs->size(); id++ ){
+	for( int id = 1; id < (int) contigs->size(); id++ ){
 		//if( x[ id - 1 ] > 0 )
 			contigs->at( id )->SetGap( (int)x[ id - 1 ] );
 		//else
@@ -4260,7 +4279,7 @@ int opera::SortScaffold(){
 			string scafString = (*iter)->GetScaffold();
 			Split( scafString, "\n", scafVec );
 			string content = "";
-			for( int i = 0; i < scafVec->size(); i++ ){
+			for( int i = 0; i < (int) scafVec->size(); i++ ){
 				scafLine->clear();
 				Split( (*scafVec)[ i ], "\t", scafLine );
 				content = (*contigs)[ (*scafLine)[ 0 ] ];
@@ -4289,7 +4308,7 @@ int opera::SortScaffold(){
 				}
 				int gapSize = atoi( (*scafLine)[ 3 ].c_str() );
 				// add the gaps except for the last contig
-				if( gapSize < 10 && i != scafVec->size() -1 )
+				if( gapSize < 10 && i != (int) scafVec->size() -1 )
 					gapSize = 10;
 				string gap = "";
 				for( int num = 0; num < gapSize; num++ )
@@ -4441,7 +4460,7 @@ int opera::ReadContigFasta( string fileName, map<string, string> *contigs )
 	}
 	column->clear();
 	delete column;
-
+	contigReader.close();
 	// save last contig
 	contigs->insert( pair<string, string>( name, seq ) );
 	return 0;
@@ -4469,7 +4488,7 @@ int opera::CheckContigFormat()
 	}
 	else{
 		vector<string> *column = new vector<string>;
-		Split( line, "\s", column );
+		Split( line, " ", column );
 		if( ( column->size() == 2 ) && IsNumber( (*column)[ 1 ] ) ){  //">scaffold" ){
 			// soap scaffold format
 			//cout<<"soap format\n";
@@ -4496,6 +4515,7 @@ int opera::CheckContigFormat()
 		}
 		delete column;
 	}
+	contigReader.close();
 
 	return 1;
 }
@@ -4666,6 +4686,7 @@ int opera::PrintParameter( string fileName ){
 	paraWriter.write( resultString.c_str(), resultString.length() );
 
 	paraWriter.close();
+	return 1;
 }
 
 // output conflicting edges to file
@@ -4686,6 +4707,7 @@ int opera::OutputConflictingEdges( string fileName ){
 	confWriter.write( resultString.c_str(), resultString.length() );
 
 	confWriter.close();
+	return 1;
 }
 
 // check if a repeat can be removed from the active region without introducing any discordant edges
@@ -5017,7 +5039,7 @@ void opera::AddRepetitiveEdges( list<PET*> leftEdges, list<PET*> rightEdges, Con
 	allEdges.insert( allEdges.end(), rightEdges.begin(), rightEdges.end() );
 	
 	for( list<PET*>::iterator iter = allEdges.begin(); iter != allEdges.end(); iter++ ){
-		int repeatPos = (*iter)->GetPositionOfContig( repeat->GetOriginalRepeat() );
+		//int repeatPos = (*iter)->GetPositionOfContig( repeat->GetOriginalRepeat() );
 		int repeatOri = (*iter)->GetOrientationOfContig( repeat->GetOriginalRepeat() );
 		Contig *otherContig = (*iter)->GetOtherContig( repeat->GetOriginalRepeat() );
 		int otherPos = (*iter)->GetPositionOfContig( otherContig );
@@ -5058,7 +5080,7 @@ void opera::AddRepetitiveEdges( list<PET*> leftEdges, list<PET*> rightEdges, Con
 
 // add the repetitive edges to repeats
 void opera::AddRepetitiveEdges( PET *edge, Contig *repeat ){
-	int repeatPos = edge->GetPositionOfContig( repeat->GetOriginalRepeat() );
+	//int repeatPos = edge->GetPositionOfContig( repeat->GetOriginalRepeat() );
 	int repeatOri = edge->GetOrientationOfContig( repeat->GetOriginalRepeat() );
 	Contig *otherContig = edge->GetOtherContig( repeat->GetOriginalRepeat() );
 	int otherPos = edge->GetPositionOfContig( otherContig );
@@ -5322,7 +5344,8 @@ bool opera::CheckEdgeSatisfaction( list<PET*> *collectedEdges, list<SUBCONTIG*> 
 		// get the position of the unique contig
 		Contig *uniqueContig, *otherContig;
 		int uniqueContigOri, otherContigOri;
-		int uniqueContigPos, otherContigPos;
+		int uniqueContigPos;
+		//int otherContigPos;
 		
 		// FIXME: get the original contig
 		// FIXED
@@ -5333,7 +5356,7 @@ bool opera::CheckEdgeSatisfaction( list<PET*> *collectedEdges, list<SUBCONTIG*> 
 			
 			otherContig = (*edgeIter)->GetOriginalEndContig();
 			otherContigOri = (*edgeIter)->GetOriginalEndContigOri();
-			otherContigPos = END;
+			//otherContigPos = END;
 		}
 		else{
 			uniqueContig = (*edgeIter)->GetOriginalEndContig();
@@ -5342,7 +5365,7 @@ bool opera::CheckEdgeSatisfaction( list<PET*> *collectedEdges, list<SUBCONTIG*> 
 
 			otherContig = (*edgeIter)->GetOriginalStartContig();
 			otherContigOri = (*edgeIter)->GetOriginalStartContigOri();
-			otherContigPos = START;
+			//otherContigPos = START;
 		}
 
 		SUBCONTIG *uniqueSubcontig = *(mapOfContigs[ uniqueContig->GetName() ]);
@@ -5557,7 +5580,7 @@ int main(int argc, char *argv[] )
 	
 	// check parameters
 	string configFileName = "";
-	if( argc == 1 || argc == 3 || argc > 4 || string(argv[ 1 ]) == "-h" ){
+	if( argc == 1 || argc == 3 || argc > 5 || string(argv[ 1 ]) == "-h" ){
 		cout<<"Usage:\n";
 		cout<<"  bin/opera <config-file>\n";
 		cout<<"    OR\n";
@@ -5566,6 +5589,7 @@ int main(int argc, char *argv[] )
 		cout<<"  <contig-file> \tMulti-fasta contig file\n";
 		cout<<"  <mapping-files> \tComma-separated list of files containing mapping of paired-end reads\n";
 		cout<<"  <output-folder> \tFolder to save the scaffold results\n";
+		cout<<"  <samtools-dir> \tFolder which contains samtools binaries\n";
 		cout<<"\n\nNOTE: Please refer to test_dataset/multiLib.config for detailed settings.\n";
 		return -1;
 	}
@@ -5589,7 +5613,7 @@ int main(int argc, char *argv[] )
 		flush(cout);
 #endif
 	}
-	else if( argc == 4 ){
+	else if( argc == 5 || argc == 4 ){
 		// get contig file name, mapping file name and output folder
 		// step 0: read config file
 #ifdef TIME
@@ -5602,7 +5626,7 @@ int main(int argc, char *argv[] )
 		// set mapping files
 		vector<string> *tempName = new vector<string>;
 		Split( argv[ 2 ], ",", tempName );
-		for( int i = 0; i < tempName->size(); i++ )
+		for( int i = 0; i < (int) tempName->size(); i++ )
 		{
 			LibInfo *newLib = new LibInfo();
 			newLib->SetFileName( tempName->at( i ) );
@@ -5616,6 +5640,15 @@ int main(int argc, char *argv[] )
 		mkdir (Configure::OUTPUT_FOLDER.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
 		if( Configure::OUTPUT_FOLDER.substr( Configure::OUTPUT_FOLDER.length() - 1, 1 ) != Configure::DIRECTORY_SIGN )
 			Configure::OUTPUT_FOLDER += Configure::DIRECTORY_SIGN;
+
+		if( argc == 5){
+                	Configure::SAMDIR = argv[ 4 ];
+			Configure::SAMDIR = Configure::SAMDIR + "/";
+		}else if( argc == 4){
+			Configure::SAMDIR = "";
+			//fprintf(stderr, "SAMDIR!!!!!!!!!!!! %s\n",Configure::SAMDIR.c_str());
+		}		
+
 #ifdef TIME
 		gettimeofday( &t_endTemp, NULL );
 		cout<<"Time Taken: "<<(t_endTemp.tv_sec - t_startTemp.tv_sec) + (t_endTemp.tv_usec - t_startTemp.tv_usec)/1000000.0<<" seconds"<<endl;
@@ -5925,6 +5958,8 @@ int main(int argc, char *argv[] )
 	delete m_opera;
 	
 	cout<<"The results are in "<<Configure::OUTPUT_FOLDER.substr( 0, Configure::OUTPUT_FOLDER.length() - 1 )<<endl;
+
+	Configure::destroy();
 
 #ifdef DEBUG
 	system("pause");

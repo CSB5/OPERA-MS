@@ -19,7 +19,7 @@ MapConverter::~MapConverter(void)
 	m_ClustersMap->clear();
 	delete m_ClustersMap;
 
-	for( int i = 0; i < m_gapTables.size(); i++ ){
+	for( int i = 0; i < (int)m_gapTables.size(); i++ ){
 		delete m_gapTables.at( i );
 	}
 }
@@ -48,7 +48,7 @@ int MapConverter::AnalyzeMultiLib( string fileName, list<PetLibrary*> *libs  ){
 		return -1;
 		}*/
 	//Export the mapping based edges if any
-	//AnalyzeBowtieMultiLib( libs );
+	if( AnalyzeBowtieMultiLib( libs ) ); // To silence the return value
 	//Add any OPERA edge file to libs
 	AnalyzeOperaMultiLib( libs );
 	return 1;
@@ -74,18 +74,20 @@ int MapConverter::AnalyzeBowtieMultiLib( list<PetLibrary*> *libs ){
 	
 	// sort according to mean
 	libs->sort( LibSort );
+	return 1;
 }
 
 // read and analyze contig graph
+// Useless function? ##?
 int MapConverter::ConvertSoapContigGraph( string fileName, list<PetLibrary*> *libs )
 {
 	// usedContig, heads, tails
 	// save the mappings of contig to scaffold
-	map<int, string> *heads;
-	map<int, string> *tails;
+	//map<int, string> *heads;
+	//map<int, string> *tails;
 
 	// read contig file and save all scaffold and C id
-	list<Contig*> *contigs = m_graph->GetContigs();
+	//list<Contig*> *contigs = m_graph->GetContigs();
 
 	return 0;
 }
@@ -143,12 +145,12 @@ void MapConverter::FindOverlapOfSOAP(){
 			while( headListIter != (*headIter).second->end() ){
 				Contig *headContig = m_graph->GetContigUsingPos( *headListIter );
 				headListIter++;
-				int headOri = *headListIter;
+				//int headOri = *headListIter;
 				list<int>::iterator tailListIter = (*tailIter).second->begin();
 				while( tailListIter != (*tailIter).second->end() ){
 					Contig *tailContig = m_graph->GetContigUsingPos( *tailListIter );
 					tailListIter++;
-					int tailOri = *tailListIter;
+					//int tailOri = *tailListIter;
 					if( tailContig->GetID() < headContig->GetID() ){
 						// add edge
 						numOfEdge++;
@@ -230,7 +232,7 @@ int MapConverter::IQR( vector<double> *dis, double &mean, double &std, string li
 	string distributionResults = "distance\n";
 	*/
 
-	for( int i = 0; i < dis->size(); i++ ){
+	for( int i = 0; i < (int)dis->size(); i++ ){
 		disStr += itos( dis->at( i ) ) + "\n";
 		if( dis->at( i ) >= lowerbound && dis->at( i ) <= upperbound ){
 			sum += dis->at( i );
@@ -252,7 +254,7 @@ int MapConverter::IQR( vector<double> *dis, double &mean, double &std, string li
 	mean = sum / num;
 	std = 0;
 	// calculate std
-	for( int i = 0; i < dis->size(); i++ ){
+	for( int i = 0; i < (int)dis->size(); i++ ){
 		if( dis->at( i ) >= lowerbound && dis->at( i ) <= upperbound ){
 			std += pow( dis->at( i ) - mean, 2 );
 		}
@@ -302,7 +304,7 @@ int MapConverter::CalculateReadDisOnSameContig( vector<string> *firstColumn, vec
 
 // convert bowtie format into opera format
 int MapConverter::ConvertBowtieFileMultiLib( PetLibrary *lib ){
-	int sumTime = 0;
+	//int sumTime = 0;
 	
 	vector<string> *path = new vector<string>;
 	Split( lib->GetFileName(), "/", path );
@@ -530,7 +532,12 @@ string MapConverter::ConvertBowtieFormatMultiLib( mappingInfo *firstRead, mappin
 			}
 		}
 	}
-
+	else{
+		leftDis = 1;
+		rightDis = 1;
+		cout<<"Dummy Case. Should not enter here";
+	}
+	// Any need to keep elseif and not make it else? ##?
 	dis = (int) (currentLib->GetMean() - leftDis - rightDis);
 	result += itos( dis ) + "\t" + itos( currentLib->GetStd() ) + "\n";
 	if( pos1 > pos2 ){
@@ -641,7 +648,8 @@ void MapConverter::CreateGapTables( PetLibrary *lib ){
 	}
 	m_gapTables.clear();
 	
-	double maxDis = lib->GetMean() + Configure::STD_TIMES * lib->GetStd();
+	double maxDis = 0;
+	maxDis = lib->GetMean() + Configure::STD_TIMES * lib->GetStd();
 	if( lib->GetMaxDis() < maxDis )	
 		maxDis = lib->GetMaxDis();
 
@@ -789,7 +797,7 @@ int MapConverter::BundleMultiLib( list<PetLibrary*> *libs, FILE *discardedEdgeFi
 }
 
 // bundle multiple libraries to create super clusters
-int MapConverter::BundleSuperCluster( list<PetLibrary*> *libs, list<PetLibrary*> *superCluster, list<string> *conflictingEdges, int libType ){
+void MapConverter::BundleSuperCluster( list<PetLibrary*> *libs, list<PetLibrary*> *superCluster, list<string> *conflictingEdges, int libType ){
 	m_ClustersMap->clear();
 
 	int maxMean = 0;
@@ -872,12 +880,13 @@ int MapConverter::BundleSuperCluster( list<PetLibrary*> *libs, list<PetLibrary*>
 	{
 		delete (*libIter);
 	}
+	return;
 }
 
 
 // select the biggest cluster if there is a confliction
 string MapConverter::BundleOneSuperCluster( multiset<PET*, less_std> *group, PetLibrary *lib, list<string> *conflictingEdges ){ 
-	PET *result;
+	//PET *result;
 	string finalCluster = "";
 
 	int totalSize = 0;
@@ -892,7 +901,7 @@ string MapConverter::BundleOneSuperCluster( multiset<PET*, less_std> *group, Pet
 		// find all clusters within the range
 		// do cluster
 		// only accept the cluster containing more than half of the reads
-		int biggest = group->size() - 1;
+		//int biggest = group->size() - 1;
 		PET *biggestPet = (*group->rbegin());
 		
 		// initialize formula
@@ -906,9 +915,9 @@ string MapConverter::BundleOneSuperCluster( multiset<PET*, less_std> *group, Pet
 		int lowerbound = biggestPet->GetDis() - Configure::STD_TIMES * biggestPet->GetStd();
 		int upperbound = biggestPet->GetDis() + Configure::STD_TIMES * biggestPet->GetStd();
 		string startName = biggestPet->GetStartContig()->GetName();
-		int startOri = biggestPet->GetStartContigOri();
+		//int startOri = biggestPet->GetStartContigOri();
 		string endName = biggestPet->GetEndContig()->GetName();
-		int endOri = biggestPet->GetEndContigOri();
+		//int endOri = biggestPet->GetEndContigOri();
 		bool startIsRepeat = biggestPet->GetStartContig()->IsRepeat();
 		bool endIsRepeat = biggestPet->GetEndContig()->IsRepeat();
 		//PET *superCluster = new PET();
@@ -1079,22 +1088,24 @@ string MapConverter::BundleCluster( multiset<SinglePet*, less_distance> *group )
 }
 
 // correct the distance of clusters
+/*
 void MapConverter::CorrectDistance( multiset<SinglePet*, lessDistance> *group, PetLibrary *lib ){
 	if( group->empty() )
 		return;
 
-	Contig *startContig = m_graph->GetContig( (*group->begin())->GetStartID() );
-	Contig *endContig = m_graph->GetContig( (*group->begin())->GetEndID() );
+	if( m_graph->GetContig( (*group->begin())->GetStartID() ) ); // "If" discards return value
+	if( m_graph->GetContig( (*group->begin())->GetEndID() ) ); // "If" discards return value
 
 	// create the table of g and g_head
-	int libUpperbound = Configure::UPPERBOUND; 
-	int contigSumLength = startContig->GetLength() + endContig->GetLength();
+	//int libUpperbound = Configure::UPPERBOUND; 
+	//int contigSumLength = startContig->GetLength() + endContig->GetLength();
 
 	
 
 	// for each pet, find the closest value of g_head, and change it to the corresponding g
 
 }
+*/
 
 // bundle a certain cluster
 string MapConverter::BundleClusterMultiLib( multiset<SinglePet*, lessDistance> *group, PetLibrary *lib, ofstream *clusterInfoFile, FILE *discardedEdgeFile,
@@ -1105,7 +1116,7 @@ string MapConverter::BundleClusterMultiLib( multiset<SinglePet*, lessDistance> *
 	if( group->empty() )
 		return "";
 
-	bool isSpecialEdge = false;
+	//bool isSpecialEdge = false;
 
 	//cerr<<"start bundle\n";
 	string clusterInfo = "";
@@ -1302,7 +1313,7 @@ void MapConverter::RefineMean( PET *e, Contig *c1, Contig *c2 ){
 	if( id < 0 )
 		id = 0;
 
-	if( id >= m_gapTables.size() )
+	if( id >= (int)m_gapTables.size() )
 		id = m_gapTables.size() - 1;
 
 	//cerr<<"total table is "<<m_gapTables.size()<<endl;
@@ -1322,7 +1333,7 @@ string MapConverter::CalculateAnchorRegion( list<SinglePet*> *pets ){
 	string results = "";
 	for( int i = 0; i < 2; i++ ){
 		// get the contig name
-		vector<string> *contents = new vector<string>;
+		//vector<string> *contents = new vector<string>;
 		string contigName;
 		if( i == 0 )
 			contigName = m_graph->GetContig( pets->front()->GetStartID() )->GetName();
@@ -1335,7 +1346,7 @@ string MapConverter::CalculateAnchorRegion( list<SinglePet*> *pets ){
 		for( list<SinglePet*>::iterator iter = pets->begin(); iter != pets->end(); iter++ ){
 			vector<string> *lines = new vector<string>;
 			Split( (*iter)->GetOriString(), "\n", lines );
-			int startPos, endPos;
+			int startPos = 0; int endPos = 0;
 			for( int lineID = 0; lineID < 2; lineID++ ){
 				vector<string> *contents = new vector<string>;
 				Split( lines->at( lineID ), "\t", contents );
@@ -1487,7 +1498,7 @@ int MapConverter::AnalyzeOpera( string fileName ){
 int MapConverter::AnalyzeOperaMultiLib( list<PetLibrary*> *libs ){
 	// get all cluster files and handle them one by one
 	//cerr<<"Total file in AnalyzeOperaMultiLib is "<<Configure::MULTI_LIB_INFO->size()<<endl;
-	for( int i = 0; i < Configure::MULTI_LIB_INFO->size(); i++ )
+	for( int i = 0; i < (int)Configure::MULTI_LIB_INFO->size(); i++ )
 	{
 		if(Configure::MULTI_LIB_INFO->at( i )-> GetMapType() == OPERA){
 			cerr<<"Analyzing file: "<<Configure::MULTI_LIB_INFO->at( i )->GetFileName()<<endl;

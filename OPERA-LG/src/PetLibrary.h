@@ -63,7 +63,7 @@ public:
 	void SetNameWithoutPath( string name );
 	string GetNameWithoutPath();
 	// insert a contig pair into map
-	bool InsertPair( int c1, int c2, SinglePet *pet );
+	void InsertPair( int c1, int c2, SinglePet *pet );
 	// get the pair map
 	map<pair<int, int>, multiset<SinglePet*, lessDistance>*>* GetSinglePetsMap();
 	// add a cluster

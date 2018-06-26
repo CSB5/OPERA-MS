@@ -9,18 +9,20 @@ use Getopt::Long;
 my $help_message = "
 
 	Options:
-	--contig		Multi-fasta contig file
+	--contig		    Multi-fasta contig file
 	--illumina-read1	Fasta/Fastq file of read 1 of the paired-end reads
 	--illumina-read2	Fasta/Fastq file of read 2 of the paired-end reads
-	--out			Name of the output file
-	--map-tool		Mapping tool can be either bwa (default) or bowtie
-	--tool-dir		Directory that contains binaries to the chosen mapping tool (default PATH)
-        --samtools-dir		Directory that contains samtools binaries (default PATH)
-	--help			Help
+	--out			    Name of the output file
+	--map-tool		    Mapping tool can be either bwa (default) or bowtie
+	--tool-dir		    Directory that contains binaries to the chosen mapping tool (default PATH)
+    --samtools-dir	    Directory that contains samtools binaries (default PATH)
+    --nproc             Number of threads to use
+	--help			    Help
 ";
 
 my $path = "";
 my $samtoolsDir = "";
+my $nproc;
 
 GetOptions(
 
@@ -31,6 +33,7 @@ GetOptions(
     "map-tool=s"      => \$mapTool,
     "tool-dir=s"      => \$path,
     "samtools-dir=s"  => \$samtoolsDir,
+    "nproc=i"       => \$nproc
     "help"	=> \$flag_help
 
 ) or die("Error in command line arguments.\n");
@@ -56,6 +59,9 @@ if ( !(defined($readFile2)) ){
 if ( !(defined($outputFile)) ){
         print "Name of the output file missing.\n";
         exit 0;
+}
+if( !(defined($nproc))){
+        $nproc = 1;
 }
 #if ( ($mapTool eq "bwa" || !(defined($mapTool))) && defined($bowtieDir) ){
 #        print "Bowtie directory not needed and ignored for bwa mapping.\n";
@@ -318,7 +324,7 @@ sub findSAWithBwa
     $time = localtime;
     print "[$time]\t";
     print "Finding the SA coordinates of the reads using BWA aln...\n";
-    $command = "${path}bwa aln -t 30 $folder$contigName[ -1 ] - > ${folder}read.sai";
+    $command = "${path}bwa aln -t $nproc $folder$contigName[ -1 ] - > ${folder}read.sai";
 }
 
 sub generateAlignmentUsingBwa
@@ -328,7 +334,7 @@ sub generateAlignmentUsingBwa
     print "Generate alignments of reads using bwa sampe...\n";
     # $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | awk \'{ if( \$3 != \"*\" ) print \$0 }\' > $folder$outputFile";
     # $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | samtools view -S -h -b -F 0x4 - | samtools sort -no - ${folder}temporarySam | samtools view -h -b - > $folder$outputFile";
-    $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ 20 -no - ${folder}temporarySam > $folder$outputFile";
+    $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ $nproc -no - ${folder}temporarySam > $folder$outputFile";
     print $command."\n";
 }
 

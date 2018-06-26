@@ -620,7 +620,7 @@ void Graph::DeleteEdges( Contig *c, list<PET*> *edges, bool isFirst, ScaffoldRes
 			(*iter)->SetDE( false );
 			int pos = (*iter)->GetPositionOfContig( c );
 			int ori = (*iter)->GetOrientationOfContig( c );
-			int preOri = ori;
+			//int preOri = ori;
 			if( !isFirst )
 				(*iter)->ReplaceContig( pos, m_contigsArray[ scaffold->GetID() ] );
 
@@ -859,7 +859,7 @@ void Graph::DeleteEdgesMultiLib( Contig *c, list<PET*> *edges, bool isFirst, Sca
 			// replace edges
 			int pos = (*iter)->GetPositionOfContig( c );
 			int ori = (*iter)->GetOrientationOfContig( c );
-			int preOri = ori;
+			//int preOri = ori;
 			if( !isFirst )
 				(*iter)->ReplaceContig( pos, m_contigsArray[ scaffold->GetID() ] );
 
@@ -942,7 +942,7 @@ bool Graph::IfSameOriInScaffoldAndEdge( Contig *c, int ori, ScaffoldResult *s ){
 	vector<string> lines;
 	Split( s->GetScaffoldString(), "\n", &lines );
 
-	for( int i = 0; i < lines.size(); i++ ){
+	for( int i = 0; i < (int) lines.size(); i++ ){
 		vector<string> line;
 		Split( lines.at( i ), "\t", &line );
 		if( line.at( 0 ) == contigName ){
@@ -959,7 +959,7 @@ bool Graph::IfSameOriInScaffoldAndEdge( Contig *c, int ori, ScaffoldResult *s ){
 
 // find subgraph
 list<Contig*> * Graph::FindSubgraph( int &numOfContig, int &numOfBorderContig, int &minClusterSize ){
-	list<Contig*> *subgraph;
+	list<Contig*> *subgraph = NULL;
 		
 	Contig *c = NULL;
 

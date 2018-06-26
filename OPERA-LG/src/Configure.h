@@ -60,8 +60,7 @@ public:
 	static const int TOO_MANY_PARTIAL_SCAFFOLDS = -2;
 	static int FILE_FORMAT;				// fasta or statistic
 	static int FILE_TYPE;				// velvet or soap
-	static bool FILTER_REPEAT;			// if need to filter the repeat contigs, if false edges between repeats are removed
-	static bool KEEP_REPEAT_FULL;			// if repeat need to be kept, if set to true no contigs are set to repeat
+	static bool FILTER_REPEAT;			// if need to filter the repeat contigs
 	static double REPEAT_THRESHOLD;		// repeat threshold, default = 1.5
 	static string CONTIG_FILE;			// the contig file
 	static int CONTIG_SIZE_THERSHOLD;	// the contig size threshold, default = 500
@@ -73,6 +72,7 @@ public:
 	static int LIB_STD;					// the standard deviation of library, default = 1000
 	static bool CALCULATE_ORI;			// if need to calculate the orientation of paired end reads
 	static int READ_ORI;				// the orientation of reads(in, out or forward)
+	static string SAMDIR;				//samtools dir
 
 	static int STD_TIMES;				// the times of stdandard deviation, default is 6
 	static int CLUSTER_THRESHOLD;		// the paired end read cluster threshold
@@ -147,4 +147,7 @@ public:
 
 	// ploidy value, default value = 1
 	static int PLOIDY;
+
+	// function to destroy allocated MULTI_LIB_INFO
+	static void destroy();
 };

@@ -6,20 +6,12 @@ Configure::Configure(void)
 
 Configure::~Configure(void)
 {
-	vector<LibInfo*>::iterator iter = MULTI_LIB_INFO->begin();
-	while( iter != MULTI_LIB_INFO->end() )
-	{
-		delete *iter;
-		iter = MULTI_LIB_INFO->erase( iter );
-	}
-	delete MULTI_LIB_INFO;
 }
 
 // contig file related parameters
 int Configure::FILE_FORMAT = FASTA;
 int Configure::FILE_TYPE = VELVET;
 bool Configure::FILTER_REPEAT = true;
-bool Configure::KEEP_REPEAT_FULL = false;
 double Configure::REPEAT_THRESHOLD = 1.5;
 string Configure::CONTIG_FILE = "";
 int Configure::CONTIG_SIZE_THERSHOLD = 500;
@@ -59,12 +51,10 @@ int Configure::KMER = 49;
 // multiple libraries variables
 vector<LibInfo*> *Configure::MULTI_LIB_INFO = new vector<LibInfo*>;
 
-//FAST
+//int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 10000000;
 int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 100000;
 int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 5;
-//SLOW
-//int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 10000000;
-//int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 1;
+//int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 10;
 
 int Configure::UNIT_OF_PARTIAL_SCAFFOLDS = 20000;
 
@@ -77,6 +67,8 @@ int Configure::INCREASED_DELTA = 5;
 bool Configure::SIMULTANEOUSLY_HANDLE_LIBRARIES = true;
 
 string Configure::REAL_POSITION_FILE = "";
+
+string Configure::SAMDIR = "";
 
 int Configure::UPPERBOUND = 0;
 
@@ -97,3 +89,13 @@ int Configure::MIN_LIBRARY_MEAN = 250;
 int Configure::PLOIDY = 1;
 
 int Configure::HAPLOID_COVERAGE = -1;
+
+void Configure::destroy(){
+	vector<LibInfo*>::iterator iter = MULTI_LIB_INFO->begin();
+	while( iter != MULTI_LIB_INFO->end() )
+	{
+		delete *iter;
+		iter = MULTI_LIB_INFO->erase( iter );
+	}
+	delete MULTI_LIB_INFO;
+}
