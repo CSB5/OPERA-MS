@@ -81,7 +81,7 @@ int ContigConverter::ConvertContigFile( string fileName, Graph *graph, list<PetL
 	}
 
 	// save all contig names in graph
-	for( int i = 0; i < myContigs->size(); i++ ){
+	for( int i = 0; i < (int) myContigs->size(); i++ ){
 		graph->SaveContigName( myContigs->at( i )->GetName() );
 	}
 
@@ -136,7 +136,7 @@ int ContigConverter::ConvertContigFile( string fileName, Graph *graph, list<PetL
 // calculate coverage using mapping information
 int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 	// get all mapping files and handle them one by one
-	for( int libID = 0; libID < Configure::MULTI_LIB_INFO->size(); libID++ ){
+	for( int libID = 0; libID < (int) Configure::MULTI_LIB_INFO->size(); libID++ ){
 		if(Configure::MULTI_LIB_INFO->at( libID )-> GetMapType() == SAM || Configure::MULTI_LIB_INFO->at( libID )-> GetMapType() == BOWTIE){
 			// analyze all reads
 			cerr<<"Analyzing "<<(libID+1)<<" library: ";
@@ -168,9 +168,10 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 				// it is a bam format
 				tempFileName = Configure::OUTPUT_FOLDER + "temporary.sam";
 				string cmd = "mkfifo " + tempFileName;
-				system( cmd.c_str() );
-				cmd  = "samtools view " + Configure::MULTI_LIB_INFO->at( libID )->GetFileName() + " > " + tempFileName + "&"; 
-				system( cmd.c_str() );
+				if( system( cmd.c_str() ) );
+				cmd  = Configure::SAMDIR.c_str() + std::string("samtools view ") + Configure::MULTI_LIB_INFO->at( libID )->GetFileName() + " > " + tempFileName + "&"; 
+				//fprintf(stderr,"Command is !!!!!\n");
+				if( system( cmd.c_str() ) );
 			}
 
 			ifstream mapReader( tempFileName.c_str() );
@@ -180,7 +181,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 			
 				if( newLib->GetFileName().substr( newLib->GetFileName().length() - 4, 4 ) == ".bam" ){
 					string cmd = "rm " + Configure::OUTPUT_FOLDER + "temporary.sam";
-					system( cmd.c_str() );
+					if( system( cmd.c_str() ) );
 				}
 
 				return -1;
@@ -220,7 +221,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 			double tempAverage = 0;
 			double tempNum = 0;
 			bool useThreshold = false;
-			double contigThreshold = 0;
+			//double contigThreshold = 0;
 
 			string preLine, nextLine;
 			while( getline( mapReader, preLine ) ){
@@ -243,12 +244,12 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 			
 					Contig *firstContig = NULL;
 					Contig *secondContig = NULL;
-					int firstContigPos;
-					int secondContigPos;
+					int firstContigPos=0;
+					int secondContigPos=0;
 					string firstContigOri;
 					string secondContigOri;
-					int firstReadLength;
-					int secondReadLength;
+					int firstReadLength=0;
+					int secondReadLength=0;
 
 					if( IsPair( preNameString, nextNameString ) ){
 						// is a pair and both reads are mapped
@@ -385,7 +386,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 					
 								// check contig length
 								hash_map<const char*, int, hash<const char*>, eqName>::iterator pos = m_contigNameHashMap->find( (*preColumn)[2].c_str() );
-								Contig *c;
+								Contig *c = NULL;
 								if( pos != m_contigNameHashMap->end() )
 									c = myContigs->at(  pos->second );
 
@@ -457,7 +458,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 			if( Configure::MULTI_LIB_INFO->at( libID )->GetFileName().substr( Configure::MULTI_LIB_INFO->at( libID )->GetFileName().length() - 4, 4 ) == ".bam" ){
 				// it is a bam formattempFileName = Configure::OUTPUT_FOLDER + "temporary.sam";
 				string cmd = "rm " + tempFileName;
-				system( cmd.c_str() );
+				if( system( cmd.c_str() ) );
 			}
 
 
@@ -482,7 +483,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 				
 					if( newLib->GetFileName().substr( newLib->GetFileName().length() - 4, 4 ) == ".bam" ){
 						string cmd = "rm " + Configure::OUTPUT_FOLDER + "temporary.sam";
-						system( cmd.c_str() );
+						if( system( cmd.c_str() ) );
 					}
 				
 					return -1;
@@ -510,7 +511,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 					if( IQR( &allDis[ maxID ], mean, std, names->at( 0 ), percentageOfOutliers, numberOfUsedPairs, newLib ) == -1 ){
 						if( newLib->GetFileName().substr( newLib->GetFileName().length() - 4, 4 ) == ".bam" ){
 							string cmd = "rm " + Configure::OUTPUT_FOLDER + "temporary.sam";
-							system( cmd.c_str() );
+							if( system( cmd.c_str() ) );
 						}
 						path->clear();
 						delete path;
@@ -558,7 +559,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 				double num = 0;
 				string disStr = "";
 			
-				for( int i = 0; i < allDis[ maxID ].size(); i++ ){
+				for( int i = 0; i < (int) allDis[ maxID ].size(); i++ ){
 					//cerr<<"i\n";
 					disStr += itos( allDis[ maxID ].at( i ) ) + "\n";
 					if( allDis[ maxID ].at( i ) >= lowerbound && allDis[ maxID ].at( i ) <= upperbound ){
@@ -602,8 +603,9 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 			m_libString.append( "Number of used paired reads for estimating the mean and the standard deviation of the library is: "
 					    + itos( numberOfUsedPairs ) + "\n" );
 			char buffer[50];
-			int n, a=5, b=3;
-			n=sprintf (buffer, "Percentage of outliers is: %.2f\%\n", percentageOfOutliers );
+			//int n, a=5, b=3;
+			//n=sprintf (buffer, "Percentage of outliers is: %.2f\%\n", percentageOfOutliers );
+			sprintf (buffer, "Percentage of outliers is: %.2f%%\n", percentageOfOutliers );
 			string tempStr( buffer );
 			m_libString.append( tempStr );
 			m_libString.append( "\n" );
@@ -637,7 +639,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 	libWriter.close();
 
 	// calculate the coverage
-	for( int i = 0; i < myContigs->size(); i++ ){
+	for( int i = 0; i < (int) myContigs->size(); i++ ){
 		myContigs->at( i )->CalculateCov();
 	}
 
@@ -680,7 +682,7 @@ int ContigConverter::IQR( vector<double> *dis, double &mean, double &std, string
 	double num = 0;
 	string disStr = "";
 
-	for( int i = 0; i < dis->size(); i++ ){
+	for( int i = 0; i < (int) dis->size(); i++ ){
 		disStr += itos( dis->at( i ) ) + "\n";
 		if( dis->at( i ) >= lowerbound && dis->at( i ) <= upperbound ){
 			sum += dis->at( i );
@@ -699,7 +701,7 @@ int ContigConverter::IQR( vector<double> *dis, double &mean, double &std, string
 	mean = sum / num;
 	std = 0;
 	// calculate std
-	for( int i = 0; i < dis->size(); i++ ){
+	for( int i = 0; i < (int) dis->size(); i++ ){
 		if( dis->at( i ) >= lowerbound && dis->at( i ) <= upperbound ){
 			std += pow( dis->at( i ) - mean, 2 );
 		}
@@ -965,7 +967,7 @@ void ContigConverter::FilterRepeat( vector<Contig*> *contigs, Graph *graph ){
 		// user did not specify the hyploid coverage, need to calculate
 		double sum = 0;
 		double num = 0;
-		for( int i = 0; i < contigs->size(); i++ ){
+		for( int i = 0; i < (int) contigs->size(); i++ ){
 			if( contigs->at( i )->GetCov() > 0 && contigs->at( i )->GetLength() > Configure::CONTIG_SIZE_THERSHOLD ){
 				sum += contigs->at( i )->GetCov() * contigs->at( i )->GetLength();
 				num += contigs->at( i )->GetLength();
@@ -992,8 +994,7 @@ void ContigConverter::FilterRepeat( vector<Contig*> *contigs, Graph *graph ){
 	while( contigIter != contigs->end() ){
 		(*contigIter)->SetIfRepeat( false );
 
-		//Set the contig as repeat
-		if( ! Configure::KEEP_REPEAT_FULL && (*contigIter)->GetCov() > threshold ){
+		if( (*contigIter)->GetCov() > threshold ){
 			// remove repeat contigs
 			m_repeatContigs->push_back( *contigIter );
 			//(*contigIter)->SetContigType( REPEAT );
@@ -1033,7 +1034,7 @@ void ContigConverter::FilterRepeat( vector<Contig*> *contigs, Graph *graph ){
 
 	// save to graph
 	graph->SetContigNum( usedContigs.size() );
-	for( int i = 0; i < usedContigs.size(); i++ )
+	for( int i = 0; i < (int) usedContigs.size(); i++ )
 		graph->AddContig( usedContigs.at( i ) );
 }
 
@@ -1089,7 +1090,7 @@ void ContigConverter::RemoveSmallContigs( vector<Contig*> *contigs, Graph *graph
 
 	// save to graph
 	graph->SetContigNum( usedContigs.size() );
-	for( int i = 0; i < usedContigs.size(); i++ )
+	for( int i = 0; i < (int) usedContigs.size(); i++ )
 		graph->AddContig( usedContigs.at( i ) );
 }
 

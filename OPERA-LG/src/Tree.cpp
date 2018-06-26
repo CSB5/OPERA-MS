@@ -21,7 +21,7 @@ bool Tree::IfExist( string *arString, string *deString, int numOfUnhappyEdges ){
 	vector<string> *content = new vector<string>;
 	Split( *arString, "\t", content );
 	list<int> *arValue = new list<int>;
-	for( int i = 0; i < content->size() / 2 ; i++ ){
+	for( int i = 0; i < (int)content->size() / 2 ; i++ ){
 		int value = atoi( content->at( i * 2 ).c_str() ) + 1;		// avoid 0, add 1 to all values
 		if( content->at( i * 2 + 1 ) == "-" )
 			value = -value;
@@ -35,7 +35,7 @@ bool Tree::IfExist( string *arString, string *deString, int numOfUnhappyEdges ){
 	// get dangling edges value
 	Split( *deString, "\t", content );
 	list<int> *deValue = new list<int>;
-	for( int i = 0; i < content->size(); i++ ){
+	for( int i = 0; i < (int)content->size(); i++ ){
 		deValue->push_back( atoi( content->at( i ).c_str() ) );
 	}
 	content->clear();

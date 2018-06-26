@@ -311,7 +311,7 @@ void Contig::SetBorderListPos( list<Contig*>::iterator iter ){
 // generate the scaffold string
 string Contig::toScaffoldString(){
 	char buffer[ 1000 ];
-	int n = sprintf( buffer, "%s\tBE\t%.0f\t%d", m_name.c_str(), m_length, m_gapSize );
+	sprintf( buffer, "%s\tBE\t%.0f\t%d", m_name.c_str(), m_length, m_gapSize );
 	string result( buffer );
 	return result; 
 }
@@ -804,7 +804,7 @@ void Contig::AddDistance( double dis, int step ){
 	}
 	else{
 		// it is a repeat. only remember the smallest position
-		if( m_visitedTime = 0 ){
+		if( m_visitedTime == 0 ){
 			m_distance = dis;
 			m_visitedTime = 1;
 			m_weightedVisitedTime = 1;
@@ -924,7 +924,7 @@ void Contig::SplitSuperContig( Contig *previousContig ){
 
 	// get the last contig of the previous super contig
 	string lastContigName;
-	int lastContigOri;
+	int lastContigOri = 0;
 	
 	if( previousContig != NULL ){
 		if( !previousContig->IsRepeat() ){
@@ -943,7 +943,7 @@ void Contig::SplitSuperContig( Contig *previousContig ){
 	
 	m_removedDis = 0;
 	if( m_ori == PLUS ){
-		for( int i = 0; i < lines.size(); i++ ){
+		for( int i = 0; i < (int) lines.size(); i++ ){
 			vector<string> columns;
 			Split( lines.at( i ), "\t", &columns );
 			SUBCONTIG *newSubcontig = new SUBCONTIG;
@@ -984,7 +984,7 @@ void Contig::SplitSuperContig( Contig *previousContig ){
 			newSubcontig->m_gapSize = atoi( columns.at( 3 ).c_str() );
 
 			if( previousContig != NULL 
-			    && i == lines.size() - 1 
+			    && i == (int) lines.size() - 1 
 			    && lastContigOri != newSubcontig->m_ori 
 			    && lastContigName == columns.at( 0 ) ){
 				// remove the first contig

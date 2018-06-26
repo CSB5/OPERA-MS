@@ -131,12 +131,12 @@ double solve_quadprog(Matrix<double>& G, Vector<double>& g0,
   double t, t1, t2; /* t is the step lenght, which is the minimum of the partial step length t1 
     * and the full step length t2 */
   Vector<int> A(m + p), A_old(m + p), iai(m + p);
-  int q, iq, iter = 0;
+  int iq, iter = 0;
   Vector<bool> iaexcl(m + p);
 	
   /* p is the number of equality constraints */
   /* m is the number of inequality constraints */
-  q = 0;  /* size of the active set A (containing the indices of the active constraints) */
+  //q = 0;  /* size of the active set A (containing the indices of the active constraints) */
 #ifdef TRACE_SOLVER
   std::cout << std::endl << "Starting solve_quadprog" << std::endl;
   print_matrix("G", G);
@@ -283,7 +283,7 @@ l1:	iter++;
   if (fabs(psi) <= m * std::numeric_limits<double>::epsilon() * c1 * c2* 100.0)
   {
     /* numerically there are not infeasibilities anymore */
-    q = iq;
+    //q = iq;
     
     return f_value;
   }
@@ -309,7 +309,7 @@ l2: /* Step 2: check for feasibility and determine a new S-pair */
     }
   if (ss >= 0.0)
   {
-    q = iq;
+    //q = iq;
     
     return f_value;
   }
@@ -377,7 +377,7 @@ l2a:/* Step 2a: determine step direction */
   {
     /* QPP is infeasible */
     // FIXME: unbounded to raise
-    q = iq;
+    //q = iq;
     return inf;
   }
   /* case (ii): step in dual space */

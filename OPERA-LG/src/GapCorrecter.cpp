@@ -6,18 +6,22 @@ GapCorrecter::GapCorrecter(void){
 
 GapCorrecter::GapCorrecter( int max, int min, int contigLength, int mean, int std, int readLength, vector<double> *pos ){
 	m_gapList = new vector<Gap*>();
+	m_contigLength = 0;
 	m_contigLength = contigLength;
 	m_maxGapSize = max;   // should be the max insert size - read length
+	m_minGapSize = 0;
 	m_minGapSize = min;
 	m_mean = mean;
 	m_std = std;
 
 	m_possibility = pos;
 
+	m_readLength = 0;
 	m_readLength = readLength;
+	m_useNormalDistribution = true;
 
 	int sum = 0;
-	for( int i = 0; i < pos->size(); i++ ){
+	for( int i = 0; i < (int)pos->size(); i++ ){
 		sum += pos->at( i );
 	}
 	if( sum <= 100000 ){
@@ -32,7 +36,7 @@ GapCorrecter::GapCorrecter( int max, int min, int contigLength, int mean, int st
 
 
 GapCorrecter::~GapCorrecter(void){
-	for( int i = 0; i < m_gapList->size(); i++ ){
+	for( int i = 0; i < (int)m_gapList->size(); i++ ){
 		delete m_gapList->at( i );
 	}
 	m_gapList->clear();
@@ -53,8 +57,8 @@ void GapCorrecter::CalculateTable(){
 	m_minEstimatedGapSize = 0;
 	m_maxEstimatedGapSize = 0;
 
-	bool startIsZero = true;
-	bool endIsZero = false;
+	//bool startIsZero = true;
+	//bool endIsZero = false;
 
 	// for gap = 0, 
 	   // calculate summation of i*P(i) from g to g+c
@@ -92,7 +96,7 @@ void GapCorrecter::CalculateTable(){
 		m_maxEstimatedGapSize = newGapSize;
 
 	// for gap g from 1 to max
-	for( int i = 1; i < m_gapList->size(); i++ ){
+	for( int i = 1; i < (int)m_gapList->size(); i++ ){
 		double possibilityGM1 = CalculatePossibility( i - 1 + m_readLength); 
 		double possibilityGPC = CalculatePossibility( i + m_contigLength );
 		//double possibilityGM1 = m_possibility->at( i - 1 );
@@ -139,7 +143,7 @@ double GapCorrecter::CalculatePossibility( int value ){
 	}
 	else{
 		double result;
-		if( value >= m_possibility->size() )
+		if( value >= (int)m_possibility->size() )
 			result = 0;
 		else
 			result = m_possibility->at( value );
@@ -158,7 +162,7 @@ int GapCorrecter::PrintTable( string fileName ){
 	
 	string results;
 	results = "read_gap_size\testimated_gap_size\tnew_mean\n";
-	for( int i = 0; i < m_gapList->size(); i++ ){
+	for( int i = 0; i < (int)m_gapList->size(); i++ ){
 		results.append( itos( i ) + "\t" + itos( m_gapList->at( i )->m_estimatedGapSize ) + 
 				"\t" + itos( m_gapList->at( i )->m_newMu ) + "\n" );
 	}
@@ -183,8 +187,8 @@ int GapCorrecter::GetRealGapSize( double estimatedGapSize )
 	// if the value is too big
 	if( estimatedGapSize > m_maxEstimatedGapSize ){
 		// bigger than the tail value, just use the tail value
-		int number = 0;
-		double sum = 0;
+		//int number = 0;
+		//double sum = 0;
 		
 		for( int i = m_gapList->size() - 1; i >= 0; i-- ){
 			if( i == 0 ){
@@ -245,7 +249,7 @@ int GapCorrecter::GetRealGapSize( double estimatedGapSize )
 	}
 
 	// check the one after middle
-	for( int i = middle + 1; i < m_gapList->size(); i++ ){
+	for( int i = middle + 1; i < (int)m_gapList->size(); i++ ){
 		if( m_gapList->at( i )->m_estimatedGapSize == m_gapList->at( middle )->m_estimatedGapSize ){
 			number++;
 			sum += i;

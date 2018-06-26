@@ -30,7 +30,6 @@ void Split( string line, string label, vector<string> *column ){
 void Split( string line, string label, list<string> *column ){
 	column->clear();
 	int pos = line.find( label );
-	int id = 0;
 	while( pos != -1 ){
 		column->push_back( line.substr( 0, pos ) );
 		line = line.substr( pos + 1, line.length() - pos - 1 );
@@ -100,7 +99,7 @@ void PrintNumberToFile( FILE *file, double num ){
 
 // check if it is a number (coverage)
 bool IsNumber( string s ){
-	for( int i = 0; i < s.size(); i++ ){
+	for( int i = 0; i < (int)s.size(); i++ ){
 		char x = s.at( i );
 		if( ( x >= '0' && x <= '9' ) || x == '.' )
 			continue;
@@ -141,10 +140,10 @@ bool IsSAM( string fileName )
 		// it is a bam format
 		tempFileName = Configure::OUTPUT_FOLDER + "temporary.sam";
 		string cmd = "mkfifo " + tempFileName;
-		system( cmd.c_str() );
+		if(system( cmd.c_str() ) );
 		//cerr<<"finish mkfifo\n";
-		cmd  = "samtools view " + fileName + " > " + tempFileName + "&"; 
-		system( cmd.c_str() );
+		cmd  = Configure::SAMDIR.c_str() + std::string("samtools view ") + fileName + " > " + tempFileName + "&"; 
+		if(system( cmd.c_str() ) );
 		//cerr<<"finish samtools\n";
 	}
 
@@ -173,7 +172,7 @@ bool IsSAM( string fileName )
 
 	if( fileName.substr( fileName.length() - 4, 4 ) == ".bam" ){
 		string cmd = "rm " + Configure::OUTPUT_FOLDER + "temporary.sam";
-		system( cmd.c_str() );
+		if(system( cmd.c_str() ) );
 	}
 	
 	return result;

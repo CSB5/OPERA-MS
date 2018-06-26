@@ -111,12 +111,12 @@ private:
 		 PetLibrary *currentLibrary );
 
 	// bundle multiple libraries to create super clusters
-	int BundleSuperCluster( list<PetLibrary*> *libs, list<PetLibrary*> *superCluster, list<string> *conflictingEdges, int libType );
+	void BundleSuperCluster( list<PetLibrary*> *libs, list<PetLibrary*> *superCluster, list<string> *conflictingEdges, int libType );
 	// bundle a certain super cluster
 	string BundleOneSuperCluster( multiset<PET*, less_std> *group, PetLibrary *lib, list<string> *conflictingEdges ); //, ofstream *clusterInfoFile, FILE *discardedEdgeFile );
 
 	// correct the distance of clusters
-	void CorrectDistance( multiset<SinglePet*, lessDistance> *group, PetLibrary *lib );
+	//void CorrectDistance( multiset<SinglePet*, lessDistance> *group, PetLibrary *lib );
 	
 	// create tables for gap correction
 	void CreateGapTables( PetLibrary *lib );

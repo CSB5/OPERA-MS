@@ -4,11 +4,18 @@
 PetLibrary::PetLibrary(string name)
 {
 	m_fileName = name;
-	m_singlePetsMap = new map<pair<int, int>, multiset<SinglePet*, lessDistance>*>;
-	m_edges = new list<PET*>;
+	m_singlePetsMap = new map<pair<int, int>, multiset<SinglePet*, lessDistance>*>();
+	m_edges = new list<PET*>();
 	//m_threshold = -1;
-	m_possibilityOfDistance = new vector<double>;
-	m_mapInfo = new list<mappingInfo*>;
+	m_possibilityOfDistance = new vector<double>();
+	m_mapInfo = new list<mappingInfo*>();
+	m_mean = 0;
+	m_std = 0;
+	m_ori = 0;
+	m_fileNameWithoutPath = "";
+	m_minDistance = 0;
+	m_maxDistance = 0;
+	m_readLength = 0;
 
 }
 
@@ -64,7 +71,7 @@ int PetLibrary::GetStd(){
 }
 
 // check if a contig pair exist in map
-bool PetLibrary::InsertPair( int c1, int c2, SinglePet *pet ){
+void PetLibrary::InsertPair( int c1, int c2, SinglePet *pet ){
 	pair<int, int> newPair( c1, c2 );
 	map<pair<int, int>, multiset<SinglePet*, lessDistance>*>::iterator mapIter = m_singlePetsMap->find( newPair );
 	if( mapIter == m_singlePetsMap->end() ){

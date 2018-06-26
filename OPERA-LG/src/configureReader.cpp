@@ -41,6 +41,8 @@ int configureReader::ReadConfigFile( string fileName )
 		}
 	}
 
+	configReader.close();
+
 	return 1;
 }
 
@@ -79,18 +81,16 @@ int configureReader::AnalyzeParameters( string line ){
 		else
 			return -1;
 	}
-	else if( propertyName == "keep_repeat"){
-		if( value == "yes" )
-			Configure::KEEP_REPEAT_FULL = true;
-		else if( value == "no" ){
-			Configure::KEEP_REPEAT_FULL = false;
-		}
-		else
-			return -1;
-	}
 	else if( propertyName == "contig_file" ){
 		Configure::CONTIG_FILE = value;	
 	}
+	else if( propertyName == "samtools_dir" ){
+                Configure::SAMDIR = value;
+		if(Configure::SAMDIR != ""){
+			Configure::SAMDIR = Configure::SAMDIR + "/";
+        	}
+	}
+
 	else if( propertyName == "repeat_threshold" ){
 		Configure::REPEAT_THRESHOLD = atof( value.c_str() );
 	}
