@@ -123,7 +123,7 @@ OPERA-MS can be used as complete pipeline, or can be used in a stepwise fashion:
 - **GAP_FILLING**: gap-filling of all the scaffold assemblies using long-read data and short contigs.
 - **INFO**: generation of metagenome assembly statistics (see below for a detailed description).
 
-Concatenating a "+" to the step name, for example **REF_CLUSTERING+** will allow to run all the following steps after **REF_CLUSTERING**.
+Concatenating a **+** to a step name will allow to perfom all the steps following it. For example **REF_CLUSTERING+** will allow to run all the following steps after **REF_CLUSTERING**.
 
 ### Outputs
 
