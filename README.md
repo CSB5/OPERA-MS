@@ -21,11 +21,11 @@ cd /path/to/OPERA-MS
 make
 ~~~~
 
-This will build SIGMA (reference-free clustering approach), OPERA-LG (single genome scaffolder/gap-filler), and install the required perl modules.
+This will build SIGMA (reference-free clustering approach), [OPERA-LG](https://github.com/CSB5/OPERA-MS/tree/master/OPERA-LG) (single genome scaffolder/gap-filler), and install the required perl modules.
 
 ### Testing Installation
 
-A set of test files and a sample configuration file is provided to perform a test run of OPERA-MS. To test it, simply: 
+A set of test files and a sample configuration file is provided to perform a test run of OPERA-MS. To test it, simply write the following commands: 
 ~~~~
 cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config 2> log.err
@@ -48,15 +48,15 @@ This will assemble a low diversity mock community in the folder __OPERA-MS/sampl
 # Running OPERA-MS
 
 ### Inputs
-OPERA-MS takes short and long reads as inputs.
+OPERA-MS takes short and long reads fastq files as inputs.
 
-1) A long read file to be used in scaffolding (e.g. sample_files/sample_long_read.fastq).
-2) Paired end reads to be used in scaffolding (e.g. sample_files/lib_1_1.fa, test_dataset/sample_R1.fastq.gz).
+1) A long read fastq files to be used in scaffolding and gap-filling (e.g. sample_files/sample_long_read.fastq).
+2) Paired end reads fastq to be used for contig assembly and scaffolding (e.g. test_dataset/sample_R1.fastq.gz, test_dataset/sample_R2.fastq.gz).
 3) Optionally, contigs assembled from short reads can be provided (e.g. sample_files/sample_contigs.fasta).
 
 ### Executing OPERA-MS
 
-OPERA-MS requires the specfication of a configuration file that will indicate path to the input files and the option used for the assembly. To run OPERA-MS, write `perl /path/to/OPERA-MS/OPERA-MS.pl <config file>`. 
+OPERA-MS requires the specfication of a configuration file that will indicate the path to the input files and the options used during the assembly steps. To run OPERA-MS, write `perl /path/to/OPERA-MS/OPERA-MS.pl <config file> 2> log.err`. 
 
 ### Configuration File Specification
 
@@ -70,7 +70,7 @@ The configuration file must be formatted as follow:
 <OPTION2> <VALUE3>
 ~~~~
 
-This is an example of a configuration file:
+Here an example of a configuration file:
 
 ~~~~
 #This is a comment. 
@@ -99,7 +99,7 @@ All paths are relative to the current working directory of your terminal. All pa
 
 - **ILLUMINA_READ_2**: `path/to/illum_read2.fastq.gz` - Path to the second illumina read file.
 
-- **NUM_PROCESSOR**: `default : 1` - The number of used processors.
+- **NUM_PROCESSOR**: `default : 1` - The number of processors used.
 
 - **CONTIG_LEN_THR**: `default: 500` - Threshold for contig clustering. Smaller contigs will not be considered for clustering.
 
@@ -118,16 +118,16 @@ OPERA-MS can be used as complete pipeline, or can be used in a stepwise fashion:
 - **CONTIG_GRAPH**: sort-read and long-read mapping to the contig assembly to construct the assembly graph and estimate the contigs coverage.
 - **CLUSTERING**: hierarchical clustering based on contig connections and coverage.
 - **REF_CLUSTERING**: cluster merging based on similarity to a data-base of reference genomes (computation of `mash` distance and contig alignment to best reference using `mummer`).
-- **STRAIN_CLUSTERING**: identification of species with multiple strains, strains deconvolution and independent assembly of each strain. Strain level scaffold assemblies are provided in the following files: __OUT_DIR/intermediate_files/strain_analysis/\*/\*/scaffoldSeq.fasta__.
-- **ASSEMBLY**: assembly of single strain species clusters.
+- **STRAIN_CLUSTERING**: identification of species with multiple strains, strains deconvolution and independent assembly of each strain using OPERA-LG. Strain level scaffold assemblies are provided in the following files: __OUT_DIR/intermediate_files/strain_analysis/\*/\*/scaffoldSeq.fasta__.
+- **ASSEMBLY**: assembly of single strain species clusters using OPERA-LG.
 - **GAP_FILLING**: gap-filling of all the scaffold assemblies using long-read data and short contigs.
 - **INFO**: generation of metagenome assembly statistics (see below for a detailed description).
 
-Concatenating a "+" to the step name (e.g. **ASSEMBLY+**) will allow to run all the following steps.
+Concatenating a "+" to the step name, for example **REF_CLUSTERING+** will allow to run all the following steps after **REF_CLUSTERING**.
 
 ### Outputs
 
-Outputs can be found in the specified OUTPUT_DIR and will contains all assembled sequences before  and after gap-filling: __scaffoldSeq.fasta__ and __scaffoldSeq.fasta.filled__ respectively.
+Outputs can be found in the specified OUTPUT_DIR and will contains all assembled sequences before and after gap-filling: __scaffoldSeq.fasta__ and __scaffoldSeq.fasta.filled__ respectively.
 The file __scaffold_info.txt__ provides an overview of the assembled sequences according to the following features:
 - **SEQ_ID**: sequence identifier. For single strain species sequences are name `opera_scaffold_X`. Sequences from multi-strain species are named `strainY_opera_scaffold_X` where `Y` indicate the strain ID.
 - **LENGTH**: sequence length.
@@ -135,7 +135,7 @@ The file __scaffold_info.txt__ provides an overview of the assembled sequences a
 - **SPECIES**: putative species to which the assembled sequence belong to.
 - **NB_STRAIN**: number of strains detected for the species.
 - **REFERENCE_GENOME**: path to the closest reference genome present in the OPERA-MS data-base.
-- **FRACTION_GENOME_COVERED**: fraction of the sequence that map to the reference genome.
+- **FRACTION_GENOME_COVERED**: fraction of the sequence that maps to the reference genome.
 - **IDENTITY**: % identity between the sequence and the reference genome.
 
 ### Dependencies
