@@ -14,7 +14,7 @@ OPERA-MS uses the following strategy: (i) Assembling preliminary contigs using t
 
 To install OPERA-MS, download and unzip OPERA-MS to a specified directory or `git clone https://github.com/CSB5/OPERA-MS.git`.
 
-All the tools needed are distributed pre-built. See below for more information on dependencies.
+All required tools are distributed pre-built. See below for more information on dependencies.
 
 ~~~~
 cd /path/to/OPERA-MS
@@ -25,12 +25,12 @@ This will build SIGMA (reference-free clustering approach), OPERA-LG (single gen
 
 ### Testing Installation
 
-A set of test files and a sample configuration file is provided to allow the user to test out the OPERA-MS pipeline. To test it, simply : 
+A set of test files and a sample configuration file is provided to allow the user to test out the OPERA-MS pipeline. To test it, simply: 
 ~~~~
 cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config 2> log.err
 ~~~~
-This will assemble a low diversity mock community in the folder __OPERA-MS/sample_output__. One should see the following statistics (name and size of the 10 most longest assembled sequences) after completion :
+This will assemble a low diversity mock community in the folder __OPERA-MS/sample_output__. One should see the following statistics (name and size of the 10 most longest assembled sequences) after completion:
 
 ~~~~
 >strain1_opera_scaffold_1	5180338
@@ -52,15 +52,15 @@ OPERA-MS takes short and long reads as inputs.
 
 1) A long read file to be used in scaffolding (e.g. test_dataset/long_read_1.fa).
 2) Paired end reads to be used in scaffolding (e.g. test_dataset/lib_1_1.fa, test_dataset/lib_1_2.fa).
-3) Optionally, contigs assembled from short reads can be provided.
+3) Optionally, contigs assembled from short reads can be provided (e.g. sample_files/sample_contigs.fasta).
 
 ### Executing OPERA-MS
 
-OPERA-MS requires a config file. To run OPERA-MS, write `perl /path/to/OPERA-MS/OPERA-MS.pl <config file>`. 
+OPERA-MS requires the specfication of a configuration file that will indicate path to the input files and the option used for the assembly. To run OPERA-MS, write `perl /path/to/OPERA-MS/OPERA-MS.pl <config file>`. 
 
-### Specification for the Configuration file
+### Configuration File Specification
 
-Configuration files must be formatted in the form :
+The configuration file must be formatted as follow:
 
 ~~~~
 #One space between OPTION and VALUE
@@ -70,15 +70,15 @@ Configuration files must be formatted in the form :
 <OPTION2> <VALUE3>
 ~~~~
 
-This is an example of a configuration file :
+This is an example of a configuration file:
 
 ~~~~
 #This is a comment. 
 #We can use absolute or relative paths
 OUTPUT_DIR opera_ms_output/ #Relative path from current working directory.
-LONG_READ_FILE test_files/POOL.fa
-ILLUMINA_READ_1 test_files/mock1000.R1.fastq.gz
-ILLUMINA_READ_2 test_files/mock1000.R2.fastq.gz
+LONG_READ_FILE test_files/sample_long_read.fastq
+ILLUMINA_READ_1 test_files/sample_R1.fastq.gz
+ILLUMINA_READ_2 test_files/sample_R2.fastq.gz
 
 STRAIN_CLUSTERING YES
 NUM_PROCESSOR 20
@@ -91,37 +91,37 @@ KMER_SIZE 60
 ### Options 
 All paths are relative to the current working directory of your terminal. All paths can be chosen to be either relative or absolute.
 
-- **OUTPUT_DIR** : `path/to/results` - Where the final results of OPERA-MS will go.
+- **OUTPUT_DIR** : `path/to/results` - Where the final results of OPERA-MS will be outputted.
 
-- **LONG_READ_FILE** : `path/to/long-read.fa` - A path to the long read file.
+- **LONG_READ_FILE** : `path/to/long-read.fa` - Path to the long read file.
 
-- **ILLUMINA_READ_1** : `path/to/illum_read1.fa` - A path to the first illumina read file.
+- **ILLUMINA_READ_1** : `path/to/illum_read1.fa` - Path to the first illumina read file.
 
-- **ILLUMINA_READ_2** : `path/to/illum_read2.fa` - A path to the second complement illumina read file.
+- **ILLUMINA_READ_2** : `path/to/illum_read2.fa` - Path to the second illumina read file.
 
-- **NUM_PROCESSOR** : `default : 1` - The number of processors that this pipeline will use.
+- **NUM_PROCESSOR** : `default : 1` - The number of used processors.
 
-- **CONTIG_LEN_THR** : `default : 500` - Threshold for contig clustering. Smaller contigs will not be considered for clustering.
+- **CONTIG_LEN_THR** : `default: 500` - Threshold for contig clustering. Smaller contigs will not be considered for clustering.
 
 - **STRAIN_CLUSTERING** : `YES/NO` - Indicate if the strain level clustering step is performed (YES) or skipped (NO) 
 
-- **CONTIG_EDGE_LEN** : `default : 80` - When calculating coverage of contigs using SIGMA, this number of bases will not be considered from each end of the contig, to avoid biases due to lower mapping efficiency at contig edges. 
+- **CONTIG_EDGE_LEN** : `default: 80` - When calculating coverage of contigs using SIGMA, this number of bases will not be considered from each end of the contig, to avoid biases due to lower mapping efficiency at contig edges. 
 
-- **CONTIG_WINDOW_LEN** : `340` - The window in which coverage is computed by SIGMA for clustering. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value.
+- **CONTIG_WINDOW_LEN** : `340` - The window size in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value.
 
 - **KMER_SIZE** : `(positive integer)` - The value of kmer used to produce the assembled contigs/scaffolds.
 
-- **CONTIGS_FILE** : `path/to/contigs.fa` - A path to the contigs file if the short reads have been assembled previously.
+- **CONTIGS_FILE** : `path/to/contigs.fa` - Path to the contigs file, if the short reads have already been assembled previously.
 
 OPERA-MS can be used as complete pipeline, or can be used in a stepwise fashion:
-- **SHORT_READ_ASSEMBLY** : short-read assembly using Megahit.
-- **CONTIG_GRAPH** : sort-read and long-read mapping to the contig assembly to construct the assembly graph and estimate the contigs coverage.
-- **CLUSTERING** : hierarchical clustering based on contig connections and coverage.
-- **REF_CLUSTERING** : cluster merging based on similarity to a data base of reference genomes (computation of 'mash' distance and contig alignment to best reference using 'mummer').
-- **STRAIN_CLUSTERING** : identification of species with multiple strains, strains deconvolution and independent assembly of each strain. Strain level scaffold assemblies are provided in the following files: __OUT_DIR/intermediate_files/strain_analysis/*/*/scaffoldSeq.fasta__.
-- **ASSEMBLY** : assembly of single strain species clusters.
-- **GAP_FILLING** : gap-filling of all the scaffold assemblies using long-read data and short contigs.
-- **INFO** : generation of metagenome assembly statistics (see below for a detailed description).
+- **SHORT_READ_ASSEMBLY**: short-read assembly using Megahit.
+- **CONTIG_GRAPH**: sort-read and long-read mapping to the contig assembly to construct the assembly graph and estimate the contigs coverage.
+- **CLUSTERING**: hierarchical clustering based on contig connections and coverage.
+- **REF_CLUSTERING**: cluster merging based on similarity to a data base of reference genomes (computation of 'mash' distance and contig alignment to best reference using 'mummer').
+- **STRAIN_CLUSTERING**: identification of species with multiple strains, strains deconvolution and independent assembly of each strain. Strain level scaffold assemblies are provided in the following files: __OUT_DIR/intermediate_files/strain_analysis/*/*/scaffoldSeq.fasta__.
+- **ASSEMBLY**: assembly of single strain species clusters.
+- **GAP_FILLING**: gap-filling of all the scaffold assemblies using long-read data and short contigs.
+- **INFO**: generation of metagenome assembly statistics (see below for a detailed description).
 Concatenating a "+" to the step name (e.g. **ASSEMBLY+**) will allow to run all the following steps.
 ### Outputs
 
