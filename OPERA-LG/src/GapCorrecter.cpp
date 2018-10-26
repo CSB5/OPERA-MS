@@ -21,7 +21,7 @@ GapCorrecter::GapCorrecter( int max, int min, int contigLength, int mean, int st
 	m_useNormalDistribution = true;
 
 	int sum = 0;
-	for( int i = 0; i < (int)pos->size(); i++ ){
+	for( int i = 0; i < (int) pos->size(); i++ ){
 		sum += pos->at( i );
 	}
 	if( sum <= 100000 ){
@@ -36,7 +36,7 @@ GapCorrecter::GapCorrecter( int max, int min, int contigLength, int mean, int st
 
 
 GapCorrecter::~GapCorrecter(void){
-	for( int i = 0; i < (int)m_gapList->size(); i++ ){
+	for( int i = 0; i < (int) m_gapList->size(); i++ ){
 		delete m_gapList->at( i );
 	}
 	m_gapList->clear();
@@ -96,7 +96,7 @@ void GapCorrecter::CalculateTable(){
 		m_maxEstimatedGapSize = newGapSize;
 
 	// for gap g from 1 to max
-	for( int i = 1; i < (int)m_gapList->size(); i++ ){
+	for( int i = 1; i < (int) m_gapList->size(); i++ ){
 		double possibilityGM1 = CalculatePossibility( i - 1 + m_readLength); 
 		double possibilityGPC = CalculatePossibility( i + m_contigLength );
 		//double possibilityGM1 = m_possibility->at( i - 1 );
@@ -143,7 +143,7 @@ double GapCorrecter::CalculatePossibility( int value ){
 	}
 	else{
 		double result;
-		if( value >= (int)m_possibility->size() )
+		if( value >= (int) m_possibility->size() )
 			result = 0;
 		else
 			result = m_possibility->at( value );
@@ -162,7 +162,7 @@ int GapCorrecter::PrintTable( string fileName ){
 	
 	string results;
 	results = "read_gap_size\testimated_gap_size\tnew_mean\n";
-	for( int i = 0; i < (int)m_gapList->size(); i++ ){
+	for( int i = 0; i < (int) m_gapList->size(); i++ ){
 		results.append( itos( i ) + "\t" + itos( m_gapList->at( i )->m_estimatedGapSize ) + 
 				"\t" + itos( m_gapList->at( i )->m_newMu ) + "\n" );
 	}
@@ -249,7 +249,7 @@ int GapCorrecter::GetRealGapSize( double estimatedGapSize )
 	}
 
 	// check the one after middle
-	for( int i = middle + 1; i < (int)m_gapList->size(); i++ ){
+	for( int i = middle + 1; i < (int) m_gapList->size(); i++ ){
 		if( m_gapList->at( i )->m_estimatedGapSize == m_gapList->at( middle )->m_estimatedGapSize ){
 			number++;
 			sum += i;

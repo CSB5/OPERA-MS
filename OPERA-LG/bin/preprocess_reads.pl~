@@ -9,21 +9,22 @@ use Getopt::Long;
 my $help_message = "
 
 	Options:
-	--contig		Multi-fasta contig file
-	--illumina-read1	Fasta/Fastq file of read 1 of the paired-end reads
-	--illumina-read2	Fasta/Fastq file of read 2 of the paired-end reads
-	--out			Name of the output file
-	--map-tool		Mapping tool can be either bwa (default) or bowtie
-	--tool-dir		Directory that contains binaries to the chosen mapping tool (default PATH)
-        --samtools-dir		Directory that contains samtools binaries (default PATH)
-	--help			Help
+    --nproc             Number of processor used during the analysis 
+    --contig		Multi-fasta contig file
+    --illumina-read1	Fasta/Fastq file of read 1 of the paired-end reads
+    --illumina-read2	Fasta/Fastq file of read 2 of the paired-end reads
+    --out		Name of the output file
+    --map-tool		Mapping tool can be either bwa (default) or bowtie
+    --tool-dir		Directory that contains binaries to the chosen mapping tool (default PATH)
+    --samtools-dir		Directory that contains samtools binaries (default PATH)
+    --help			Help
 ";
 
 my $path = "";
 my $samtoolsDir = "";
 
 GetOptions(
-
+    "nproc=i"    => \$nproc,
     "contig=s"    => \$contigFile,
     "illumina-read1=s"    => \$readFile1,
     "illumina-read2=s" => \$readFile2,
@@ -116,7 +117,7 @@ elsif( $mapTool eq "bwa" )
     &readAndMap;
 
     # remove the intermediate file
-    `rm ${folder}read.sai`;
+    `rm ${folder}$outputFile\_read.sai`;
 }
 else
 {
@@ -225,7 +226,7 @@ sub buildIndexUsingBwa
     print "[$time]\t";
     print "Building bwa index...\n";
     @contigName = split( "/", $contigFile );
-    if( ! -f "$folder$contigName[ -1 ].bwt" )
+    if( ! -f "$folder$contigName[ -1 ].amb" )
     {
 	if( $type eq "cs" )
 	{
@@ -318,17 +319,18 @@ sub findSAWithBwa
     $time = localtime;
     print "[$time]\t";
     print "Finding the SA coordinates of the reads using BWA aln...\n";
-    $command = "${path}bwa aln -t 30 $folder$contigName[ -1 ] - > ${folder}read.sai";
+    $command = "${path}bwa aln -t $nproc $folder$contigName[ -1 ] - > ${folder}$outputFile\_read.sai";
 }
 
 sub generateAlignmentUsingBwa
 {
     $time = localtime;
     print "[$time]\t";
-    print "Generate alignments of reads using bwa sampe...\n";
+    print "Generate alignments of reads using bwa samse...\n";
     # $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | awk \'{ if( \$3 != \"*\" ) print \$0 }\' > $folder$outputFile";
     # $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | samtools view -S -h -b -F 0x4 - | samtools sort -no - ${folder}temporarySam | samtools view -h -b - > $folder$outputFile";
-    $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ 20 -no - ${folder}temporarySam > $folder$outputFile";
+    #$command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ 20 -no - ${folder}temporarySam > $folder$outputFile";
+    $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}$outputFile\_read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ $nproc -no - ${folder}$outputFile\_temp > $folder$outputFile";
     print $command."\n";
 }
 

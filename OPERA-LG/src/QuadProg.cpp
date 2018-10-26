@@ -80,9 +80,9 @@ double solve_quadprog(Matrix<double>& G, Vector<double>& g0,
        CI.nrows() >= mx || CI.ncols() >= mx || 
        ci0.size() >= mx || ce0.size() >= mx || g0.size() >= mx){
       msg << "The dimensions of one of the input matrices or vectors were "
-	  << "too large." << std::endl
-	  << "The maximum allowable size for inputs to solve_quadprog is:"
-	  << mx << std::endl;
+    << "too large." << std::endl
+    << "The maximum allowable size for inputs to solve_quadprog is:"
+    << mx << std::endl;
       throw std::logic_error(msg.str());
     }
   }
@@ -90,31 +90,31 @@ double solve_quadprog(Matrix<double>& G, Vector<double>& g0,
   if ((int)G.nrows() != n)
   {
     msg << "The matrix G is not a square matrix (" << G.nrows() << " x " 
-	<< G.ncols() << ")";
+  << G.ncols() << ")";
     throw std::logic_error(msg.str());
   }
   if ((int)CE.nrows() != n)
   {
     msg << "The matrix CE is incompatible (incorrect number of rows " 
-	<< CE.nrows() << " , expecting " << n << ")";
+  << CE.nrows() << " , expecting " << n << ")";
     throw std::logic_error(msg.str());
   }
   if ((int)ce0.size() != p)
   {
     msg << "The vector ce0 is incompatible (incorrect dimension " 
-	<< ce0.size() << ", expecting " << p << ")";
+  << ce0.size() << ", expecting " << p << ")";
     throw std::logic_error(msg.str());
   }
   if ((int)CI.nrows() != n)
   {
     msg << "The matrix CI is incompatible (incorrect number of rows " 
-	<< CI.nrows() << " , expecting " << n << ")";
+  << CI.nrows() << " , expecting " << n << ")";
     throw std::logic_error(msg.str());
   }
   if ((int)ci0.size() != m)
   {
     msg << "The vector ci0 is incompatible (incorrect dimension " 
-	<< ci0.size() << ", expecting " << m << ")";
+  << ci0.size() << ", expecting " << m << ")";
     throw std::logic_error(msg.str());
   }
   x.resize(n);
@@ -133,7 +133,7 @@ double solve_quadprog(Matrix<double>& G, Vector<double>& g0,
   Vector<int> A(m + p), A_old(m + p), iai(m + p);
   int iq, iter = 0;
   Vector<bool> iaexcl(m + p);
-	
+  
   /* p is the number of equality constraints */
   /* m is the number of inequality constraints */
   //q = 0;  /* size of the active set A (containing the indices of the active constraints) */
@@ -150,7 +150,7 @@ double solve_quadprog(Matrix<double>& G, Vector<double>& g0,
   /*
    * Preprocessing phase
    */
-	
+  
   /* compute the trace of the original matrix G */
   c1 = 0.0;
   for (i = 0; i < n; i++)
@@ -239,7 +239,7 @@ double solve_quadprog(Matrix<double>& G, Vector<double>& g0,
     A[i] = -i - 1;
     
     if (!add_constraint(R, J, d, iq, R_norm))
-    {	  
+    {   
       // Equality constraints are linearly dependent
       throw std::runtime_error("Constraints are linearly dependent");
       return f_value;
@@ -250,7 +250,7 @@ double solve_quadprog(Matrix<double>& G, Vector<double>& g0,
   for (i = 0; i < m; i++)
     iai[i] = i;
   
-l1:	iter++;
+l1: iter++;
 #ifdef TRACE_SOLVER
   print_vector("x", x);
 #endif
@@ -260,7 +260,7 @@ l1:	iter++;
     ip = A[i];
     iai[ip] = -1;
   }
-	
+  
   /* compute s[x] = ci^T * x + ci0 for all elements of K \ A */
   ss = 0.0;
   psi = 0.0; /* this value will contain the sum of all infeasibilities */
@@ -352,10 +352,10 @@ l2a:/* Step 2a: determine step direction */
     if (r[k] > 0.0)
     {
       if (u[k] / r[k] < t1)
-	    {
-	      t1 = u[k] / r[k];
-	      l = A[k];
-	    }
+      {
+        t1 = u[k] / r[k];
+        l = A[k];
+      }
     }
   }
   /* Compute t2: full step length (minimum step in primal space such that the constraint ip becomes feasible */
@@ -434,16 +434,16 @@ l2a:/* Step 2a: determine step direction */
 #ifdef TRACE_SOLVER
       print_matrix("R", R);
       print_vector("A", A, iq);
-			print_vector("iai", iai);
+      print_vector("iai", iai);
 #endif
       for (i = 0; i < m; i++)
         iai[i] = i;
       for (i = p; i < iq; i++)
-	    {
-	      A[i] = A_old[i];
-	      u[i] = u_old[i];
-				iai[A[i]] = -1;
-	    }
+      {
+        A[i] = A_old[i];
+        u[i] = u_old[i];
+        iai[A[i]] = -1;
+      }
       for (i = 0; i < n; i++)
         x[i] = x_old[i];
       goto l2; /* go to step 2 */
@@ -453,7 +453,7 @@ l2a:/* Step 2a: determine step direction */
 #ifdef TRACE_SOLVER
     print_matrix("R", R);
     print_vector("A", A, iq);
-		print_vector("iai", iai);
+    print_vector("iai", iai);
 #endif
     goto l1;
   }
@@ -501,7 +501,7 @@ inline void compute_d(Vector<double>& d, const Matrix<double>& J, const Vector<d
 inline void update_z(Vector<double>& z, const Matrix<double>& J, const Vector<double>& d, int iq)
 {
   register int i, j, n = z.size();
-	
+  
   /* setting of z = H * d */
   for (i = 0; i < n; i++)
   {
@@ -534,7 +534,7 @@ bool add_constraint(Matrix<double>& R, Matrix<double>& J, Vector<double>& d, int
 #endif
   register int i, j, k;
   double cc, ss, h, t1, t2, xny;
-	
+  
   /* we have to find the Givens rotation which will reduce the element
     d[j] to zero.
     if it is already zero we don't have to do anything, except of
@@ -698,18 +698,18 @@ inline double scalar_product(const Vector<double>& x, const Vector<double>& y)
 {
   register int i, n = x.size();
   register double sum;
-	
+  
   sum = 0.0;
   for (i = 0; i < n; i++)
     sum += x[i] * y[i];
-  return sum;			
+  return sum;     
 }
 
 void cholesky_decomposition(Matrix<double>& A) 
 {
   register int i, j, k, n = A.nrows();
   register double sum;
-	
+  
   for (i = 0; i < n; i++)
   {
     for (j = i; j < n; j++)
@@ -718,9 +718,9 @@ void cholesky_decomposition(Matrix<double>& A)
       for (k = i - 1; k >= 0; k--)
         sum -= A[i][k]*A[j][k];
       if (i == j) 
-	    {
-		    //if (sum <= 0.0)
-		    if (sum < 0.0)
+      {
+        //if (sum <= 0.0)
+        if (sum < 0.0)
         {
           std::ostringstream os;
           // raise error
@@ -729,8 +729,8 @@ void cholesky_decomposition(Matrix<double>& A)
           throw std::logic_error(os.str());
           exit(-1);
         }
-	      A[i][i] = ::std::sqrt(sum);
-	    }
+        A[i][i] = ::std::sqrt(sum);
+      }
       else
         A[j][i] = sum / A[i][i];
     }
@@ -743,7 +743,7 @@ void cholesky_solve(const Matrix<double>& L, Vector<double>& x, const Vector<dou
 {
   int n = L.nrows();
   Vector<double> y(n);
-	
+  
   /* Solve L * y = b */
   forward_elimination(L, y, b);
   /* Solve L^T * x = y */
@@ -753,7 +753,7 @@ void cholesky_solve(const Matrix<double>& L, Vector<double>& x, const Vector<dou
 inline void forward_elimination(const Matrix<double>& L, Vector<double>& y, const Vector<double>& b)
 {
   register int i, j, n = L.nrows();
-	
+  
   y[0] = b[0] / L[0][0];
   for (i = 1; i < n; i++)
   {
@@ -767,7 +767,7 @@ inline void forward_elimination(const Matrix<double>& L, Vector<double>& y, cons
 inline void backward_elimination(const Matrix<double>& U, Vector<double>& x, const Vector<double>& y)
 {
   register int i, j, n = U.nrows();
-	
+  
   x[n - 1] = y[n - 1] / U[n - 1][n - 1];
   for (i = n - 2; i >= 0; i--)
   {
@@ -786,7 +786,7 @@ void print_matrix(const char* name, const Matrix<double>& A, int n, int m)
     n = A.nrows();
   if (m == -1)
     m = A.ncols();
-	
+  
   s << name << ": " << std::endl;
   for (int i = 0; i < n; i++)
   {
@@ -797,7 +797,7 @@ void print_matrix(const char* name, const Matrix<double>& A, int n, int m)
   }
   t = s.str();
   t = t.substr(0, t.size() - 3); // To remove the trailing space, comma and newline
-	
+  
   std::cout << t << std::endl;
 }
 
@@ -808,7 +808,7 @@ void print_vector(const char* name, const Vector<T>& v, int n)
   std::string t;
   if (n == -1)
     n = v.size();
-	
+  
   s << name << ": " << std::endl << " ";
   for (int i = 0; i < n; i++)
   {
@@ -816,7 +816,7 @@ void print_vector(const char* name, const Vector<T>& v, int n)
   }
   t = s.str();
   t = t.substr(0, t.size() - 2); // To remove the trailing space and comma
-	
+  
   std::cout << t << std::endl;
 }
 }

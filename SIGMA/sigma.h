@@ -44,6 +44,8 @@ public:
 	static int SPLITTING_PENALTY;//penalty allowing alling lager clusters
 	static int USE_WINDOW;//to swithch between contig or windows based mode
 
+	static std::string SAMDIR;				//samtools dir
+	
 	static int num_samples; /**< Number of samples. */
 	
 	static int contig_len_thr; /**< Threshold on contig length. */

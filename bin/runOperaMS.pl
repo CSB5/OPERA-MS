@@ -12,6 +12,8 @@
 #		If r is not defined or is defined as -r 1, commands
 #		will be both printed and executed.
 
+
+
 use warnings; 
 use Cwd;
 use File::Spec; 
@@ -22,13 +24,7 @@ use File::Basename;
 
 getopts('r:'); # r=1 -> run cmds in run_exe, else only print
 
-# Paths to programs used in script
-#my $bundler_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/FOR_OPERA/bundler"; 
-#my $opera_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/FOR_OPERA/opera";
-#my $sigma_path = "/mnt/projects/bertrandd/sigma/OperaMS2.0/SIGMA++/1.5_debug/sigma";
-#my $compute_n50_path = "/home/bertrandd/X_SCRIPTS/scaffold_stats_opt.pl";
 
-#TODO add a way for users to specify the path maybe?
 my $main_direct = getcwd;
 $main_direct .= "\/";
 
@@ -47,7 +43,8 @@ my($opera_ms_config_file) = @ARGV;
 my($contigs_file, %LIB, $samtools_path, $mapping_files, $sigma_contigs_file,
 	$output_dir, $bundle_size_thresh, $kmer_size, $contigs_file_type, 
 	$contig_len_thr, $contig_edge_len, 
-	$contig_window_len, $pdist_type
+   $contig_window_len, $pdist_type,
+   $short_read_tool_dir, $blasr_dir
     );
 my $num_LIB = 0;
 
@@ -55,142 +52,151 @@ $contigs_file_type = "SOAP";
 print STDERR "\nReading config file: ".$opera_ms_config_file."\n"; 
 open($opera_ms_cf, "<", $opera_ms_config_file); 
 while(<$opera_ms_cf>) {
-	next if (/^#/);  #skip comments
-	chomp($_); 		 
-	my @split_line = split('\s+', $_);
-	if (@split_line != 0) {
-	    $config_option = $split_line[0];
+    next if (/^#/);  #skip comments
+    chomp($_); 		 
+    my @split_line = split('\s+', $_);
+    if (@split_line != 0) {
+	$config_option = $split_line[0];
 
-	    switch ($config_option) {
+	switch ($config_option) {
             
-	    	case "CONTIGS_FILE" {
-				$contigs_file = File::Spec->rel2abs($split_line[1]);
-				if (! -e $contigs_file) {
-				    die "Contigs file: ".$contigs_file." not found";  
-				} 
-	    	}
-
-	    	case "MAPPING_FILES" {
-				$mapping_files = $split_line[1]; #comma separated files
-				#check if all of them exist
-				my @split_mapping_files = split(',', $mapping_files);
-				my $mapping_file;
-				for $mapping_file (@split_mapping_files) {
-					if (! -e $mapping_file) {
-					    die "Library file for computing coverage:"
-						.$mapping_file." not found";  
-					} 					
-				}
-	    	}
-
-	    	case "LIB" {
-	    		my $lib_file_name = $split_line[1]; #filename
-				$num_LIB++; 
-				my $int_lib_name = "lib_$num_LIB";
-				if (@split_line == 3) {
-				    $int_lib_name = $split_line[2]; #internal names of library for producing bundles
-				}
-
-				if (exists $LIB{$int_lib_name}) {
-				    die "Same library names given for different libraries.\n"; 
-				}
-
-				$LIB{$int_lib_name} = $lib_file_name;
-				if (! -e $LIB{$int_lib_name}) {
-				    die "Library (BAM) file: ".$LIB{$int_lib_name}." not found\n";  
-				}
-	    	}
-
-	    	case "EDGE_BUNDLESIZE_THRESHOLD" {
-	    		$bundle_size_thresh = $split_line[1]; 
-	    	}
-
-	    	case "OUTPUT_DIR" {
-				$output_dir = $split_line[1];
-	    	}
-
-	    	case "SAMTOOLS_DIR" {
-	    		$samtools_path = $split_line[1];
-	    		if (! -e $samtools_path) {
-	    			die "Samtools not found at: ".$samtools_path."\n";
-	    		}
-	    	}
-
-            case "BLASR_DIR"{
-                    $blasr_dir = $split_line[1];
-            }
-
-            case "SHORT_READ_TOOL"{
-            }
-
-            case "BWA_DIR"{
-                $short_read_tool_dir = $split_line[1];
-            }
-
-            case "VSEARCH_DIR"{
-            }
-
-            case "GRAPHMAP_DIR"{
-            }
-
-            case "WATER_DIR"{
-            }
-
-            case "RACON_DIR"{
-            }
-
-	    	case "SIGMA_CONTIGS_FILE" {
-				$sigma_contigs_file = File::Spec->rel2abs($split_line[1]); 
-				if(! -e $sigma_contigs_file) {
-				    die "Sigma contigs file:"
-					.$sigma_contigs_file. " not found.\n"; 
-				}	
-	    	}
-
-	    	case "KMER_SIZE" {
-				$kmer_size = $split_line[1];
-				if (!defined $kmer_size) {
-					die "KMER_SIZE not provided.\n";
-				}
-	    	}
-
-	    	case "CONTIGS_FILE_TYPE" {
-				$contigs_file_type = $split_line[1];
-	    	}
-
-	    	case "CONTIG_LEN_THR" {
-	    		$contig_len_thr = $split_line[1];
-	    	}
-
-	    	case "CONTIG_EDGE_LEN" {
-				$contig_edge_len = $split_line[1];
-	    	}
-
-	    	case "CONTIG_WINDOW_LEN" {
-				$contig_window_len = $split_line[1]
-	    	}
-
-	    	case "PDIST_TYPE" {
-				$pdist_type = $split_line[1];
-	    	}
-
-            case "LONG_READ_FILE"{
-            }
-
-            case "ILLUMINA_READ_1"{
-            }
-
-            case "ILLUMINA_READ_2"{
-            }
-
-            case "NUM_PROCESSOR"{
-            }
-
-            else {
-                die "Config option: ".$config_option." unknown";
-	    	}	
+	    case "CONTIGS_FILE" {
+		$contigs_file = File::Spec->rel2abs($split_line[1]);
+		if (! -e $contigs_file) {
+		    die "Contigs file: ".$contigs_file." not found";  
+		} 
 	    }
+
+	    case "MAPPING_FILES" {
+		$mapping_files = $split_line[1]; #comma separated files
+		#check if all of them exist
+		my @split_mapping_files = split(',', $mapping_files);
+		my $mapping_file;
+		for $mapping_file (@split_mapping_files) {
+		    if (! -e $mapping_file) {
+			die "Library file for computing coverage:"
+			    .$mapping_file." not found";  
+		    } 					
+		}
+	    }
+
+	    case "LIB" {
+		my $lib_file_name = $split_line[1]; #filename
+		$num_LIB++; 
+		my $int_lib_name = "lib_$num_LIB";
+		if (@split_line == 3) {
+		    $int_lib_name = $split_line[2]; #internal names of library for producing bundles
+		}
+
+		if (exists $LIB{$int_lib_name}) {
+		    die "Same library names given for different libraries.\n"; 
+		}
+
+		$LIB{$int_lib_name} = $lib_file_name;
+		if (! -e $LIB{$int_lib_name}) {
+		    die "Library (BAM) file: ".$LIB{$int_lib_name}." not found\n";  
+		}
+	    }
+
+	    case "EDGE_BUNDLESIZE_THRESHOLD" {
+		$bundle_size_thresh = $split_line[1]; 
+	    }
+
+	    case "OUTPUT_DIR" {
+		$output_dir = $split_line[1];
+	    }
+
+	    case "SAMTOOLS_DIR" {
+		$samtools_path = $split_line[1];
+		if (! -e $samtools_path) {
+		    die "Samtools not found at: ".$samtools_path."\n";
+		}
+	    }
+	    case "LONG_READ_MAPPER"{
+	    }
+	    
+	    case "BLASR_DIR"{
+		$blasr_dir = $split_line[1];
+	    }
+
+	    case "SHORT_READ_TOOL"{
+	    }
+	    case "STRAIN_CLUSTERING"{
+	    }
+	    case "BWA_DIR"{
+		$short_read_tool_dir = $split_line[1];
+	    }
+
+	    
+	    case "GRAPHMAP_DIR"{
+	    }
+	    case "RACON_DIR"{
+	    }
+	    
+	    case "MUMMER_DIR"{
+	    }
+	    
+	    case "MINIMAP2_DIR" {
+	    }
+	    
+	    case "MEGAHIT_DIR" {
+	    }
+	    
+	    case "MASH_DIR"{
+	    }
+	    
+	    case "SIGMA_CONTIGS_FILE" {
+		$sigma_contigs_file = File::Spec->rel2abs($split_line[1]); 
+		if(! -e $sigma_contigs_file) {
+		    die "Sigma contigs file:"
+			.$sigma_contigs_file. " not found.\n"; 
+		}	
+	    }
+
+	    case "KMER_SIZE" {
+		$kmer_size = $split_line[1];
+		if (!defined $kmer_size) {
+		    die "KMER_SIZE not provided.\n";
+		}
+	    }
+	    
+	    case "CONTIGS_FILE_TYPE" {
+		$contigs_file_type = $split_line[1];
+	    }
+	    
+	    case "CONTIG_LEN_THR" {
+		$contig_len_thr = $split_line[1];
+	    }
+	    
+	    case "CONTIG_EDGE_LEN" {
+		$contig_edge_len = $split_line[1];
+	    }
+	    
+	    case "CONTIG_WINDOW_LEN" {
+		$contig_window_len = $split_line[1]
+	    }
+
+	    case "PDIST_TYPE" {
+		$pdist_type = $split_line[1];
+	    }
+	    
+	    case "LONG_READ_FILE"{
+	    }
+	    
+	    case "ILLUMINA_READ_1"{
+	    }
+	    
+	    case "ILLUMINA_READ_2"{
+	    }
+	    
+	    case "NUM_PROCESSOR"{
+	    }
+	    
+	    else {
+		die "Config option: ".$config_option." unknown";
+	    }	
 	}
+    }
 }
 close($opera_ms_cf);
 
@@ -225,6 +231,7 @@ unless (-d $output_dir) {
 # Output folder name is: $output_dir/ + all libraries names separated by "_"
 # NEED TO CHANGE THAT STUFF !!!!
 my $results_folder = $output_dir."/"."intermediate_files";
+$output_dir = $results_folder;
 
 #foreach $k (sort keys %LIB) {
 #	my $lib_size_starting_index;
@@ -393,20 +400,19 @@ sub bundleBAMs {
     foreach $k (keys %libH) {
     	my $lib_bundles_dir = $output_dir."/".$k."_bundles";
 		my $lib_bundles_config = $k.".ebconfig"; 
-		if (! -d $lib_bundles_dir) {
-		    run_exe("mkdir $lib_bundles_dir");
-		    open(my $config, ">", "$lib_bundles_dir/$lib_bundles_config"); #edge bundler config
-		    print $config "\noutput_folder=$lib_bundles_dir\n";
-		    print $config "\ncontig_file=$contigs_file\n";
-		    print $config "\n[LIB]"; 
-		    print $config "\nmap_file=$libH{$k}"; #this will cause the bundler to read the read mapping from STDIN
-		    print $config "\nfilter_repeat=no\n"; 
-		    print $config "\ncluster_threshold=$bundle_size_thresh\n";
-		    print $config "\ncluster_increased_step=5\n"; 
-		    print $config "\nkmer=$kmer_size\n";
-		    close($config); 
-		    run_exe("$bundler_path $lib_bundles_dir/$lib_bundles_config");
-		}
+        run_exe("mkdir $lib_bundles_dir");
+        open(my $config, ">", "$lib_bundles_dir/$lib_bundles_config"); #edge bundler config
+	print $config "\nsamtools_dir=$samtools_path\n";
+        print $config "\noutput_folder=$lib_bundles_dir\n";
+        print $config "\ncontig_file=$contigs_file\n";
+        print $config "\n[LIB]"; 
+        print $config "\nmap_file=$libH{$k}"; #this will cause the bundler to read the read mapping from STDIN
+        print $config "\nfilter_repeat=no\n"; 
+        print $config "\ncluster_threshold=$bundle_size_thresh\n";
+        print $config "\ncluster_increased_step=5\n"; 
+        print $config "\nkmer=$kmer_size\n";
+	close($config); 
+        run_exe("$bundler_path $lib_bundles_dir/$lib_bundles_config");
     }
 }
 
@@ -514,6 +520,8 @@ sub construct_sigma_config_file {
 		print CONF "\npdist_type=NegativeBinomial\n";
 	}
 
+    print CONF "\nsamtools_dir=$samtools_path\n";
+    
 	close(CONF);
  }
 

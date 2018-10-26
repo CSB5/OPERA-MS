@@ -2,6 +2,9 @@
 use warnings;
 use Switch;
 use Getopt::Long;
+#`source activate nanopore`;
+
+
 
 my $edge_file_info;
 my $contig_file;
@@ -16,7 +19,7 @@ my $ana_dir;
 my $outfile;
 my $stage;
 my $nb_process;
-my $bin_dir;
+#my $bin_dir;
 my $is_fastq = 0;
 
 GetOptions(
@@ -33,7 +36,7 @@ GetOptions(
     "graphmap=s"      => \$graphmap_dir,
     "outfile=s"       => \$outfile,
     "stage=s"         => \$stage,
-    "bin=s"           => \$bin_dir
+ #   "bin=s"           => \$bin_dir
     )
 
  or die("Error in command line arguments.\n");
@@ -41,7 +44,7 @@ GetOptions(
 
 if(!(-e $contig_file)){
     die "CONTIG FILE NOT FOUND \n";
-}
+}	
 
 if(!(-e $scaffold_file)){
     die "SCAFFOLD FILE NOT FOUND \n";
@@ -97,12 +100,14 @@ close(READ_FILE);
 my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -V";
 
 #length of the mapping that include the contig sequence
-my $sequence_overhang = 400;
-my $additional_contig_sequence = 100;
+##?##
+my $sequence_overhang = 1000;
+#my $additional_contig_sequence = 100;
+my $additional_contig_sequence = 0;
 
 #For only getting the consensus
 if($stage eq "CONS"){
-    print STDERR " *** Construct the gap consensus sequences\n";
+    print STDERR " *** ConsEtruct the gap consensus sequences\n";
     run_exe("rm -rf $ana_dir/LOG;mkdir $ana_dir/LOG");
     #opendir(DIR, $ana_dir);
     #my @all_cons = readdir(DIR);
@@ -137,7 +142,7 @@ if($stage eq "FILL"){
 
 
 print STDERR " *** Starting the sequence extraction\n";#<STDIN>;
-#run_exe("rm -r $ana_dir");
+run_exe("rm -r $ana_dir");
 run_exe("rm -rf $ana_dir/LOG");
 run_exe("mkdir -p $ana_dir/LOG");
 my $run_racon_log = "$ana_dir/LOG/run_racon_log.txt";
@@ -148,6 +153,8 @@ my %edge_info = ();
 my %read_to_edge = ();
 #indicate which contig belong to which edges
 my %contig_to_edge = ();
+#holds the reference reads
+my %reference_reads = ();
 
 #Read the scaffold file to get the set of adjacent edges used to construct the scaffold
 my $nb_selected_edges = 0;
@@ -163,6 +170,30 @@ open(FILE, $edge_file_info);
 my ($reverse_edge, $reverse_edge_r);
 my %contig_in_gap_to_extract = ();#list of contig for which the full sequence need to be stored
 my %contig_in_gap_support = ();#To compute the support of the contig in the gap, the contig should be at least supported by 2 reads
+my %contig_lengths = ();	# Temporarily holds the contig lengths so as to compute the coordinates for cutting the reads
+
+my @tmp_path = split(/long-read-mapping/,$edge_file_info);
+my $contig_len_file = $tmp_path[0]."/opera_long_read/contigs";
+open(LEN_FILE, $contig_len_file);
+
+<LEN_FILE>;
+
+while(<LEN_FILE>){
+	@fields = split(/\t/, $_);
+	$contig_lengths{$fields[0]} = $fields[1];
+}
+
+close(LEN_FILE);
+
+# Only for debugging to verify correctness of input
+# Verified to match file. Discard this as a concern
+#foreach $c (keys %contig_lengths){
+#	print STDERR "$c\t$contig_lengths{$c}";
+#}
+#exit(0);
+
+
+open(OUT_EXTRA, ">$ana_dir/contig_extention.log");
 while(<FILE>){
     chop $_;
     @line = split(/\t/, $_);
@@ -194,9 +225,42 @@ while(<FILE>){
     @tmp = split(/\:/, $line[9]);@contig_in_gap = split(/\;/, $tmp[1]);
     %contig_in_gap_support = ();
 
+
+    ##?##
+    @coord_c1_on_r1 = split(/\_/, $coord_contig_1_on_read[0]);
+    @coord_c2_on_r1 = split(/\_/, $coord_contig_2_on_read[0]);
+    @coord_c1_for_r1 = split(/\_/, $coord_contig_1[0]);
+    @coord_c2_for_r1 = split(/\_/, $coord_contig_2[0]);
+
+
+    #Calculate the maximum possible overhang based on read 1
+    $max_seq_overhang_c1 = abs($coord_c1_on_r1[2] - $coord_c1_on_r1[1]);$max_seq_overhang_c1 = $sequence_overhang if($max_seq_overhang_c1 > $sequence_overhang);
+    $max_seq_overhang_c2 = abs($coord_c2_on_r1[2] - $coord_c2_on_r1[1]);$max_seq_overhang_c2 = $sequence_overhang if($max_seq_overhang_c2 > $sequence_overhang);
+    $max_seq_overhang_c1 = 0;
+    $max_seq_overhang_c2 = 0;
+    $edge_info{$edge_ID}->{"CONTIG_OVERHANG_INFO"}->{$contig_1} = $max_seq_overhang_c1;
+    $edge_info{$edge_ID}->{"CONTIG_OVERHANG_INFO"}->{$contig_2} = $max_seq_overhang_c2;
+
+    # Stores the reference read name (1st read)
+    #$edge_info{$edge_ID}->{"REF_READ"} = $read_name[0];
+    $reference_reads{$edge_ID} = $read_name[0];
+
+    # Stores the coordinates of the contigs which map to the reference genome
+    # Not required anymore
+    #$edge_info{$edge_ID}->{"REF_COORDS"}->{$contig_1} = @coord_c1_on_r1;
+    #$edge_info{$edge_ID}->{"REF_COORDS"}->{$contig_2} = @coord_c2_on_r1;
+    
     for(my $i = 0; $i < @read_name; $i++){
 	$r = $read_name[$i];
 	$reverse_edge_r = $reverse_edge;
+
+	#####################################################
+	#Initailize the sequence overhang based on the first read
+	#Store the read name and the overhang in  $edge_info{$edge_ID} {"REF_READ", "CONTIG1_OVERHANG", aa,  "CONTIG2_OVERHANG", bb}
+	#
+	#
+	#
+	#####################################################
 	
 	#Get the contig orientation to known if the extracted sequences have to be reversed
 	@coord_c1 = split(/\_/, $coord_contig_1[$i]);
@@ -224,6 +288,8 @@ while(<FILE>){
 	#Check for the order of the contigs and compute the coordinate of the read sequences that will be extracted
 	@coord_c1_on_read = split(/\_/, $coord_contig_1_on_read[$i]);
 	@coord_c2_on_read = split(/\_/, $coord_contig_2_on_read[$i]);
+
+
 	#PROBLEM WITH READ THAT SUPPORT 2 DISTANCES OF AN EDGE
 	$str_multi = "";
 	if(exists $read_to_edge{$r}->{$edge_ID}){
@@ -231,11 +297,62 @@ while(<FILE>){
 	    $str_multi = "[MULTI_ID$cmp_multi_edge]";
 	    $cmp_multi_edge++;
 	}
+
+	#my $seq_overhang_c1 = 0;
+	#my $seq_overhang_c2 = 0;
+
+	#Update the coordinates to extend the contig coordinates to a full mapping in the read
 	if($coord_c1_on_read[2] < $coord_c2_on_read[2]){#Contig 1 is first on the read
-	    $read_to_edge{$r}->{$edge_ID.$str_multi} = [$coord_c1_on_read[2] - $sequence_overhang, $coord_c2_on_read[1] + $sequence_overhang, $reverse_edge_r];
+		
+	    # Need ends of contigs
+	    my $end_contig_1_extra = $contig_lengths{$contig_1} - $coord_c1_for_r1[2];
+	    #if($coord_c1_for_r1[0] == 1) {
+	    #	$end_contig_1_extra = $contig_lengths{$contig_1} - ($contig_lengths{$contig_1} - $coord_c1_for_r1[1]);
+	    #}
+	    if($end_contig_1_extra < 0){
+		print STDERR "Weird Stuff : Negative lengths $contig_1\t$contig_lengths{$contig_1}\t$end_contig_1_extra\t$coord_c1_for_r1[2]\n";
+	    }
+	    #$end_contig_1_extra = 0;
+	    my $start_contig_2_extra = $coord_c2_for_r1[1];
+	    #if($coord_c2_for_r1[0] == 1) {
+	    #	$start_contig_2_extra = $contig_lengths{$contig_2} - $coord_c2_for_r1[2];
+	    #}
+	    if($start_contig_2_extra < 0){
+		print STDERR "Weird Stuff : Negative lengths $contig_2\t$contig_lengths{$contig_2}\t$start_contig_2_extra\t$coord_c2_for_r1[1]\n";
+	    }
+	    #$start_contig_2_extra = 0;
+	    
+	    
+	    print OUT_EXTRA $r . "\t" . $edge_ID . "\t" . $end_contig_1_extra . "\t" . $start_contig_2_extra . "\n";
+		
+	    $read_to_edge{$r}->{$edge_ID.$str_multi} = [$coord_c1_on_read[2] + $end_contig_1_extra, $coord_c2_on_read[1] - $start_contig_2_extra, $reverse_edge_r];
+	    
+	    #$edge_info{$edge_ID}->{"READ_OVERHANG_INFO"}->{$readname[$i]} = {"contig_1_overhang", $seq_overhang_c1, "contig_2_overhang", $seq_overhang_c2 }
+
 	}
 	else{
-	    $read_to_edge{$r}->{$edge_ID.$str_multi} = [$coord_c2_on_read[2] - $sequence_overhang, $coord_c1_on_read[1] + $sequence_overhang, $reverse_edge_r];
+	    # Need ends of contigs
+	    my $end_contig_2_extra = $contig_lengths{$contig_2} - $coord_c2_for_r1[2];
+	    #if($coord_c2_for_r1[0] == 1) {
+	    #	$end_contig_2_extra = $contig_lengths{$contig_2} - ($contig_lengths{$contig_2} - $coord_c2_for_r1[1]);
+	    #}
+	    if($end_contig_2_extra < 0){
+		print STDERR "Weird Stuff : Negative lengths $contig_2\t$contig_lengths{$contig_2}\t$end_contig_2_extra\t$coord_c2_for_r1[2]\n";
+	    }
+	    #$end_contig_2_extra = 0;
+	    my $start_contig_1_extra = $coord_c1_for_r1[1];
+	    #
+	    if($start_contig_1_extra < 0){
+		print STDERR "Weird Stuff : Negative lengths $contig_1\t$contig_lengths{$contig_1}\t$start_contig_1_extra\t$coord_c1_for_r1[1]\n";
+	    }
+	    #$start_contig_1_extra = 0;
+
+	    print OUT_EXTRA $r . "\t" . $edge_ID . "\t" . $end_contig_2_extra . "\t" . $start_contig_1_extra . "\n";
+	    
+	    $read_to_edge{$r}->{$edge_ID.$str_multi} = [$coord_c2_on_read[2] + $end_contig_2_extra, $coord_c1_on_read[1] - $start_contig_1_extra, $reverse_edge_r];
+	    
+	    #$edge_info{$edge_ID}->{"READ_OVERHANG_INFO"}->{$readname[$i]} = {"contig_1_overhang", $seq_overhang_c1, "contig_2_overhang", $seq_overhang_c2 }
+	    
 	}
 	
 	#Get the coordiate of the gap
@@ -254,6 +371,8 @@ while(<FILE>){
     }
 }
 close(FILE);
+close(OUT_EXTRA);
+#exit(0);
 
 #read the contigs and extract the sequence
 print STDERR " *** Reading contig file\n";
@@ -263,7 +382,6 @@ my $contig_seq = "";
 my $contig_name = "";
 my $extract_seq = 0;
 my %all_contig_seq = ();
-my $contig_seq_length_to_extract = $sequence_overhang + $additional_contig_sequence;
 my $edge_ID_to_investigate = "";
 while(<FILE>){
     chop $_;
@@ -279,16 +397,29 @@ while(<FILE>){
 		foreach $edge_ID (keys %{$contig_to_edge{$contig_name}}){
 		    $extraction_type = $contig_to_edge{$contig_name}->{$edge_ID};
 		    $contig_length = length($contig_seq);
+		    my $contig_seq_length_to_extract = 0;
+		    if(exists $edge_info{$edge_ID}->{"CONTIG_OVERHANG_INFO"}->{$contig_name}){
+		    	$contig_seq_length_to_extract = $edge_info{$edge_ID}->{"CONTIG_OVERHANG_INFO"}->{$contig_name} + $additional_contig_sequence;
+		    }
+		    else {
+		    	print STDERR "**********Weird stuff******** $edge_ID not found or overhang info not found\n";
+		    }
 		    #the end of the contig
 		    if($extraction_type eq ("1:+") || $extraction_type eq ("2:-")){
-			$seq = substr $contig_seq, $contig_length - $contig_seq_length_to_extract, $contig_seq_length_to_extract;
+		    $contig_seq_length_to_extract = $contig_length;
+			$start_sub = $contig_length - $contig_seq_length_to_extract;
+			$start_sub = 0 if($start_sub < 0);
+			$seq = substr $contig_seq, $start_sub, $contig_seq_length_to_extract;
+			print STDERR $contig_name . "\t" .  $extraction_type . "\t" . $contig_length . "\t" . ($start_sub) . "\t" .  $contig_seq_length_to_extract . "\n";
 		    }
 		    #The beginning of the contig
 		    if($extraction_type eq ("2:+") || $extraction_type eq ("1:-")){
+		    $contig_seq_length_to_extract = $contig_length;
 			$seq = substr $contig_seq, 0, $contig_seq_length_to_extract;
+			print STDERR $contig_name . "\t" .  $extraction_type . "\t" . $contig_length . "\t" . 0 . "\t" .  $contig_seq_length_to_extract . "\n";
 		    }
 		    #The reverse complement in case of the contig have been reverse on the scaffold
-	    $seq = reverse_complement($seq) if(index($extraction_type, "-") != -1);
+		    $seq = reverse_complement($seq) if(index($extraction_type, "-") != -1);
 		    #$edge_info{$edge_ID}->{"CONTIG_SEQ"} = ">$contig_name\n$seq\n";
 		    
 
@@ -296,19 +427,19 @@ while(<FILE>){
 			print STDERR " *** Contig seq extraction info: $contig_name $contig_length $contig_seq_length_to_extract $extraction_type " .(length($seq)). " " . (length($edge_info{$edge_ID}->{"CONTIG_SEQ"}))."\n";
 		    }
 
-            my $indicator = "@";
-			if ($edge_info{$edge_ID}->{"CONTIG_SEQ"} eq ""){
-                $edge_info{$edge_ID}->{"CONTIG_SEQ"} = "${indicator}$contig_name\n$seq\n";
-            }
+		    my $indicator = "@";
+		    if ($edge_info{$edge_ID}->{"CONTIG_SEQ"} eq ""){
+			$edge_info{$edge_ID}->{"CONTIG_SEQ"} = "${indicator}$contig_name\n$seq\n";
+		    }
 
-            else{
-                $edge_info{$edge_ID}->{"CONTIG_SEQ"} .= "${indicator}$contig_name\n$seq\n";
-            }
+		    else{
+			$edge_info{$edge_ID}->{"CONTIG_SEQ"} .= "${indicator}$contig_name\n$seq\n";
+		    }
 
-            $edge_info{$edge_ID}->{"CONTIG_SEQ"} .= "+\n";
-            $edge_info{$edge_ID}->{"CONTIG_SEQ"} .= "~" x length($seq);
-            $edge_info{$edge_ID}->{"CONTIG_SEQ"} .= "\n";
-		  
+		    $edge_info{$edge_ID}->{"CONTIG_SEQ"} .= "+\n";
+		    $edge_info{$edge_ID}->{"CONTIG_SEQ"} .= "~" x length($seq);
+		    $edge_info{$edge_ID}->{"CONTIG_SEQ"} .= "\n";
+		    
 		    if($edge_ID eq $edge_ID_to_investigate){
 			print STDERR " *** Contig seq extraction info: $contig_name $contig_length $contig_seq_length_to_extract $extraction_type ".($edge_info{$edge_ID}->{"GAP_LENGTH"})." ".(length($seq)). " " . (length($edge_info{$edge_ID}->{"CONTIG_SEQ"}))."\n";#<STDIN>;
 		    }
@@ -317,7 +448,7 @@ while(<FILE>){
 	    #$all_contig_seq{$contig_name} = $contig_seq;
 	}
 
-   #print STDERR "\n$contig_name    $extract_seq   $contig_seq \n" if($extract_seq);
+	#print STDERR "\n$contig_name    $extract_seq   $contig_seq \n" if($extract_seq);
 	$contig_name = $1;
 	$contig_seq = "";
 	$extract_seq = 0;
@@ -328,6 +459,7 @@ while(<FILE>){
     }
 }
 
+#exit(0);
 
 #Extract the sequences requires to fill the gaps in the reads
 open(OUT_STATS, ">$ana_dir/gap_stats.dat") or die;
@@ -339,6 +471,13 @@ my $nb_read = 0;my $nb_copy_of_contig_sequence = 0;
 my $read_seq = "";
 my $quality_seq = "";
 my $keep_read = 0;
+
+my %pure_gap_seq = ();
+
+##?## Debug purposes only
+open(ERR_F, ">$ana_dir/edge_err");
+open(ERR_F2, ">$ana_dir/edge_err_nf");
+
 while(<READ_FILE>){
     #if ($nb_read > 5000){ last; }
     chop $_;
@@ -352,137 +491,153 @@ while(<READ_FILE>){
     #    $indicator = "@";
     #}
 
-    if(/^>([\w|\/|\d|\-|\.]+)\s*.*/ or $is_fastq){
+    #if(/^>([\w|\/|\d|\-|\.]+)\s*.*/ or $is_fastq){
 
-       
-    if($read_seq ne  ""){
-	#print STDERR " *** read name: |$read_name|\n";<STDIN>
-    #print STDERR "\n$read_name\n";
-	$edge_list = $read_to_edge{$read_name};
-
-    if(!defined $edge_list){
-        #print STDERR "$read_name NOT DEFINED \n" if ($nb_read % 1000 == 0);
-        #print STDERR "$read_name NOT DEFINED POST 10000\n" if ($nb_read > 10000);
-    }
-
-	if(defined $edge_list){
-    #$read_seq = <FILE>;
-	foreach $edge_ID (keys %{$edge_list}){
-	    $start = $edge_list->{$edge_ID}->[0];
-	    $end = $edge_list->{$edge_ID}->[1];
-	    $reverse_complement = $edge_list->{$edge_ID}->[2];
-	    #print STDERR " *** Sequence extraction ".$read_name.length($read_seq)."\t".$start."\t".($end-$start)."\n";#<STDIN>;
-	    print STDERR " *** nb read processed $nb_read\n"if($nb_read % 1000 == 0);
-	    $nb_read++;
-	    #Get the read sequence on the rightcomplement
-	    #print STDERR " *** substr $read_name\n";
-	    $seq = substr $read_seq, $start, $end-$start;
-	    $seq = reverse_complement($seq) if($reverse_complement);
-        #$seq .= "\n#\n".(reverse_complement($seq)) if($reverse_complement);
-	    
-	    #this read support an edge twice
-	    if(index($edge_ID, "[MULTI_ID") != -1){
-		@tmp = split(/\[MULTI_ID/, $edge_ID);
-		$edge_ID = $tmp[0];
+    if(/^>(.*)/ or $is_fastq){
+	
+	if($read_seq ne  ""){
+	    #print STDERR " *** read name: |$read_name|\n";<STDIN>
+	    #print STDERR "\n$read_name\n";
+	    $edge_list = $read_to_edge{$read_name};
+	    if(!(defined $edge_list)){
+		#print STDERR "$read_name NOT DEFINED \n" if ($nb_read % 1000 == 0);
+		#print STDERR "$read_name NOT DEFINED POST 10000\n" if ($nb_read > 10000);
 	    }
 
-	    $edge_info{$edge_ID}->{"COORD"} .= "$read_name\t$start\t$end\t$reverse_complement\n";
-	    $edge_info{$edge_ID}->{"READ_EXTRACTED"}++;
+	    if(defined $edge_list){
+		#$read_seq = <FILE>;
+		foreach $edge_ID (keys %{$edge_list}){
+		    $start = $edge_list->{$edge_ID}->[0];
+		    $end = $edge_list->{$edge_ID}->[1];
+		    $reverse_complement = $edge_list->{$edge_ID}->[2];
+		    #print STDERR " *** Sequence extraction ".$read_name.length($read_seq)."\t".$start."\t".($end-$start)."\n";#<STDIN>;
+		    print STDERR " *** nb read processed $nb_read\n"if($nb_read % 1000 == 0);
+		    $nb_read++;
+		    #Get the read sequence on the rightcomplement
+		    #print STDERR " *** substr $read_name\n";
+		    if($end<$start){
+			$pure_gap_seq{$edge_ID}->{$read_name} = $start - $end;
+			#print ERR_F "$edge_ID\t$read_name\t$start\t$end\t".$edge_info{$edge_ID}->{"REF_READ"}."\t$pure_gap_seq{$edge_ID}->{$read_name}\n";
+			print ERR_F "$edge_ID\t$read_name\t$start\t$end\t".$reference_reads{$edge_ID}."\t$pure_gap_seq{$edge_ID}->{$read_name}\n";
+			$end = 1;
+			$start = 1;
+		    }
 
-        if($is_fastq){
-            $edge_info{$edge_ID}->{"SEQ"} .= "\@$read_name\_$reverse_complement\n$seq\n";
-            my $qual_seq_gap = substr $quality_seq, $start, $end-$start; 
-          #my $t1 = length($read_seq);
-          #my $t2 = length($quality_seq);
-          #print STDERR "(SEQ) $t1, (QUAL) $t2 $edge_ID\n"; 
-            $qual_seq_gap = reverse($qual_seq_gap) if ($reverse_complement);
-            $edge_info{$edge_ID}->{"SEQ"} .= "+\n$qual_seq_gap\n"; 
-        }
 
-        else{
-            $edge_info{$edge_ID}->{"SEQ"} .= "\@$read_name\_$reverse_complement\n$seq\n";
-            $edge_info{$edge_ID}->{"SEQ"} .= "+\n";
-            #Choose 0 as a filler quality value, seems like a value that was observed 
-            #from our nanopore reads.
-            $edge_info{$edge_ID}->{"SEQ"} .= "0" x ($end-$start);
-            $edge_info{$edge_ID}->{"SEQ"} .= "\n";
-        }
-	    
-	    #All the reads of that gap have been extracted
-	    #Consensus computation
-	    if($edge_info{$edge_ID}->{"READ_TO_EXTRACT"} == $edge_info{$edge_ID}->{"READ_EXTRACTED"}){
-		$edge_file = "$ana_dir/$edge_ID";
-		
-		open(OUT, ">$edge_file.fa");
-		#Write the reads seuquence that belong to the gap
-		print OUT $edge_info{$edge_ID}->{"SEQ"};
-		#
-		$c_length = 0;
-		#Write the contig sequence that belong to the gap
-		foreach $c (@{$edge_info{$edge_ID}->{"CONTIG_IN_GAP"}}){
-		    $c_o = chop $c;
-		    $seq = $contig_in_gap_to_extract{$c};
-            if($seq eq "1"){
-                print STDERR "\n$c  $seq\n"; 
-            }
-            $seq = reverse_complement($seq) if($c_o eq "-");
-		    $c_length += length($seq);
-		    print OUT "\@$c$c_o\n$seq\n"; 
-            print OUT "+\n";
-            print OUT "~" x length($seq);
-            print OUT "\n";
-            
+		    #my $read_seqlen_to_extract = $end - $start - 1;
+		    if($end > length($read_seq)){
+			print STDERR "***** Weird Stuff : Seems to exceed $read_name\t".length($seq)."\t$start\t$end\t$reverse_complement\n";
+		    }
+		    $seq = substr $read_seq, $start, $end-$start;
+		    $seq = reverse_complement($seq) if($reverse_complement);
+		    #$seq .= "\n#\n".(reverse_complement($seq)) if($reverse_complement);
+		    
+		    #this read support an edge twice
+		    if(index($edge_ID, "[MULTI_ID") != -1){
+			@tmp = split(/\[MULTI_ID/, $edge_ID);
+			$edge_ID = $tmp[0];
+		    }
+
+		    $edge_info{$edge_ID}->{"COORD"} .= "$read_name\t$start\t$end\t$reverse_complement\n";
+		    $edge_info{$edge_ID}->{"READ_EXTRACTED"}++;
+		    
+		    if($is_fastq){
+			$edge_info{$edge_ID}->{"SEQ"} .= "\@$read_name\_$reverse_complement\n$seq\n";
+			my $qual_seq_gap = substr $quality_seq, $start, $end-$start; 
+			#my $t1 = length($read_seq);
+			#my $t2 = length($quality_seq);
+			#print STDERR "(SEQ) $t1, (QUAL) $t2 $edge_ID\n"; 
+			$qual_seq_gap = reverse($qual_seq_gap) if ($reverse_complement);
+			$edge_info{$edge_ID}->{"SEQ"} .= "+\n$qual_seq_gap\n"; 
+		    }
+
+		    else{
+			$edge_info{$edge_ID}->{"SEQ"} .= "\@$read_name\_$reverse_complement\n$seq\n";
+			$edge_info{$edge_ID}->{"SEQ"} .= "+\n";
+			#Choose 0 as a filler quality value, seems like a value that was observed 
+			#from our nanopore reads.
+			$edge_info{$edge_ID}->{"SEQ"} .= "0" x ($end-$start);
+			$edge_info{$edge_ID}->{"SEQ"} .= "\n";
+		    }
+		    
+		    #All the reads of that gap have been extracted
+		    #Consensus computation
+		    if($edge_info{$edge_ID}->{"READ_TO_EXTRACT"} == $edge_info{$edge_ID}->{"READ_EXTRACTED"}){
+			$edge_file = "$ana_dir/$edge_ID";
+			
+			open(OUT, ">$edge_file.fa");
+			#Write the reads seuquence that belong to the gap
+			print OUT $edge_info{$edge_ID}->{"SEQ"};
+			#
+			$c_length = 0;
+			#Write the contig sequence that belong to the gap
+			foreach $c (@{$edge_info{$edge_ID}->{"CONTIG_IN_GAP"}}){
+			    $c_o = chop $c;
+			    $seq = $contig_in_gap_to_extract{$c};
+			    if($seq eq "1"){
+				print STDERR "\n$c  $seq\n"; 
+			    }
+			    $seq = reverse_complement($seq) if($c_o eq "-");
+			    $c_length += length($seq);
+			    print OUT "\@$c$c_o\n$seq\n"; 
+			    print OUT "+\n";
+			    print OUT "~" x length($seq);
+			    print OUT "\n";
+			}
+			
+			#To collect some stats about the gaps that have to be filled
+			print OUT_STATS 
+			    $edge_ID."\t".
+			    $edge_info{$edge_ID}->{"GAP_LENGTH"}."\t".
+			    $edge_info{$edge_ID}->{"READ_TO_EXTRACT"}."\t".
+			    (@{$edge_info{$edge_ID}->{"CONTIG_IN_GAP"}}+0)."\t".
+			    $c_length.
+			    "\n";
+			
+			#Write the contigs sequence at the boundaries of the gaps
+			#Print multiple of the contig sequences to make sure that the consensus will not affect the contig sequences
+			$nb_copy_of_contig_sequence = 1;#( $edge_info{$edge_ID}->{"READ_TO_EXTRACT"} + 1 ) / 2;
+			for(my $i = 0; $i < $nb_copy_of_contig_sequence; $i++){
+			    print OUT $edge_info{$edge_ID}->{"CONTIG_SEQ"};
+			}
+			close(OUT);
+			
+			open(OUT, ">$edge_file.coord");
+			print OUT $edge_info{$edge_ID}->{"COORD"};
+			foreach $k (keys %{$edge_info{$edge_ID}->{"CONTIG_OVERHANG_INFO"}}){
+			    print OUT $k . "\t" . $edge_info{$edge_ID}->{"CONTIG_OVERHANG_INFO"}->{$k} . "\n";
+			}
+			close(OUT);
+			
+			#print OUT_CMD "$vsearch_dir/vsearch --cluster_fast $edge_file.fa -id 0 --msaout $edge_file\_cons.fa -uc $edge_file\_cons.dat\n";
+			print OUT_CMD "$script_dir/print_ref.pl --seq-file $edge_file --edge-file $edge_file_info $racon_dir $graphmap_dir $water_dir \n";
+			#run_exe("$qsub -l mem_free=2G,h_rt=00:05:0 -pe OpenMP 1 -N vsearch -e $ana_dir/LOG/$edge_ID.err -o $ana_dir/LOG/$edge_ID.run -b y vsearch --cluster_fast $edge_file.fa -id 0 --msaout $edge_file\_cons.fa -uc $edge_file\_cons.dat");
+			#run_exe("$qsub  -l mem_free=10G,h_rt=00:05:0 -pe OpenMP 2 -N pbdagcon -e $ana_dir/LOG/$edge_ID.err -o $ana_dir/LOG/$edge_ID.run -b y $script_dir/run_pbdagcon.pl --seq-file $edge_file --bin-dir $bin_dir --isfastq $is_fastq $graphmap_dir $water_dir $pbdagcon_dir");#<STDIN>;
+			delete $edge_info{$edge_ID};
+			
+		    }
 		}
-		
-		#To collect some stats about the gaps that have to be filled
-		print OUT_STATS 
-		    $edge_ID."\t".
-		    $edge_info{$edge_ID}->{"GAP_LENGTH"}."\t".
-		    $edge_info{$edge_ID}->{"READ_TO_EXTRACT"}."\t".
-		    (@{$edge_info{$edge_ID}->{"CONTIG_IN_GAP"}}+0)."\t".
-		    $c_length.
-		    "\n";
-		
-		#Write the contigs sequence at the boundaries of the gaps
-		#Print multiple of the contig sequences to make sure that the consensus will not affect the contig sequences
-		$nb_copy_of_contig_sequence = 1;#( $edge_info{$edge_ID}->{"READ_TO_EXTRACT"} + 1 ) / 2;
-		for(my $i = 0; $i < $nb_copy_of_contig_sequence; $i++){
-		    print OUT $edge_info{$edge_ID}->{"CONTIG_SEQ"};
-		}
-		close(OUT);
-		
-		open(OUT, ">$edge_file.coord");
-		print OUT $edge_info{$edge_ID}->{"COORD"};
-		close(OUT);
-
-		#print OUT_CMD "$vsearch_dir/vsearch --cluster_fast $edge_file.fa -id 0 --msaout $edge_file\_cons.fa -uc $edge_file\_cons.dat\n";
-		print OUT_CMD "$script_dir/run_racon.pl --seq-file $edge_file --bin-dir $bin_dir $racon_dir $graphmap_dir $water_dir \n";
-		#run_exe("$qsub -l mem_free=2G,h_rt=00:05:0 -pe OpenMP 1 -N vsearch -e $ana_dir/LOG/$edge_ID.err -o $ana_dir/LOG/$edge_ID.run -b y vsearch --cluster_fast $edge_file.fa -id 0 --msaout $edge_file\_cons.fa -uc $edge_file\_cons.dat");
-		#run_exe("$qsub  -l mem_free=10G,h_rt=00:05:0 -pe OpenMP 2 -N pbdagcon -e $ana_dir/LOG/$edge_ID.err -o $ana_dir/LOG/$edge_ID.run -b y $script_dir/run_pbdagcon.pl --seq-file $edge_file --bin-dir $bin_dir --isfastq $is_fastq $graphmap_dir $water_dir $pbdagcon_dir");#<STDIN>;
-		delete $edge_info{$edge_ID};
-
-       }
+		delete $read_to_edge{$read_name}; 
+	    }
 	}
-    delete $read_to_edge{$read_name}; 
-    }
-    }
 
-    #If the file is in fastq format, we assume that the sequence is on 
-    #one line.
-    if($is_fastq){
+	#If the file is in fastq format, we assume that the sequence is on 
+	#one line.
+	if($is_fastq){
 	    @line = split(/\s/, $_);
-        $read_name = substr($line[0],1);
-        $read_seq = <READ_FILE>;
-        <READ_FILE>;
-        $quality_seq = <READ_FILE>;
-        chomp($read_seq);
-        chomp($quality_seq);
-    }
+	    $read_name = substr($line[0],1);
+	    $read_seq = <READ_FILE>;
+	    <READ_FILE>;
+	    $quality_seq = <READ_FILE>;
+	    chomp($read_seq);
+	    chomp($quality_seq);
+	}
 
-    else{
-        $read_name = $1;
-        $read_seq = "";
-    }
+	else{
+	    my @line = split(/\s/, $1);
+	    $read_name = $line[0]; 
+	    $read_seq = "";
+	}
     }
 
     else{
@@ -500,13 +655,21 @@ while(<READ_FILE>){
 
     }
 }
+close(ERR_F);
 close(READ_FILE);
 close(OUT_STATS);
+
+
+
+
+
+
 
 #Run the sequence consensus calling
 print STDERR " *** Run racon for sequence consensus calling\n";
 #run_exe("cat $cmd_file | xargs -L 1 -P $nb_process bash &> /dev/null \n");
 #run_exe("cat $cmd_file | xargs -L 1 -P $nb_process bash \n");
+#Extract the first read from edge read info can be run in parallel
 run_exe("cat $cmd_file | xargs -L 1 -P $nb_process -I COMMAND sh -c \"COMMAND\" 2> $run_racon_log");
 #to produce the filled gap scaffolds
 write_filled_gap_scaffold();
@@ -514,6 +677,11 @@ write_filled_gap_scaffold();
 #Not working right now, TODO fix it.
 #my $cmd = "ls $ana_dir | grep \"\\\-vs\\\-\" | xargs rm";
 #run_exe($cmd);
+close(ERR_F2);
+
+#run_exe("$script_dir/run_racon_4.pl --seq-file $outfile --read-file $read_file $racon_dir $graphmap_dir $water_dir");
+
+
 
 sub read_scaffold_file{
     my ($scaffold_file) = @_;
@@ -546,7 +714,7 @@ sub read_scaffold_file{
 	    #print STDERR " *** EDGE tested $edge_ID $gap_length\n";
 	    
 	    #print STDERR " *** EDGE selected $edge_ID $gap_length\n";<STDIN>;
-	    $edge_info{$edge_ID} = {"GAP_LENGTH", $gap_length, "READ_TO_EXTRACT", 0, "READ_EXTRACTED", 0, "SEQ", "", "COORD", "", "CONTIG_SEQ", "", "EDGE_ORI", $edge_ori, "CONTIG_GAPFILLING", []};#be carreful with conflicting edges that have the same contig pair
+	    $edge_info{$edge_ID} = {"GAP_LENGTH", $gap_length, "READ_TO_EXTRACT", 0, "READ_EXTRACTED", 0, "SEQ", "", "COORD", "", "CONTIG_SEQ", "", "EDGE_ORI", $edge_ori, "CONTIG_GAPFILLING", [], "CONTIG_OVERHANG_INFO", {}};#, "REF_READ", ""};# "REF_COORDS", {}};#be carreful with conflicting edges that have the same contig pair
 	    $nb_selected_edges++;
 	    $contig_to_edge{$contig_1}->{$edge_ID} = "1:$contig_1_ori";
 	    $contig_to_edge{$contig_2}->{$edge_ID} = "2:$contig_2_ori";
@@ -585,8 +753,8 @@ sub write_filled_gap_scaffold{
     close(FILE);
 
     #read scaffold file
-    open(OUT, ">$outfile");
-    run_exe("rm $ana_dir/gap_substring_report.dat;touch $ana_dir/gap_substring_report.dat");
+    open(OUT, ">$outfile");    
+    #run_exe("rm $ana_dir/gap_substring_report.dat;touch $ana_dir/gap_substring_report.dat");
     open(OUT_S, ">$ana_dir/gap_size.dat");
     open(FILE, $scaffold_file);
     my ($contig_1, $contig_1_ori, $contig_2, $contig_2_ori, $scaff_name, $gap_seq);
@@ -630,6 +798,7 @@ sub write_filled_gap_scaffold{
 	    $contig_1_seq = get_contig_seq($contig_1, $contig_1_ori, \%all_contig_seq);
 	    #Trim the contig in case of contig overlap (always trim on the left side)
 	    if($contig_trimming_length != 0){
+		print STDERR " ***** Trimming $contig_1 $contig_trimming_length\n";
 		$contig_1_seq = substr $contig_1_seq, $contig_trimming_length;
 	    }
 	    print OUT $contig_1_seq;
@@ -641,46 +810,48 @@ sub write_filled_gap_scaffold{
 	    $edge_ID = join("-vs-", @contig_order);
 	    $gap_seq = extract_gap_seq($edge_ID);
 
-        if($gap_seq eq ""){
-            print STDERR "**** GAP NOT FILLED BY RACON, ($edge_ID) *****";
-        }
-
+	    if($gap_seq eq ""){
+		print STDERR "**** REF NOT FOUND ($edge_ID) *****\n\n";
+	    }
+	    
 	    $gap_filled_stats = "NA";#the gap is not filled
-        my $gap_diff_large = "";
+	    my $gap_diff_large = "";
 	    if($gap_seq ne ""){
 		#this is an overlap or a no gap
-            
+		
 		if ( $gap_seq =~ /^[0-9,.E]+$/ ) { 
 		    $contig_trimming_length = $gap_seq;
 		    $gap_filled_stats = -($contig_trimming_length);
+		    #$contig_trimming_length = 0;
 		}
 		else{
 		    #This a gap sequence
 		    $gap_filled_stats = length($gap_seq);
-
-            #Formula for taking out edges that are way off from the predicted gap size. 
-            #Formula works out to : skip filling if predicted or actual gap size is greater than 3 times the other by 250.
-           # if((abs($gap_filled_stats - $gap_length)/(abs($gap_length + $gap_filled_stats) + 500)) < 0.5){
-           #     print OUT $gap_seq;
-           # }
-           # 
-           # elsif($gap_length > 0){
-           #     print OUT ( "N" x $gap_length);
-           #     $gap_diff_large = "BIGDIFF";
-           # }
-	       # }
-
-
-            print OUT $gap_seq;
-            }
-
-        }
+		    $contig_trimming_length = 0;
+		    #Formula for taking out edges that are way off from the predicted gap size. 
+		    #Formula works out to : skip filling if predicted or actual gap size is greater than 3 times the other by 250.
+		    # if((abs($gap_filled_stats - $gap_length)/(abs($gap_length + $gap_filled_stats) + 500)) < 0.5){
+		    #     print OUT $gap_seq;
+		    # }
+		    # 
+		    # elsif($gap_length > 0){
+		    #     print OUT ( "N" x $gap_length);
+		    #     $gap_diff_large = "BIGDIFF";
+		    # }
+		    # }
+		    
+		    
+		    print OUT $gap_seq;
+		}
+		
+	    }
 	    #For some reason the gap was not filled
-        else{
-            if($gap_length > 0){print OUT ( "N" x $gap_length);}
-            else{print OUT ( "N" x 3);}
+	    else{
+		$contig_trimming_length = 0;
+		if($gap_length > 0){print OUT ( "N" x $gap_length);}
+		else{print OUT ( "N" x 3);}
 	    } 
-	    $contig_trimming_length = 0;
+	    #$contig_trimming_length = 0;
 	    #
 	    #Get statistics
 	    print OUT_S $edge_ID."\t".$gap_length."\t".$gap_filled_stats."\t".$gap_diff_large."\n";
@@ -705,207 +876,40 @@ sub write_filled_gap_scaffold{
     close(FILE);
     close(OUT);
     close(OUT_S);
-}
-
-sub extract_gap_seq_vsearch{
-    my ($file_ID) = @_;
-
-    print STDERR " *** get vsearch gap sequence $file_ID\n";#<STDIN>;
-
-    my $mapping_file = "$ana_dir/$file_ID\_cons.fa";
-    return "" if(! -e $mapping_file);
-    #
-    #Extract the contig name from the file ... problem with _ ... -_-'
-    my @contig_name_tab = split(/-vs-/, $file_ID);
-    #NEED TO CHANGE THAT MESS
-    #@contig_name_tab = ($contig_name_tab[0]."_".$contig_name_tab[1], $contig_name_tab[2]."_".$contig_name_tab[3]) if(@contig_name_tab > 2);
-    #
-    #
-    #Construct the multiple alignement between the contig and the concensus
-    my @multi_alignement = ();
-    print STDERR "@contig_name_tab\n";
-    my $contig_name = "";
-    my $flag_extract_seq = -1;
-    
-    open(FILE_CONS, "$mapping_file");
-    while(<FILE_CONS>){
-	chop $_;
-	if ( $_ =~ /\>(.*)/ ){
-	    $contig_name = $1;
-	    #print STDERR $contig_name."\n";
-	    $flag_extract_seq = -1;
-	    if($contig_name eq $contig_name_tab[0] || $contig_name eq $contig_name_tab[1] || $contig_name eq "consensus"){
-		push(@multi_alignement, []);
-		$flag_extract_seq = @multi_alignement - 1;
-		#print STDERR " **** EXT $contig_name $flag_extract_seq\n";
-	    }
-	}
-	else{
-	    if($flag_extract_seq != -1){
-		@str = split(//, $_);
-		push(@{$multi_alignement[$flag_extract_seq]}, @str);
-	    }
-	}
-    }
-    close(FILE_CONS);
-
-    #Extract the gap sequence
-    my ($left, $right);$left = "";$right = "";
-    my $alignement_length = @{$multi_alignement[0]} + 0;
-    my $gap_seq = "";
-    my $begin_overlap = -1; my $end_overlap = -1;
-    my $flag_first_rigth = 0;
-    for(my $i = 0; $i < $alignement_length; $i++){
-	
-	#Identification of the boundary order -_-'
-	if($left eq ""){
-	    if($multi_alignement[0]->[$i] ne "+" && $multi_alignement[0]->[$i] ne "-"){
-		$left = 0;
-		$right = 1;
-	    }
-	    if($multi_alignement[1]->[$i] ne "+" && $multi_alignement[1]->[$i] ne "-"){
-		$left = 1;
-		$right = 0;
-	    }
-	}
-        
-	#print STDERR "$multi_alignement[0]->[$i]$multi_alignement[1]->[$i]$multi_alignement[2]->[$i]\nleft $left right $right\n";#<STDIN>;
-
-	next if($left eq "");
-
-	#It is an overlap
-	if($multi_alignement[$left]->[$i] ne "+" && $multi_alignement[$left]->[$i] ne "-"){
-	    if($multi_alignement[$right]->[$i] ne "+" && $multi_alignement[$right]->[$i] ne "-"){
-		$begin_overlap = $i if($begin_overlap == -1);
-		$end_overlap = $i;
-	    }
-	    else{
-		$gap_seq = "";
-	    }
-	}
-	else{
-	    next if($begin_overlap != -1);
-	    if($multi_alignement[$right]->[$i] ne "+"&& $multi_alignement[$right]->[$i] ne "-"){
-		last if($gap_seq ne "");#We have got the gap sequence
-	    }
-	    else{
-		$gap_seq .= $multi_alignement[2]->[$i] if($multi_alignement[2]->[$i] ne "+" && $multi_alignement[2]->[$i] ne "-");#Add the concensus sequence to the gap
-	    }
-	}
-    }
-
-
-    if($begin_overlap != -1){
-	$gap_seq = $end_overlap - $begin_overlap;
-    }
-
-    return $gap_seq;
     
 }
+
 
 
 sub extract_gap_seq{
     my ($file_ID) = @_;
     
     #get the cordinate of the sequence that have to be extracted
-    my $mapping_file = "$ana_dir/$file_ID\_contig_cons.m5";
+    my $mapping_file = "$ana_dir/$file_ID\_r.fa";
     return "" if(! -e $mapping_file);
     
     print STDERR " *** get Gap sequence $file_ID $mapping_file\n";#<STDIN>;
 
-    open(FILE_CONS, $mapping_file);
-    my $tmp = "";
-    #
-    my @tmp_tab = split(/-vs-/, $file_ID);
-    #
-    #Extract the contig name from the file
-    my @contig_name_tab = split(/-vs-/, $file_ID);
-    #
-    my $contig_name = "";
-    my $ref_name = "";
-    my %contig_coord = ($contig_name_tab[0], [-1,-1,-1,-1], $contig_name_tab[1], [-1,-1,-1,-1]);
-    my $flag_begin = 1;
-    my $contig_seq_length = $sequence_overhang + $additional_contig_sequence; 
-    #Read the alignement of the contig to the consensu
-    while(<FILE_CONS>){
-	chop $_;
-	#this is simply comments
-	if(index($_, "#") != -1){
-	    $flag_begin = 1;
-	    next;
-	}
-	#Read the 3 lines of the alignement
-	@ref_seq = split(/\s+/, $_);    
-	next if(@ref_seq < 2);#this an empty line
+    open(REF_FILE, $mapping_file);
+    my $seq ="";
+    <REF_FILE>;
+    chop($seq = <REF_FILE>);
 
-	$tmp = <FILE_CONS>;
-	$tmp = <FILE_CONS>;chop $tmp;@contig_seq =  split(/\s+/, $tmp);
-	
-	$contig_name = $contig_seq[0];
-	
-	#print STDERR " **** the contig alignement line $tmp ===> $contig_name\n";
-
-	#extract the 1 and last corrdinates of the alignements
-	if($flag_begin){
-	    $contig_coord{$contig_name}->[0] = $ref_seq[1];
-	    $contig_coord{$contig_name}->[1] = $contig_seq[1];
-	    $flag_begin = 0;
-	}
-	else{
-	    $contig_coord{$contig_name}->[2] = $ref_seq[3];
-	    $contig_coord{$contig_name}->[3] = $contig_seq[3];
-	    $flag_begin = 0
-	}
-    }
-    close(FILE_CONS);
-
-    open(OUT_REP, ">>$ana_dir/gap_substring_report.dat");
-    print OUT_REP 
-	$file_ID."\t".
-	$contig_name_tab[0]."\t".(join(";", @{$contig_coord{$contig_name_tab[0]}}))."\t".
-	$contig_name_tab[1]."\t".(join(";", @{$contig_coord{$contig_name_tab[1]}}));
-    
-    my $contig_gap_1 = $contig_name_tab[0];
-    my $contig_gap_2 = $contig_name_tab[1];
-    
-    #Conare the end mapping of the 2 contig and re-order them
-    if($contig_coord{$contig_gap_2}->[2] < $contig_coord{$contig_gap_1}->[2]){
-	$contig_gap_1 = $contig_name_tab[1];
-	$contig_gap_2 = $contig_name_tab[0];
-    }
-
-    #beginning of the gap
-    $gap_start = $contig_coord{$contig_gap_1}->[2];#alignemnt end of contig 1
-    $gap_end = $contig_coord{$contig_gap_2}->[0];#alignemnt start of contig 2
-    
-    print OUT_REP "\t"."[ $gap_start $gap_end ]\n";
-    close(OUT_REP);
-    
-    my $gap_seq_res = "";
-    #CHECK FOR WEIRD CASE
-    #Case were only one contig map ... Need to add more cases here
-    #print STDERR " *** gap alignement boundaries ".$gap_start." ".$gap_end."\n";<STDIN>;
-    return $gap_seq_res if($gap_start == -1 || $gap_end == -1);
-
-    #Check between contig overlap and proper gaps
-    if($gap_end <= $gap_start){
-	#This is an over lap or a no gap sequence
-	$gap_seq_res = $gap_start - $gap_end;
+    if($seq ne ""){
+    	return $seq;
     }
     else{
-	#This is a proper gap and we extract the sequence from the consensus sequence
-    my $cons_tool;
-    $cons_tool = "racon";
+    	#my $out = $pure_gap_seq{$file_ID}->{$edge_info{$file_ID}->{"REF_READ"}};
+    	my $out = $pure_gap_seq{$file_ID}->{$reference_reads{$file_ID}};
 
-    #We used to use pbdagcon for gap concensus.
-    #$cons_tool = "pbdagcon" if (!$is_fastq);
-	my $seq = `tail -n1 $ana_dir/$file_ID\_$cons_tool.fa`;
-	$gap_seq_res = (substr $seq, $gap_start , $gap_end - $gap_start);
+	#print ERR_F2 "$file_ID\t".$edge_info{$file_ID}->{"REF_READ"}."\t".$pure_gap_seq{$file_ID}->{$edge_info{$file_ID}->{"REF_READ"}}."\n";
+	print ERR_F2 "$file_ID\t".$reference_reads{$file_ID}."\t".$pure_gap_seq{$file_ID}->{$reference_reads{$file_ID}}."\n";
+    	if(! (defined $out) ) {
+	    #print STDERR "*************WEIRD STUFF : Size entry absent for overlap*************".$file_ID."\t".$edge_info{$file_ID}->{"REF_READ"}."\n";
+	    print STDERR "*************WEIRD STUFF : Size entry absent for overlap*************".$file_ID."\t".$reference_reads{$file_ID}."\n";
+    	}
+    	return $out;
     }
-
-    #print STDERR $gap_seq_res."\n";<STDIN>;
-
-    return $gap_seq_res;
 }
 
 
@@ -969,13 +973,6 @@ sub run_exe{
     $run = 1;
     print STDERR $exe."\n";;
     print STDERR `$exe` if($run);
-}
-
-sub run_exe_racon{
-    open (RAC_LOG,">", $run_racon_log); 
-    my ($exe) = @_;
-    print RAC_LOG `$exe`; 
-    close (RAC_LOG);
 }
 
 #vsearch --cluster_fast S288C/FINAL_TEST/GAP_FILLING/171068_171204.fa -id 0 --msaout cons.txt -uc cons.dat

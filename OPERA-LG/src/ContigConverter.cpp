@@ -170,7 +170,6 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 				string cmd = "mkfifo " + tempFileName;
 				if( system( cmd.c_str() ) );
 				cmd  = Configure::SAMDIR.c_str() + std::string("samtools view ") + Configure::MULTI_LIB_INFO->at( libID )->GetFileName() + " > " + tempFileName + "&"; 
-				//fprintf(stderr,"Command is !!!!!\n");
 				if( system( cmd.c_str() ) );
 			}
 
@@ -244,12 +243,12 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 			
 					Contig *firstContig = NULL;
 					Contig *secondContig = NULL;
-					int firstContigPos=0;
-					int secondContigPos=0;
+					int firstContigPos = 0;
+					int secondContigPos = 0;
 					string firstContigOri;
 					string secondContigOri;
-					int firstReadLength=0;
-					int secondReadLength=0;
+					int firstReadLength = 0;
+					int secondReadLength = 0;
 
 					if( IsPair( preNameString, nextNameString ) ){
 						// is a pair and both reads are mapped
@@ -994,7 +993,8 @@ void ContigConverter::FilterRepeat( vector<Contig*> *contigs, Graph *graph ){
 	while( contigIter != contigs->end() ){
 		(*contigIter)->SetIfRepeat( false );
 
-		if( (*contigIter)->GetCov() > threshold ){
+		//Set the contig as repeat
+		if( ! Configure::KEEP_REPEAT_FULL && (*contigIter)->GetCov() > threshold ){
 			// remove repeat contigs
 			m_repeatContigs->push_back( *contigIter );
 			//(*contigIter)->SetContigType( REPEAT );

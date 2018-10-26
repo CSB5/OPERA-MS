@@ -37,10 +37,12 @@ public:
 	static std::vector<std::string> skipped_cluster_edges_files; /**< Paths to cluster skipped edges files. */
 	static std::vector<std::string> filtered_edges_files; /**< Paths to filtered edges files. */
 	static std::string clusters_file;  /**< Path to clusters file. */
-
-
-
-
+	
+	static int AR_TYPE;//Type of arrival rate used 1=> mean 2=> median
+	static int R_ESTIMATION_TYPE;//Type of dispertion parameter esimation 1=> least squre 2=> max
+	static int COMPUTE_SCORE;//To not compute any score during SIGMA => run opera on the un-cutted tree
+	static int SPLITTING_PENALTY;//penalty allowing alling lager clusters
+	static int USE_WINDOW;//to swithch between contig or windows based mode
 
 	static int num_samples; /**< Number of samples. */
 	
@@ -49,10 +51,11 @@ public:
 	static int contig_window_len; /**< Contig window length. */
 	static int kmer_size; /**< Kmer size used for contig assembly. */
 	static long int total_assembly_size; /**< Total assembly size. */
+	static long int total_assembly_nb_contig; /**< Total number of contigs. */
 
 	static std::string pdist_type; /**< Type of read count probability distribution. */
 
-	static double R; /**< Dispersion parameter R for negative binomial distribution. */
+	static double R_VALUE; /**< Dispersion parameter R for negative binomial distribution. */
 
 private:
 	/**

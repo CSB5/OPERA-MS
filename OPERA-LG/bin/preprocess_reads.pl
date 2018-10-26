@@ -9,23 +9,22 @@ use Getopt::Long;
 my $help_message = "
 
 	Options:
-	--contig		    Multi-fasta contig file
-	--illumina-read1	Fasta/Fastq file of read 1 of the paired-end reads
-	--illumina-read2	Fasta/Fastq file of read 2 of the paired-end reads
-	--out			    Name of the output file
-	--map-tool		    Mapping tool can be either bwa (default) or bowtie
-	--tool-dir		    Directory that contains binaries to the chosen mapping tool (default PATH)
-    --samtools-dir	    Directory that contains samtools binaries (default PATH)
-    --nproc             Number of threads to use
-	--help			    Help
+    --nproc             Number of processor used during the analysis 
+    --contig		Multi-fasta contig file
+    --illumina-read1	Fasta/Fastq file of read 1 of the paired-end reads
+    --illumina-read2	Fasta/Fastq file of read 2 of the paired-end reads
+    --out		Name of the output file
+    --map-tool		Mapping tool can be either bwa (default) or bowtie
+    --tool-dir		Directory that contains binaries to the chosen mapping tool (default PATH)
+    --samtools-dir		Directory that contains samtools binaries (default PATH)
+    --help			Help
 ";
 
 my $path = "";
 my $samtoolsDir = "";
-my $nproc;
 
 GetOptions(
-
+    "nproc=i"    => \$nproc,
     "contig=s"    => \$contigFile,
     "illumina-read1=s"    => \$readFile1,
     "illumina-read2=s" => \$readFile2,
@@ -33,7 +32,6 @@ GetOptions(
     "map-tool=s"      => \$mapTool,
     "tool-dir=s"      => \$path,
     "samtools-dir=s"  => \$samtoolsDir,
-    "nproc=i"       => \$nproc
     "help"	=> \$flag_help
 
 ) or die("Error in command line arguments.\n");
@@ -59,9 +57,6 @@ if ( !(defined($readFile2)) ){
 if ( !(defined($outputFile)) ){
         print "Name of the output file missing.\n";
         exit 0;
-}
-if( !(defined($nproc))){
-        $nproc = 1;
 }
 #if ( ($mapTool eq "bwa" || !(defined($mapTool))) && defined($bowtieDir) ){
 #        print "Bowtie directory not needed and ignored for bwa mapping.\n";
@@ -122,12 +117,12 @@ elsif( $mapTool eq "bwa" )
     &readAndMap;
 
     # remove the intermediate file
-    `rm ${folder}read.sai`;
+    `rm ${folder}$outputFile\_read.sai`;
 }
 else
 {
-    print "The mapping tool should be either bwa or bowtie.\n";
-    exit(0);
+    die "The mapping tool should be either bwa or bowtie.\n";
+    
 }
 
 # finalize
@@ -231,18 +226,18 @@ sub buildIndexUsingBwa
     print "[$time]\t";
     print "Building bwa index...\n";
     @contigName = split( "/", $contigFile );
-    if( ! -f "$folder$contigName[ -1 ].bwt" )
+    if( ! -f "$folder$contigName[ -1 ].amb" )
     {
 	if( $type eq "cs" )
 	{
 	    $command = "${path}bwa index -c -p $folder$contigName[ -1 ] $contigFile";
-	    `$command`; # or die "ERROR! Running bwa index error.\n";
+	    `$command`; #or die "Error during bwa index creation.\n";
 	}
 	else
 	{
 	    $command = "${path}bwa index -p $folder$contigName[ -1 ] $contigFile";
 	    print $command."\n";
-	    `$command`;  # or die "ERROR! Running bwa index error.\n";
+	    `$command`; #or die "Error during bwa index creation.\n";
 	}
     }
     else
@@ -324,18 +319,25 @@ sub findSAWithBwa
     $time = localtime;
     print "[$time]\t";
     print "Finding the SA coordinates of the reads using BWA aln...\n";
-    $command = "${path}bwa aln -t $nproc $folder$contigName[ -1 ] - > ${folder}read.sai";
+    $command = "${path}bwa aln -t $nproc $folder$contigName[ -1 ] - > ${folder}$outputFile\_read.sai";
+    if($?){
+	die "Error during bwa mapping. Please see log for details.\n";
+    }
 }
 
 sub generateAlignmentUsingBwa
 {
     $time = localtime;
     print "[$time]\t";
-    print "Generate alignments of reads using bwa sampe...\n";
+    print "Generate alignments of reads using bwa samse...\n";
     # $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | awk \'{ if( \$3 != \"*\" ) print \$0 }\' > $folder$outputFile";
     # $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | samtools view -S -h -b -F 0x4 - | samtools sort -no - ${folder}temporarySam | samtools view -h -b - > $folder$outputFile";
-    $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ $nproc -no - ${folder}temporarySam > $folder$outputFile";
+    #$command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ 20 -no - ${folder}temporarySam > $folder$outputFile";
+    $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}$outputFile\_read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ $nproc -no - ${folder}$outputFile\_temp > $folder$outputFile";
     print $command."\n";
+    if($?){
+	die "Error during bwa mapping. Please see log for details.\n";
+    }
 }
 
 sub clearBowtie

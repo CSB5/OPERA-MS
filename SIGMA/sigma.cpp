@@ -30,6 +30,7 @@ std::vector<std::string> Sigma::mapping_files;
 std::vector<std::string> Sigma::edges_files;
 
 std::string Sigma::sigma_contigs_file;
+std::string Sigma::SAMDIR;
 
 std::string Sigma::output_dir;
 std::vector<std::string> Sigma::skipped_filter_edges_files;
@@ -109,6 +110,9 @@ void Sigma::configure(ParamsMap* params) {
 
 	output_dir = getStringValue(params, std::string("output_dir"));
 
+
+	SAMDIR = getStringValue(params, std::string("samtools_dir"));
+	
 	for (auto it = edges_files.begin(); it != edges_files.end(); ++it) {
 		std::string file_path = *it;
 
@@ -135,6 +139,8 @@ void Sigma::configure(ParamsMap* params) {
 	contig_edge_len = getIntValue(params, std::string("contig_edge_len"));
 	contig_window_len = getIntValue(params, std::string("contig_window_len"));
 
+	
+	
 	if (contig_len_thr == -1) contig_len_thr = 500;
 	if (contig_edge_len == -1) contig_edge_len = 100;
 	if (contig_window_len == -1) contig_window_len = 300;
@@ -303,7 +309,8 @@ int main(int argc, char** argv) {
 			
 			//run samtools to get the fake sam
 			//cmd = "samtools view " + Sigma::mapping_files[sample_index] + " | head -n 100000 " + " > " + fake_sam + "&";
-			cmd = "samtools view " + Sigma::mapping_files[sample_index] + " > " + fake_sam + "&";
+			
+			cmd = Sigma::SAMDIR + "/samtools view " + Sigma::mapping_files[sample_index] + " > " + fake_sam + "&";
 			fprintf(stderr, " *** EXEC %s\n", cmd.c_str());
 			if( system (cmd.c_str()) );
 

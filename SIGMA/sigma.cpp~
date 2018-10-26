@@ -18,7 +18,7 @@
 #include "cluster_graph.h"
 #include "probability_distribution.h"
 
-std::string Sigma::contigs_file_type;
+//std::string Sigma::contigs_file_type;
 int Sigma::AR_TYPE;
 int Sigma::R_ESTIMATION_TYPE;
 int Sigma::COMPUTE_SCORE;
@@ -49,7 +49,7 @@ long int Sigma::total_assembly_nb_contig;
 
 std::string Sigma::pdist_type;
 
-double Sigma::R;
+double Sigma::R_VALUE;
 
 void Sigma::readConfigFile(char* config_file) {
 	ParamsMap params;
@@ -96,7 +96,7 @@ void Sigma::readConfigFile(char* config_file) {
 }
 
 void Sigma::configure(ParamsMap* params) {
-	contigs_file_type = getStringValue(params, std::string("contigs_file_type"));
+	//contigs_file_type = getStringValue(params, std::string("contigs_file_type"));
 
 	contigs_file = getStringValue(params, std::string("contigs_file"));
 	mapping_files = getVectorValue(params, std::string("mapping_files"));
@@ -142,18 +142,19 @@ void Sigma::configure(ParamsMap* params) {
 	pdist_type = getStringValue(params, std::string("pdist_type"));
 
 	if (pdist_type == "-") pdist_type = std::string("NegativeBinomial");
+
+	
 	
 	AR_TYPE = getIntValue(params, std::string("AR_TYPE"));
-	R_ESTIMATION_TYPE = getIntValue(params, std::string("R_ESTIMATION_TYPE"));
+	R_VALUE = getDoubleValue(params, std::string("R_VALUE"));
 	COMPUTE_SCORE = getIntValue(params, std::string("COMPUTE_SCORE"));
 	SPLITTING_PENALTY = getIntValue(params, std::string("SPLITTING_PENALTY"));
 	USE_WINDOW = getIntValue(params, std::string("USE_WINDOW"));
 	if(AR_TYPE == -1) AR_TYPE = 1;
-	if(R_ESTIMATION_TYPE == -1) R_ESTIMATION_TYPE = 1;
 	if(COMPUTE_SCORE == -1) COMPUTE_SCORE = 1;
 	if(SPLITTING_PENALTY == -1) SPLITTING_PENALTY = 0;
 	if(USE_WINDOW == -1) USE_WINDOW = 1;
-	R = getDoubleValue(params, std::string("R"));
+	//R = getDoubleValue(params, std::string("R"));
 }
 
 int Sigma::getIntValue(ParamsMap* params, std::string key) {
@@ -244,32 +245,41 @@ int main(int argc, char** argv) {
   		} else {	// file does not exist, calculate total assembly size and write it into file
 			ContigReader* contig_reader;
 
-			if (Sigma::contigs_file_type == "SOAPdenovo") {
-				contig_reader = new SOAPdenovoReader();
-			} else if (Sigma::contigs_file_type == "Velvet") {
-				contig_reader = new VelvetReader();
-			} else {
-				fprintf(stderr, "Unknown contigs_file_type: %s\n", Sigma::contigs_file_type.c_str());
-				exit(EXIT_FAILURE);
-			}
+			//if (Sigma::contigs_file_type == "SOAPdenovo") {
+			//	contig_reader = new SOAPdenovoReader();
+			//} else if (Sigma::contigs_file_type == "Velvet") {
+			//	contig_reader = new VelvetReader();
+			//} else if(Sigma::contigs_file_type == "RAY") {
+			//	contig_reader = new RAYReader();
+			//}else {
+			//	fprintf(stderr, "Unknown contigs_file_type: %s\n", Sigma::contigs_file_type.c_str());
+			//	exit(EXIT_FAILURE);
+			//}
 
+            contig_reader = new AllReader();
 			//Sigma::total_assembly_size = 
 			//The static varailbes Sigma::total_assembly_size and Sigma::total_assembly_nb_contig are initialize in this fuction
+
 			contig_reader->get_assembly_size(Sigma::contigs_file.c_str());
 			delete contig_reader;
 		}
 
 	} else {
 		ContigReader* contig_reader;
+        /** We used to care about what format the contigs used to be in.**/
 
-		if (Sigma::contigs_file_type == "SOAPdenovo") {
-			contig_reader = new SOAPdenovoReader();
-		} else if (Sigma::contigs_file_type == "Velvet") {
-			contig_reader = new VelvetReader();
-		} else {
-			fprintf(stderr, "Unknown contigs_file_type: %s\n", Sigma::contigs_file_type.c_str());
-			exit(EXIT_FAILURE);
-		}
+		//if (Sigma::contigs_file_type == "SOAPdenovo") {
+		//	contig_reader = new SOAPdenovoReader();
+		//} else if (Sigma::contigs_file_type == "Velvet") {
+		//	contig_reader = new VelvetReader();
+		//} else if(Sigma::contigs_file_type == "RAY") {
+		//	contig_reader = new RAYReader();
+		//}else {
+		//	fprintf(stderr, "Unknown contigs_file_type: %s\n", Sigma::contigs_file_type.c_str());
+		//	exit(EXIT_FAILURE);
+		//}
+
+        contig_reader = new AllReader();
 
 		fprintf(stderr, "Loading contigs from %s...\n", Sigma::contigs_file.c_str());
 		time(&start);
@@ -289,13 +299,13 @@ int main(int argc, char** argv) {
 			std::string fake_sam = Sigma::mapping_files[sample_index] + ".sam";
 			std::string cmd = "mkfifo " + fake_sam;
 			fprintf(stderr, " *** EXEC %s\n", cmd.c_str());
-			system (cmd.c_str());
+			if( system (cmd.c_str()) );
 			
 			//run samtools to get the fake sam
-			cmd = "samtools view " + Sigma::mapping_files[sample_index] + " | head -n 100000 " + " > " + fake_sam + "&";
-			//cmd = "samtools view " + Sigma::mapping_files[sample_index] + " > " + fake_sam + "&";
+			//cmd = "samtools view " + Sigma::mapping_files[sample_index] + " | head -n 100000 " + " > " + fake_sam + "&";
+			cmd = "samtools view " + Sigma::mapping_files[sample_index] + " > " + fake_sam + "&";
 			fprintf(stderr, " *** EXEC %s\n", cmd.c_str());
-			system (cmd.c_str());
+			if( system (cmd.c_str()) );
 
 			//Read the fake sam file
 			fprintf(stderr, "Loading mapping from %s...\n", fake_sam.c_str());
@@ -306,7 +316,7 @@ int main(int argc, char** argv) {
 			
 			cmd = "rm " + fake_sam;
 			fprintf(stderr, " *** EXEC %s\n", cmd.c_str());
-			system (cmd.c_str());
+			if( system (cmd.c_str()) );
 
 			fprintf(stderr, "DONE! %.4f sec\n\n", difftime(finish, start));//std::cin.get();
 		}
@@ -323,7 +333,7 @@ int main(int argc, char** argv) {
 	}
 
 	fprintf(stderr, "Number of contigs: %ld\n\n", contigs.size());
-	fprintf(stderr, "Toal number of contigs: %ld\n\n", Sigma::total_assembly_nb_contig);
+	fprintf(stderr, "Total number of contigs: %ld\n\n", Sigma::total_assembly_nb_contig);
 	
 	EdgeReader* edge_reader = new OperaBundleReader();
 
@@ -358,11 +368,11 @@ int main(int argc, char** argv) {
 	if (Sigma::pdist_type == "Poisson") {
 		prob_dist = new PoissonDistribution();
 	} else if (Sigma::pdist_type == "NegativeBinomial") {
-		if (Sigma::R <= 0.0) {
-			Sigma::R = compute_R(&contigs);
+		if (Sigma::R_VALUE <= 0.0) {
+			Sigma::R_VALUE = compute_R(&contigs);
 			//prob_dist = new NegativeBinomialDistribution(compute_R(&contigs));
 		} 
-		prob_dist = new NegativeBinomialDistribution(Sigma::R);
+		prob_dist = new NegativeBinomialDistribution(Sigma::R_VALUE);
 		
 	} else {
 		fprintf(stderr, "Unknown pdist_type: %s\n", Sigma::pdist_type.c_str());

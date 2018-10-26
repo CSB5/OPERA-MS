@@ -44,7 +44,7 @@ my $samtools_dir = "";
 my $short_read_maptool = "bwa";
 my $kmer_size = 100;
 my $flag_help;
-
+my $skip_opera = 0;
 
 my $help_message = "
 
@@ -57,17 +57,18 @@ Options:
         --num-of-processors: number of processors used for mapping stages
         --blasr: Folder which contains blasr binary (default PATH)
         --short-read-maptool: Mapping tool can be either bwa (default) or bowtie
-	--short-read-tooldir: Directory that contains binaries to the chosen short read mapping tool (default PATH)
-        --samtools-dir:	Directory that contains samtools binaries (default PATH)
-	--opera: Folder which contains opera binary (default PATH)
-	--illumina-read1: fasta file of illumina read1
-	--illumina-read2: fasta file of illumina read2
+--short-read-tooldir: Directory that contains binaries to the chosen short read mapping tool (default PATH)
+        --samtools-dir:Directory that contains samtools binaries (default PATH)
+--opera: Folder which contains opera binary (default PATH)
+--illumina-read1: fasta file of illumina read1
+--illumina-read2: fasta file of illumina read2
         --help : prints this message
+    --skip-opera :set to 1 to skip running OPERA-LG and just uses the script for processing purposes. (Default set to 0)
 ";
 
 if ( @ARGV == 0 ) {
-        print $help_message;
-        exit 0;
+    print $help_message;
+    exit 0;
 }
 
 GetOptions(
@@ -85,28 +86,31 @@ GetOptions(
     "short-read-tooldir=s" => \$short_read_tooldir,
     "illumina-read1=s"      => \$illum_read1,
     "illumina-read2=s"      => \$illum_read2,
-    "help"       => \$flag_help
-) or die("Error in command line arguments.\n");
+    "help"       => \$flag_help,
+    "skip-opera=i" => \$skip_opera
+    ) or die("Error in command line arguments.\n");
 
 if ($flag_help) {
-        print $help_message;
-        exit 0;
+    print $help_message;
+    exit 0;
 }
 if (!defined($contigFile)) {
-        print "contigs fasta file needs to be specified\n";
-        exit 0;
+    my $cmd = 'pwd';
+    print STDERR "\n".$cmd."\n";
+    print "contigs fasta file needs to be specified\n";
+    exit 0;
 }
 if (!defined($readsFile)) {
-        print "long reads fasta file needs to be specified\n";
-        exit 0;
+    print "long reads fasta file needs to be specified\n";
+    exit 0;
 }
 if (!defined($file_pref)) {
-        print "prefix of output mapping file needs to be specified\n";
-        exit 0;
+    print "prefix of output mapping file needs to be specified\n";
+    exit 0;
 }
 if (!defined($outputDir)) {
-        print "output directory for scaffolding results needs to be specified\n";
-        exit 0;
+    print "output directory for scaffolding results needs to be specified\n";
+    exit 0;
 }
 #if (!defined($blasrDir)) {
 #        print "Folder which contains blasr binary if it is not in PATH needs to be specified\n";
@@ -163,30 +167,44 @@ if ( ! -e $illum_read1 && $illum_read1 ne "NONE") {die "\nError: $illum_read1 - 
 if ( ! -e $illum_read2 && $illum_read2 ne "NONE") {die "\nError: $illum_read2 - illumina read 2 file does not exist $str_full_path\n"};
 
 if ( ! -e "$blasrDir/blasr" && $blasrDir ne "") {die "\nError: $blasrDir - blasr does not exist in the directory $str_full_path\n"};
+
+#my $blasr_version = "${blasrDir}blasr --version > /dev/null 2>&1";
+#run_exe($blasr_version);
+
+#if ($?){
+#    die "blasr version less than 5.1. Please install the latest version. Exiting. \n";
+#}
+
 #if ( ! -e "$graphmapDir/graphmap" ) {die "$! graphmap does not exist in the directory $str_full_path\n"};
 if ( ! -e "$operaDir/OPERA-LG" && $operaDir ne "") {die "\nError:$operaDir - OPERA-LG does not exist in the directory $str_full_path\n"};
-if ( ! -e "$short_read_tooldir/bowtie" && $short_read_maptool eq "bowtie" && $short_read_tooldir ne "") {die "\nError: $short_read_tooldir - bowtie does not exist in the directory $str_full_path\n"};
 if ( ! -e "$short_read_tooldir/bwa" && $short_read_maptool eq "bwa" && $short_read_tooldir ne "") {die "\nError: $short_read_tooldir - bwa does not exist in the directory $str_full_path\n"};
 
 
 #map illumina reads to the contigs using preprocess_reads.pl
 if(! -e "${file_pref}.bam" &&  !($illum_read1 eq "NONE" && $illum_read2 eq "NONE")){
-    print "Mapping short-reads using  $short_read_maptool...\n";
+    $start_time = time;
+    print " *** *** Mapping short-reads using  $short_read_maptool...\n";
     $str_path_dir = "";
     $str_path_dir .= "--tool-dir  $short_read_tooldir" if($short_read_tooldir ne "");
     $str_path_dir .= " --samtools-dir $samtools_dir" if($samtools_dir ne "");
-    run_exe("perl $operaDir/preprocess_reads.pl --map-tool $short_read_maptool $str_path_dir --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam");
+    run_exe("perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam");
+    $end_time = time;
+    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
 }
 
 if(! -e "$file_pref.map.sort"){
     # map using blasr
+    $start_time = time;
     print "Mapping long-reads using blasr...\n";
-    #run_exe( "${blasrDir}blasr -nproc $nproc -m 1 $readsFile $contigFile  | cut -d ' ' -f1-4,7-13 | sed 's/ /\\t/g' > $file_pref.map");
+    #run_exe( "${blasrDir}blasr --nproc $nproc -m 1 $readsFile $contigFile  | cut -d ' ' -f1-4,7-13 | sed 's/ /\\t/g' > $file_pref.map");
     if($mapper eq "blasr"){
-	run_exe( "${blasrDir}blasr  -nproc $nproc -m 1 -minMatch 5 -bestn 10 -noSplitSubreads -advanceExactMatches 1 -nCandidates 1 -maxAnchorsPerPosition 1 -sdpTupleSize 7 $readsFile $contigFile | cut -d ' ' -f1-5,7-12 | sed 's/ /\\t/g' > $file_pref.map");
+	run_exe( "${blasrDir}blasr  -nproc $nproc -m 1 -minMatch 5 -bestn 10 -noSplitSubreads -advanceExactMatches 1 -nCandidates 1 -maxAnchorsPerPosition 1 -sdpTupleSize 7 $readsFile $contigFile | cut -d ' ' -f1-12 | sed 's/ /\\t/g' > $file_pref.map");
+	$end_time = time;print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
 	# sort mapping
+	$start_time = time;
 	print "Sorting mapping results...\n";
-	run_exe("sort -k1,1 -k9,9g  $file_pref.map > $file_pref.map.sort") 
+	run_exe("sort -k1,1 -k10,10g  $file_pref.map > $file_pref.map.sort");
+	$end_time = time;print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
     }
     
     if($mapper eq "graphmap"){
@@ -208,6 +226,7 @@ if($mapper eq "graphmap"){
     close(FILE);
 }
 # analyze mapping file
+$start_time = time;
 print "Analyzing sorted results...\n";
 #my $all_edge_file = "pairedEdges";
 my $all_edge_file = "pairedEdges";
@@ -245,7 +264,7 @@ for (my $i = 0; $i <= 0; $i++){
 	if(! exists $repeat_contig{$contig}){
 	    $repeat_contig{$contig} = 1;
 	    print OUT $_;
-	    #print STDERR " *** CONTIG $contig\n";
+	        #print STDERR " *** CONTIG $contig\n";
 	}
     }
     close(FILE);
@@ -282,15 +301,22 @@ for (my $i = 0; $i <= 5; $i++){
     close(OUT);
 }
 
-#
+$end_time = time;print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+
+
 # create configure file
 &CreateConfigFile( $contigFile, "", @allEdgeFiles );
 
-# run opera
-&run_exe( "${operaDir}OPERA-LG config > log" );
 
-#Link to the result file
-&run_exe("ln -s results/scaffoldSeq.fasta scaffoldSeq.fasta");
+if (!$skip_opera){
+
+        # run opera
+    &run_exe( "${operaDir}OPERA-LG config > log" );
+
+    #Link to the result file
+    &run_exe("ln -s results/scaffoldSeq.fasta scaffoldSeq.fasta");
+
+}
 
 sub extract_edge{
     my ($all_edge_file) = @_;
@@ -317,8 +343,8 @@ sub extract_edge{
 	chop $_;
 	@line = split(/\t/, $_);
 	$dist = $line[4];
-  	$support = $line[6];
-  	foreach $it (keys %inter){
+	$support = $line[6];
+	foreach $it (keys %inter){
 	    if($support >= 0 && $inter{$it}->[0] < $dist && $dist < $inter{$it}->[1]){
 		$OUT = $out_edge{$it};
 		print $OUT join("\t", @line)."\n";
@@ -394,11 +420,11 @@ sub check_overlap_contig_for_gapfilling{
 	if($contig_size >= $min_contig_size ||
 	   ($prev_contig_size < $min_contig_size && $prev_contig_score > $contig_score)){
 	    pop(@{$contig_list});
-	    #The new contig have a alignement with better quality and it can be added to the list
+	        #The new contig have a alignement with better quality and it can be added to the list
 	    return 1;
 	}
 	else{
-	    #The new contig have a alignement with lower quality than the previous contig, it will not be added to the list
+	        #The new contig have a alignement with lower quality than the previous contig, it will not be added to the list
 	    return 0;
 	}
     }
@@ -426,48 +452,48 @@ sub printEdges {
 	$next_contig_found = 0;
 	@contig_for_gapfilling_list = ();
 	for( $j = $i + 1; $j <= $alignemnt_to_link; $j++ ){
-	    
-	    #Conflicting alignement are filtered out
+	        
+	        #Conflicting alignement are filtered out
 	    next if(index($alignments[$j], "_CONFLICT") != -1);
 
 	    my ($rn2, $cn2, $ro2, $co2, $cs2, $ce2, $cl2, $rs2, $re2, $rl2) = split(/ /, $alignments[$j]);
 	    $ori2 = ($co2 == 0 ? "+" : "-");
-	    
+	        
 	    if(0 && $cn1 == 170676){
 		print STDERR $cn1."\t".$cn2." $rn2 => ";
 		foreach $a (@contig_for_gapfilling_list){
 		    print STDERR " ".join(",", @{$a});
 		}
-		print STDERR "\n";<STDIN> if($cn2 == 172314 && @contig_for_gapfilling_list != 0 && $contig_for_gapfilling_list[0]->[0] == 167726);
+		#print STDERR "\n";<STDIN> if($cn2 == 172314 && @contig_for_gapfilling_list != 0 && $contig_for_gapfilling_list[0]->[0] == 167726);
 	    }
 
-	    #To store the short contig for the gapfilling
+	        #To store the short contig for the gapfilling
 	    if(index($alignments[$j], "_small_contig_gapfilling") != -1){
 		if($re1 - $overlap < $rs2){#No conflict with contig at the starting point of the edge [TESTED TOO MANY TIMES]
 		    add_contig_for_gapfilling(\@contig_for_gapfilling_list, $cn2,  $ori2, $rs2, $re2, $cs2, $cl2, 1);
 		}
 		next;
 	    }
-	       
+	           
 	    $distance = int(($rs2-$re1) + abs($rs2-$re1)*0.09); 
-	    #NEED TO REMOVE AS SD IS NOW COMPUTED ON THE AVG DISTANCE OF THE EDGE
+	        #NEED TO REMOVE AS SD IS NOW COMPUTED ON THE AVG DISTANCE OF THE EDGE
 	    $sd = int(abs($distance)*0.1+50);#Why the SD is applied to the corrected distance 
 	    $distance += -$cs2 - ($cl1-$ce1);
 
-	    #print "$alignments[$i]\n$alignments[$j]\n \n" if($cn1 eq $cn2); 
-	    next if(
-		$cn1 eq $cn2 || #the contig is the same
-		($cl1 < $min_opera_contig_size || $cl2 < $min_opera_contig_size) ||#one contig does not pass opera contig size threshold
-		exists $repeat_contig{$cn1} ||#one of the contig is a repeat
-		exists $repeat_contig{$cn2} 
-		#exists $edge_to_filter{$cn1.":".$cn2.":".$distance}#This a conflicting edge
-		);
-	    
+	        #print "$alignments[$i]\n$alignments[$j]\n \n" if($cn1 eq $cn2); 
+	        next if(
+		    $cn1 eq $cn2 || #the contig is the same
+		    ($cl1 < $min_opera_contig_size || $cl2 < $min_opera_contig_size) ||#one contig does not pass opera contig size threshold
+		    exists $repeat_contig{$cn1} ||#one of the contig is a repeat
+		    exists $repeat_contig{$cn2} 
+		    #exists $edge_to_filter{$cn1.":".$cn2.":".$distance}#This a conflicting edge
+		    );
+	        
 	    @contig_order = sort($cn1, $cn2);
 	    $edge_ID = join(" ", @contig_order);
 
-	    #Collect the transitive edge for that read to filter out edge from reads that contain only the transitive edge
-	    
+	        #Collect the transitive edge for that read to filter out edge from reads that contain only the transitive edge
+	        
 	    if($component{$cn1} == 0 && $component{$cn2} == 0) {
 
 		$component{$cn1} = $component{$cn2} = $component_num; 
@@ -491,7 +517,7 @@ sub printEdges {
 
 		#print $length{$component{$cn1}}." with ".$length{$component{$cn2}}."\n";
 		if($length{$component{$cn1}} >= $length{$component{$cn2}}) {
-		    
+		        
 		    $member{$component{$cn1}} .= " ".$member{$component{$cn2}};
 		    $length{$component{$cn1}} += $length{$component{$cn2}}; $length{$component{$cn2}} = 0; 
 		    foreach $member (split(/ /, $member{$component{$cn2}})) { $component{$member} = $component{$cn1}; }
@@ -512,18 +538,18 @@ sub printEdges {
 		$str = "$cn1\t$cn2";
 		$str = "$cn2\t$cn1" if($contig_order[0] ne $cn1);
 		$edge_read_info{$edge_ID} = {"EDGE", $str,
-					     "DIST_LIST", [],
-					     "READ_LIST", [],
-					     "COORD_CONTIG_1", [],
-					     "COORD_CONTIG_2", [],
-					     "COORD_CONTIG_1_ON_READ", [],
-					     "COORD_CONTIG_2_ON_READ", [],
-					     "CONTIG_GAPFILLING", []
+					          "DIST_LIST", [],
+					          "READ_LIST", [],
+					          "COORD_CONTIG_1", [],
+					          "COORD_CONTIG_2", [],
+					          "COORD_CONTIG_1_ON_READ", [],
+					          "COORD_CONTIG_2_ON_READ", [],
+					          "CONTIG_GAPFILLING", []
 		};
 	    }
 	    $others{$edge_ID} .= "$rn1,$cn1,$ori1,$cn2,$ori2,$distance,$sd|";
 
-	    #Swap the alignement in case of contig order change
+	        #Swap the alignement in case of contig order change
 	    if($contig_order[0] eq $cn1){
 		push(@{$edge_read_info{$edge_ID}->{"COORD_CONTIG_1"}}, $co1."_".$cs1."_".$ce1);
 		push(@{$edge_read_info{$edge_ID}->{"COORD_CONTIG_2"}}, $co2."_".$cs2."_".$ce2);
@@ -540,8 +566,8 @@ sub printEdges {
 	    }
 	    push(@{$edge_read_info{$edge_ID}->{"READ_LIST"}}, $rn1);
 	    push(@{$edge_read_info{$edge_ID}->{"DIST_LIST"}}, $distance);
-	    
-	    #Check if the long contig ovlap with the last contig of the list
+	        
+	        #Check if the long contig ovlap with the last contig of the list
 	    check_overlap_contig_for_gapfilling(\@contig_for_gapfilling_list, $rs2, $re2, $cs2, $cl2);
 	    $c_gap_filling_str = "";
 	    foreach $c (@contig_for_gapfilling_list){
@@ -550,16 +576,16 @@ sub printEdges {
 	    chop $c_gap_filling_str;
 	    $c_gap_filling_str = "NONE" if($c_gap_filling_str eq "");
 	    push(@{$edge_read_info{$edge_ID}->{"CONTIG_GAPFILLING"}}, $c_gap_filling_str);
-	    #add the long contig to the contig list in case of direct edges not present, the contig is filtered as repeat
+	        #add the long contig to the contig list in case of direct edges not present, the contig is filtered as repeat
 	    add_contig_for_gapfilling(\@contig_for_gapfilling_list, $cn2,  $ori2, $rs2, $re2, $cs2, $cl2, 0);
-	    #next;
+	        #next;
 	}
     }    
 }
 
 sub checkMapping{
     my ($mapFile, $all_edge_file) = @_;
-    my ($rn, $cn, $score, $unused, $ro, $rs, $re, $rl, $co, $cs, $ce, $cl);
+    my ($rn, $cn, $score, $unused, $ro, $rs, $re, $rl, $co, $cs, $ce, $cl, $similarity);
     my $currentScore = 0;my $previousScore = 0;
     %component = (); %length = (); $component_num = 1; %member = ();
     #%print = (); 
@@ -577,7 +603,9 @@ sub checkMapping{
 	next if(@line < 10);
 	#Get the mapping coordinates using blars or graphmap
 	#($rn, $cn, $ro, $co, $cs, $ce, $cl, $rs, $re, $rl, $score) = @line if($mapper eq "blasr");
-	($rn, $cn, $ro, $co, $score, $cs, $ce, $cl, $rs, $re, $rl) = @line if($mapper eq "blasr");
+	($rn, $cn, $ro, $co, $score, $similarity, $cs, $ce, $cl, $rs, $re, $rl) = @line if($mapper eq "blasr");
+
+    #print STDOUT "$score\n";
 	#Conversion from the graphmmap (mhap) format to the blasr format
 	if($mapper eq "graphmap"){
 	    ($rn, $cn, $score, $unused, $ro, $rs, $re, $rl, $co, $cs, $ce, $cl) = @line;
@@ -598,14 +626,14 @@ sub checkMapping{
 	#Filter small contigs
 	if($cl < $min_contig_size) {
 	    print STATUS (join("\t", @data)." | "); print STATUS "small-contig\n";
-	    #Those alignement are saved for the gapfilling part only in order to improve the sequence quality of the filled sequences
-	    #The overlapping alignements are solve during the print edge step to avoind interference between long contigs used for scaffolding and short contigs only used gapfilling
-	    if($cl > $min_contig_size_for_gap_filling && 
-	       $ce-$cs >= $fraction_in_gap*$cl #The contig fraction mapped is 90% of is length
-		){
-		push @alignments, "@data";
-		$alignments[@alignments-1] .= "_small_contig_gapfilling";
-	    }
+	        #Those alignement are saved for the gapfilling part only in order to improve the sequence quality of the filled sequences
+	        #The overlapping alignements are solve during the print edge step to avoind interference between long contigs used for scaffolding and short contigs only used gapfilling
+	        if($cl > $min_contig_size_for_gap_filling && 
+		          $ce-$cs >= $fraction_in_gap*$cl #The contig fraction mapped is 90% of is length
+		    ){
+		    push @alignments, "@data";
+		    $alignments[@alignments-1] .= "_small_contig_gapfilling";
+		}
 	    next;
 	}
 	
@@ -627,9 +655,9 @@ sub checkMapping{
 
 	#This is a new read
 	if($rn ne $prev_rn) {
-	    #Get the edge of the alignement on read prev_rn
+	        #Get the edge of the alignement on read prev_rn
 	    &printEdges(*alignments) if(@alignments > 1);
-	    #Udpdate the variable to start to collect information about the alignent on the read $rn
+	        #Udpdate the variable to start to collect information about the alignent on the read $rn
 	    $prev_rn = $rn; @alignments = (); 
 	    push @alignments, "@data";
 	    $prev_alignment_end = $re + $cl-$ce;
@@ -640,37 +668,37 @@ sub checkMapping{
 	    $curr_alignment_start = $rs - $cs;
 	    $curr_alignment_end = $re + $cl-$ce;
 	    $currentScore = $score;
-	    #Non overlapping alignement
+	        #Non overlapping alignement
 	    if($prev_alignment_end-$overlap < $curr_alignment_start) {
 		
 		push @alignments, "@data";
-		$prev_alignment_end = $curr_alignment_end;	
+		$prev_alignment_end = $curr_alignment_end;
 		$previousScore = $currentScore;   
 	    }
 	    else {
 		#WE SIMPLY FLAG THE ALIGNEMENT AS CONFLICTING AND LOOSE THE INFORMATION
 		if($FLAG_FILTER_CONFLICTING_ALIGNEMENT){
 		    $prev_alignment_end = $curr_alignment_end;
-		    #print STDERR " *** ADD CONFLICT TAG ".(($alignments[@alignments-1]))."\n";#<STDIN>;
+		        #print STDERR " *** ADD CONFLICT TAG ".(($alignments[@alignments-1]))."\n";#<STDIN>;
 		    $alignments[@alignments-1] .= "_CONFLICT";
 		    print STATUS " overlapped";
 		}
 		else{
-		    #If 2 contig alignements are overlapping, take the one with the highest score
-		    #DO WE WANT TO USE THE ALIGNEMENT LENGTH AS WELL TO COMPARE THE ALIGNEMENT ???
-		    if( ($mapper eq "blasr" && $previousScore > $currentScore) || #the best score are the more negative
-			($mapper eq "graphmap" && $previousScore < $currentScore) #here we use the the fraction of bases covered by seeds to compare the alignements
-			){
-			# replace mapping
-			pop @alignments;
-			push @alignments, "@data";
-			$prev_alignment_end = $curr_alignment_end;	
-			$previousScore = $currentScore; 
-			print STATUS " overlapped better";
-		    }
-		    else{
-			print STATUS " overlapped";
-		    }
+		        #If 2 contig alignements are overlapping, take the one with the highest score
+		        #DO WE WANT TO USE THE ALIGNEMENT LENGTH AS WELL TO COMPARE THE ALIGNEMENT ???
+		        if( ($mapper eq "blasr" && $previousScore > $currentScore) || #the best score are the more negative
+			    ($mapper eq "graphmap" && $previousScore < $currentScore) #here we use the the fraction of bases covered by seeds to compare the alignements
+			    ){
+			    # replace mapping
+			    pop @alignments;
+			    push @alignments, "@data";
+			    $prev_alignment_end = $curr_alignment_end;
+			    $previousScore = $currentScore; 
+			    print STATUS " overlapped better";
+			}
+			else{
+			    print STATUS " overlapped";
+			}
 		}
 	    }
 	}
@@ -686,21 +714,21 @@ sub checkMapping{
     my %edge_distance_support = ();my @sorted_distance_ori = ();my @all_distance_ori = ();
     my ($distance_ID, $best_support);
     foreach $key (keys(%edge_read_info)) {
-	print STDERR "\n *** *** contig pair $key\n";
+#print STDERR "\n *** *** contig pair $key\n";
 	#Compute the support and edge distance as well as the orientation
 	#Constructure a array that contain the distance as well as the orientation of the 2 contigs involve in the edge
 	%edge_distance_support = ();
 	@all_distance_ori = ();
 	$edge_read_info{$key}->{"EDGE_TYPE"} =  ();
 	for(my $i = 0; $i < @{$edge_read_info{$key}->{"DIST_LIST"}}; $i++){
-	    #print STDERR " *** $i ".(@{$edge_read_info{$key}->{"DIST_LIST"}}+0)."\n";<STDIN>;
+	        #print STDERR " *** $i ".(@{$edge_read_info{$key}->{"DIST_LIST"}}+0)."\n";<STDIN>;
 	    $d = $edge_read_info{$key}->{"DIST_LIST"}->[$i];
 	    @tmp = split(/\_/, $edge_read_info{$key}->{"COORD_CONTIG_1"}->[$i]);$ori_1 = ($tmp[0] == 0 ? "+" : "-");
 	    @tmp = split(/\_/, $edge_read_info{$key}->{"COORD_CONTIG_2"}->[$i]);$ori_2 = ($tmp[0] == 0 ? "+" : "-");
-	    #
+	        #
 	    @tmp = split(/\_/, $edge_read_info{$key}->{"COORD_CONTIG_1_ON_READ"}->[$i]);$start_1 = $tmp[1];
 	    @tmp = split(/\_/, $edge_read_info{$key}->{"COORD_CONTIG_2_ON_READ"}->[$i]);$start_2 = $tmp[1];
-	    #
+	        #
 	    $edge = $ori_1.":".$ori_2;
 	    if($start_1 > $start_2){#The order of the contig is reversed
 		$ori_1 = ($ori_1 eq "+" ? "-" : "+");
@@ -716,11 +744,11 @@ sub checkMapping{
 	for(my $i = 0; $i < @sorted_distance_ori; $i++){
 	    $distance = $sorted_distance_ori[$i]->[0];
 	    $edge = $sorted_distance_ori[$i]->[1];
-	    print STDERR " *** $edge the dist $distance\n";
+##    print STDERR " *** $edge the dist $distance\n";
 	    $distance_ID = -1;
 	    if(exists $edge_distance_support{$edge}){
 		for(my $j = 0; $j < @{$edge_distance_support{$edge}}; $j++){
-		    #The distance match one the the previous distance found
+		        #The distance match one the the previous distance found
 		    if(remove_standard_deviation($edge_distance_support{$edge}->[$j]->[0]) <= $distance && $distance <= add_standard_deviation($edge_distance_support{$edge}->[$j]->[0])){
 			$distance_ID = $j;
 			last;
@@ -729,7 +757,7 @@ sub checkMapping{
 	    }
 	    if($distance_ID == -1){
 		#New edge distance
-		print STDERR " ------------ new distance\n";
+##print STDERR " ------------ new distance\n";
 		$edge_distance_support{$edge} = () if(! exists $edge_distance_support{$edge});
 		push(@{$edge_distance_support{$edge}}, [$distance, $distance, 1]);
 		$nb_edge_distance++;
@@ -741,7 +769,7 @@ sub checkMapping{
 	    }
 	}
 	
-	#print STDERR " *** ".$nb_edge_distance." number of distance or that edge\n";<STDIN>;
+#print STDERR " *** ".$nb_edge_distance." number of distance or that edge\n";<STDIN>;
 
 	#Compute the final support
 	$best_distance_ID = 0;
@@ -773,19 +801,19 @@ sub checkMapping{
 	for(my $j = 0; $j < @{$edge_read_info{$key}->{"DIST_LIST"}}; $j++){
 	    $read_distance = $edge_read_info{$key}->{"DIST_LIST"}->[$j];#cmp_read];
 	    $read_edge_type = $edge_read_info{$key}->{"EDGE_TYPE"}->[$j];
-	    if($best_edge ne $read_edge_type ||#this read does not support the correct edge type
-	       ! (remove_standard_deviation($best_distance) <= $read_distance && $read_distance <= add_standard_deviation($best_distance))){#this read does not support the correct distance
-		print STDERR " *** Remove reads ".($edge_read_info{$key}->{"READ_LIST"}->[$splice_offset])." $read_edge_type $read_distance not in [ ".(remove_standard_deviation($best_distance))." ,".(add_standard_deviation($best_distance))."] from $best_edge $best_distance and supported by $best_support reads n\n";
-		splice @{$edge_read_info{$key}->{"READ_LIST"}}, $splice_offset, 1;
-		splice @{$edge_read_info{$key}->{"COORD_CONTIG_1"}}, $splice_offset, 1;
-		splice @{$edge_read_info{$key}->{"COORD_CONTIG_2"}}, $splice_offset, 1;
-		splice @{$edge_read_info{$key}->{"COORD_CONTIG_1_ON_READ"}}, $splice_offset, 1;
-		splice @{$edge_read_info{$key}->{"COORD_CONTIG_2_ON_READ"}}, $splice_offset, 1;
-		splice @{$edge_read_info{$key}->{"CONTIG_GAPFILLING"}}, $splice_offset, 1;
-		#$nb_read_in_edge--;
-	    }
+	        if($best_edge ne $read_edge_type ||#this read does not support the correct edge type
+		   ! (remove_standard_deviation($best_distance) <= $read_distance && $read_distance <= add_standard_deviation($best_distance))){#this read does not support the correct distance
+		    #print STDERR " *** Remove reads ".($edge_read_info{$key}->{"READ_LIST"}->[$splice_offset])." $read_edge_type $read_distance not in [ ".(remove_standard_deviation($best_distance))." ,".(add_standard_deviation($best_distance))."] from $best_edge $best_distance and supported by $best_support reads n\n";
+		    splice @{$edge_read_info{$key}->{"READ_LIST"}}, $splice_offset, 1;
+		    splice @{$edge_read_info{$key}->{"COORD_CONTIG_1"}}, $splice_offset, 1;
+		    splice @{$edge_read_info{$key}->{"COORD_CONTIG_2"}}, $splice_offset, 1;
+		    splice @{$edge_read_info{$key}->{"COORD_CONTIG_1_ON_READ"}}, $splice_offset, 1;
+		    splice @{$edge_read_info{$key}->{"COORD_CONTIG_2_ON_READ"}}, $splice_offset, 1;
+		    splice @{$edge_read_info{$key}->{"CONTIG_GAPFILLING"}}, $splice_offset, 1;
+		    #$nb_read_in_edge--;
+		}
 	    else{
-	    	$splice_offset++;
+		$splice_offset++;
 	    }
 	}
 	
@@ -851,6 +879,7 @@ sub CreateConfigFile{
 
     print CONF "# Contig file\n";
     print CONF "contig_file=$contigFile\n";
+#TODO This is to make sure scaffolds form when there is 0 coverage. Remove/keep in release
 
     print CONF "kmer=$kmer_size\n";
 
@@ -868,14 +897,14 @@ sub CreateConfigFile{
     @means = (300, 1000, 2000, 5000, 15000, 40000);
     @stds = (30, 100, 200, 500, 1500, 4000);
     foreach $edgeFileName ( @edgeFiles ){
-	    print CONF "[LIB]\n";
+	print CONF "[LIB]\n";
 	    #print CONF "cluster_threshold=$cluster_threshold\n";
-	    print CONF "cluster_threshold=$cluster_threshold_tab[ $i ]\n";
-	    print CONF "map_file=$edgeFileName\n";
-	    print CONF "lib_mean=$means[ $i ]\n";
-	    print CONF "lib_std=$stds[ $i ]\n";
-	    print CONF "map_type=opera\n";
-	    $i++;
+	print CONF "cluster_threshold=$cluster_threshold_tab[ $i ]\n";
+	print CONF "map_file=$edgeFileName\n";
+	print CONF "lib_mean=$means[ $i ]\n";
+	print CONF "lib_std=$stds[ $i ]\n";
+	print CONF "map_type=opera\n";
+	$i++;
     }
     
     close CONF;
@@ -896,5 +925,5 @@ sub run_exe{
 #grep -e 175698 -e 175870 S288C/V6_RAW/pairedEdges_no_repeat_i*
 
 #grep -e 173042 S288C/V6_RAW/edge_read_info.dat | grep 170690
-#170690	+	173042	+	channel_339_read_99_47788;channel_474_read_4_1403826200_86695	COORD_CONTIG_1:0_6_616;1_11_621	COORD_CONTIG_2:0_35_2544;1_1104_2528	COORD_CONTIG_1_ON_READ:0_5790_6353;0_6633_7234	COORD_CONTIG_2_ON_READ:0_20984_23254;0_2_1385
+#170690+173042+channel_339_read_99_47788;channel_474_read_4_1403826200_86695COORD_CONTIG_1:0_6_616;1_11_621COORD_CONTIG_2:0_35_2544;1_1104_2528COORD_CONTIG_1_ON_READ:0_5790_6353;0_6633_7234COORD_CONTIG_2_ON_READ:0_20984_23254;0_2_1385
 #grep -A1 channel_339_read_99_47788 /home/bertrandd/PROJECT_LINK/OPERA_LG/NANOPORE/DATA/W303_ONT_Raw_reads_filter_rename_single_line.fa > weird_read.fa;grep -A1 channel_474_read_4_1403826200_86695 /home/bertrandd/PROJECT_LINK/OPERA_LG/NANOPORE/DATA/W303_ONT_Raw_reads_filter_rename_single_line.fa >> weird_read.fa

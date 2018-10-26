@@ -6,7 +6,7 @@ CPP := $(wildcard *.cpp)
 install : $(PROGRAM)
 
 $(PROGRAM) : $(OBJS)     
-	g++ -c -O3 -Wall $(CPP) $<
+	g++ -c -O3 -std=c++98 -Wall -Wno-deprecated $(CPP) $<
 #	g++ -c -g -fno-inline -w $(CPP) $<
 #	g++ -c -g -fno-inline -w $(CPP) $< -pg
 #	g++ -o ../bin/$(PROGRAM) *.o -pg

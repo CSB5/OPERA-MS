@@ -6,12 +6,14 @@ Configure::Configure(void)
 
 Configure::~Configure(void)
 {
+	
 }
 
 // contig file related parameters
 int Configure::FILE_FORMAT = FASTA;
 int Configure::FILE_TYPE = VELVET;
 bool Configure::FILTER_REPEAT = true;
+bool Configure::KEEP_REPEAT_FULL = false;
 double Configure::REPEAT_THRESHOLD = 1.5;
 string Configure::CONTIG_FILE = "";
 int Configure::CONTIG_SIZE_THERSHOLD = 500;
@@ -51,10 +53,12 @@ int Configure::KMER = 49;
 // multiple libraries variables
 vector<LibInfo*> *Configure::MULTI_LIB_INFO = new vector<LibInfo*>;
 
-//int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 10000000;
-int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 100000;
-int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 5;
-//int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 10;
+//FAST
+//int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 100000;
+//int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 5;
+//SLOW
+int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 10000000;
+int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 1;
 
 int Configure::UNIT_OF_PARTIAL_SCAFFOLDS = 20000;
 
