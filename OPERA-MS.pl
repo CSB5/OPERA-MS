@@ -818,10 +818,10 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
     my $nb_contig = @all_size+0;
     $nb_seq = compute_Nx(50, $assembly_size, \@sort_tab);$n50 = $sort_tab[$nb_seq];
     my $str_stats =  " *** Assembly stats:\n" . 
-	" *** *** " . "Number of contigs:" . $nb_contig . " \n". 
-	" *** *** " . "Assembly size $assembly_size bp\n". 
+	" *** *** " . "Number of contigs: " . $nb_contig . " \n". 
+	" *** *** " . "Assembly size: $assembly_size bp\n". 
 	#"\t" . "min contig size $sort_tab[$nb_contig-1] bp, ".
-	" *** *** " . "Max contig size $sort_tab[0] bp\n".
+	" *** *** " . "Max contig size: $sort_tab[0] bp\n".
 	" *** *** " . "Contig(s) longer than 1Mbp: $contig_1mb \n".
 	" *** *** " . "Contig(s) longer than 1Mbp: $contig_100kb contig\n".
 	" *** *** " . "Contig N50: $n50 bp\n";
