@@ -510,7 +510,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CONTIG_GRAPH"){
     $long_read_mapper_option = "--minimap2 $minimap2_dir" if($mapper eq "minimap2");
     $long_read_mapper_option = "--blasr $blasr_dir" if($mapper eq "blasr");
     
-    $command= "${opera_ms_dir}${opera_version}/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $DIR_MAPPING --num-of-processors $num_processor --opera ${opera_ms_dir}${opera_version}/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --samtools-dir $samtools_dir $long_read_mapper_option --short-read-tooldir $short_read_tool_dir --skip-opera 1  2> $DIR_MAPPING/log.err";
+    $command= "${opera_ms_dir}${opera_version}/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $DIR_MAPPING --num-of-processors $num_processor --opera ${opera_ms_dir}${opera_version}/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --samtools-dir $samtools_dir $long_read_mapper_option --short-read-tooldir $short_read_tool_dir --skip-opera 1 > log.out  2> $DIR_MAPPING/log.err";
     
     run_exe($command);
     #
@@ -780,22 +780,56 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
     }
     
     #Remove the contigs that have been used during gapfiling in the .fa file
-    $command = "perl $opera_ms_dir/bin/clean_scaffolds_repeats.pl $output_dir/$inter";
-    run_exe($command);
+    #$command = "perl $opera_ms_dir/bin/clean_scaffolds_repeats.pl $output_dir/$inter";
+    #run_exe($command);
     
     #$command = "mv $output_dir/lib_* $output_dir/$inter; rm -r $output_dir/$inter/scaffolds; mv $output_dir/runOperaMS.config $output_dir/$inter/";
     #run_exe($command);
-    
-    run_exe("rm $output_dir/scaffoldSeq.fasta.filled;ln -s $DIR_OPERA_LR/scaffoldSeq.fasta.filled $output_dir/scaffoldSeq.fasta.filled");
+
+    #Rename the scaffold sequence into contig after gap filling
+    run_exe("sed 's/_scaffold_/_contig_/' $DIR_OPERA_LR/scaffoldSeq.fasta.filled > $output_dir/contig.fasta");
+    run_exe("sed 's/_scaffold_/_contig_/' ${output_dir}/scaffold_info.txt > ${output_dir}/contig_info.txt; rm ${output_dir}/scaffold_info.txt"); 
     #$command = "rm $output_dir/contigs.bam";#; ln -s $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled $output_dir/scaffoldSeq.fasta.filled";
     #run_exe($command);
     
     #$command="less ${output_dir}/$inter/opera_long_read/statistics";
-    $str = `sort -k2,2nr  ${output_dir}/scaffold_info.txt | head -n10 | cut -f1,2`;
+    #$str = `sort -k2,2nr  ${output_dir}/scaffold_info.txt | head -n10 | cut -f1,2`;
     run_exe($command);
     $end_time = time;
     print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
-    print STDOUT $str . "\n";
+    #Get the stats
+    my @all_size = ();
+    open(FILE, "${output_dir}/contig_info.txt");
+    my $contig_1mb = 0;
+    my $contig_100kb = 0;
+    my $assembly_size = 0;
+    <FILE>;
+    while(<FILE>){
+	@line = split(/\t/, $_);
+	$size = $line[1];
+	$contig_1mb++ if($size > 1000000);
+	$contig_100kb++ if($size > 100000);
+	$assembly_size += $size;
+	push(@all_size, $size);
+    }
+    close(FILE);
+	
+    my @sort_tab = sort {$b <=> $a} @all_size;
+    my $nb_contig = @all_size+0;
+    $nb_seq = compute_Nx(50, $assembly_size, \@sort_tab);$n50 = $sort_tab[$nb_seq];
+    my $str_stats =  " *** Assembly stats:\n" . 
+	" *** *** " . "Number of contigs:" . $nb_contig . " \n". 
+	" *** *** " . "Assembly size $assembly_size bp\n". 
+	#"\t" . "min contig size $sort_tab[$nb_contig-1] bp, ".
+	" *** *** " . "Max contig size $sort_tab[0] bp\n".
+	" *** *** " . "Contig(s) longer than 1Mbp: $contig_1mb \n".
+	" *** *** " . "Contig(s) longer than 1Mbp: $contig_100kb contig\n".
+	" *** *** " . "Contig N50: $n50 bp\n";
+    
+    print STDOUT $str_stats . "\n";
+    open(OUT, ">${output_dir}/assembly.stats");
+    print OUT $str_stats . "\n";
+    close(OUT);
 }
 
 print STDERR "\n*************OPERA-MS DONE***************\n" if($STAGE_TO_RUN eq "ALL");
@@ -909,6 +943,26 @@ sub generate_opera_config_file{
 sub generate_ms_config_file{
     
 }
+
+sub compute_Nx{
+    my ($x, $length, $ptr_tab) = @_;
+
+    my $nb_x_base = $length * ($x / 100);
+    
+    my $total = 0;
+    
+    my $i = 0;
+    for($i = 0; $total < $nb_x_base; $i++){
+	$total += $ptr_tab->[$i];
+    }
+    
+    #print "$x $pos_x $size\n";<STDIN>;
+
+    #return $ptr_tab->[$i-1];
+    return $i -1;
+}
+
+
 
 
 sub run_exe{
