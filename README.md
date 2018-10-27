@@ -40,7 +40,7 @@ All paths are relative to the current working directory of your terminal. All pa
 
 - **OUTPUT_DIR** : `path/to/results` - Where the final results of OPERA-MS will be outputted.
 
-- **LONG_READ_FILE** : `path/to/long-read.fa` - Path to the long read file.
+- **LONG_READ** : `path/to/long-read.fa` - Path to the long read file.
 
 - **ILLUMINA_READ_1** : `path/to/illum_read1.fa` - Path to the first illumina read file.
 
