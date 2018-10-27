@@ -45,7 +45,9 @@ my $contig_to_tile = $contig_file;
 $prefix_name = "$assembly_dir/consensus";
 my $contig_tile_mapping = "$prefix_name\_tiling.paf";
 print STDERR " *** Identify corrected reads\n";
+#Used minimap2 to insert the contigs
 run_nucmmer($contig_to_tile, $racon_consensus, $prefix_name);
+#
 get_paf_file("$prefix_name\_tiling.coords", $contig_tile_mapping, "ONLY_SCAFF_CONTIG");
 
 #<STDIN>;
@@ -151,7 +153,7 @@ sub get_contig_and_corrected_read_in_gap{
     
     #Map the contig sequence to the corrected assembly
     my $tiling_mapping = "$seq_file.paf";
-    run_exe("minimap2_dir/minimap2 -t1 --cs=short -w5 -m0 $seq_file $out_contig_file > $tiling_mapping");#<STDIN>;
+    run_exe("$minimap2_dir/minimap2 -t1 --cs=short -w5 -m0 $seq_file $out_contig_file > $tiling_mapping");#<STDIN>;
 
     #Identify the contigs gap sequences in between the contigs or the overlaps
     open(FILE, "sort -k8,8 -n $tiling_mapping | ");
@@ -237,6 +239,7 @@ sub get_contig_and_corrected_read_in_gap{
     #exit(0);
 }
 
+#Should be done once to avoid reading the read file multiple times
 sub get_read_mapping{
     my ($scaffold_dir, $edge_read_info_file, $single_contig_on_file, $long_read_file, $out_dir) = @_;
 

@@ -11,14 +11,15 @@ use Statistics::Basic qw(:all);
 my $ref_directory = $ARGV[0];
 my $nb_process = $ARGV[1];
 my $opera_ms_dir = $ARGV[2];
-my $mummer_dir = $ARGV[3];
+my $scaffold_seq_file = $ARGV[3];
+my $mummer_dir = $ARGV[4];
 #
 my $cluster_file = "$ref_directory/clusters_seq_similarity";
 my $species_file = "$ref_directory/cluster_species.dat";
 my $super_cluster_file = "$ref_directory/super_cluster.dat";
 #my $cluster_file = "../sigma/clusters";
 my $scaffold_file = "$ref_directory/../opera_long_read/scaffolds.scaf";
-my $scaffold_seq_file = "$ref_directory/../opera_long_read/scaffoldSeq.fasta.filled";
+#my $scaffold_seq_file = "$ref_directory/../opera_long_read/scaffoldSeq.fasta.filled";
 my $outfile = "$ref_directory/../../scaffold_info.txt";
 my $contigs_windows_glob = "$ref_directory/../coverage_estimation/contigs_*";
 my $clusters_cov_file = "$ref_directory/NO_REPEAT/repeat_contigs_info.txt";
@@ -32,7 +33,7 @@ my %clusters_cov = ();
 my %contig_cov = ();
 my @cov_list = [];
 
-my $use_nucmer = 1;
+my $use_nucmer = 0;
 
 my @contig_window_glob = glob($contigs_windows_glob);
 my $contigs_windows_file = $contig_window_glob[0];
@@ -137,59 +138,62 @@ my $cmd_file = "$ref_directory/POST_EVAL/cmd.txt";
 my %filled_scaffold_length = ();
 
 #Preprocessing for nucmer.
-if ($use_nucmer){
-    print STDERR " *** Run nucmmer\n";
-    my $scaffold_name;
-    my $scaffold_seq;
-    open (CMD, ">",  $cmd_file) or die;
-    while (<SCAFFOLDS>){
-        chomp $_;
-        if ($_ =~ />/){
-            my @line = split(/\t/, $_);
-            $_ =~ /length:\s(\d*)\s/;
-            my $length = $1;
 
-            my $scaffold = $line[0];
-            my $scaffname = substr $scaffold,1;
-	    
-	    $scaffold_name = <SCAFFOLDSEQ>;
-	    $scaffold_seq = <SCAFFOLDSEQ>;
+#print STDERR " *** Run nucmmer\n";
+my $scaffold_name;
+my $scaffold_seq;
+open (CMD, ">",  $cmd_file) or die;
+while (<SCAFFOLDS>){
+    chomp $_;
+    if ($_ =~ />/){
+	my @line = split(/\t/, $_);
+	$_ =~ /length:\s(\d*)\s/;
+	my $length = $1;
 
+	my $scaffold = $line[0];
+	my $scaffname = substr $scaffold,1;
+
+	$scaffold_name = <SCAFFOLDSEQ>;
+	$scaffold_seq = <SCAFFOLDSEQ>;
+	
+	$length = length($scaffold_seq) - 1;
+	$filled_scaffold_length{$scaffname} = $length;
+	#
+	#print STDERR " *** *** $scaffold_name $scaffname $length\n";#<STDIN>;
+	
+	#Make intermediate files for nucmer only for large enough scaffolds.
+	if($use_nucmer && $length > 999){
 	    
-	    $length = length($scaffold_seq) - 1;
-	    $filled_scaffold_length{$scaffname} = $length;
-	    #
-	    #print STDERR " *** *** $scaffold_name $scaffname $length\n";#<STDIN>;
-	    
-            #Make intermediate files for nucmer only for large enough scaffolds.
-            if($length > 999){
-                open (SCAF_OUT, ">", "$ref_directory/POST_EVAL/$scaffname") or die;
-		print SCAF_OUT $scaffold_name;
-                print SCAF_OUT $scaffold_seq;
-                close (SCAF_OUT);
-                my @contigline = split(/\t/, <SCAFFOLDS>);
-                my $contig = $contigline[0];
-                print STDERR $contig . "\n";
-                my $cluster_for_scaffold = $clusters_to_contigs{$contig};
-                if (defined $cluster_for_scaffold and
-                    exists $cluster_to_species{$cluster_for_scaffold}){
-		    my $command = "${mummer_dir}nucmer --maxmatch -c 400 --banded $ref_directory/POST_EVAL/$scaffname $opera_ms_dir/$cluster_to_species{$cluster_for_scaffold} -p $ref_directory/POST_EVAL/$scaffname; ${mummer_dir}show-coords -lrcT $ref_directory/POST_EVAL/$scaffname.delta > $ref_directory/POST_EVAL/$scaffname-out\n"; 
-                    print CMD $command;
-                }
-            }
-        }
+	    open (SCAF_OUT, ">", "$ref_directory/POST_EVAL/$scaffname") or die;
+	    print SCAF_OUT $scaffold_name;
+	    print SCAF_OUT $scaffold_seq;
+	    close (SCAF_OUT);
+	    my @contigline = split(/\t/, <SCAFFOLDS>);
+	    my $contig = $contigline[0];
+	    print STDERR $contig . "\n";
+	    my $cluster_for_scaffold = $clusters_to_contigs{$contig};
+	    if (defined $cluster_for_scaffold and
+		exists $cluster_to_species{$cluster_for_scaffold}){
+		my $command = "${mummer_dir}nucmer --maxmatch -c 400 --banded $ref_directory/POST_EVAL/$scaffname $opera_ms_dir/$cluster_to_species{$cluster_for_scaffold} -p $ref_directory/POST_EVAL/$scaffname; ${mummer_dir}show-coords -lrcT $ref_directory/POST_EVAL/$scaffname.delta > $ref_directory/POST_EVAL/$scaffname-out\n"; 
+		print CMD $command;
+	    }
+	}
     }
-    close(SCAFFOLDS) or die;
+}
+close(SCAFFOLDS) or die;
+close(SCAFFOLDSEQ) or die;
+close(CMD);
+if ($use_nucmer){
     #exit(0);
     #Go through and parse the scaffolds file and the nucmer.
-    open (SCAFFOLDS, $scaffold_file) or die;
     my $command = "cat $cmd_file | xargs -L 1 -P $nb_process -I COMMAND sh -c \"COMMAND\" 2> $cmd_file-log.txt";
     print STDERR $command . "\n";
     `$command`;
 }
 
-
-my $no_species_info_line = "NA\tNA\tNA\tNA\tNA";
+open (SCAFFOLDS, $scaffold_file) or die;
+#my $no_species_info_line = "NA\tNA\tNA\tNA\tNA";
+my $no_species_info_line = "NA\tNA\tNA";
 my $species_info_line = "";
 my ($ref_genome, $species_name);
 my %nb_species_strain = ();
@@ -246,8 +250,9 @@ while(<SCAFFOLDS>){
                     #print OUTFILE $cluster_to_species{$cluster_for_scaffold} . "\t";
 		    
 		    #my @scaff_line = split(/\t/, $scaf_name);
-		    $n_info = get_nucmer_info($length,$scaffold_name);
-		    print OUTFILE $species_name . "\t" . $nb_species_strain{$species_name} . "\t" . "$opera_ms_dir/$ref_genome" . "\t" . $n_info . "\t";
+		    #$n_info = get_nucmer_info($length,$scaffold_name);
+		    #print OUTFILE $species_name . "\t" . $nb_species_strain{$species_name} . "\t" . "$opera_ms_dir/$ref_genome" . "\t" . $n_info . "\t";
+		    print OUTFILE $species_name . "\t" . $nb_species_strain{$species_name} . "\t" . "$opera_ms_dir/$ref_genome";
                 }
 
                 else{

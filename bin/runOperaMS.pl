@@ -180,7 +180,7 @@ while(<$opera_ms_cf>) {
 		$pdist_type = $split_line[1];
 	    }
 	    
-	    case "LONG_READ_FILE"{
+	    case "LONG_READ"{
 	    }
 	    
 	    case "ILLUMINA_READ_1"{

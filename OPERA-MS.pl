@@ -174,7 +174,7 @@ if ( @ARGV >= 1){
 			     }
 			 }
 			 
-			 case "LONG_READ_FILE"{
+			 case "LONG_READ"{
 			     $long_read_file = $split_line[1];
 			     if ($long_read_file =~ /\.gz$/){
 				 die "$long_read_file appears to be in gzipped format. Blasr does not accept gzipped files, please unzip.\n";
@@ -365,9 +365,11 @@ else{
 #mummer
 if(!defined($mummer_dir)){
     $mummer_dir = "$opera_ms_dir/utils/MUMmer3.23/";
-    my $exe_check = "${mummer_dir}nucmer --version";
-    run_exe($exe_check);
-    if ($?){
+    if(-d $mummer_dir){
+	my $exe_check = "${mummer_dir}nucmer --version";
+	run_exe($exe_check);
+    }
+    if ($? || ! -d $mummer_dir ){
 	print STDERR "\nnucmer found in $mummer_dir is not functional. Checking path for mummer. \n";
 	print STDERR "\nChecking path for mummer. \n";
 	$mummer_dir = " ";
@@ -578,7 +580,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CLUSTERING"){
     generate_sigma_config_file($DIR_COV, $DIR_MAPPING, $DIR_SIGMA);
 
     #Run sigma
-    print STDOUT "\n---  STEP 2: SIGMA HIERARCHICAL CLUSTERING  ---\n";
+    print STDOUT "\n---  STEP 2: HIERARCHICAL CLUSTERING  ---\n";
     $command="${opera_ms_dir}bin/sigma $DIR_SIGMA/sigma.config > $DIR_SIGMA/log.out 2> $DIR_SIGMA/log.err";
     run_exe($command);
 
@@ -604,7 +606,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "REF_CLUSTERING"){
     #Run reference mapping to merge clusters, use both long read and short read.
     #Use the short read and add a link if support > 5, gap estimated < 500 and validated on a reference
     #NEED TO REMOVE LINKS SUPPORTED BY BOTH SHORT AND LONG READS
-    print STDOUT "\n---  STEP 3: REFRENCE BASED CLUSTERING  ---\n";
+    print STDOUT "\n---  STEP 3: SPECIES CLUSTERING  ---\n";
     $command="mkdir -p $DIR_REF_CLUSTERING";
     run_exe($command);
     $command="perl ${opera_ms_dir}bin/sequence_similarity_clustering.pl $output_dir/$inter $contigs_file $num_processor $opera_ms_dir $mash_dir $mummer_dir 2> $DIR_REF_CLUSTERING/log.err";
@@ -625,7 +627,7 @@ if($strain_clustering eq "YES" && ($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "S
     #Plug-in the strain level assembly
     #->if a species contains the strain each strain will be assembled independently by opera-lg
     #->if a species does not contain the strain they are all pulled together and assembled in a single run by opera-lg
-    print STDOUT "\n---  STEP 4: STRAIN LEVEL ASSEMBLY  ---\n";
+    print STDOUT "\n---  STEP 4: STRAIN LEVEL CLUSTERING AND ASSEMBLY  ---\n";
     run_exe("rm -r $DIR_STRAIN;mkdir -p $DIR_STRAIN");
     $command = "perl ${opera_ms_dir}bin/coverage_clustering.pl $output_dir/$inter $DIR_STRAIN $contigs_file $opera_ms_dir 2>  $DIR_STRAIN/log.err";
     run_exe($command);
@@ -757,6 +759,9 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "GAP_FILLING"){
     run_exe($command);
     
     #$command="python ${opera_ms_dir}/SCRIPTS/Pipeline.py --analysis_dir ${output_dir} --main_script_dir ${opera_ms_dir}/SCRIPTS/ --aux_script_dir $opera_ms_dir/$opera_version/bin/ --minimap2_dir $minimap2_dir --pilon_path $pilon_path --racon_dir $racon_dir --bwa_dir $short_read_tool_dir --samtools_dir $samtools_dir --edge_file $lr_output_dir/edge_read_info.dat --scaffolds_file $opera_scaff_file --contig_file $contigs_file --long_read_file $long_read_file --short_read_file_1 $illum_read1  --short_read_file_2 $illum_read2 --num_processor $num_processor";
+    $command = "perl $opera_ms_dir/bin/match_scaffolds_clusters.pl $DIR_REF_CLUSTERING $num_processor $opera_ms_dir $DIR_OPERA_LR/scaffoldSeq.fasta $mummer_dir 2> $DIR_REF_CLUSTERING/s_info.err";
+    run_exe($command);
+    
     $command="$opera_ms_dir/$opera_version/bin/gapfilling.pl $DIR_GAPFILLING $contigs_file $long_read_file $num_processor $opera_ms_dir/$opera_version/bin/ $racon_dir $minimap2_dir $mummer_dir 2> $DIR_OPERA_LR/gapfilling.log";
     run_exe($command);
 
@@ -773,7 +778,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
     $start_time = time;
     print STDOUT "\n---  STEP 7: ASSEMBLY INFO  ---\n";
     #For the scaffold_info.dat file generation
-    $command = "perl $opera_ms_dir/bin/match_scaffolds_clusters.pl $DIR_REF_CLUSTERING $num_processor $opera_ms_dir $mummer_dir 2> $DIR_REF_CLUSTERING/s_info.err";
+    $command = "perl $opera_ms_dir/bin/match_scaffolds_clusters.pl $DIR_REF_CLUSTERING $num_processor $opera_ms_dir $DIR_OPERA_LR/scaffoldSeq.fasta.filled $mummer_dir 2> $DIR_REF_CLUSTERING/s_info.err";
     run_exe($command);
     if($?){
 	die "Error in during scaffold info genration. Please see $DIR_REF_CLUSTERING/s_info.err for details.\n";
@@ -788,7 +793,8 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
 
     #Rename the scaffold sequence into contig after gap filling
     run_exe("sed 's/_scaffold_/_contig_/' $DIR_OPERA_LR/scaffoldSeq.fasta.filled > $output_dir/contig.fasta");
-    run_exe("sed 's/_scaffold_/_contig_/' ${output_dir}/scaffold_info.txt > ${output_dir}/contig_info.txt; rm ${output_dir}/scaffold_info.txt"); 
+    run_exe("sed 's/_scaffold_/_contig_/' ${output_dir}/scaffold_info.txt > ${output_dir}/contig_info.txt");
+    run_exe("rm ${output_dir}/scaffold_info.txt");
     #$command = "rm $output_dir/contigs.bam";#; ln -s $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled $output_dir/scaffoldSeq.fasta.filled";
     #run_exe($command);
     
@@ -823,7 +829,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
 	#"\t" . "min contig size $sort_tab[$nb_contig-1] bp, ".
 	" *** *** " . "Max contig size: $sort_tab[0] bp\n".
 	" *** *** " . "Contig(s) longer than 1Mbp: $contig_1mb \n".
-	" *** *** " . "Contig(s) longer than 1Mbp: $contig_100kb contig\n".
+	" *** *** " . "Contig(s) longer than 100kb: $contig_100kb contig\n".
 	" *** *** " . "Contig N50: $n50 bp\n";
     
     print STDOUT $str_stats . "\n";

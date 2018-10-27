@@ -38,7 +38,7 @@ foreach $scaff_dir (@all_dir){
     #next if($scaff_dir ne "opera_scaffold_1");
     next if($scaff_dir eq ".." || ! -e "$working_dir/$scaff_dir/scaffolds.scaf");
     
-    print OUT "perl $opera_bin_dir/gapfill_single_scaffold.pl $contig_file $working_dir/$scaff_dir/ $edge_read_info_file $read_file $opera_bin_dir $racon_dir $minimap2_dir $mummer_dir\n";
+    print OUT "perl $opera_bin_dir/gapfill_single_scaffold.pl $contig_file $working_dir/$scaff_dir/ $edge_read_info_file $read_file $opera_bin_dir $racon_dir $minimap2_dir $mummer_dir 2> $working_dir/$scaff_dir/log.err\n";
     
     #last if($nb_tiling_run == 10);
     #$nb_tiling_run++;
@@ -245,5 +245,6 @@ sub run_exe{
     print STDERR $return . "\n" if($run);
     return $return;
 }
+
 
 
