@@ -15,7 +15,7 @@ make
 
 ### Testing Installation
 
-A set of test files and a sample configuration file is provided to allow to test out the OPERA-MS pipeline. Simply run the following commands: 
+A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. Simply run the following commands: 
 ~~~~
 cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config 2> log.err
