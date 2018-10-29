@@ -100,7 +100,7 @@ We require the following software to be functional:
 All software are packaged as pre-build with OPERA-MS. Each binary is placed inside of the __utils__ folder.
 If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the  __utils__ folder.
 
-OPERA-MS is written in Python, R and Perl, and makes use of the following Perl modules:
+OPERA-MS is written in C++, Python, R and Perl, and makes use of the following Perl modules (installed using cpanm):
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
 
 - [File::Which](https://metacpan.org/pod/File::Which)
