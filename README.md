@@ -53,13 +53,13 @@ The configuration file is formatted as follow:
 
 - **NUM_PROCESSOR** : `default : 1` - The number of used processors
 
-- **LONG_READ_MAPPER** `default: blasr` - Sofware used for long-read mapping blasr/minimap2
+- **LONG_READ_MAPPER** `default: blasr` - Software used for long-read mapping blasr/minimap2
 
 - **STRAIN_CLUSTERING** : `default: YES` - Indicate if the strain level clustering step is performed (YES) or skipped (NO)
 
 - **CONTIG_LEN_THR** : `default: 500` - Threshold for contig clustering, smaller contigs will not be considered for clustering
 
-- **CONTIG_EDGE_LEN** : `default: 80` - When calculating coverage of contigs, number of bases filtered out from each contig ends, to avoid biases due to lower mapping efficiency
+- **CONTIG_EDGE_LEN** : `default: 80` - When calculating contig coverage, number of bases filtered out from each contig ends, to avoid biases due to lower mapping efficiency
 
 - **CONTIG_WINDOW_LEN** : `default: 340` - The window size in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value
 
@@ -84,13 +84,14 @@ Finally, strain level scaffold assemblies can be found in the following files: _
 
 We require the following software to be functional:
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tesated with version 1.0.4-beta)
-2) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below).
-3) [bwa](https://github.com/lh3/bwa).
-4) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above which uses '-' options).
+2) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below)
+3) [bwa](https://github.com/lh3/bwa)
+4) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above which uses '-' options)
 5) [minimap2]( https://github.com/lh3/minimap2). (tested with version 2.11-r797)
 6) [Racon](https://github.com/isovic/racon) - (version 0.5.0)
-7) [Mash](https://github.com/marbl/Mash).
-8) [MUMmer](http://mummer.sourceforge.net/).
+7) [Mash](https://github.com/marbl/Mash)
+8) [MUMmer](http://mummer.sourceforge.net/)
+
 All software are packaged as pre-build with OPERA-MS. Each binary is placed inside of the __utils__ folder.
 If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the  __utils__ folder.
 
@@ -101,7 +102,7 @@ OPERA-MS is writen in Python, R and Perl, and makes use of the following Perl mo
 
 - [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
 
-- [Statistics::R] (https://metacpan.org/pod/Statistics::R)
+- [Statistics::R](https://metacpan.org/pod/Statistics::R)
 
 # Contact information
 For additional information, help and bug reports please send an email to one of the following: bertrandd@gis.a-star.edu.sg, nagarajann@gis.a-star.edu.sg
