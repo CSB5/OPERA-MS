@@ -90,12 +90,12 @@ Finally, strain level scaffold assemblies can be found in the following files: _
 We require the following software to be functional:
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tested with version 1.0.4-beta)
 2) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below)
-3) [bwa](https://github.com/lh3/bwa)
+3) [bwa](https://github.com/lh3/bwa) - (tested with version 0.7.10-r789)
 4) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above which uses '-' options)
 5) [minimap2]( https://github.com/lh3/minimap2). (tested with version 2.11-r797)
 6) [Racon](https://github.com/isovic/racon) - (version 0.5.0)
-7) [Mash](https://github.com/marbl/Mash)
-8) [MUMmer](http://mummer.sourceforge.net/)
+7) [Mash](https://github.com/marbl/Mash) - (tested with version 1.1.1)
+8) [MUMmer](http://mummer.sourceforge.net/) (tested with version 3.23)
 
 All software are packaged as pre-build with OPERA-MS. Each binary is placed inside of the __utils__ folder.
 If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the  __utils__ folder.
