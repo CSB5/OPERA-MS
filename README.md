@@ -8,7 +8,7 @@ OPERA-MS uses the following strategy:
 (4) Identification of species for which multiple strains have been assembled, and strain deconvolution using contig coverage information,
 (5) Scaffolding and gap-filling of the strain and species clusters using [OPERA-LG](https://sourceforge.net/p/operasf/wiki/The%20OPERA%20wiki/).
 
-OPERA-MS is able to assemble near complete genomes with as little as 9x long-read coverage on mock communities (compared to >30x required by other hybrid assembler). Evaluation on real gut microbiomes reveal that short-read contigs N50 can be improved up to 200x, and that OPERA-MS assembled twice as many draft quality assemblies with N50 >100kbp compared to other hybrid assembler. In comparison to other tool, OPERA-MS provides high quality and contiguous genomes when multiple strain of the same species are present.
+OPERA-MS is able to assemble near complete genomes with as little as 9x long-read coverage on mock communities (compared to >30x required by other hybrid assembler). Evaluation on real gut microbiomes reveal that short-read contigs N50 can be improved up to 200x, and that OPERA-MS assembled twice as many draft quality assemblies with N50 >100kbp compared to other hybrid assembler. In comparison to other tools, OPERA-MS provides high quality and contiguous genomes when multiple strain of the same species are present.
 
 # Installation
 
@@ -62,7 +62,7 @@ The configuration file is formatted as follow:
 
 - **STRAIN_CLUSTERING** : `default: YES` - Indicate if the strain level clustering step is performed (YES) or skipped (NO)
 
-- **CONTIG_LEN_THR** : `default: 500` - Contig length threshold for clustering, smaller contigs will not be filtered out
+- **CONTIG_LEN_THR** : `default: 500` - Contig length threshold for clustering, smaller contigs will be filtered out
 
 - **CONTIG_EDGE_LEN** : `default: 80` - When calculating contig coverage, number of bases filtered out from each contig ends, to avoid biases due to lower mapping efficiency
 
