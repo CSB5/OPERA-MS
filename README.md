@@ -78,7 +78,7 @@ __contig_info.txt__ provides a detailed overview of the assembled contigs accord
 - **NB_STRAIN** : number of strains detected for the species
 - **REFERENCE_GENOME** : path to the closest reference genome present in the OPERA-MS database
 
-Finally, strain level scaffold assemblies can be found in the following files: __OUT_DIR/intermediate_files/strain_analysis/*/*/scaffoldSeq.fasta__.
+Finally, strain level scaffold assemblies can be found in the following files: __OUT_DIR/intermediate_files/strain_analysis/\*/\*/scaffoldSeq.fasta__.
 
 # Dependencies
 
