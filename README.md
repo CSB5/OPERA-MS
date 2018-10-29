@@ -19,7 +19,7 @@ git clone https://github.com/CSB5/OPERA-MS.git
 cd /path/to/OPERA-MS
 make
 ~~~~
-If you encounter any problem during the installation, please see the **Dependencies** Section. 
+If you encounter any problem during the installation, please see the [**Dependencies**](#dependencies) Section. 
 
 A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands: 
 ~~~~
