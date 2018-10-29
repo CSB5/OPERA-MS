@@ -911,7 +911,7 @@ sub generate_opera_config_file{
 		print OUT "map_type=opera\n";
 		print OUT "map_file=$dir_ref_clustering/NO_REPEAT/filtered_pairedEdges_i$i\n";
 		print OUT "lib_mean=$val_mean_std[1]\n";
-		print OUT "lib_std=$val_mean_std[1]\n";
+		print OUT "lib_std=$val_mean_std[2]\n";
 	    }
 	    next;
 	}

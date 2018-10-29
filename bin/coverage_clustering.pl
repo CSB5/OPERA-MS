@@ -23,6 +23,7 @@ my $clusters_species_file = "$inter_dir/reference_mapping/cluster_species.dat";
 my $ref_clusters = "$inter_dir/reference_mapping/clusters_seq_similarity";
 
 
+#Get length and coverage of contigs
 open (FILE, $windows_file) or die;
 my $header = <FILE>;
 chop $header;
@@ -44,6 +45,7 @@ while (<FILE>) {
 close(FILE);
 
 
+#Get cluster length
 open(REF_CLUS, $ref_clusters) or die;
 while(<REF_CLUS>){
     chomp $_;
@@ -68,11 +70,15 @@ open (STRAINS, $clusters_species_file) or die;
 while (<STRAINS>){
     chomp $_;
     if($_ =~ />(.*)/){
+	$cluster = $1;
+        chomp $cluster;
         #operate at a species level
         my $strain = <STRAINS>;
 	$strain = "$opera_ms_dir/$strain";
         chomp $strain;
         while($strain =~ />(.*)/){
+	    $cluster = $1;
+	    chomp $cluster;
             $strain = <STRAINS>;
 	    if(defined $strain){
 		chomp $strain;
@@ -95,8 +101,8 @@ while (<STRAINS>){
 	
 	#print STDERR " *** $strain $species\n";<STDIN>;
 	
-        $cluster = $1;
-        chomp $cluster;
+        #$cluster = $1;
+        #chomp $cluster;
         #print STDERR $cluster . "\n";
         
         if(!exists $cluster_lengths{$cluster}){
@@ -170,7 +176,7 @@ foreach my $species (keys %species_to_ref_genome){
 
     $seq_length = length($seq);
     print STDERR " *** length -> $seq_length -> $species_to_contigs_length{$species}\n";
-    if($species_to_contigs_length{$species} > $seq_length and
+    if($species_to_contigs_length{$species} > $seq_length + ($seq_length * 0.1) and
        $seq_length > 1000000){
         print OUT $species . "\t" . $seq_length . "\t" . $species_to_contigs_length{$species} . "\t" . $ref_genome_best . "\n";
         $species_to_analyze{$species} = 1;
