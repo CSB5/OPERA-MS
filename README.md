@@ -12,7 +12,7 @@ git clone https://github.com/CSB5/OPERA-MS.git
 cd /path/to/OPERA-MS
 make
 ~~~~
-If you encounter any problem during the installation, please see the **Dependencies** Section. 
+If you encounter any problem during the installation, please see the [**Dependencies**](#dependencies) Section. 
 
 ### Testing Installation
 
