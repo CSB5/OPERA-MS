@@ -19,6 +19,7 @@ A set of test files and a sample configuration file is provided to test out the 
 ~~~~
 cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config 2> log.err
+diff contig_info.txt sample_output/contig_info.txt
 ~~~~
 This will assemble a low diversity mock community in the folder __OPERA-MS/sample_output__. 
 
@@ -27,8 +28,8 @@ This will assemble a low diversity mock community in the folder __OPERA-MS/sampl
 ### Inputs
 OPERA-MS takes short and long reads as inputs.
 
-1) A long read (Oxford Nanopore, PacBio, TruSeq Synthetic Long Read) fastq file (e.g. test_dataset/long_read_1.fq).
-2) Short read paired end read fastq files (e.g. test_dataset/lib_1_1.fq, test_dataset/lib_1_2.fq).
+1) A long read fastq file obtained from either Oxford Nanopore, PacBio or TruSeq Synthetic Long Read sequencing technologies (e.g. sample_files/sample_long_read.fastq).
+2) Short read paired end read fastq files (e.g. sample_files/sample_R1.fastq.gz and sample_files/sample_R2.fastq.gz).
 3) Optionally, contigs assembled from short reads can be provided (e.g. sample_files/sample_contigs.fasta).
 
 ### Executing OPERA-MS
@@ -38,40 +39,40 @@ OPERA-MS requires the specfication of a configuration file that indicates the pa
 ### Required parameters
 All paths are relative to the current working directory of your terminal. All paths can be chosen to be either relative or absolute.
 
-- **OUTPUT_DIR** : `path/to/results` - Where the final results of OPERA-MS will be outputted.
+- **OUTPUT_DIR** : `path/to/results` - Where the final results of OPERA-MS will be outputted
 
-- **LONG_READ** : `path/to/long-read.fa` - Path to the long read file.
+- **LONG_READ** : `path/to/long-read.fa` - Path to the long read file
 
-- **ILLUMINA_READ_1** : `path/to/illum_read1.fa` - Path to the first illumina read file.
+- **ILLUMINA_READ_1** : `path/to/illum_read1.fa` - Path to the first illumina read file
 
-- **ILLUMINA_READ_2** : `path/to/illum_read2.fa` - Path to the second illumina read file.
+- **ILLUMINA_READ_2** : `path/to/illum_read2.fa` - Path to the second illumina read file
 
 ### Optional parameters 
 
-- **NUM_PROCESSOR** : `default : 1` - The number of used processors.
+- **NUM_PROCESSOR** : `default : 1` - The number of used processors
 
-- **CONTIG_LEN_THR** : `default: 500` - Threshold for contig clustering. Smaller contigs will not be considered for clustering.
+- **CONTIG_LEN_THR** : `default: 500` - Threshold for contig clustering, smaller contigs will not be considered for clustering
 
 - **STRAIN_CLUSTERING** : `YES/NO` - Indicate if the strain level clustering step is performed (YES) or skipped (NO) 
 
-- **CONTIG_EDGE_LEN** : `default: 80` - When calculating coverage of contigs using SIGMA, this number of bases will not be considered from each end of the contig, to avoid biases due to lower mapping efficiency at contig edges. 
+- **CONTIG_EDGE_LEN** : `default: 80` - When calculating coverage of contigs using SIGMA, this number of bases will not be considered from each end of the contig, to avoid biases due to lower mapping efficiency at contig edges
 
-- **CONTIG_WINDOW_LEN** : `340` - The window size in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value.
+- **CONTIG_WINDOW_LEN** : `340` - The window size in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value
 
-- **KMER_SIZE** : `(positive integer)` - The value of kmer used to produce the assembled contigs/scaffolds.
+- **KMER_SIZE** : `(positive integer)` - The value of kmer used to produce the assembled contigs/scaffolds
 
-- **CONTIGS_FILE** : `path/to/contigs.fa` - Path to the contigs file, if the short reads have already been assembled previously.
+- **CONTIGS_FILE** : `path/to/contigs.fa` - Path to the contigs file, if the short reads have already been assembled previously
 
 ### Outputs
 
 Outputs can be found in the specified OUTPUT_DIR and will contains all assembled contigs __contig.fasta__.
 The file __contig_info.txt__ provides an overview of the assembled contigs according to the following features:
-- **CONTIG_ID** : contig identifier. Single strain species contigs are name `opera_contig_X`. Contigs from multi-strain species are named `strainY_opera_contig_X` where `Y` indicate the strain ID.
-- **LENGTH** : contig length.
-- **ARRIVAL_RATE** : median contig short read arrival rate.
-- **SPECIES** : putative species to which the assembled contig belong to.
-- **NB_STRAIN** : number of strains detected for the species.
-- **REFERENCE_GENOME** : path to the closest reference genome present in the OPERA-MS database.
+- **CONTIG_ID** : contig identifier. Single strain species contigs are name `opera_contig_X`. Contigs from multi-strain species are named `strainY_opera_contig_X` where `Y` indicate the strain ID
+- **LENGTH** : contig length
+- **ARRIVAL_RATE** : median contig short read arrival rate
+- **SPECIES** : putative species to which the assembled contig belong to
+- **NB_STRAIN** : number of strains detected for the species
+- **REFERENCE_GENOME** : path to the closest reference genome present in the OPERA-MS database
 
 Strain level scaffold assemblies are provided in the following files: __OUT_DIR/intermediate_files/strain_analysis/*/*/scaffoldSeq.fasta__.
 

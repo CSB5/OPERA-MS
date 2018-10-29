@@ -44,6 +44,9 @@ my $num_processor = 1;
 my $help_line = "To configure OPERA-MS, please look at the example config file inside the OPERA-MS folder.\nUsage: \n\npath/OPERA-MS/OPERA-MS.pl <config_file>\n\nNote that the config file must be inside the path/OPERA-MS directory.\n";
 my $incorrect_arguments="Please input the correct arguments. Refer to the documentation for more information or use:\n\n path/OPERA-MS/OPERA-MS.pl -h. \n\n";
 my $run_following = 0;
+my $contig_edge_len = 80;
+my $contig_window_len = 340;
+my $contig_len_thr = 500;
 
 if ( @ARGV == 0 ){
     die $incorrect_arguments; 
@@ -142,9 +145,9 @@ if ( @ARGV >= 1){
 
 			 case "KMER_SIZE" {
 			     $kmer_size = $split_line[1];
-			     if (!defined $kmer_size) {
-				 die "KMER_SIZE not provided.\n";
-			     }
+			     #if (!defined $kmer_size) {
+			     #die "KMER_SIZE not provided.\n";
+			     #}
 			 }
 
 			 #Option uses for runOperaMS.pl
@@ -152,12 +155,15 @@ if ( @ARGV >= 1){
 			 }
 
 			 case "CONTIG_LEN_THR" {
+			     $contig_len_thr = $split_line[1];
 			 }
 
 			 case "CONTIG_EDGE_LEN" {
+			     $contig_edge_len = $split_line[1];
 			 }
 
 			 case "CONTIG_WINDOW_LEN" {
+			     $contig_window_len = $split_line[1];
 			 }
 
 			 case "PDIST_TYPE" {
@@ -475,7 +481,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "SHORT_READ_ASSEMBLY"){
 	    }
 	}
 	$end_time = time();
-	print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";#<STDIN>;
+	print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";#<STDIN>;
     }
 }
 
@@ -521,7 +527,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CONTIG_GRAPH"){
 	die "Error in the long read processing. Please see log for details.\n";
     }
     $end_time_sub = time;
-    print STDOUT "***  Contig graph generation Elapsed time: " . ($end_time_sub - $start_time_sub) . "\n";
+    print STDOUT "***  Contig graph generation Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
 
     ### Softlink opera.bam
     $command="ln -s $DIR_MAPPING/opera.bam $output_dir/contigs.bam";
@@ -552,12 +558,12 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CONTIG_GRAPH"){
 	die "Error in edge bundling and SIGMA execution. Please see $DIR_COV/log.out and $DIR_COV/log.err for details.\n";
     }
     $end_time_sub = time;
-    print STDOUT "***  Coverage estimation Elapsed time: " . ($end_time_sub - $start_time_sub) . "\n";
+    print STDOUT "***  Coverage estimation Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
     #Remove edge with an outlier edge support/contig coverage ratio => good to remove error due to missmapping
     $command = "perl ${opera_ms_dir}bin/filter_edge_coverage_ratio.pl $DIR_MAPPING $DIR_COV/contigs_*";
     run_exe($command);
     $end_time = time;
-    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
 
 
@@ -595,7 +601,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CLUSTERING"){
     
     #***
     $end_time = time;
-    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
 
 
@@ -615,7 +621,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "REF_CLUSTERING"){
 	die "Error in during reference based clustering. Please see $DIR_REF_CLUSTERING/log.err for details.\n";
     }
     $end_time = time;
-    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
 
 
@@ -660,7 +666,7 @@ if($strain_clustering eq "YES" && ($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "S
 	die "Error in during strain clustering assembly. Please see $cmd_strain.log for details.\n";
     }
     $end_time = time;
-    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
     
 
@@ -680,7 +686,10 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "ASSEMBLY"){
     #remove the contigs that belong to clusters that are associated to species with multiple strains
     my $reference_cluster_file = "$DIR_REF_CLUSTERING/clusters_seq_similarity";
     $reference_cluster_file = "$DIR_REF_CLUSTERING/clusters_single_strain" if($strain_clustering eq "YES");
-    $command="outcontig=`ls $DIR_COV/contigs_\*`; ${opera_ms_dir}bin/filter_cluster_coverage.pl `echo \$outcontig` $reference_cluster_file $DIR_REF_CLUSTERING 1.5 $DIR_REF_CLUSTERING/NO_REPEAT $DIR_REF_CLUSTERING/NUCMER_OUT/";
+    $contig_coverage_file = "$DIR_COV/contigs_$contig_window_len\_$contig_edge_len";
+    $command = "${opera_ms_dir}bin/filter_cluster_coverage.pl $contig_coverage_file $reference_cluster_file $DIR_REF_CLUSTERING 1.5 $DIR_REF_CLUSTERING/NO_REPEAT $DIR_REF_CLUSTERING/NUCMER_OUT/";
+    #$command="outcontig=`ls $DIR_COV/contigs_\*`; ${opera_ms_dir}bin/filter_cluster_coverage.pl `echo \$outcontig` $reference_cluster_file $DIR_REF_CLUSTERING 1.5 $DIR_REF_CLUSTERING/NO_REPEAT $DIR_REF_CLUSTERING/NUCMER_OUT/";
+    
     run_exe($command);
     
     
@@ -691,7 +700,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "ASSEMBLY"){
 	die "Error in during OPERA-LG. Please see $DIR_OPERA_LR/log.out and $DIR_OPERA_LR/log.err for details.\n";
     }
     $end_time = time;
-    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
 
 my $DIR_GAPFILLING = "$output_dir/$inter/opera_long_read/GAPFILLING";
@@ -770,7 +779,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "GAP_FILLING"){
     }
     
     $end_time = time;
-    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
  
 if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
@@ -802,7 +811,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
     #$str = `sort -k2,2nr  ${output_dir}/scaffold_info.txt | head -n10 | cut -f1,2`;
     run_exe($command);
     $end_time = time;
-    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
     #Get the stats
     my @all_size = ();
     open(FILE, "${output_dir}/contig_info.txt");
