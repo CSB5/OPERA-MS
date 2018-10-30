@@ -11,7 +11,7 @@
 #include "Contig.h"
 #include "Graph.h"
 #include "CommonFunction.h"
-#include <ext/hash_map>
+#include <unordered_map>
 #include <stdexcept> 
 
 
@@ -68,7 +68,7 @@ private:
 	vector<Contig*> *myContigs;
 	list<Contig*> *m_repeatContigs;
 	list<Contig*> *m_smallContigs;
-	hash_map<const char*, int, hash<const char*>, eqName> *m_contigNameHashMap;
+	unordered_map<string, int> *m_contigNameHashMap;
 
 	string m_libString;
 };

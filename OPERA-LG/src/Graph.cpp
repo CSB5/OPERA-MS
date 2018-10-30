@@ -3,7 +3,7 @@
 Graph::Graph(void)
 {
 	//m_contigNameMap = new map<string, int>;
-	m_contigNameHashMap = new hash_map<const char*, int, hash<const char*>, eqName>;
+	m_contigNameHashMap = new unordered_map<string, int>;
 	m_numberOfContigs = 0;
 	m_numberOfEdges = 0;
 
@@ -16,7 +16,7 @@ Graph::Graph(void)
 	m_contigID = new map<int, Contig*>();
 	m_contigNames = new set<string>;
 
-	m_repeatContigSet = new hash_map<const char*, bool, hash<const char*>, eqName>;
+	m_repeatContigSet = new unordered_map<string, bool>;
 }
 
 Graph::~Graph(void)
@@ -79,7 +79,15 @@ void Graph::AddContig( Contig *c ){
 	m_contigsArray[ m_numberOfContigs ] = c;
 	c->SetID( m_numberOfContigs );
 	//m_contigNameMap->insert( pair<string, int>(c->GetName(), c->GetID() ) );
-	m_contigNameHashMap->insert( pair<const char*, int>(c->GetName().c_str(), c->GetID() ) );
+
+	cerr << " *** Add contig " << c->GetName() << " -> " << c->GetName().c_str() << endl;//cin.get();
+	m_contigNameHashMap->insert( pair<string, int>(c->GetName(), c->GetID() ) );
+	
+	//GetContigIndex(string(c->GetName().c_str()));
+	//GetContigIndex(string("k99_2"));//cin.get();
+	//cin.get();
+	
+	
 	m_numberOfContigs++;
 
 	// add to list
@@ -122,7 +130,7 @@ void Graph::InitializeContig( int libNum ){
 int Graph::OutputContigs( string fileName ){
 	ofstream contigWriter( fileName.c_str() );
 
-	if( contigWriter == NULL )
+	if( contigWriter.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
@@ -149,11 +157,26 @@ int Graph::OutputContigs( string fileName ){
 // return -1 if not find
 int Graph::GetContigIndex( string contigName ){
 	//map<string, int>::const_iterator pos = m_contigNameMap->find( contigName );
-	hash_map<const char*, int, hash<const char*>, eqName>::iterator pos = m_contigNameHashMap->find( contigName.c_str() );
-	if( pos == m_contigNameHashMap->end() )
+	//cerr << " hash size " << m_contigNameHashMap->size() << endl; 
+	//cerr << " *** GetContigIndex |" << contigName << "|" << endl;//cin.get();
+	
+	/*hash_map<const char*, int, hash<const char*>, eqName>::iterator pos = m_contigNameHashMap->begin();
+	while(pos != m_contigNameHashMap->end() ){
+		cerr << "*** " << *(pos->first) << " " << pos->second << endl;cin.get();
+		pos++;
+		}*/
+
+	unordered_map<string, int>::iterator pos = m_contigNameHashMap->find( contigName );
+	//pos = m_contigNameHashMap->find( contigName.c_str() );
+
+	if( pos == m_contigNameHashMap->end() ){
+		//cerr << " Not in map"<<endl;
 		return -1;
-	else
+	}
+	else{
+		//cerr << " Contig Index " << pos->second <<endl;
 		return pos->second;
+	}
 
 	
 }
@@ -1298,7 +1321,7 @@ bool Graph::HasEdges(){
 // return -1 if failed
 int Graph::OutputScaffolds( string fileName ){
 	ofstream scafWriter( fileName.c_str() );
-	if( scafWriter == NULL ){
+	if( scafWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
 	}
@@ -1388,7 +1411,7 @@ void Graph::InsertRepeatContigName( Contig *c ){
 
 // check if a certain contig is a repeat
 bool Graph::IsRepeat( string name ){
-	hash_map<const char*, bool, hash<const char*>, eqName>::iterator pos = m_repeatContigSet->find( name.c_str() );
+	unordered_map<string, bool>::iterator pos = m_repeatContigSet->find( name );
 	if( pos == m_repeatContigSet->end() )
 		return false;
 	else

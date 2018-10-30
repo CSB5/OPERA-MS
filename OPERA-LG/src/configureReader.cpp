@@ -16,7 +16,7 @@ int configureReader::ReadConfigFile( string fileName )
 {
 	ifstream configReader( fileName.c_str() );
 
-	if( configReader == NULL )
+	if( configReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;

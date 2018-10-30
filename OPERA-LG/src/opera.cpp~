@@ -5607,6 +5607,7 @@ int main(int argc, char *argv[] )
 			cout<<"ERROR: The format of configuration file is not correct"<<endl; 
 			return -1;
 		}
+		//cerr<<"Samtools path "<<Configure::SAMDIR<<endl;
 #ifdef TIME
 		gettimeofday( &t_endTemp, NULL );
 		cout<<"Time Taken: "<<(t_endTemp.tv_sec - t_startTemp.tv_sec) + (t_endTemp.tv_usec - t_startTemp.tv_usec)/1000000.0<<" seconds"<<endl;

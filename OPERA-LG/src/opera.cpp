@@ -88,7 +88,7 @@ void opera::Clear(){
 bool opera::CheckNameConfliction(){
 	ifstream contigReader( Configure::CONTIG_FILE.c_str() );
 
-	if( contigReader == NULL )
+	if( contigReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<Configure::CONTIG_FILE<<" file"<<endl;
 		return true;
@@ -111,7 +111,7 @@ bool opera::CheckFileExist(){
 	// check contig file
 	ifstream contigReader( Configure::CONTIG_FILE.c_str() );
 
-	if( contigReader == NULL )
+	if( contigReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<Configure::CONTIG_FILE<<" file"<<endl;
 		return false;
@@ -122,7 +122,7 @@ bool opera::CheckFileExist(){
 	{
 		ifstream mapReader( Configure::MULTI_LIB_INFO->at( i )->GetFileName().c_str() );
 
-		if( mapReader == NULL )
+		if( mapReader.fail() )
 		{
 			cout<<"ERROR: Cannot open "<<Configure::MULTI_LIB_INFO->at( i )->GetFileName()<<" file"<<endl;
 			return false;
@@ -142,7 +142,7 @@ int opera::ReadRealPositionFile( string fileName ){
 
 	//cerr<<"analyzing position file\n";
 
-	if( realPositionReader == NULL )	{
+	if( realPositionReader.fail() )	{
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
 	}
@@ -4148,7 +4148,7 @@ int opera::OutputScaffold( string fileName ){
 // output unhappy edges
 int opera::OutputUnhappyEdges( string fileName ){
 	ofstream unhappyWriter( fileName.c_str() );
-	if( unhappyWriter == NULL ){
+	if( unhappyWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
 	}
@@ -4250,7 +4250,7 @@ int opera::SortScaffold(){
 	fileName = Configure::OUTPUT_FOLDER + Configure::DIRECTORY_SIGN + "scaffoldSeq.fasta";
 	ofstream resultWriter( fileName.c_str() );
 
-	if( resultWriter == NULL ){
+	if( resultWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
 	}
@@ -4347,7 +4347,7 @@ int opera::ReadContigFile( string fileName, multiset<FinalScaffold*, great_lengt
 {
 	ifstream contigReader( fileName.c_str() );
 
-	if( contigReader == NULL )
+	if( contigReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
@@ -4373,7 +4373,7 @@ int opera::ReadScaffoldFile( string fileName, multiset<FinalScaffold*, great_len
 {
 	ifstream contigReader( fileName.c_str() );
 
-	if( contigReader == NULL )
+	if( contigReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
@@ -4429,7 +4429,7 @@ int opera::ReadContigFasta( string fileName, map<string, string> *contigs )
 {
 	ifstream contigReader( fileName.c_str() );
 
-	if( contigReader == NULL )
+	if( contigReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
@@ -4471,7 +4471,7 @@ int opera::CheckContigFormat()
 {
 	ifstream contigReader( Configure::CONTIG_FILE.c_str() );
 
-	if( contigReader == NULL )
+	if( contigReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<Configure::CONTIG_FILE<<" file"<<endl;
 		return -1;
@@ -4623,7 +4623,7 @@ bool opera::GetKmer( string contigFileName, int type ){
 		string graphFile = path + "LastGraph";
 		ifstream graphReader( graphFile.c_str() );
 
-		if( graphReader == NULL ){
+		if( graphReader.fail() ){
 			return false;
 		}
 
@@ -4649,7 +4649,7 @@ bool opera::GetKmer( string contigFileName, int type ){
 
 		ifstream graphReader( graphFile.c_str() );
 
-		if( graphReader == NULL ){
+		if( graphReader.fail() ){
 			temp->clear();
 			delete temp;
 			return false;
@@ -4674,7 +4674,7 @@ bool opera::GetKmer( string contigFileName, int type ){
 int opera::PrintParameter( string fileName ){
 	ofstream paraWriter( fileName.c_str() );
 	
-	if( paraWriter == NULL ){
+	if( paraWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<fileName<<" file\n";
 		return -1;
 	}
@@ -4693,7 +4693,7 @@ int opera::PrintParameter( string fileName ){
 int opera::OutputConflictingEdges( string fileName ){
 	ofstream confWriter( fileName.c_str() );
 	
-	if( confWriter == NULL ){
+	if( confWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<fileName<<" file\n";
 		return -1;
 	}
@@ -5716,6 +5716,7 @@ int main(int argc, char *argv[] )
 		cout<<"ERROR: Converting contig file error!"<<endl;
 		return -1;
 	}
+	//cerr << " *** " << m_opera->m_graph->GetContigIndex( string("k99_2"));
 #ifdef TIME
 	gettimeofday( &t_endTemp, NULL );
 	cout<<"Time Taken: "<<(t_endTemp.tv_sec - t_startTemp.tv_sec) + (t_endTemp.tv_usec - t_startTemp.tv_usec)/1000000.0<<" seconds"<<endl;
@@ -5735,6 +5736,7 @@ int main(int argc, char *argv[] )
 #endif
 	cout<<"Step 3: Reading mapping file ..."<<endl;
 	flush(cout);
+	//cerr << " *** " << m_opera->m_graph->GetContigIndex( string("k99_16"));
 	MapConverter myMapConverter( m_opera->m_graph );
 	/*if( myMapConverter.Analyze( Configure::MAP_FILE ) == -1 ){
 		cout<<"ERROR: Converting mapping file error!"<<endl;

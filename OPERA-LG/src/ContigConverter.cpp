@@ -6,7 +6,7 @@ ContigConverter::ContigConverter(void)
 	m_repeatContigs = new list<Contig*>;
 	m_smallContigs = new list<Contig*>;
 
-	m_contigNameHashMap = new hash_map<const char*, int, hash<const char*>, eqName>;
+	m_contigNameHashMap = new unordered_map<string, int>;
 	
 	m_libString = "";
 }
@@ -39,7 +39,7 @@ void ContigConverter::DeleteContigs( list<Contig*> *contigs ){
 int ContigConverter::ConvertContigFile( string fileName, Graph *graph, list<PetLibrary*> *libs ){
 	ifstream contigReader( fileName.c_str() );
 
-	if( contigReader == NULL )
+	if( contigReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
@@ -175,7 +175,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 
 			ifstream mapReader( tempFileName.c_str() );
 
-			if( mapReader == NULL ){
+			if( mapReader.fail() ){
 				cout<<"ERROR: Cannot open "<<Configure::MULTI_LIB_INFO->at( libID )->GetFileName()<<" file"<<endl;
 			
 				if( newLib->GetFileName().substr( newLib->GetFileName().length() - 4, 4 ) == ".bam" ){
@@ -258,7 +258,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 							// if the first read is mappable
 							string contigName = preColumn->at( 2 );
 				
-							hash_map<const char*, int, hash<const char*>, eqName>::iterator pos = m_contigNameHashMap->find( contigName.c_str() );
+							unordered_map<string, int>::iterator pos = m_contigNameHashMap->find( contigName );
 							if( pos != m_contigNameHashMap->end() ){
 								// add 1 to the number of reads in this contig
 								Contig *currentContig = myContigs->at(  pos->second );
@@ -281,7 +281,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 						if( !(atoi( nextColumn->at( 1 ).c_str()) & 0X4) ){
 							// if the second read is mappable
 							string contigName = nextColumn->at( 2 );
-							hash_map<const char*, int, hash<const char*>, eqName>::iterator pos = m_contigNameHashMap->find( contigName.c_str() );
+							unordered_map<string, int>::iterator pos = m_contigNameHashMap->find( contigName);
 							if( pos != m_contigNameHashMap->end() ){
 								// add 1 to the number of reads in this contig
 								Contig *currentContig = myContigs->at(  pos->second );
@@ -384,7 +384,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 								}
 					
 								// check contig length
-								hash_map<const char*, int, hash<const char*>, eqName>::iterator pos = m_contigNameHashMap->find( (*preColumn)[2].c_str() );
+								unordered_map<string, int>::iterator pos = m_contigNameHashMap->find( (*preColumn)[2] );
 								Contig *c = NULL;
 								if( pos != m_contigNameHashMap->end() )
 									c = myContigs->at(  pos->second );
@@ -428,7 +428,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 							// if the first read is mappable
 							string contigName = preColumn->at( 2 );
 				
-							hash_map<const char*, int, hash<const char*>, eqName>::iterator pos = m_contigNameHashMap->find( contigName.c_str() );
+							unordered_map<string, int>::iterator pos = m_contigNameHashMap->find( contigName );
 							if( pos != m_contigNameHashMap->end() ){
 								// add 1 to the number of reads in this contig
 								Contig *currentContig = myContigs->at(  pos->second );
@@ -537,7 +537,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 				Split( path->at( path->size() - 1 ), ".", names );
 
 				ofstream disWriter( (Configure::OUTPUT_FOLDER + "distanceOfMatePairs_" + names->at( 0 )).c_str(), ios::out );
-				if( disWriter == NULL ){
+				if( disWriter.fail() ){
 					cout<<"ERROR: Cannot open "<<(Configure::OUTPUT_FOLDER + "distanceOfMatePairs_" + names->at(0))<<" file"<<endl;
 					path->clear();
 					delete path;
@@ -630,7 +630,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 
 	// output library information
 	ofstream libWriter( (Configure::OUTPUT_FOLDER + "lib.txt").c_str() );
-	if( libWriter == NULL ){
+	if( libWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<(Configure::OUTPUT_FOLDER + "lib.txt")<<" file"<<endl;
 		return -1;
 	}
@@ -650,7 +650,7 @@ int ContigConverter::IQR( vector<double> *dis, double &mean, double &std, string
 		       PetLibrary *currentLibrary )
 {
 	ofstream disWriter( (Configure::OUTPUT_FOLDER + "distanceOfMatePairs_" + libName).c_str(), ios::out );
-	if( disWriter == NULL ){
+	if( disWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<(Configure::OUTPUT_FOLDER + "distanceOfMatePairs_" + libName)<<" file"<<endl;
 		return -1;
 	}
@@ -1034,8 +1034,12 @@ void ContigConverter::FilterRepeat( vector<Contig*> *contigs, Graph *graph ){
 
 	// save to graph
 	graph->SetContigNum( usedContigs.size() );
-	for( int i = 0; i < (int) usedContigs.size(); i++ )
+	for( int i = 0; i < (int) usedContigs.size(); i++ ){
+		//cerr << " filter repeat" << endl;
 		graph->AddContig( usedContigs.at( i ) );
+		//cerr << " *** " << graph->GetContigIndex( usedContigs.at( i )->GetName().c_str()) << endl;
+		//cerr << " *** " << graph->GetContigIndex( string("k99_2")) << endl;//cin.get();
+	}
 }
 
 // analyze opera's contig file
@@ -1090,15 +1094,18 @@ void ContigConverter::RemoveSmallContigs( vector<Contig*> *contigs, Graph *graph
 
 	// save to graph
 	graph->SetContigNum( usedContigs.size() );
-	for( int i = 0; i < (int) usedContigs.size(); i++ )
+	for( int i = 0; i < (int) usedContigs.size(); i++ ){
 		graph->AddContig( usedContigs.at( i ) );
+		//cerr << " ** ContigConverter" << endl;
+		//graph->GetContigIndex(string("k99_2"));//cin.get();
+	}
 }
 
 // print list of contigs
 int ContigConverter::PrintContigs( list<Contig*> *contigs, string fileName ){
 	ofstream contigWriter( fileName.c_str() );
 
-	if( contigWriter == NULL ){
+	if( contigWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<fileName<<endl;
 		return -1;
 	}

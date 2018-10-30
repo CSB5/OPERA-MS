@@ -1,5 +1,5 @@
 
-install: sigma opera perlmodule mummer
+install: sigma opera mummer perlmodule 
 
 clean : sigmaclean operaclean
 

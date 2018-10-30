@@ -8,7 +8,7 @@
 #include <list>
 #include <set>
 #include <algorithm>
-#include <ext/hash_map>
+#include <unordered_map>
 #include <map>
 #include <time.h>
 #include <sys/time.h>
@@ -143,8 +143,8 @@ private:
 	string m_libString;
 
 	// for contig graph
-	hash_map<const char*, list<int>*, hash<const char*>, eqName> *m_headHashMap;
-	hash_map<const char*, list<int>*, hash<const char*>, eqName> *m_tailHashMap;
+	unordered_map<string, list<int>*> *m_headHashMap;
+	unordered_map<string, list<int>*> *m_tailHashMap;
 	map<string, list<int>* > *m_headList;			// the map to save all the first kmer of each contig, contigID orientation
 	map<string, list<int>* > *m_tailList;			// the map to save all the last kmer of each contig
 

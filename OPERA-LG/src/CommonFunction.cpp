@@ -151,7 +151,7 @@ bool IsSAM( string fileName )
 	//ifstream mapReader( fileName.c_str() );
 	ifstream mapReader( tempFileName.c_str() );
 
-	if( mapReader == NULL )
+	if( mapReader.fail() )
 	{
 		cout<<"error reading mapping file"<<endl;
 		return false;

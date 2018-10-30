@@ -8,7 +8,8 @@
 #include <set>
 #include "CommonFunction.h"
 #include "ScaffoldResult.h"
-#include <ext/hash_map>
+//#include <ext/hash_map>
+#include<unordered_map>
 //#include <hash_map>
 
 using namespace std;
@@ -138,7 +139,7 @@ private:
 	list<Contig*> *m_scaffoldsList;		// the list of all scaffolds( singletons )
 	list<Contig*> *m_borderContigsList;	// the border contig list(with edges)
 	//map<string, int> *m_contigNameMap;	// map saving contig names 
-	hash_map<const char*, int, hash<const char*>, eqName> *m_contigNameHashMap;
+	unordered_map<string, int> *m_contigNameHashMap;
 	//hash_map<const char*, int, eqName> *m_contigNameHashMap;
 	bool ifInitializeContig;
 
@@ -147,7 +148,7 @@ private:
 
 	void AddEdgeToSubgraph( list<Contig*> *subgraph );          // check if there are missing edges in this subgraph
 
-	hash_map<const char*, bool, hash<const char*>, eqName> *m_repeatContigSet;    // a set saving all the repetitive contigs' names
+	unordered_map<string, bool> *m_repeatContigSet;    // a set saving all the repetitive contigs' names
 };
 
 // comparison, not case sensitive.

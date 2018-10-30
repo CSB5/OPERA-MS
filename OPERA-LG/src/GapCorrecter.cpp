@@ -155,7 +155,7 @@ double GapCorrecter::CalculatePossibility( int value ){
 // print the constructed table
 int GapCorrecter::PrintTable( string fileName ){
 	ofstream tableWriter(  (Configure::OUTPUT_FOLDER + fileName).c_str() );
-	if( tableWriter == NULL ){
+	if( tableWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<(Configure::OUTPUT_FOLDER + fileName)<<" file"<<endl;
 		return -1;
 	}

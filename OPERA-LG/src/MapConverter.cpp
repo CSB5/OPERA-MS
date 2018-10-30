@@ -8,8 +8,8 @@ MapConverter::MapConverter(void)
 
 	m_libString = "";
 
-	m_headHashMap = new hash_map<const char*, list<int>*, hash<const char*>, eqName>;
-	m_tailHashMap = new hash_map<const char*, list<int>*, hash<const char*>, eqName>;
+	m_headHashMap = new unordered_map<string, list<int>*>;
+	m_tailHashMap = new unordered_map<string, list<int>*>;
 }
 
 MapConverter::~MapConverter(void)
@@ -27,6 +27,10 @@ MapConverter::~MapConverter(void)
 
 MapConverter::MapConverter( Graph *graph ){
 	m_graph = graph;
+	m_graph->GetContigIndex( string("k99_2"));
+	graph->GetContigIndex( string("k99_2"));
+	//cin.get();
+	
 	m_singlePetsMap = new map<pair<int, int>, multiset<SinglePet*, less_distance>*>;
 	m_pairMap = new list<string>;
 	m_totalTime = 0;
@@ -193,7 +197,7 @@ int MapConverter::IQR( vector<double> *dis, double &mean, double &std, string li
 		       PetLibrary *currentLibrary )
 {
 	ofstream disWriter( (Configure::OUTPUT_FOLDER + "distanceOfMatePairs_" + libName).c_str(), ios::out );
-	if( disWriter == NULL ){
+	if( disWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<(Configure::OUTPUT_FOLDER + "distanceOfMatePairs_" + libName)<<" file"<<endl;
 		return -1;
 	}
@@ -312,7 +316,7 @@ int MapConverter::ConvertBowtieFileMultiLib( PetLibrary *lib ){
 	Split( path->at( path->size() - 1 ), ".", names );
 	ofstream mapWriter( (Configure::OUTPUT_FOLDER + "pairedEndReads_" + names->at( 0 )).c_str(), ios::out );
 	lib->SetNameWithoutPath( names->at( 0 ) );
-	if( mapWriter == NULL ){
+	if( mapWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<(Configure::OUTPUT_FOLDER + "pairedEndReads_" + names->at( 0 ))<<" file"<<endl;
 		names->clear();
 		delete names;
@@ -615,7 +619,7 @@ bool less_singlePet( SinglePet*& p1, SinglePet*& p2 ){
 // start bundle
 int MapConverter::Bundle(){
 	ofstream clusterWriter( (Configure::OUTPUT_FOLDER + "clusters").c_str() );
-	if( clusterWriter == NULL ){
+	if( clusterWriter.fail() ){
 		cout<<"ERROR: Cannot open "<<(Configure::OUTPUT_FOLDER + "clusters")<<" file"<<endl;
 		return -1;
 	}
@@ -682,7 +686,7 @@ int MapConverter::BundleMultiLib( list<PetLibrary*> *libs, FILE *discardedEdgeFi
 			
 			ofstream clusterWriter( (Configure::OUTPUT_FOLDER + "clusters_" + currentLib->GetNameWithoutPath() ).c_str() );
 			ofstream clusterInfoWriter( (Configure::OUTPUT_FOLDER + "clustersInfo_" + currentLib->GetNameWithoutPath() ).c_str() );
-			if( clusterWriter == NULL ){
+			if( clusterWriter.fail() ){
 				cout<<"ERROR: Cannot open "<<(Configure::OUTPUT_FOLDER + "clustersInfo_" + currentLib->GetNameWithoutPath() )<<" file"<<endl;
 				return -1;
 			}
@@ -1454,7 +1458,7 @@ string MapConverter::CalculateAnchorRegion( list<SinglePet*> *pets ){
 int MapConverter::AnalyzeOpera( string fileName ){
 	ifstream edgeReader( fileName.c_str() );
 
-	if( edgeReader == NULL )
+	if( edgeReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
 		return -1;
@@ -1506,7 +1510,7 @@ int MapConverter::AnalyzeOperaMultiLib( list<PetLibrary*> *libs ){
 			//cout<<i<<": threshold: "<<Configure::MULTI_LIB_INFO->at( i )->GetThreshold()<<endl;
 			ifstream edgeReader( Configure::MULTI_LIB_INFO->at( i )->GetFileName().c_str() );
 
-			if( edgeReader == NULL )
+			if( edgeReader.fail() )
 				{
 					cout<<"ERROR: Cannot open "<<Configure::MULTI_LIB_INFO->at( i )->GetFileName()<<" file"<<endl;
 					return -1;
@@ -1535,7 +1539,8 @@ int MapConverter::AnalyzeOperaMultiLib( list<PetLibrary*> *libs ){
 				// add to graph
 				int firstID = m_graph->GetContigIndex( (*currentPet)[ 0 ] );
 				int secondID = m_graph->GetContigIndex( (*currentPet)[ 2 ] );
-
+				m_graph->GetContigIndex( string("k99_2"));
+				
 				// if one of contigs does not exist
 				if( firstID == -1 || secondID == -1 )
 					continue;
@@ -1543,6 +1548,8 @@ int MapConverter::AnalyzeOperaMultiLib( list<PetLibrary*> *libs ){
 				Contig *firstContig = m_graph->GetContig( firstID );
 				Contig *secondContig = m_graph->GetContig( secondID );
 
+				//cerr firstID  secondID
+				
 				//if( firstContig->GetName() == "10639727" || secondContig->GetName() == "10639727" ){
 				//	cerr<<"    edge with large threshold: "<<line<<endl;
 				//}
