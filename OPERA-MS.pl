@@ -687,7 +687,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "ASSEMBLY"){
     my $reference_cluster_file = "$DIR_REF_CLUSTERING/clusters_seq_similarity";
     $reference_cluster_file = "$DIR_REF_CLUSTERING/clusters_single_strain" if($strain_clustering eq "YES");
     $contig_coverage_file = "$DIR_COV/contigs_$contig_window_len\_$contig_edge_len";
-    $command = "${opera_ms_dir}bin/filter_cluster_coverage.pl $contig_coverage_file $reference_cluster_file $DIR_REF_CLUSTERING 1.5 $DIR_REF_CLUSTERING/NO_REPEAT $DIR_REF_CLUSTERING/NUCMER_OUT/";
+    $command = "${opera_ms_dir}bin/filter_cluster_coverage.pl $contig_coverage_file $reference_cluster_file $DIR_REF_CLUSTERING 1.5 $DIR_REF_CLUSTERING/NO_REPEAT $DIR_REF_CLUSTERING/NUCMER_OUT/ $mummer_dir";
     #$command="outcontig=`ls $DIR_COV/contigs_\*`; ${opera_ms_dir}bin/filter_cluster_coverage.pl `echo \$outcontig` $reference_cluster_file $DIR_REF_CLUSTERING 1.5 $DIR_REF_CLUSTERING/NO_REPEAT $DIR_REF_CLUSTERING/NUCMER_OUT/";
     
     run_exe($command);

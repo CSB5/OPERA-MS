@@ -3,7 +3,7 @@ use warnings;
 use Statistics::Basic qw(:all);
 #$use Math::NumberCruncher;
 
-my ($covfile, $cluster_file, $edge_file_dir, $diff_cov_threshold, $dir_res, $nucmer_dir) = @ARGV;
+my ($covfile, $cluster_file, $edge_file_dir, $diff_cov_threshold, $dir_res, $nucmer_dir, $mummer_exe_dir) = @ARGV;
 my $command;
 my %contig_info = ();
 
@@ -97,7 +97,7 @@ opendir(my $nuc_dir, $nucmer_dir) or die "NUCMER directory $nucmer_dir not found
 while (my $mapped_file = readdir($nuc_dir)){
     if ($mapped_file =~ /(\d+)-repeat_detection.delta/){
         my $cluster = $1;
-       `show-coords -lrcT $nucmer_dir/$mapped_file > $nucmer_dir/$1.txt`;
+       `$mummer_exe_dir/show-coords -lrcT $nucmer_dir/$mapped_file > $nucmer_dir/$1.txt`;
        open (NUC_MAPPING,"$nucmer_dir/$1.txt") or die;
         my %contig_mapped = ();
        <NUC_MAPPING>;

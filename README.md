@@ -27,7 +27,7 @@ cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config 2> log.err
 diff sample_files/contig_info.txt sample_output/contig_info.txt
 ~~~~
-This will assemble a low diversity mock community in the folder __OPERA-MS/sample_output__. 
+This will assemble a low diversity mock community in the folder **OPERA-MS/sample_output**. 
 
 # Running OPERA-MS
 
@@ -62,7 +62,7 @@ The configuration file is formatted as follow:
 
 - **STRAIN_CLUSTERING** : `default: YES` - Indicate if the strain level clustering step is performed (YES) or skipped (NO)
 
-- **CONTIG_LEN_THR** : `default: 500` - Contig length threshold for clustering, smaller contigs will be filtered out
+- **CONTIG_LEN_THR** : `default: 500` - Contig length threshold for clustering, contigs smaller than CONTIG_LEN_THR will be filtered out
 
 - **CONTIG_EDGE_LEN** : `default: 80` - When calculating contig coverage, number of bases filtered out from each contig ends, to avoid biases due to lower mapping efficiency
 
@@ -74,8 +74,8 @@ The configuration file is formatted as follow:
 ### Outputs
 
 Outputs can be found in the specified OUTPUT_DIR.
-The file __contig.fasta__ contains the assembled contigs, and __assembly.stats__ provides overall assembly statistics (e.g. assembly size, N50, longest scaffold ...).
-__contig_info.txt__ provides a detailed overview of the assembled contigs according to the following features:
+The file **contig.fasta** contains the assembled contigs, and **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest scaffold ...).
+**contig_info.txt** provides a detailed overview of the assembled contigs according to the following features:
 - **CONTIG_ID** : contig identifier. Single strain species contigs are named `opera_contig_X`. Contigs from multi-strain species are named `strainY_opera_contig_X`, where `Y` indicate the strain ID
 - **LENGTH** : contig length
 - **ARRIVAL_RATE** : median contig short-reads arrival rate
@@ -83,7 +83,7 @@ __contig_info.txt__ provides a detailed overview of the assembled contigs accord
 - **NB_STRAIN** : number of strains detected for the species
 - **REFERENCE_GENOME** : path to the closest reference genome present in the OPERA-MS database
 
-Finally, strain level scaffold assemblies can be found in the following files: __OUT_DIR/intermediate_files/strain_analysis/\*/\*/scaffoldSeq.fasta__.
+Finally, strain level scaffold assemblies can be found in the following files: **OUT_DIR/intermediate_files/strain_analysis/\*/\*/scaffoldSeq.fasta**.
 
 # Dependencies
 
@@ -98,7 +98,7 @@ We require the following software to be functional:
 8) [MUMmer](http://mummer.sourceforge.net/) (tested with version 3.23)
 
 All software are packaged as pre-build with OPERA-MS. Each binary is placed inside of the __utils__ folder.
-If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the  __utils__ folder.
+If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the  **utils** folder.
 
 OPERA-MS is written in C++, Python, R and Perl, and makes use of the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
