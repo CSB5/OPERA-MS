@@ -87,8 +87,7 @@ Finally, strain level scaffold assemblies can be found in the following files: *
 
 # Dependencies
 
-
-All required software (except `cpanm`) comes either pre-compiled with OPERA-MS or is build during the installation process. Binaries are placed inside the __utils__
+The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required software comes either pre-compiled with OPERA-MS or is build during the installation process. Binaries are placed inside the __utils__
 folder:
 
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tested with version 1.0.4-beta)
@@ -110,9 +109,9 @@ OPERA-MS is written in C++, Python, R and Perl, and makes use of the following P
 - [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
 - [Statistics::R](https://metacpan.org/pod/Statistics::R)
 
-Note for Mac Users: the system default `clang` provider will likely fail to compile `OPERA-LG`:
-please install a recent GNU C++ compiler and point make to its path. For example, if you installed
-GCC version 8.1.0 via Homebrew to /usr/local, then:
+Note for Mac Users: the system default compiler (`clang`) will likely fail to compile `OPERA-LG`:
+please install a recent GNU C++ compiler and point `make` to its path. For example, if you installed
+GCC version 8.1.0 via Homebrew to /usr/local, then the following should work:
 
 
 ```
@@ -124,5 +123,5 @@ CXX=/usr/local/bin/g++-8 make
 # Contact information
 For additional information, help and bug reports please send an email to one of the following: 
 
-- Denis Bertrand <bertrandd@gis.a-star.edu.sg>
-- Niranjan Nagarajan <nagarajann@gis.a-star.edu.sg>
+- Denis Bertrand: <bertrandd@gis.a-star.edu.sg>
+- Niranjan Nagarajan: <nagarajann@gis.a-star.edu.sg>
