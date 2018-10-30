@@ -229,6 +229,7 @@ close(REF_CLUS);
 #Read the original contig sequence file and remove any contigs that belong to species with multiple strain
 my $prev_scaf;
 my $seq = "";
+my $contigs;
 open(FILE, $contigs_file) or die;
 open(CONTIGS, ">$inter_dir/reference_mapping/single_strain_species.fa");
 while (<FILE>){
@@ -236,7 +237,7 @@ while (<FILE>){
     if ($_ =~ />/){
         if(defined $prev_scaf){
             my @line = split(/\s/, $prev_scaf);
-            my $contigs = substr $line[0], 1;
+            $contigs = substr $line[0], 1;
 
             if(! exists $strain_contig{$contigs}){
                 print CONTIGS $prev_scaf . "\n";
@@ -253,7 +254,11 @@ while (<FILE>){
 }
 close(FILE);
 
-
+if(! exists $strain_contig{$contigs}){
+    print CONTIGS $prev_scaf . "\n";
+    print CONTIGS $seq . "\n";
+}
+close(CONTIGS);
 
 
 sub run_exe{
