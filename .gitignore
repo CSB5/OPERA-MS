@@ -10,3 +10,5 @@ LARGE_DATASET_TEST
 sample_output
 bin/sigma
 OPERA-LG/bin/OPERA-LG
+*swp
+*un~
