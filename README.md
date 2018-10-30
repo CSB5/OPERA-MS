@@ -87,7 +87,10 @@ Finally, strain level scaffold assemblies can be found in the following files: *
 
 # Dependencies
 
-We require the following software to be functional:
+
+All required software (except `cpanm`) comes either pre-compiled with OPERA-MS or is build during the installation process. Binaries are placed inside the __utils__
+folder:
+
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tested with version 1.0.4-beta)
 2) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below)
 3) [bwa](https://github.com/lh3/bwa) - (tested with version 0.7.10-r789)
@@ -97,17 +100,29 @@ We require the following software to be functional:
 7) [Mash](https://github.com/marbl/Mash) - (tested with version 1.1.1)
 8) [MUMmer](http://mummer.sourceforge.net/) (tested with version 3.23)
 
-All software are packaged as pre-build with OPERA-MS. Each binary is placed inside of the __utils__ folder.
+
 If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the  **utils** folder.
 
 OPERA-MS is written in C++, Python, R and Perl, and makes use of the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
+
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
-
 - [File::Which](https://metacpan.org/pod/File::Which)
-
 - [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
-
 - [Statistics::R](https://metacpan.org/pod/Statistics::R)
 
+Note for Mac Users: the system default `clang` provider will likely fail to compile `OPERA-LG`:
+please install a recent GNU C++ compiler and point make to its path. For example, if you installed
+GCC version 8.1.0 via Homebrew to /usr/local, then:
+
+
+```
+CXX=/usr/local/bin/g++-8 make
+
+```
+
+
 # Contact information
-For additional information, help and bug reports please send an email to one of the following: bertrandd@gis.a-star.edu.sg, nagarajann@gis.a-star.edu.sg
+For additional information, help and bug reports please send an email to one of the following: 
+
+- Denis Bertrand <bertrandd@gis.a-star.edu.sg>
+- Niranjan Nagarajan <nagarajann@gis.a-star.edu.sg>
