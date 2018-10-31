@@ -69,7 +69,7 @@ The configuration file is formatted as follows:
 ### Output
 
 The following output files can be found in the specified output directory i.e. OUTPUT_DIR.
-The file **contig.fasta** contains the assembled contigs, and **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest scaffold etc.).
+The file **contig.fasta** contains the assembled contigs, and **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest contig etc.).
 **contig_info.txt** provides a detailed overview of the assembled contigs with the following information:
 - **CONTIG_ID** : contig identifier, typically `opera_contig_X`. Contigs from species where OPERA-MS detects multiple genomes are named `strainY_opera_contig_X` to record this information, where `Y` indicates the strain ID
 - **LENGTH** : contig length
@@ -78,7 +78,7 @@ The file **contig.fasta** contains the assembled contigs, and **assembly.stats**
 - **NB_STRAIN** : number of strain genomes in the metagenome that were detected by OPERA-MS for this species
 - **REFERENCE_GENOME** : path to the closest reference genome present in the OPERA-MS database
 
-Finally, strain level scaffold assemblies can be found in the following files: **OUT_DIR/intermediate_files/strain_analysis/\*/\*/scaffoldSeq.fasta**.
+Finally, strain level scaffold assemblies can be found in the following directory: **OUT_DIR/intermediate_files/strain_analysis/**.
 
 # Dependencies
 
