@@ -451,7 +451,7 @@ my $command;
 
 if($STAGE_TO_RUN eq "TEST_INSTALLATION"){
     print STDOUT "\n *** All third party software are functional.\n";
-    print STDOUT " *** Please try to run OPERA-MS on the test dataset.\n\n";
+    print STDOUT " *** Please try to run OPERA-MS on the test data-set.\n\n";
     exit(1);
 }
 
