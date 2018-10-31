@@ -1,5 +1,5 @@
 # Introduction 
-OPERA-MS is an hybrid metagenomic assembler which combines the advantages of short and long-read technologies providing high quality assemblies by addressing issues of low contiguity of short-read assemblies, and low base-pair quality of long-read assemblies. The method have been extensively tested on mock communities sequenced using different long-read sequencing technology (TruSeq Synthetic Long Read, PacBio and Oxford Nanopore) and provides high quality assemblies for read technologies with high base-pair error rate.
+OPERA-MS is a hybrid metagenomic assembler which combines the advantages of short and long-read technologies providing high quality assemblies by addressing issues of low contiguity of short-read only assemblies, and low base-pair quality of long-read only assemblies. OPERA-MS has been extensively tested on mock communities and real datasets sequenced using different long-read technologies, including TruSeq Synthetic Long Read, PacBio and Oxford Nanopore, and is particularly robust to noise in underlying sequence data.
 
 OPERA-MS uses the following strategy:
 (1) Assembly of preliminary high base-pair quality contigs using a short-read metagenomic assembler (default: MEGAHIT),
