@@ -18,8 +18,9 @@ To install OPERA-MS run the following commands:
 git clone https://github.com/CSB5/OPERA-MS.git
 cd /path/to/OPERA-MS
 make
+OPERA-MS.pl sample_config.config TEST_INSTALLATION 2> log.err
 ~~~~
-If you encounter any problem during the installation, please see the [**Dependencies**](#dependencies) Section. 
+If you encounter any problem during the installation, or if some third party sofware binaries are not functional on your see system, please see the [**Dependencies**](#dependencies) Section. 
 
 A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands: 
 ~~~~

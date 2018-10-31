@@ -214,23 +214,7 @@ else{
     die $incorrect_arguments;
 }
 
-#Download the genome reference data base for the first utilasation
-if(! -e "$opera_ms_dir/database_updated"){
-    print STDOUT " *** First utilization: set-up of reference genome databases. Please wait ...\n";
-    #
-    print STDOUT " *** (1/3) Download of genomeDB_Sketch.msh\n";
-    run_exe("wget --no-check-certificate -O $opera_ms_dir/genomeDB_Sketch.msh https://www.dropbox.com/s/kot086vh26nds6j/genomeDB_Sketch.msh?dl=0");
-    #
-    print STDOUT " *** (2/3) Download of complete_ref_genomes.tar.gz\n";
-    run_exe("wget --no-check-certificate -O $opera_ms_dir/complete_ref_genomes.tar.gz https://www.dropbox.com/s/wcxvy2u0yhp3pw0/complete_ref_genomes.tar.gz?dl=0");
-    #
-    print STDOUT " *** (3/3) Extraction of complete_ref_genomes.tar.gz\n";
-    run_exe("tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz --directory $opera_ms_dir");
-    #
-    run_exe("rm $opera_ms_dir/complete_ref_genomes.tar.gz");
-    #
-    run_exe("touch $opera_ms_dir/database_updated");
-}
+
 
 my $inter = "intermediate_files"; 
 $output_dir = $main_dir . $output_dir."/" if (substr($output_dir, 0, 1) ne "/");
@@ -254,6 +238,8 @@ if (! -e "$opera_ms_dir/bin/bundler" or
     ! -e "$opera_ms_dir/OPERA-LG/bin/OPERA-LG"){
     die "bundler and OPERA-LG not found. Please make install before running OPERA-MS.\n";
 }
+print STDOUT " *** OPERA-LG functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
+
 
 #samtools
 if(!defined($samtools_dir)){
@@ -279,6 +265,7 @@ else{
     }
     
 }
+print STDOUT " *** Samtools functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
 
 #blasr
 if(!defined($blasr_dir)){
@@ -300,6 +287,7 @@ else{
         die "blasr not found at: ".$blasr_dir."\n";
     }
 }
+print STDOUT " *** Blasr functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
 
 #bwa mapping
 if(!defined($short_read_tool_dir)){
@@ -323,6 +311,7 @@ else{
         die "$short_read_maptool not found at : ".$short_read_tool_dir."\n";
     }
 }
+print STDOUT " *** Bwa functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
 
 #minimap2
 if(!defined($minimap2_dir)){
@@ -345,6 +334,7 @@ else{
         die "minimap2 not found at: ".$minimap2_dir."\n";
     }
 }
+print STDOUT " *** Minimap2 functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
 
 #mash
 if(!defined($mash_dir)){
@@ -367,6 +357,7 @@ else{
         die "mash not found at: ".$mash_dir."\n";
     }
 }
+print STDOUT " *** Mash functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
 
 #mummer
 if(!defined($mummer_dir)){
@@ -392,6 +383,7 @@ else{
         die "mummer not found at: ".$mummer_dir."\n";
     }
 }
+print STDOUT " *** Mummer functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
 
 if(!defined($megahit_dir)){
     $megahit_dir = "$opera_ms_dir/utils/megahit_v1.0.4-beta_LINUX_CPUONLY_x86_64-bin/";
@@ -413,7 +405,8 @@ else{
         die "Megahit not found at: ".$megahit_path."\n";
     }
 }
- 
+print STDOUT " *** MEGAHIT functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
+
 #Check for racon.
 if(!defined($racon_dir)){
     $racon_dir = "$opera_ms_dir/utils/";
@@ -435,6 +428,7 @@ else{
         die "racon not found at: ".$racon_dir."\n";
     }
 }
+print STDOUT " *** Racon functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
 
 if( ! -e $illum_read1) {
     die "\nError : $illum_read1 - illumina read 1 file does not exist\n";
@@ -455,6 +449,30 @@ if( ! -d "$opera_ms_dir/$opera_version"){
 #my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -V -l mem_free=20G,h_rt=500:0:0 -pe OpenMP 20";
 my $command;
 
+if($STAGE_TO_RUN eq "TEST_INSTALLATION"){
+    print STDOUT "\n *** All third party software are functional.\n";
+    print STDOUT " *** Please try to run OPERA-MS on the test dataset.\n\n";
+    exit(1);
+}
+
+#Download the genome reference data base for the first utilasation
+if(! -e "$opera_ms_dir/database_updated"){
+    print STDOUT " *** First utilization: set-up of reference genome databases. Please wait ...\n";
+    #
+    print STDOUT " *** (1/3) Download of genomeDB_Sketch.msh\n";
+    run_exe("wget --no-check-certificate -O $opera_ms_dir/genomeDB_Sketch.msh https://www.dropbox.com/s/kot086vh26nds6j/genomeDB_Sketch.msh?dl=0");
+    #
+    print STDOUT " *** (2/3) Download of complete_ref_genomes.tar.gz\n";
+    run_exe("wget --no-check-certificate -O $opera_ms_dir/complete_ref_genomes.tar.gz https://www.dropbox.com/s/wcxvy2u0yhp3pw0/complete_ref_genomes.tar.gz?dl=0");
+    #
+    print STDOUT " *** (3/3) Extraction of complete_ref_genomes.tar.gz\n";
+    run_exe("tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz --directory $opera_ms_dir");
+    #
+    run_exe("rm $opera_ms_dir/complete_ref_genomes.tar.gz");
+    #
+    run_exe("touch $opera_ms_dir/database_updated");
+}
+
 ### opera config
 #
 my ($start_time, $end_time);
@@ -470,8 +488,6 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "SHORT_READ_ASSEMBLY"){
 	$flag_megahit_assembly = 1;
 	#
 	$contigs_file = "$megahit_out_dir/final.contigs.fa";
-	$contigs_file_sed = $contigs_file;
-	$contigs_file_sed =~ s/\//\\\//g;      #replace / with \/
 	#
 	if(! -e $contigs_file){
 	    $command = "$megahit_dir/megahit --num-cpu-threads $num_processor -1 $illum_read1 -2 $illum_read2 -o $megahit_out_dir > $output_dir/$inter/megahit.out 2> $output_dir/$inter/megahit.err";
@@ -485,10 +501,11 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "SHORT_READ_ASSEMBLY"){
     }
 }
 
+
+
+
 if(! defined $contigs_file){
     $contigs_file = "$megahit_out_dir/final.contigs.fa";
-    $contigs_file_sed = $contigs_file;
-    $contigs_file_sed =~ s/\//\\\//g;      #replace / with \/
 }
 
 #Delete all the intermidate file -_-
