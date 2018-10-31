@@ -41,11 +41,11 @@ The configuration file is formatted as follows:
 
 - **OUTPUT_DIR** : `path/to/results` - Directory where OPERA-MS results will be outputted
 
-- **LONG_READ** : `path/to/long-read.fq` - Path to the long-read fastq file obtained from either Oxford Nanopore, PacBio or TruSeq Synthetic Long Read sequencing
+- **LONG_READ** : `path/to/long-read.fq` - Path to the long-read fastq file obtained from either Oxford Nanopore, PacBio or Illumina Synthetic Long Read sequencing
 
-- **ILLUMINA_READ_1** : `path/to/illum_read1.fq.gz` - Path to the first Illumina read file
+- **ILLUMINA_READ_1** : `path/to/illum_read1.fq.gz` - Path to the first read for Illumina paired-end read data
 
-- **ILLUMINA_READ_2** : `path/to/illum_read2.fq.gz` - Path to the second Illumina read file
+- **ILLUMINA_READ_2** : `path/to/illum_read2.fq.gz` - Path to the second read for Illumina paired-end read data
 
 ### Optional parameters 
 
