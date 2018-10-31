@@ -26,7 +26,6 @@ A set of test files and a sample configuration file is provided to test out the 
 ~~~~
 cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config 2> log.err
-diff sample_files/contig_info.txt sample_output/contig_info.txt
 ~~~~
 This will assemble a low diversity mock community in the folder **OPERA-MS/sample_output**. 
 
