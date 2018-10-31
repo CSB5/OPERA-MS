@@ -49,31 +49,31 @@ The configuration file is formatted as follows:
 
 ### Optional parameters 
 
-- **CONTIGS_FILE** : `path/to/contigs.fa` - Path to the contigs file, if the short-reads have been assembled previously
+- **CONTIGS_FILE** : `path/to/contigs.fa` - Path to the contig file, if the short-reads have been assembled previously
 
-- **NUM_PROCESSOR** : `default : 1` - The number of used processors
+- **NUM_PROCESSOR** : `default : 1` - Number of processors to use
 
-- **LONG_READ_MAPPER** `default: blasr` - Software used for long-read mapping blasr/minimap2
+- **LONG_READ_MAPPER** `default: blasr` - Software used for long-read mapping i.e. blasr or minimap2
 
-- **STRAIN_CLUSTERING** : `default: YES` - Indicate if the strain level clustering step is performed (YES) or skipped (NO)
+- **STRAIN_CLUSTERING** : `default: YES` - Whether strain level clustering should be performed (YES) or skipped (NO)
 
-- **CONTIG_LEN_THR** : `default: 500` - Contig length threshold for clustering, contigs smaller than CONTIG_LEN_THR will be filtered out
+- **CONTIG_LEN_THR** : `default: 500` - Contig length threshold for clustering; contigs smaller than CONTIG_LEN_THR will be filtered out
 
-- **CONTIG_EDGE_LEN** : `default: 80` - When calculating contig coverage, number of bases filtered out from each contig ends, to avoid biases due to lower mapping efficiency
+- **CONTIG_EDGE_LEN** : `default: 80` - When calculating contig coverage, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency
 
-- **CONTIG_WINDOW_LEN** : `default: 340` - The window length in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value
+- **CONTIG_WINDOW_LEN** : `default: 340` - Window length in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value
 
-- **KMER_SIZE** : `default: 60` - The kmer value used to produce the assembled contigs
+- **KMER_SIZE** : `default: 60` - Kmer value used to assemble contigs
 
 
-### Outputs
+### Output
 
-Outputs can be found in the specified OUTPUT_DIR.
-The file **contig.fasta** contains the assembled contigs, and **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest scaffold ...).
-**contig_info.txt** provides a detailed overview of the assembled contigs according to the following features:
-- **CONTIG_ID** : contig identifier. Single strain species contigs are named `opera_contig_X`. Contigs from multi-strain species are named `strainY_opera_contig_X`, where `Y` indicate the strain ID
+The following output files can be found in the specified output directory i.e. OUTPUT_DIR.
+The file **contig.fasta** contains the assembled contigs, and **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest scaffold etc.).
+**contig_info.txt** provides a detailed overview of the assembled contigs with the following information:
+- **CONTIG_ID** : contig identifier, typically `opera_contig_X`. Contigs from species where OPERA-MS detects multiple genomes are named `strainY_opera_contig_X` to record this information, where `Y` indicates the strain ID
 - **LENGTH** : contig length
-- **ARRIVAL_RATE** : median contig short-reads arrival rate
+- **ARRIVAL_RATE** : median short-read arrival rate for the contig
 - **SPECIES** : putative species to which the assembled contig belong to
 - **NB_STRAIN** : number of strains detected for the species
 - **REFERENCE_GENOME** : path to the closest reference genome present in the OPERA-MS database
