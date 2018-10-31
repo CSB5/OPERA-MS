@@ -18,7 +18,7 @@ To install OPERA-MS run the following commands:
 git clone https://github.com/CSB5/OPERA-MS.git
 cd /path/to/OPERA-MS
 make
-OPERA-MS.pl sample_config.config TEST_INSTALLATION 2> log.err
+perl OPERA-MS.pl sample_config.config TEST_INSTALLATION 2> log.err
 ~~~~
 If you encounter any problem during the installation, or if some third party sofware binaries are not functional on your see system, please see the [**Dependencies**](#dependencies) Section. 
 
