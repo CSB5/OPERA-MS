@@ -74,15 +74,15 @@ The file **contig.fasta** contains the assembled contigs, and **assembly.stats**
 - **CONTIG_ID** : contig identifier, typically `opera_contig_X`. Contigs from species where OPERA-MS detects multiple genomes are named `strainY_opera_contig_X` to record this information, where `Y` indicates the strain ID
 - **LENGTH** : contig length
 - **ARRIVAL_RATE** : median short-read arrival rate for the contig
-- **SPECIES** : putative species to which the assembled contig belong to
-- **NB_STRAIN** : number of strains detected for the species
+- **SPECIES** : closest reference species in the OPERA-MS database for the assembled contig
+- **NB_STRAIN** : number of strain genomes in the metagenome that were detected by OPERA-MS for this species
 - **REFERENCE_GENOME** : path to the closest reference genome present in the OPERA-MS database
 
 Finally, strain level scaffold assemblies can be found in the following files: **OUT_DIR/intermediate_files/strain_analysis/\*/\*/scaffoldSeq.fasta**.
 
 # Dependencies
 
-The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required software comes either pre-compiled with OPERA-MS or is build during the installation process. Binaries are placed inside the __utils__
+The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required software comes either pre-compiled with OPERA-MS or is built during the installation process. Binaries are placed inside the __utils__
 folder:
 
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tested with version 1.0.4-beta)
@@ -95,7 +95,7 @@ folder:
 8) [MUMmer](http://mummer.sourceforge.net/) (tested with version 3.23)
 
 
-If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the  **utils** folder.
+If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the **utils** folder.
 
 OPERA-MS is written in C++, Python, R and Perl, and makes use of the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
 
@@ -116,7 +116,7 @@ CXX=/usr/local/bin/g++-8 make
 
 
 # Contact information
-For additional information, help and bug reports please send an email to one of the following: 
+For additional information, help and bug reports please send an email to: 
 
 - Denis Bertrand: <bertrandd@gis.a-star.edu.sg>
 - Niranjan Nagarajan: <nagarajann@gis.a-star.edu.sg>
