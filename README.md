@@ -79,7 +79,7 @@ The file **contig.fasta** contains the assembled contigs, and **assembly.stats**
 - **NB_STRAIN** : number of strain genomes in the metagenome that were detected by OPERA-MS for this species
 - **REFERENCE_GENOME** : path to the closest reference genome present in the OPERA-MS database
 
-Finally, strain level scaffold assemblies can be found in the following directory: **OUT_DIR/intermediate_files/strain_analysis/**.
+Finally, strain level contig assemblies can be found in the following directory: **OUT_DIR/strain_assembly/**. For each species, strains are ordered from the most abundant to the less abundant.
 
 # Dependencies
 

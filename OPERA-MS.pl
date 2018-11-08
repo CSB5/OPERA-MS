@@ -864,9 +864,9 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
     print OUT $str_stats . "\n";
     close(OUT);
 
-    my $multi_strain_dir = "$output_dir/muti_strain_assembly";
+    my $multi_strain_dir = "$output_dir/strain_assembly";
     run_exe("mkdir $multi_strain_dir") if(! -d "$multi_strain_dir");
-    get_contig_sequence("${output_dir}/contig_info.txt", "$multi_strain_dir", "$output_dir/contig.fasta");
+    get_contig_sequence("${output_dir}/contig_info.txt", $multi_strain_dir, "$output_dir/contig.fasta");
 }
 
 print STDERR "\n*************OPERA-MS DONE***************\n" if($STAGE_TO_RUN eq "ALL");
