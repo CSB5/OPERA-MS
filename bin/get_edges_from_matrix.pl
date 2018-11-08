@@ -1,9 +1,8 @@
 #!/usr/bin/perl
-use Data::Dumper;
 use warnings;
 use Statistics::Basic qw(:all);
 use strict;
-use List::Util qw(sum);
+
 
 my $inter_dir = $ARGV[0];
 my $matrix = $ARGV[1];
@@ -158,3 +157,4 @@ while (<FILE>){
 }
 close(FILE);
 
+#perl /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS//bin/get_edges_from_matrix.pl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_508_3//intermediate_files /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_508_3//intermediate_files/strain_analysis/Klebsiella_pneumoniae/matrix /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_508_3//intermediate_files/strain_analysis/Klebsiella_pneumoniae /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_508_3//intermediate_files/megahit_assembly/final.contigs.fa 0 1000

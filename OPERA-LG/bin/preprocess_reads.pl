@@ -117,7 +117,7 @@ elsif( $mapTool eq "bwa" )
     &readAndMap;
 
     # remove the intermediate file
-    `rm ${folder}$outputFile\_read.sai`;
+    #`rm ${folder}$outputFile\_read.sai`;
 }
 else
 {
@@ -226,7 +226,7 @@ sub buildIndexUsingBwa
     print "[$time]\t";
     print "Building bwa index...\n";
     @contigName = split( "/", $contigFile );
-    if( ! -f "$folder$contigName[ -1 ].amb" )
+    if( 1 || ! -f "$folder$contigName[ -1 ].amb" )#Remove check for previous construction as it may cause bwa to crash
     {
 	if( $type eq "cs" )
 	{
@@ -321,7 +321,7 @@ sub findSAWithBwa
     print "Finding the SA coordinates of the reads using BWA aln...\n";
     $command = "${path}bwa aln -t $nproc $folder$contigName[ -1 ] - > ${folder}$outputFile\_read.sai";
     if($?){
-	die "Error during bwa mapping. Please see log for details.\n";
+	die "Error during bwa aln. Please see log for details.\n";
     }
 }
 
@@ -333,10 +333,11 @@ sub generateAlignmentUsingBwa
     # $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | awk \'{ if( \$3 != \"*\" ) print \$0 }\' > $folder$outputFile";
     # $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | samtools view -S -h -b -F 0x4 - | samtools sort -no - ${folder}temporarySam | samtools view -h -b - > $folder$outputFile";
     #$command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ 20 -no - ${folder}temporarySam > $folder$outputFile";
-    $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}$outputFile\_read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ $nproc -no - ${folder}$outputFile\_temp > $folder$outputFile";
+    #$command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}$outputFile\_read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 - | ${samtoolsDir}samtools sort -\@ $nproc -no - ${folder}$outputFile\_temp > $folder$outputFile";
+    $command = "${path}bwa samse -n 1 $folder$contigName[ -1 ] ${folder}$outputFile\_read.sai - | grep '\\(^@\\|XT:A:U\\)' | ${samtoolsDir}samtools view -S -h -b -F 0x4 -  > $folder$outputFile";
     print $command."\n";
     if($?){
-	die "Error during bwa mapping. Please see log for details.\n";
+	die "Error during bwa samse. Please see log for details.\n";
     }
 }
 

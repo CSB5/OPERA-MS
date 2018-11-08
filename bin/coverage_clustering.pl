@@ -191,7 +191,7 @@ foreach my $species (keys %species_to_analyze){
     my $cmd = "mkdir -p $out_dir/$species";
     run_exe($cmd);
 
-    open(REF_CLUS, $ref_clusters) or die;
+    open(REF_CLUS, $ref_clusters) or die("File $ref_clusters not found\n");
     open (MATRIX, ">$out_dir/$species/matrix");
     while(<REF_CLUS>){
         chomp $_;
@@ -212,7 +212,7 @@ foreach my $species (keys %species_to_analyze){
 }
 
 #Read the orginal cluster file and remove any contigs that belong to species with multiple strain
-open(REF_CLUS, $ref_clusters) or die;
+open(REF_CLUS, $ref_clusters) or die("File $ref_clusters not found\n");
 open(OUT, ">$inter_dir/reference_mapping/clusters_single_strain");
 while(<REF_CLUS>){
     chomp $_;
@@ -230,7 +230,7 @@ close(REF_CLUS);
 my $prev_scaf;
 my $seq = "";
 my $contigs;
-open(FILE, $contigs_file) or die;
+open(FILE, $contigs_file) or die("File $contigs_file not found\n");
 open(CONTIGS, ">$inter_dir/reference_mapping/single_strain_species.fa");
 while (<FILE>){
     chomp $_;

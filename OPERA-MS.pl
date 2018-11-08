@@ -824,9 +824,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
     #$command = "rm $output_dir/contigs.bam";#; ln -s $output_dir/$inter/opera_long_read/scaffoldSeq.fasta.filled $output_dir/scaffoldSeq.fasta.filled";
     #run_exe($command);
     
-    #$command="less ${output_dir}/$inter/opera_long_read/statistics";
-    #$str = `sort -k2,2nr  ${output_dir}/scaffold_info.txt | head -n10 | cut -f1,2`;
-    run_exe($command);
+    
     $end_time = time;
     print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
     #Get the stats
@@ -834,13 +832,15 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
     open(FILE, "${output_dir}/contig_info.txt");
     my $contig_1mb = 0;
     my $contig_100kb = 0;
+    my $contig_500kb = 0;
     my $assembly_size = 0;
     <FILE>;
     while(<FILE>){
 	@line = split(/\t/, $_);
 	$size = $line[1];
-	$contig_1mb++ if($size > 1000000);
-	$contig_100kb++ if($size > 100000);
+	$contig_1mb++ if($size >= 1000000);
+	$contig_500kb++ if($size >= 500000);
+	$contig_100kb++ if($size >= 100000);
 	$assembly_size += $size;
 	push(@all_size, $size);
     }
@@ -855,13 +855,18 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
 	#"\t" . "min contig size $sort_tab[$nb_contig-1] bp, ".
 	" *** *** " . "Max contig size: $sort_tab[0] bp\n".
 	" *** *** " . "Contig(s) longer than 1Mbp: $contig_1mb \n".
-	" *** *** " . "Contig(s) longer than 100kb: $contig_100kb contig\n".
+	" *** *** " . "Contig(s) longer than 500kb: $contig_500kb\n".
+	" *** *** " . "Contig(s) longer than 100kb: $contig_100kb\n".
 	" *** *** " . "Contig N50: $n50 bp\n";
     
     print STDOUT $str_stats . "\n";
     open(OUT, ">${output_dir}/assembly.stats");
     print OUT $str_stats . "\n";
     close(OUT);
+
+    my $multi_strain_dir = "$output_dir/muti_strain_assembly";
+    run_exe("mkdir $multi_strain_dir") if(! -d "$multi_strain_dir");
+    get_contig_sequence("${output_dir}/contig_info.txt", "$multi_strain_dir", "$output_dir/contig.fasta");
 }
 
 print STDERR "\n*************OPERA-MS DONE***************\n" if($STAGE_TO_RUN eq "ALL");
@@ -994,6 +999,76 @@ sub compute_Nx{
     return $i -1;
 }
 
+sub get_contig_sequence{
+    my ($info_file, $strain_dir, $contig_file) = @_;
+    my %strain_file = ();
+    my %contig_strain = ();
+    open(FILE, $info_file);
+    my $strain_counter = 0;
+    my $current_species = "";
+    my @line;
+    while(<FILE>){
+	@line = split(/\t/, $_);
+	$contig_id = $line[0];
+	if ($contig_id =~ /strain(.+)_opera_contig_(.+)/){
+	    $strain_id = "strain".$1;
+	    $species = $line[3];
+	    if($species ne "NA" && ! exists $strain_file{$strain_id}){
+		$strain_counter = 0 if($species ne $current_species);
+		$strain_counter++;
+		$current_species = $species;
+		print " *** Wrinting $strain_dir/$species\_strain\_$strain_counter.fa => $strain_id\n";
+		open($strain_file{$strain_id}, ">$strain_dir/$species\_strain\_$strain_counter.fa");
+		
+	    }
+	    $contig_strain{$contig_id} = $strain_id;
+	}
+    }
+    close(FILE);
+    #exit(0);
+    open(IN, $contig_file);
+    my $print_flag = 0;
+
+    my $OUT_FILE = "";
+    my $ID;
+    while(<IN>){
+	
+	if($_ =~ />.*/){
+	    #print STDERR "---> $nb_contig\n" if($nb_contig % 500000 == 0);$nb_contig++;
+	    @line = split(/\s+/, $_);
+	    $ID = $line[0];
+	    
+	    #print STDERR $ID."\n"; <STDIN>;
+	    if(exists $contig_strain{$ID}){
+		$print_flag = 1;
+		$OUT_FILE = $strain_file{$contig_strain{$ID}};
+		if(! defined $OUT_FILE){
+		    $print_flag = 0;
+		}
+		else{
+		    print STDERR " *** $ID => $contig_strain{$ID}\n";
+		    #chop $_;
+		    #print $_."\n";
+		    print $OUT_FILE $ID . "\n";
+		}
+	    }
+	    else{
+		#print STDERR "**************** IN\n";
+		$print_flag = 0;
+		
+	    }
+	}
+	else{
+	    print $OUT_FILE $_ if($print_flag);
+	}
+    }
+    close(IN);
+
+    foreach $s (keys %strain_file){
+	close($strain_file{$s});
+    }
+    
+}
 
 
 

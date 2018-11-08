@@ -134,6 +134,7 @@ while($mode_accepted == -1){
 	#
 	@{$window_count_in_h_mode_distribution} = ();
 	$nb_window_in_dist = 0;$coverage_sum_in_dist = 0;
+	#The coverage estimate is made on contig then windows are extracted
 	foreach $contig (sort {$contig_info{$b}->{"MEAN_READ_COUNT"} <=> $contig_info{$a}->{"MEAN_READ_COUNT"}} keys %contig_info){
 	    $contig_read_count = $contig_info{$contig}->{"MEAN_READ_COUNT"};
 	    #$probability = compute_probability( $strain_mean_cov, $dispersion_value, $contig_mean_cov);
@@ -146,6 +147,9 @@ while($mode_accepted == -1){
 		push(@{$window_count_in_h_mode_distribution}, @{$contig_info{$contig}->{"WINDOW"}});
 	    }
 	}
+
+	next if($nb_window_in_dist == 0);#Can happen when contigs have widows with very different coverage and the dispertion parameter is very high
+	
 	$sequence_size_in_h_mode_distribution =  $nb_window_in_dist * $window_size;#@{$window_count_in_h_mode_distribution} * $window_size;
 	$mean_cov_in_dist = $coverage_sum_in_dist / $nb_window_in_dist;
 	print STDERR " *** Mode distribution evaluation : " . $curr_mode . " sequence_size_in_h_mode_distribution: $sequence_size_in_h_mode_distribution " . "mean_cov_in_dist $mean_cov_in_dist ". " estimated_mean_value $strain_mean_value " . "mean_cov_in_dist/estimated_mean_value " . ($mean_cov_in_dist  / $strain_mean_value) . "\n";#<STDIN>;

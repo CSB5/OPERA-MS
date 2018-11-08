@@ -1,9 +1,8 @@
 #!/usr/bin/perl
-use Data::Dumper;
 use warnings;
 use Statistics::Basic qw(:all);
-use strict;
-use List::Util qw(sum first);
+#use strict;
+
 
 #############################################################
 #Script for merging sigma clusters based on reference genomes.
@@ -264,8 +263,8 @@ sub merge_clusters{
                 $cluster_to_super_cluster_ID{$cluster_2} = $super_cluster_ID;
                 $super_cluster[$super_cluster_ID] = [$cluster_1, $cluster_2];
                 
-                my @species_intersection = ();
-                undef(@species_intersection); 
+                my %species_intersection = ();
+                undef(%species_intersection); 
                 my %strain_set = ();
                 undef(%strain_set);
                 
@@ -285,8 +284,8 @@ sub merge_clusters{
                         my $species2 = $strain_delim[0] . "_" . $strain_delim[1];
 
                         if($species2 eq $species){
-                            if (!(first {$_ eq $species} @species_intersection)){
-                                push @species_intersection, $species;
+                            if (! exists $species_intersection{$species}){
+                                $species_intersection{$species} = 1;
                             }
                         }
                     }
@@ -311,7 +310,7 @@ sub merge_clusters{
                 #print STDERR "INTERSECTION @species_intersection, LENGTH $length\n";
                 my $strain_to_map_to = $cluster_species_set->{$cluster_1}->[0];
                 $super_cluster_strain_set->{$super_cluster_ID} = {%strain_set};
-                $super_cluster_species_set->{$super_cluster_ID} = [@species_intersection]; 
+                $super_cluster_species_set->{$super_cluster_ID} = [keys %species_intersection]; 
             }
             else{
             #1 clusters not in super cluster
@@ -326,8 +325,8 @@ sub merge_clusters{
                     push(@{$super_cluster[$super_cluster_ID]}, $cluster_2);
                     #needed to clear out the array
                     my %strain_set = %{$super_cluster_strain_set->{$super_cluster_ID}};
-                    my @species_intersection = ();
-                    undef(@species_intersection); 
+                    my %species_intersection = ();
+                    undef(%species_intersection); 
 
                     foreach my $s (@{$super_cluster_species_set->{$super_cluster_ID}}){
                         foreach my $s2 (@{$cluster_species_set->{$cluster_2}}){
@@ -338,8 +337,8 @@ sub merge_clusters{
                         my $species = $strain_delim[0] . "_" . $strain_delim[1];
 
                             if($species eq $s){
-                                if (!(first {$_ eq $species} @species_intersection)){
-                                    push @species_intersection, $species;
+                                if (! exists $species_intersection{$species}){
+                                    $species_intersection{$species} = 1;
                                 }
                             }
                         }
@@ -357,7 +356,7 @@ sub merge_clusters{
 
                     }
                     
-                    $super_cluster_species_set->{$super_cluster_ID} = [@species_intersection]; 
+                    $super_cluster_species_set->{$super_cluster_ID} = [keys %species_intersection]; 
                     #my $length = @species_intersection;
                     #print STDERR "INTERSECTION @species_intersection, LENGTH $length\n";
                 }
@@ -375,14 +374,14 @@ sub merge_clusters{
                         }
                         $super_cluster[$super_cluster_ID_2] = "NAN";
 
-                        my @species_intersection = ();
+                        my %species_intersection = ();
                         #Needed to clear out the array... some scope/memory issue
-                        undef(@species_intersection); 
+                        undef(%species_intersection); 
 
                         foreach my $s (@{$super_cluster_species_set->{$super_cluster_ID_1}}){
                             foreach my $s2 (@{$super_cluster_species_set->{$super_cluster_ID_2}}){
                                 if ($s2 eq $s){
-                                    push @species_intersection, $s;
+                                    $species_intersection{$s} = 1;
                                 }
                             }
                         }
@@ -401,7 +400,7 @@ sub merge_clusters{
                             }
                         }
 
-                        $super_cluster_species_set->{$super_cluster_ID_1} = [@species_intersection]; 
+                        $super_cluster_species_set->{$super_cluster_ID_1} = [keys %species_intersection]; 
                         delete $super_cluster_species_set->{$super_cluster_ID_2};
                         delete $super_cluster_strain_set -> {$super_cluster_ID_2};
                     }
@@ -409,7 +408,6 @@ sub merge_clusters{
             }
         }
     }
-
     close(FILE);
 }
 
@@ -892,12 +890,12 @@ sub check_reference_position{
         if (!@contig_mapping1 or !@contig_mapping2){ next; }
 
 	#Repeat detection based on fraction of the contig mapped
-        if (sum(@contig_percent_mapped1) > 150){ 
+        if (sum(\@contig_percent_mapped1) > 150){ 
             #print STDERR "REPEAT DETECTED $contig1 \n";
             next;
         }
 
-        if(sum(@contig_percent_mapped2) > 150){
+        if(sum(\@contig_percent_mapped2) > 150){
             #print STDERR "REPEAT DETECTED $contig2\n";
             next;
         }
@@ -952,3 +950,15 @@ sub check_reference_position{
 
    return $result;
 }
+
+sub sum{
+    my ($array) = @_;
+    my $res = 0;
+    foreach $s (@{$array}){
+	$res += $s;
+    }
+    return $res;
+}
+
+#perl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/../../OPERA-MS-DEV/OPERA-MS/bin/sequence_similarity_clustering.pl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/UPDATED_TEST//intermediate_files /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-1.1/sample_files/sample_contigs.fasta 10 /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/../../OPERA-MS-DEV/OPERA-MS/ /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/../../OPERA-MS-DEV/OPERA-MS//utils/ /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/../../OPERA-MS-DEV/OPERA-MS//utils/MUMmer3.23/ 
+

@@ -48,20 +48,28 @@ print STDERR " *** Identify corrected reads\n";
 #Used minimap2 to insert the contigs
 run_nucmmer($contig_to_tile, $racon_consensus, $prefix_name);
 #
-get_paf_file("$prefix_name\_tiling.coords", $contig_tile_mapping, "ONLY_SCAFF_CONTIG");
+#check for the validity of the racon consensus, if there no mapping to the assembly the following stage are skipped, and the initial pre-assembly is used for the final stages
+my $nb_line_in_coords = `wc -l $prefix_name\_tiling.coords`;@tmp = split(/\s+/, $nb_line_in_coords);$nb_line_in_coords = $tmp[0];
+my $ncr_assembly = "$assembly_dir/racon_remapped.fasta";
+if($nb_line_in_coords == 4){
+    run_exe("cp $initial_assembly $ncr_assembly");
+}
+else{
+    #
+    get_paf_file("$prefix_name\_tiling.coords", $contig_tile_mapping, "ONLY_SCAFF_CONTIG");
 
-#<STDIN>;
+    #<STDIN>;
 
-#Get the contig to tile sequence and the corrected reads
-my $corrected_read = "$assembly_dir/corrected_read";
-my $contig_in_tiling = "$assembly_dir/contig_in_tiling";
-get_contig_and_corrected_read_in_gap($contig_tile_mapping, $racon_consensus, $contig_to_tile, "$corrected_read.fa", "$contig_in_tiling.fa");
+    #Get the contig to tile sequence and the corrected reads
+    my $corrected_read = "$assembly_dir/corrected_read";
+    my $contig_in_tiling = "$assembly_dir/contig_in_tiling";
+    get_contig_and_corrected_read_in_gap($contig_tile_mapping, $racon_consensus, $contig_to_tile, "$corrected_read.fa", "$contig_in_tiling.fa");
 
-#Intergrate the contigs in concensus
-run_exe("$opera_bin_dir/Remap.py $contig_tile_mapping $racon_consensus $contig_in_tiling.fa");
-$ncr_assembly = "$assembly_dir/racon_remapped.fasta";
-#run_exe("mv $scaffold_dir/test_gapfil_remapped.fasta $ncr_assembly");
-
+    #Intergrate the contigs in concensus
+    run_exe("$opera_bin_dir/Remap.py $contig_tile_mapping $racon_consensus $contig_in_tiling.fa");
+    
+    #run_exe("mv $scaffold_dir/test_gapfil_remapped.fasta $ncr_assembly");
+}
 
 #Identify the final set of contigs used in the tiling
 $prefix_name = "$assembly_dir/final_contig_set";

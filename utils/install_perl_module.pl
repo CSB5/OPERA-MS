@@ -3,10 +3,21 @@
 #use strict;
 use warnings;
 
+#Check if cpanm is installed
+#my $path_to_cpanm = `command -v cpanm`;chop $path_to_cpanm;
+`cpanm --version 2> /dev/null`;
+if ($?){
+    die("Please install cpanm for the setup the Perl modules");
+}
+
+#List of perl modules to install
 check_module("Switch");
 check_module("Statistics::Basic");
-check_module("File::Which");
 check_module("Statistics::R");
+check_module("File::Which");
+check_module("File::Spec::Functions");
+check_module("Getopt::Long");
+
 
 sub check_module{
     my ($module) = @_;
