@@ -105,17 +105,6 @@ OPERA-MS is written in C++, Python, R and Perl, and makes use of the following P
 - [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
 - [Statistics::R](https://metacpan.org/pod/Statistics::R)
 
-Note for Mac Users: the system default compiler (`clang`) will likely fail to compile `OPERA-LG`:
-please install a recent GNU C++ compiler and point `make` to its path. For example, if you installed
-GCC version 8.1.0 via Homebrew to /usr/local, then the following should work:
-
-
-```
-CXX=/usr/local/bin/g++-8 make
-
-```
-
-
 # Contact information
 For additional information, help and bug reports please send an email to: 
 
