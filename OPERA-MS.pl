@@ -613,7 +613,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CLUSTERING"){
     
     
     #Refine the sigma R parameter
-    $command = "${opera_ms_dir}bin/refine_r_estimate.pl $DIR_COV/contigs_340_80 $DIR_SIGMA $opera_ms_dir";
+    $command = "${opera_ms_dir}bin/refine_r_estimate.pl $DIR_COV/contigs_340_80 $DIR_SIGMA $num_processor $opera_ms_dir";
     run_exe($command);
     
     #***
@@ -672,18 +672,19 @@ if($strain_clustering eq "YES" && ($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "S
 	@line = split(/\t/, $_);
 	$species = $line[0];
 	$species_length = $line[1];
-	$command = "perl ${opera_ms_dir}bin/cluster_strain.pl $DIR_STRAIN/$species $species_length $global_r_value $r_value_step $opera_ms_dir";
+	$command = "perl ${opera_ms_dir}bin/cluster_strain.pl $DIR_STRAIN/$species $species_length $global_r_value $r_value_step $opera_ms_dir 2> $DIR_STRAIN/$species.log";
 	print CMD_STRAIN $command . "\n";
 	#run_exe($command);
     }
     close(FILE);
     close(CMD_STRAIN);
-    run_exe("cat $cmd_strain | xargs -L 1 -P $num_processor -I COMMAND sh -c \"COMMAND\" 2> $cmd_strain.log");
+    run_exe("cat $cmd_strain | xargs -L 1 -P $num_processor -I COMMAND sh -c \"COMMAND\"");
     if($?){
 	die "Error in during strain clustering assembly. Please see $cmd_strain.log for details.\n";
     }
     $end_time = time;
     print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
+    
 }
     
 
@@ -696,6 +697,11 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "ASSEMBLY"){
     $command="mkdir $DIR_OPERA_LR";
     run_exe($command);
 
+    #Add the contigs in cluster strain 0 back to the opera assembly
+    if($strain_clustering eq "YES"){
+	run_exe("cat $DIR_REF_CLUSTERING/single_strain_species.fa $DIR_STRAIN/*/excluded_contigs.fa > $DIR_REF_CLUSTERING/single_strain_species_with_excluded.fa");
+    }
+    
     generate_opera_config_file($DIR_MAPPING, $DIR_REF_CLUSTERING, $DIR_OPERA_LR);
     
     #Assembly of all the other contigs were no multiple strain of the same species have inferred
@@ -855,8 +861,8 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "INFO"){
 	#"\t" . "min contig size $sort_tab[$nb_contig-1] bp, ".
 	" *** *** " . "Max contig size: $sort_tab[0] bp\n".
 	" *** *** " . "Contig(s) longer than 1Mbp: $contig_1mb \n".
-	" *** *** " . "Contig(s) longer than 500kb: $contig_500kb\n".
-	" *** *** " . "Contig(s) longer than 100kb: $contig_100kb\n".
+	" *** *** " . "Contig(s) longer than 500kbp: $contig_500kb\n".
+	" *** *** " . "Contig(s) longer than 100kbp: $contig_100kb\n".
 	" *** *** " . "Contig N50: $n50 bp\n";
     
     print STDOUT $str_stats . "\n";
@@ -958,7 +964,7 @@ sub generate_opera_config_file{
 	}
 
 	if($strain_clustering eq "YES" && $line[0] eq "contig_file"){
-	    print OUT "contig_file=$dir_ref_clustering/single_strain_species.fa\n";
+	    print OUT "contig_file=$dir_ref_clustering/single_strain_species_with_excluded.fa\n";
 	    next;
 	}
 
@@ -1017,7 +1023,7 @@ sub get_contig_sequence{
 		$strain_counter = 0 if($species ne $current_species);
 		$strain_counter++;
 		$current_species = $species;
-		print " *** Wrinting $strain_dir/$species\_strain\_$strain_counter.fa => $strain_id\n";
+		print STDERR " *** Wrinting $strain_dir/$species\_strain\_$strain_counter.fa => $strain_id\n";
 		open($strain_file{$strain_id}, ">$strain_dir/$species\_strain\_$strain_counter.fa");
 		
 	    }
@@ -1046,7 +1052,7 @@ sub get_contig_sequence{
 		    $print_flag = 0;
 		}
 		else{
-		    print STDERR " *** $ID => $contig_strain{$ID}\n";
+		    #print STDERR " *** $ID => $contig_strain{$ID}\n";
 		    #chop $_;
 		    #print $_."\n";
 		    print $OUT_FILE $ID . "\n";

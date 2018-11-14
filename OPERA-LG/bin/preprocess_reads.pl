@@ -117,7 +117,7 @@ elsif( $mapTool eq "bwa" )
     &readAndMap;
 
     # remove the intermediate file
-    #`rm ${folder}$outputFile\_read.sai`;
+    `rm ${folder}$outputFile\_read.sai`;
 }
 else
 {

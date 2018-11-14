@@ -2,8 +2,6 @@
 use warnings "all";
 use Statistics::Basic qw(:all);
 use Statistics::R;
-#use Math::GammaFunction qw(:all);
-#use Math::GammaFunction qw(:all);
 
 
 my ($end_time, $start_time);
@@ -11,16 +9,7 @@ $start_time = time;
 
 my $R = Statistics::R->new();
 my @confidance_interval;
-#compute_confidance_interval(4.8, 8);
-#print STDERR "@confidance_interval\n";
-#use POSIX ();
-#use POSIX qw(setsid);
-#use POSIX qw(:errno_h :fcntl_h);
 
-
-#$a = log_gamma(5);
-
-#exit(0);
 
 my ($species_dir, $reference_size, $dispersion_value, $step_dispersion_value_increase, $opera_ms_dir) = @ARGV;
 
@@ -34,7 +23,6 @@ my $header = <FILE>;chop $header;
 my @line = split (/ /, $header);
 my $window_size = $line[3];
 my ( $mean, $stddev, $median, $nb_exluded_window);
-#my (@window_count, @window_count_filtered);
 while (<FILE>) {
     chomp $_;	
     #The line with the contig ID
@@ -44,14 +32,12 @@ while (<FILE>) {
     $nb_window = $line[4];
     #The line with number of arriving reads
     $read_count = <FILE>;chop $read_count;
-    #print STDERR $read_count."\t|".$nb_window."|\t".$window_size."\n";<STDIN>;
+    
     #Skip the next line that contian the windows (need to compute the variance latter)
     $str = <FILE>;chop $str;my @window_count = split(/ /, $str);
     #print STDERR $contig."\t".$length."\t"."@window_count"."\n";<STDIN>;
     $mean   = int(mean(@window_count)); # array refs are ok too
-    $median   = median(@window_count); # array refs are ok too
-    #$stddev   = stddev( @window_count );
-    #$variance = variance (@window_count); 
+    $median = median(@window_count); # array refs are ok too
     
     #print STDERR " *** $contig\n @window_count\n$median $mean $stddev\n";<STDIN>;
     $contig_info{$contig} = {
@@ -105,6 +91,7 @@ my $mode_accepted = -1;
 my $nb_window_in_dist;
 my $coverrage_sun_in_dist;
 my $window_count_in_h_mode_distribution;
+my @strain_list = ();
 while($mode_accepted == -1){
     
     $mode = compute_mode($window_count);
@@ -117,7 +104,7 @@ while($mode_accepted == -1){
 	next;
     }
 
-    for(my $i = @{$mode} - 1; $i >= 0 && $mode_accepted == -1; $i--){
+    for(my $i = @{$mode} - 1; $i >= 0; $i--){
 	
 	
 	$curr_mode = $mode->[$i];
@@ -136,6 +123,7 @@ while($mode_accepted == -1){
 	$nb_window_in_dist = 0;$coverage_sum_in_dist = 0;
 	#The coverage estimate is made on contig then windows are extracted
 	foreach $contig (sort {$contig_info{$b}->{"MEAN_READ_COUNT"} <=> $contig_info{$a}->{"MEAN_READ_COUNT"}} keys %contig_info){
+	    next if($contig_info{$contig}->{"STRAIN_ID"} != 0);
 	    $contig_read_count = $contig_info{$contig}->{"MEAN_READ_COUNT"};
 	    #$probability = compute_probability( $strain_mean_cov, $dispersion_value, $contig_mean_cov);
 	    
@@ -155,89 +143,27 @@ while($mode_accepted == -1){
 	print STDERR " *** Mode distribution evaluation : " . $curr_mode . " sequence_size_in_h_mode_distribution: $sequence_size_in_h_mode_distribution " . "mean_cov_in_dist $mean_cov_in_dist ". " estimated_mean_value $strain_mean_value " . "mean_cov_in_dist/estimated_mean_value " . ($mean_cov_in_dist  / $strain_mean_value) . "\n";#<STDIN>;
 	
 	if((0.70 < ($mean_cov_in_dist  / $strain_mean_value) && ($mean_cov_in_dist  / $strain_mean_value) < 1.3) && #the mean estimate and the mean obtain by the confidance interval are comparable => good fitting
-	    $sequence_size_in_h_mode_distribution > $reference_size*0.5){
-	    $mode_accepted = $i;
-	    print STDERR " *** *** *** MODE ACCEPTED $i $mode->[$i]\n\n";
-	    #Get the count in the confidance interval
-	    my @tmp_count = ();
+	   # The sequence is big enough to be a complete genome for the first mode that should be a whole genomes, all the mode will lowest coverage value that pass the pervious test will be taken into account
+	   ($mode_accepted != -1 || $sequence_size_in_h_mode_distribution > $reference_size*0.5)){
+
+	    $mode_accepted = 0 if($mode_accepted == -1);
+	    $mode_accepted++;
+	    push(@strain_list, $mode_accepted);
+	    print STDERR " *** *** *** MODE ACCEPTED $i $curr_mode\n\n";
 	    
+	    select_mode_contigs($mode_accepted, $curr_mode, $strain_mean_value, $window_count_in_h_mode_distribution);
 	}
-		
-	#my @tmp_count = ();
-	#if(0 && $sequence_size_in_h_mode_distribution < $reference_size*0.5){
-	    #filter $window_count to remove any value higher than the mode
-	 #   foreach $count (@{$window_count}){
-	#	push(@tmp_count, $count) if($count < $mode->[1])
-	 #   }
-	  #  $window_count = \@tmp_count;
-	#}
-	#else{
-	#    $mode_accepted = 1;
-	#}
     }
+    
     if($mode_accepted == -1){
-	$dispersion_value += $step_dispersion_value_increase;
+	#All node are pulled into STRAIN_1
+	$mode_accepted = 1;
+	push(@strain_list, $mode_accepted);
+	foreach $contig (keys %contig_info){
+	    $contig_info{$contig}->{"STRAIN_ID"} = $mode_accepted;
+	}
     }
 }
-
-
-#Restimation of R
-#$strain_var = int(variance ($window_count));
-$strain_var = int(variance ($window_count_in_h_mode_distribution));
-		  
-$dispersion_value = ($strain_mean_value * $strain_mean_value) / ($strain_var - $strain_mean_value);
-print STDERR "DISPERTION VALUE " . $dispersion_value . " ESTIMATED USING " . $strain_mean_value . " AND VARIANCE |". $strain_var . "|\n";
-#Restimate the mean using the restimated R value
-$strain_mean_value = estimate_mean($mode->[$mode_accepted], $dispersion_value);
-
-print STDERR "MEAN ESTIMATION BASED " . $strain_mean_value . "\t". $strain_var . "\t|" . $dispersion_value . "|\n";
-
-#Get the confiance interval for the strain coverage
-compute_confidance_interval($strain_mean_value, $dispersion_value);
-#To remove repeat
-#if($confidance_interval[1] > $strain_mean_value * 1.75){
-#    $confidance_interval[1] = $strain_mean_value * 1.75;
-#}
-print STDERR $strain_mean_value . "\t". $dispersion_value . "\t" . "[@confidance_interval]" . "\t" . ($sum_read_count / (@contig_mean_cov+0)) . "\t" . $min_contig_cov . "\n";#<STDIN>;
-
-#Score each contig and assign a strain to it
-#my $PROBABILITY_THRESHOLD = 0.95;
-open(OUT, ">contig_coverage_evaluation.dat");
-my @window_in_inter = ();my @window_outside_inter = ();
-foreach $contig (sort {$contig_info{$b}->{"MEAN_READ_COUNT"} <=> $contig_info{$a}->{"MEAN_READ_COUNT"}} keys %contig_info){
-    $contig_mean_cov = $contig_info{$contig}->{"MEAN_READ_COUNT"};
-    #$probability = compute_probability( $strain_mean_cov, $dispersion_value, $contig_mean_cov);
-
-    @window_in_inter = (); @window_outside_inter = ();
-    
-    $cmp = 0;
-    foreach $window_coverage (@{$contig_info{$contig}->{"WINDOW"}}){
-	if($confidance_interval[0] < $window_coverage){# && $window_coverage < $confidance_interval[1]){
-	    push(@window_in_inter, $cmp);
-	}
-	else{
-	    push(@window_outside_inter, $cmp);
-	}
-	$cmp++;
-    }
-    
-    
-    if($confidance_interval[0] < $contig_mean_cov && $contig_mean_cov < $confidance_interval[1]){
-	$contig_info{$contig}->{"STRAIN_ID"} = 1;
-    }
-    else{
-	if($contig_mean_cov < $strain_mean_value){
-	    $contig_info{$contig}->{"STRAIN_ID"} = 2;
-	}
-    }
-
-    #if(@window_in_inter != 0 && @window_outside_inter != 0 && $contig_info{$contig}->{"STRAIN_ID"} == 1){
-    #$chimeric_rate = @window_in_inter / (@window_in_inter + @window_outside_inter);
-    #print OUT $contig . "\t" . $chimeric_rate . "\t" . (join(",", @window_outside_inter)) . "\n";
-    #}
-    
-}
-close(OUT);
 
 #exit(0);
 
@@ -248,7 +174,6 @@ close(OUT);
 
 #Construct the data for OPERA-LG
 my @EDGE_ID_INFO = (300, 1000, 2000, 5000, 15000, 40000);
-my @strain_list = (1, 2);
 my ($species_contig_file, $strain_contig_file);
 foreach $strain_id (@strain_list){
     $strain_dir = "$species_dir/STRAIN_$strain_id";
@@ -322,6 +247,42 @@ foreach $strain_id (@strain_list){
     print STDOUT "*** ***  Assembly $species_name $strain_id, Elapsed time: " . ($end_time - $start_time) . "\n";
 }
 
+#Write the file with the exluded contigs
+get_contig_sequence("$species_dir/excluded_contigs.fa", "$species_dir/contigs.fa", \%contig_info);
+
+sub select_mode_contigs{
+    my ($strain_id, $mode_value, $strain_mean_value, $window_count_in_h_mode_distribution) = @_;
+    #Restimation of R
+    my $strain_var = int(variance ($window_count_in_h_mode_distribution));
+    #
+    my $dispersion_value = ($strain_mean_value * $strain_mean_value) / ($strain_var - $strain_mean_value);
+    print STDERR "\n Strain $strain_id\n";
+    print STDERR "DISPERTION VALUE " . $dispersion_value . " ESTIMATED USING " . $strain_mean_value . " AND VARIANCE |". $strain_var . "|\n";
+    #Restimate the mean using the restimated R value
+    $strain_mean_value = estimate_mean($mode_value, $dispersion_value);
+
+    print STDERR "MEAN ESTIMATION BASED " . $strain_mean_value . "\t". $strain_var . "\t|" . $dispersion_value . "|\n";
+
+    #Get the confiance interval for the strain coverage
+    compute_confidance_interval($strain_mean_value, $dispersion_value);
+    #
+    print STDERR $strain_mean_value . "\t". $dispersion_value . "\t" . "[@confidance_interval]" . "\t" . ($sum_read_count / (@contig_mean_cov+0)) . "\t" . $min_contig_cov . "\n";#<STDIN>;
+
+    #Score each contig and assign a strain to it
+    foreach $contig (sort {$contig_info{$b}->{"MEAN_READ_COUNT"} <=> $contig_info{$a}->{"MEAN_READ_COUNT"}} keys %contig_info){
+	$contig_mean_cov = $contig_info{$contig}->{"MEAN_READ_COUNT"};
+	#$probability = compute_probability( $strain_mean_cov, $dispersion_value, $contig_mean_cov);
+	
+	if($contig_info{$contig}->{"STRAIN_ID"} == 0 && #Not selected in another strain
+	   $confidance_interval[0] < $contig_mean_cov && $contig_mean_cov < $confidance_interval[1]){
+	    $contig_info{$contig}->{"STRAIN_ID"} = $strain_id;
+	}
+	
+    }
+    
+}
+
+
 
 sub extract_edge{
     my ($edge_id, $strain_id, $OPERA_LG_CONFIG) = @_;
@@ -384,12 +345,11 @@ sub extract_edge{
 #If the largest contains seems to contains more than 1 genome:
 #    * Try to deacrise the smoothing factor
 #    * Give a warning indicating that it is not possible to perform strain analysis for that genome
-sub select_mode{
-    my ($mode_set, $assembly_length) = @_;
-    for (my $i = @{$mode_set}-1; $i >= 0; $i--){
-	
-    }
-}
+#sub select_mode{
+#    my ($mode_set, $assembly_length) = @_;
+#    for (my $i = @{$mode_set}-1; $i >= 0; $i--){
+#    }
+#}
 
 sub compute_confidance_interval{
     my ( $strain_mean_cov, $dispersion_value) = @_;
@@ -553,6 +513,41 @@ sub filter_mapping{
 	
     }
 
+    close(OUT);
+    
+}
+
+sub get_contig_sequence{
+    my ($out_file, $contig_file, $contig_info) = @_;
+    
+    open(IN, $contig_file);
+    my $print_flag = 0;
+
+    open(OUT, ">$out_file");
+    my $ID;
+    while(<IN>){
+	
+	if($_ =~ />(.*)/){
+	    #print STDERR "---> $nb_contig\n" if($nb_contig % 500000 == 0);$nb_contig++;
+	    @line = split(/\s+/, $1);
+	    $ID = $line[0];
+	    
+	    
+	    if($contig_info->{$ID}->{"STRAIN_ID"} == 0 ){
+		$print_flag = 1;
+		print OUT ">" . $ID . "\n";
+	    }
+	    else{
+		#print STDERR "**************** IN\n";
+		$print_flag = 0;
+		
+	    }
+	}
+	else{
+	    print OUT $_ if($print_flag);
+	}
+    }
+    close(IN);
     close(OUT);
     
 }
