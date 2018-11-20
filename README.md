@@ -1,3 +1,5 @@
+[![Preprint at bioRxiv](https://img.shields.io/badge/preprint-bioRxiv-yellow.svg)](https://www.biorxiv.org/content/early/2018/10/30/456905)
+
 # Introduction 
 OPERA-MS is a hybrid metagenomic assembler which combines the advantages of short and long-read technologies to provide high quality assemblies, addressing issues of low contiguity for short-read only assemblies, and low base-pair quality for long-read only assemblies. OPERA-MS has been extensively tested on mock and real communities sequenced using different long-read technologies, including Oxford Nanopore, PacBio and Illumina Synthetic Long Read, and is particularly robust to noise in the read data.
 
@@ -102,8 +104,15 @@ OPERA-MS is written in C++, Python, R and Perl, and makes use of the following P
 
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
 - [File::Which](https://metacpan.org/pod/File::Which)
+- [File::Spec::Functions](https://perldoc.perl.org/File/Spec/Functions.html)
 - [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
 - [Statistics::R](https://metacpan.org/pod/Statistics::R)
+- [Getopt::Long](http://perldoc.perl.org/Getopt/Long.html)
+
+Once cpanm is installed simply run:
+~~~~
+perl utils/install_perl_module.pl
+~~~~
 
 # Contact information
 For additional information, help and bug reports please send an email to: 

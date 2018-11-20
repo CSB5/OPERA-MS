@@ -7,6 +7,8 @@ my ($working_dir, $contig_file, $read_file, $nb_process, $opera_bin_dir, $racon_
 
 run_exe("mkdir $working_dir") if(! -d $working_dir);
 
+my $start_time = time;
+my $end_time;
 #split the scaffold
 my $assembly_scaffold_file = "$working_dir/../scaffolds.scaf";
 
@@ -15,6 +17,9 @@ my %scaff_info = ();
 my %singleton_contig = ();
 my @scaffold_order = ();
 split_scaffold_file($working_dir, $assembly_scaffold_file);
+$end_time = time;
+print STDERR "***  Construt scaffold dir Elapsed time: " . ($end_time - $start_time) . "s\n";
+$start_time = time;
 
 ################oNLY FOR TESTIN PURPOSE
 #merge_contig_from_scaf($working_dir, $contig_file, "$working_dir/../scaffoldSeq.fasta.filled");
@@ -26,6 +31,10 @@ my $edge_read_info_file = "$working_dir/../../long-read-mapping/edge_read_info.d
 my $long_read_mapping = "$working_dir/../../long-read-mapping/opera.map.sort.status";
 
 get_read_on_single_contig($working_dir, $long_read_mapping);
+
+$end_time = time;
+print STDERR "*** Identify read mapping to single contig Elapsed time: " . ($end_time - $start_time) . "s\n";
+$start_time = time;
 
 
 opendir(DIR, $working_dir);
@@ -48,9 +57,19 @@ close(OUT);
 $g_log = "$g_cmd.log";
 run_exe("cat $g_cmd | xargs -L 1 -P $nb_process -I COMMAND sh -c \"COMMAND\" 2> $g_log");
 
+$end_time = time;
+print STDERR "***  Gap filling core Elapsed time: " . ($end_time - $start_time) . "s\n";
+$start_time = time;
+
 
 #merge the contigs into the gapfilled file
 merge_contig_from_scaf($working_dir, $contig_file, "$working_dir/../scaffoldSeq.fasta.filled");
+
+$end_time = time;
+print STDERR "*** Contig merging Elapsed time: " . ($end_time - $start_time) . "s\n";
+$start_time = time;
+
+
     
 sub merge_contig_from_scaf{
     my ($gap_filling_dir, $contig_file, $out_file) = @_;

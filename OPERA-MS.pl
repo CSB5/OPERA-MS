@@ -730,6 +730,7 @@ my $DIR_GAPFILLING = "$output_dir/$inter/opera_long_read/GAPFILLING";
 if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "GAP_FILLING"){
     $STAGE_TO_RUN = "ALL" if($run_following == 1);
     $start_time = time;
+    $start_time_sub = time;
     print STDOUT "\n---  STEP 6: GAP FILLING  ---\n";
     #Add the scaffold obtain during the strain level assembly back in
     
@@ -753,7 +754,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "GAP_FILLING"){
 	run_exe("mv $opera_contig_size_file $opera_contig_size_file_single") if(! -e $opera_contig_size_file_single);
 	run_exe("cp $opera_contig_size_file_single $opera_contig_size_file");
     }
-
+    
     #Add the multiple strain genome scaffold to the pool
     if($strain_clustering eq "YES"){
 	opendir(DIR, "$DIR_STRAIN");
@@ -784,19 +785,33 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "GAP_FILLING"){
 	}
     }
 
+    $end_time_sub = time;
+    
     #exit(0);
 
     #perform the gap fill
     $command="rm $output_dir/scaffoldSeq.fasta; rm $output_dir/scaffoldSeq.fasta.stats; ln -s $DIR_OPERA_LR/scaffoldSeq.fasta $output_dir/scaffoldSeq.fasta";
     run_exe($command);
+
+    $end_time_sub = time;
+    print STDOUT "***  Pre-processing Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
+    $start_time_sub = time;
     
     #$command="python ${opera_ms_dir}/SCRIPTS/Pipeline.py --analysis_dir ${output_dir} --main_script_dir ${opera_ms_dir}/SCRIPTS/ --aux_script_dir $opera_ms_dir/$opera_version/bin/ --minimap2_dir $minimap2_dir --pilon_path $pilon_path --racon_dir $racon_dir --bwa_dir $short_read_tool_dir --samtools_dir $samtools_dir --edge_file $lr_output_dir/edge_read_info.dat --scaffolds_file $opera_scaff_file --contig_file $contigs_file --long_read_file $long_read_file --short_read_file_1 $illum_read1  --short_read_file_2 $illum_read2 --num_processor $num_processor";
     $command = "perl $opera_ms_dir/bin/match_scaffolds_clusters.pl $DIR_REF_CLUSTERING $num_processor $opera_ms_dir $DIR_OPERA_LR/scaffoldSeq.fasta $mummer_dir 2> $DIR_REF_CLUSTERING/s_info.err";
     run_exe($command);
+
+    $end_time_sub = time;
+    print STDOUT "***  Scaffold species matching Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
+    $start_time_sub = time;
     
     $command="$opera_ms_dir/$opera_version/bin/gapfilling.pl $DIR_GAPFILLING $contigs_file $long_read_file $num_processor $opera_ms_dir/$opera_version/bin/ $racon_dir $minimap2_dir $mummer_dir 2> $DIR_OPERA_LR/gapfilling.log";
     run_exe($command);
 
+    $end_time_sub = time;
+    print STDOUT "***  Gappfilling core Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
+    $start_time_sub = time;
+    
     if($?){
 	die "Error in during gapfilling. Please see $DIR_OPERA_LR/gapfilling.log for details.\n";
     }

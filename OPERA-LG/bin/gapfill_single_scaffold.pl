@@ -5,6 +5,12 @@ use warnings;
 
 my ($contig_file, $scaffold_dir, $edge_read_info_file, $seq_read_file, $opera_bin_dir, $racon_dir, $minimap2_dir, $mummer_dir) = @ARGV;
 
+my $start_time_total = time;
+
+
+my $start_time = time;
+my $end_time;
+
 my $re_run = 1;
 
 my @tmp = split(/\//, $scaffold_dir);
@@ -20,6 +26,11 @@ run_exe("mkdir $assembly_dir");
 my $initial_assembly = "$scaffold_dir/test_gapfil.fa";
 run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --scaffold-file $scaffold_dir/scaffolds.scaf --output-directory  $scaffold_dir/GAP_FILLING --num-of-processors 1 --script $opera_bin_dir --read-file $seq_read_file --outfile $initial_assembly");
 
+$end_time = time;
+print STDERR "*** Pre-consensus assembly construction Elapsed time: " . ($end_time - $start_time) . "s\n";
+$start_time = time;
+
+
 #Consensus construction
 my $mapping_file = "$assembly_dir/test_gapfil.fa.filtered.paf";
 my $read_file = "$assembly_dir/POOL.fastq";
@@ -27,7 +38,16 @@ my $racon_consensus = "$assembly_dir/racon.fa";
 if($re_run || ! -e $racon_consensus){
     #run_exe("mkdir $assembly_dir/../CORR/;touch $assembly_dir/../CORR/single_read.map");
     get_read_mapping($scaffold_dir, $edge_read_info_file, "$assembly_dir/single_read.map", $seq_read_file, $assembly_dir);
+    #$end_time = time;
+    #print STDERR "*** Get read sequence Elapsed time: " . ($end_time - $start_time) . "s\n";
+    #$start_time = time;
+    
     run_racon($initial_assembly, $read_file, $mapping_file, $racon_consensus, 500, 5, -4, -8, -6, "CONSENSUS");
+    #
+    $end_time = time;
+    print STDERR "*** Racon consensus assembly construction Elapsed time: " . ($end_time - $start_time) . "s\n";
+    $start_time = time;
+
 }
 
 #Check if racon consensus empty due to low read coverage or edge identified by short reads
@@ -47,6 +67,10 @@ my $contig_tile_mapping = "$prefix_name\_tiling.paf";
 print STDERR " *** Identify corrected reads\n";
 #Used minimap2 to insert the contigs
 run_nucmmer($contig_to_tile, $racon_consensus, $prefix_name);
+$end_time = time;
+print STDERR "*** Contig mapping to concensus assembly Elapsed time: " . ($end_time - $start_time) . "s\n";
+$start_time = time;
+
 #
 #check for the validity of the racon consensus, if there no mapping to the assembly the following stage are skipped, and the initial pre-assembly is used for the final stages
 my $nb_line_in_coords = `wc -l $prefix_name\_tiling.coords`;@tmp = split(/\s+/, $nb_line_in_coords);$nb_line_in_coords = $tmp[0];
@@ -64,9 +88,13 @@ else{
     my $corrected_read = "$assembly_dir/corrected_read";
     my $contig_in_tiling = "$assembly_dir/contig_in_tiling";
     get_contig_and_corrected_read_in_gap($contig_tile_mapping, $racon_consensus, $contig_to_tile, "$corrected_read.fa", "$contig_in_tiling.fa");
-
+    
     #Intergrate the contigs in concensus
     run_exe("$opera_bin_dir/Remap.py $contig_tile_mapping $racon_consensus $contig_in_tiling.fa");
+    
+    $end_time = time;
+    print STDERR "*** Improvement of consensus assembly (1) Elapsed time: " . ($end_time - $start_time) . "s\n";
+    $start_time = time;
     
     #run_exe("mv $scaffold_dir/test_gapfil_remapped.fasta $ncr_assembly");
 }
@@ -77,11 +105,21 @@ $contig_tile_mapping = "$prefix_name\_tiling.paf";
 $updated_corrected_read = "$assembly_dir/updated_corrected_read";
 $contig_in_tiling = "$assembly_dir/final_contig_in_tiling";
 run_nucmmer($contig_to_tile, $ncr_assembly, $prefix_name);
+$end_time = time;
+print STDERR "*** Contig mapping to concensus assembly (2) Elapsed time:" . ($end_time - $start_time) . "s\n";
+$start_time = time;
+
 get_paf_file("$prefix_name\_tiling.coords", $contig_tile_mapping, "ALL");
 get_contig_and_corrected_read_in_gap($contig_tile_mapping, $ncr_assembly, $contig_to_tile, "$updated_corrected_read.fa", "$contig_in_tiling.fa");
 
 #Tile the contigs based on mapping to reference
 run_exe("$opera_bin_dir/Remap.py $contig_tile_mapping $ncr_assembly $contig_in_tiling.fa");
+
+$end_time = time;
+print STDERR "*** Improvement of consensus assembly (2) Elapsed time: " . ($end_time - $start_time) . "s\n";
+$start_time = time;
+
+print STDERR "*** Gapfilling_elapse_time\t" . ($end_time - $start_time_total) . "\n";
 
 #Delete the intermidate file
 #run_exe("rm $assembly_dir/TILING_POOL.fastq $assembly_dir/POOL.fastq");
@@ -255,10 +293,17 @@ sub get_read_mapping{
     if($re_run || ! -e $fastq_pool){
 	run_exe("python $opera_bin_dir/Filter_read_names_edge.py $edge_read_info_file $single_contig_on_file $scaffold_dir/scaffolds.scaf $long_read_file > $fastq_pool");
     }
+    $end_time = time;
+    print STDERR "*** Pool read in gap Elapsed time: " . ($end_time - $start_time) . "s\n";
+    $start_time = time;
 
     $mapping_file = "$out_dir/test_gapfil.fa.filtered.paf";
     run_exe("$minimap2_dir/minimap2 --cs=short -w5 -m0 $scaffold_dir/test_gapfil.fa $fastq_pool > $mapping_file");
+    $end_time = time;
+    print STDERR "*** Map read in gap Elapsed time: " . ($end_time - $start_time) . "s\n";
+    $start_time = time;
 
+    
     if(0){
 	#Get the read file
 	#$fastq_pool = "$current_dir/SECOND_POOL.fastq";
