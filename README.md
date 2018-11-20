@@ -109,7 +109,7 @@ OPERA-MS is written in C++, Python, R and Perl, and makes use of the following P
 - [Statistics::R](https://metacpan.org/pod/Statistics::R)
 - [Getopt::Long](http://perldoc.perl.org/Getopt/Long.html)
 
-Once cpanm is installed simply run:
+Once cpanm is installed, simply run the following command to install all the perl modules:
 ~~~~
 perl utils/install_perl_module.pl
 ~~~~
