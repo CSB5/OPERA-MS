@@ -45,25 +45,36 @@ my $nucmer_dir = "$inter_dir/reference_mapping/NUCMER_OUT/";
 my $command = "mkdir -p $ref_map_folder"; 
 run_exe($command) if (!(-d $ref_map_folder));
 
+my ($start_time, $end_time);
 get_cluster_contigs_info(\%contig_info_, \%cluster_info_);
+
+$start_time = time;
 if ($PARSE_FILES_MASH){
     my %edges_to_cov_diff = ();
     generate_edges_between_clusters(\%edges_to_cov_diff, \%contig_info_);
     run_mash_on_clusters(\%cluster_info_, \%contig_info_, $contig_seq_file);
 }
+$end_time = time;
+print STDERR "***  Mash mapping Elapsed time: " . ($end_time - $start_time) . "s\n";#<STDIN>;
 
-generate_clusters_species(\%cluster_species_set_, \%species_to_ignore_);
+generate_clusters_species(\%cluster_species_set_, \%species_to_ignore_, \%cluster_info_);
 
+$start_time = time;
 if ($PARSE_FILES_NUC){
     run_nucmer(\%cluster_species_set_, \%contig_info_, \%reference_mappings_);
     get_correct_edges(\%reference_mappings_, \%contig_info_);
 }
+$end_time = time;
+print STDERR "***  Mummer mapping Elapsed time: " . ($end_time - $start_time) . "s\n";#<STDIN>;
 
+$start_time = time;
 if ($MERGE_CLUSTERS){
     merge_clusters(\%contig_info_, \%cluster_species_set_, \%super_cluster_species_set_, \%super_cluster_strain_set_);
     recover_edges(\%contig_info_);
     export_info(\%contig_info_, \%cluster_species_set_, \%super_cluster_strain_set_);
 }
+$end_time = time;
+print STDERR "***  Cluster merging Elapsed time: " . ($end_time - $start_time) . "s\n";#<STDIN>;
 ###################################END################################
 
 #Export some info about the clusters. The clusters file, the species file, and a super cluster file.
@@ -514,10 +525,12 @@ sub get_correct_edges{
 #the nucmer mapping to confirm if an edge is verified by the reference to be
 #true.
 sub run_nucmer{
+    my ($cluster_species_set, $contig_info, $reference_mappings) = @_;
+    
     my %cluster_connection = ();
     run_exe("rm -r $nucmer_dir; mkdir -p $nucmer_dir"); 
     open (my $CMD, ">", "$nucmer_dir/cmd.txt") or die;
-    my ($cluster_species_set, $contig_info, $reference_mappings) = @_;
+    
     foreach my $cluster (keys %{$cluster_species_set}){
         if (@{$cluster_species_set->{$cluster}} != 0){
             my $top_species = @{$cluster_species_set->{$cluster}}[0];
@@ -552,38 +565,30 @@ sub run_nucmer{
 
 #From the intermediate MASH files, associate each cluster with a set of strains.
 sub generate_clusters_species{
-    my ($cluster_species_set, $species_to_ignore) = @_;
+    my ($cluster_species_set, $species_to_ignore, $cluster_info) = @_;
     my $top_prediction = 5;
     my $nb_prediction;
-    opendir(DIR, $mash_dir);
-    my @cluster_mash = readdir(DIR);
+    
 
     #Get the best species for each cluster
     print STDERR " *** Read mash files\n";
-    foreach my $cluster (@cluster_mash){
-        if($cluster =~ /(.+)\.dat/){
-            my $cluster_name = $1;
-            #print STDERR " *** ".$cluster. "\t" . $cluster_name. "\n";
-            open(FILE, "sort -k3,3 -g $mash_dir/$cluster |");
-            $cluster_species_set->{$cluster_name} = [];
-            $nb_prediction = 0;
-            while(<FILE>){
-                my @line = split(/\t/, $_);
-                #$line[0] looks is the species ID, it looks like
-                #/mnt/path/to/#####.fna
-                my $species = $line[0];
-                my @delim_species = split(/\//, $species);
-                #print STDOUT $delim_species[7] . "\n";
-                #if (exists $species_to_ignore->{$delim_species[7]}){
-                #    next;
-                #}
-
-                push @{$cluster_species_set->{$cluster_name}},$species;
-                $nb_prediction++;
-                last if($nb_prediction == $top_prediction);
-            }
-            close(FILE);
-        }
+    my @line;my $species;
+    
+    foreach my $cluster_name (keys %{$cluster_info}){
+	#print STDERR " *** ".$cluster. "\t" . $cluster_name. "\n";
+	open(FILE, "sort -k3,3 -g $mash_dir/$cluster_name.dat |");
+	$cluster_species_set->{$cluster_name} = [];
+	$nb_prediction = 0;
+	while(<FILE>){
+	    @line = split(/\t/, $_);
+	    
+	    $species = $line[0];
+	    
+	    push @{$cluster_species_set->{$cluster_name}},$species;
+	    $nb_prediction++;
+	    last if($nb_prediction == $top_prediction);
+	}
+	close(FILE);
     }
 }
 
@@ -592,12 +597,14 @@ sub generate_clusters_species{
 sub get_cluster_contigs_info{
     my ($contig_info, $cluster_info) = @_;
     open (FILE, "$clusters_file") or die;
+    my @line;
+    my ($contig, $cluster, $cluster_mean);
     while(<FILE>){
         chomp $_;	
-        my @line = split(/\t/, $_);
-        my $contig = $line[0];
-        my $cluster = $line[1];
-        my $cluster_mean = $line[3];
+        @line = split(/\t/, $_);
+        $contig = $line[0];
+        $cluster = $line[1];
+        $cluster_mean = $line[3];
         
         #add more info to these collections if we need
         $contig_info->{$contig}->{"CLUSTER"} = $cluster;
@@ -612,9 +619,11 @@ sub get_cluster_contigs_info{
 sub generate_edges_between_clusters{
     my ($edges_to_cov_diff, $contig_info) = @_; 
     open (FILE, "$paired_edges_file") or die;
+    my @line;
+    my ($contig1, $contig2);
     while(<FILE>){
         chomp $_;
-        my @line = split(/\t/, $_);
+        @line = split(/\t/, $_);
         my $contig1 = $line[0];
         my $contig2 = $line[2];
 
@@ -628,13 +637,15 @@ sub generate_edges_between_clusters{
     close (FILE);
 
     open (FILE, "$short_edges_file") or die;
+
+    my ($overlap, $support);
     while(<FILE>){
         chomp $_;
-        my @line = split(/\t/, $_);
-        my $contig1 = $line[0];
-        my $contig2 = $line[2];
-        my $overlap = $line[4];
-        my $support = $line[6];
+        @line = split(/\t/, $_);
+        $contig1 = $line[0];
+        $contig2 = $line[2];
+        $overlap = $line[4];
+        $support = $line[6];
 
         #we're only interested in edges BETWEEN clusters
         if (!exists $contig_info->{$contig1} or !exists $contig_info->{$contig2}){
@@ -672,58 +683,51 @@ sub run_mash_on_clusters{
     run_exe("rm -r $mash_dir");
     run_exe("mkdir -p $mash_dir");
     my $out;
-    
+
     foreach my $clust (keys %{$cluster_info}){
-        my $file_writer;
-
-        #May have to had a filtering based on cluster length
-        open($file_writer, ">$mash_dir/$clust.fa");
+        #my $file_writer;
+	#May have to had a filtering based on cluster length
+        #open($file_writer, ">$mash_dir/$clust.fa");
         $cluster_info->{$clust}->{"OUT_FILE"} = "$mash_dir/$clust.fa";#$file_writer;
-        close($file_writer)
+        #close($file_writer);
     }
-
+    
     #extract the sequence of each cluster
     open(FILE, $contig_seq_file) or die "Could not open contigs file $contig_seq_file $!.\n";
-    my ($contig_name, $contig_seq, $contig_size);
+    my ($contig_name, $contig_seq);
     $contig_size = 0;
     
     my %cluster_length = ();
+    my @tmp;my $cluster_name;
     while(<FILE>){
 	#last if($comp == $max_contig);
         chomp $_;
         if($_ ne ""){
             if($_ =~ /^>(.+)/){
-            my @tmp = split(/\s+/, $1);
+		@tmp = split(/\s+/, $1);
 
-            if(defined($contig_name)){
-                my $cluster_name = $contig_info->{$contig_name}->{"CLUSTER"};
-                if(defined $cluster_name &&
-                   exists $cluster_info->{$cluster_name}->{"OUT_FILE"}){
-		    #print STDERR " Write " . $cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"} . "\n";<STDIN>;
-                    #$out = $cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"};
-                    open($out,'>>',$cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"});
-                    if(exists ($cluster_length{$contig_info->{$contig_name}->{"CLUSTER"}})){
-                        $cluster_length{$contig_info->{$contig_name}->{"CLUSTER"}}->{"SIZE"} += $contig_size;
-                    }
-
-                    else{
-                        $cluster_length{$contig_info->{$contig_name}->{"CLUSTER"}} = {"SIZE", $contig_size};
-                    }
-                    print $out $contig_seq;
-                    close($out);
-                }
-            }
-
-            $contig_seq = $_."\n";
-            $contig_name = $tmp[0];
-            $contig_size = 0;
-            #<STDIN>;
-            #print STDERR "\n".$contig_seq;
+		if(defined($contig_name)){
+		    $cluster_name = $contig_info->{$contig_name}->{"CLUSTER"};
+		    if(defined $cluster_name &&
+		       exists $cluster_info->{$cluster_name}->{"OUT_FILE"}){
+			#print STDERR " Write " . $cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"} . "\n";<STDIN>;
+			#$out = $cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"};
+			open($out,'>>',$cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"});
+			
+			print $out $contig_seq;
+			close($out);
+		    }
+		}
+		
+		$contig_seq = $_."\n";
+		$contig_name = $tmp[0];
+		$contig_size = 0;
+		#<STDIN>;
+		#print STDERR "\n".$contig_seq;
             }
             else{
-            $contig_seq = $contig_seq.$_."\n";
-            $contig_size += length($_); 
-            }
+		$contig_seq = $contig_seq.$_."\n";
+	    }
         }
     }
     close(FILE);
@@ -737,11 +741,11 @@ sub run_mash_on_clusters{
     
     foreach my $clust (keys %{$cluster_info}){
 	if(exists $cluster_info->{$clust}->{"OUT_FILE"}){
-	    if ($cluster_length{$clust}->{"SIZE"} > 0){
+	    #if ($cluster_length{$clust}->{"SIZE"} > 0){
 	        # run_exe("$mash_exe_dir/mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa > $mash_dir/$clust.dat");
 		#`$qsub -l mem_free=2G,h_rt=00:30:0 -pe OpenMP 1 -N mashing -e $out_dir/LOG/$clust.err -o $mash_dir/$clust.dat -b y $mash_exe_dir/mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa`;
 		print $CMD "${mash_exe_dir}mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa > $mash_dir/$clust.dat\n";
-	    }
+	    #}
 	    
 	    #close($cluster_info->{$clust}->{"OUT_FILE"});
 	}
@@ -833,6 +837,9 @@ sub check_reference_position{
    my $ref_length;
 
    #print STDERR "CHECKING REF POSITION : $contig1($clust1), $contig2($clust2), $length, $number_of_files\n";
+   my @line;
+   my @positions_reference;
+   my ($contig, $percent_mapped, $index);
    for (my $i=0; $i < $number_of_files; $i++){
         open(NUC_MAPPING, "$nucmer_dir/$mapfile_name\_$i.txt")
         or die "Parsing problem during read rescue using NUCMER mapping.\n";
@@ -847,26 +854,22 @@ sub check_reference_position{
                 next;
            }
            #print STDERR $_;
-           my @line = split(/\t/, $_);
-           my $contig = $line[11];
+           @line = split(/\t/, $_);
+           $contig = $line[11];
            $ref_length = $line[8];
-           my $percent_mapped = $line[9];
-           
-           my $index;
-           
+           $percent_mapped = $line[9];
+	   
            #Scan each line of the cluster-vs-cluster file for the contigs
            #we want and find their positions on the reference.
            if($contig eq $contig1){
                 $index = 0;
            }
-
-           elsif($contig eq $contig2){
-                $index = 1;
+	   elsif($contig eq $contig2){
+	       $index = 1;
            }
-
-           else {next;}
-
-           my @positions_reference = ($line[2],$line[3]);
+	   else {next;}
+	   
+           @positions_reference = ($line[2],$line[3]);
            my @sorted_positions = sort{ $a <=> $b }(@positions_reference); 
            #print STDERR @sorted_positions . "\n";
             
@@ -960,5 +963,5 @@ sub sum{
     return $res;
 }
 
-#perl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/../../OPERA-MS-DEV/OPERA-MS/bin/sequence_similarity_clustering.pl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/UPDATED_TEST//intermediate_files /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-1.1/sample_files/sample_contigs.fasta 10 /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/../../OPERA-MS-DEV/OPERA-MS/ /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/../../OPERA-MS-DEV/OPERA-MS//utils/ /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/../../OPERA-MS-DEV/OPERA-MS//utils/MUMmer3.23/ 
 
+#perl /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/bin/sequence_similarity_clustering.pl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_506_03_MINI//intermediate_files /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_506_03_MINI//intermediate_files/megahit_assembly/final.contigs.fa 20 /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/ /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS//utils/ /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS//utils/MUMmer3.23/ 2> /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_506_03_MINI//intermediate_files/reference_mapping/log.err
