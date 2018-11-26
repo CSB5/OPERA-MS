@@ -139,4 +139,5 @@ docker run \
 For additional information, help and bug reports please send an email to: 
 
 - Denis Bertrand: <bertrandd@gis.a-star.edu.sg>
+- Lorenz Gerber (docker related topics): <lorenzottogerber@gmail.com>
 - Niranjan Nagarajan: <nagarajann@gis.a-star.edu.sg>
