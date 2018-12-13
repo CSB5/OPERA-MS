@@ -314,7 +314,7 @@ construct_sigma_config_file($sigma_dir, $contigs_file_type, $contigs_file,
 	$edges_files, $sigma_contigs_file, $contig_len_thr, 
 	$contig_edge_len, $contig_window_len, $pdist_type, $bundle_size_thresh);
 
-run_exe("$sigma_path $sigma_dir/sigma.config");
+run_exe("$sigma_path $sigma_dir/sigma.config 2> $sigma_dir/sigma.err");
 
 # CHECK IF COVERAGE NEEDS TO BE COMPUTED
 #if (0 && !defined $sigma_contigs_file) {			#coverage not computed

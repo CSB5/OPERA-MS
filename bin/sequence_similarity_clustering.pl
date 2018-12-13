@@ -707,13 +707,9 @@ sub run_mash_on_clusters{
 		@tmp = split(/\s+/, $1);
 
 		if(defined($contig_name)){
-		    $cluster_name = $contig_info->{$contig_name}->{"CLUSTER"};
-		    if(defined $cluster_name &&
-		       exists $cluster_info->{$cluster_name}->{"OUT_FILE"}){
+		    if(exists $contig_info->{$contig_name}->{"CLUSTER"}){
 			#print STDERR " Write " . $cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"} . "\n";<STDIN>;
-			#$out = $cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"};
 			open($out,'>>',$cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"});
-			
 			print $out $contig_seq;
 			close($out);
 		    }
@@ -731,23 +727,21 @@ sub run_mash_on_clusters{
         }
     }
     close(FILE);
+    #Write the last contig in its cluster
+    if(exists $contig_info->{$contig_name}->{"CLUSTER"}){
+	open($out,'>>',$cluster_info->{$contig_info->{$contig_name}->{"CLUSTER"}}->{"OUT_FILE"});
+	print $out $contig_seq;
+	close($out);
+    }
     
-    #foreach my $clust (keys %{$cluster_info}){
-    #close($cluster_info->{$clust}->{"OUT_FILE"}); 
-    #}
-
     #Run mash
     open (my $CMD, ">", $mash_cmd_file) or die "Could not write to mash command file at $mash_cmd_file\n";
     
     foreach my $clust (keys %{$cluster_info}){
 	if(exists $cluster_info->{$clust}->{"OUT_FILE"}){
 	    #if ($cluster_length{$clust}->{"SIZE"} > 0){
-	        # run_exe("$mash_exe_dir/mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa > $mash_dir/$clust.dat");
-		#`$qsub -l mem_free=2G,h_rt=00:30:0 -pe OpenMP 1 -N mashing -e $out_dir/LOG/$clust.err -o $mash_dir/$clust.dat -b y $mash_exe_dir/mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa`;
-		print $CMD "${mash_exe_dir}mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa > $mash_dir/$clust.dat\n";
+	    print $CMD "${mash_exe_dir}mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa > $mash_dir/$clust.dat\n";
 	    #}
-	    
-	    #close($cluster_info->{$clust}->{"OUT_FILE"});
 	}
     }
 

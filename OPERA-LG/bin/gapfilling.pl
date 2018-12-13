@@ -32,10 +32,13 @@ my $long_read_mapping = "$working_dir/../../long-read-mapping/opera.map.sort.sta
 
 get_read_on_single_contig($working_dir, $long_read_mapping);
 
+run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --scaffold-file $assembly_scaffold_file --read-file $read_file --output-directory $working_dir");
+
 $end_time = time;
-print STDERR "*** Identify read mapping to single contig Elapsed time: " . ($end_time - $start_time) . "s\n";
+print STDERR "*** Identify read in gap and construt pre_consensus assembly Elapsed time: " . ($end_time - $start_time) . "s\n";
 $start_time = time;
 
+#exit(0);
 
 opendir(DIR, $working_dir);
 @all_dir = readdir(DIR);

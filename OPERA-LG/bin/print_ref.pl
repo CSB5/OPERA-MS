@@ -53,6 +53,9 @@ my $contigs = $temp_list[-1];
 @temp_list = split(/-vs-/,"$contigs");
 my $contig_1 = $temp_list[0];
 my $contig_2 = $temp_list[1];
+
+
+############################################################To get the first read from edge read info
 #print DBG $contig_1."\t".$contig_2."\n";
 #print STDERR "awk '{if(\$1 == $contig_1 && \$3 == $contig_2) print \$0}' $edge_file_info | cut -f 5 | cut -d\";\" -f 1";
 my $temp = `awk '{if(\$1 == \"$contig_1\" && \$3 == \"$contig_2\") print \$0}' $edge_file_info | cut -f 5 | cut -d\";\" -f 1`;

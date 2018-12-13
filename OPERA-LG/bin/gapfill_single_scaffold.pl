@@ -23,21 +23,21 @@ run_exe("mkdir $assembly_dir");
     
 #Run racon
 #Get the initial assembly
-my $initial_assembly = "$scaffold_dir/test_gapfil.fa";
-run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --scaffold-file $scaffold_dir/scaffolds.scaf --output-directory  $scaffold_dir/GAP_FILLING --num-of-processors 1 --script $opera_bin_dir --read-file $seq_read_file --outfile $initial_assembly");
+my $initial_assembly = "$assembly_dir/pre_consensus.fa";
+#run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --scaffold-file $scaffold_dir/scaffolds.scaf --output-directory  $scaffold_dir/GAP_FILLING --num-of-processors 1 --script $opera_bin_dir --read-file $seq_read_file --outfile $initial_assembly");
 
-$end_time = time;
-print STDERR "*** Pre-consensus assembly construction Elapsed time: " . ($end_time - $start_time) . "s\n";
-$start_time = time;
+#$end_time = time;
+#print STDERR "*** Pre-consensus assembly construction Elapsed time: " . ($end_time - $start_time) . "s\n";
+#$start_time = time;
 
 
 #Consensus construction
-my $mapping_file = "$assembly_dir/test_gapfil.fa.filtered.paf";
+my $mapping_file = "$initial_assembly.filtered.paf";
 my $read_file = "$assembly_dir/POOL.fastq";
 my $racon_consensus = "$assembly_dir/racon.fa";
 if($re_run || ! -e $racon_consensus){
     #run_exe("mkdir $assembly_dir/../CORR/;touch $assembly_dir/../CORR/single_read.map");
-    get_read_mapping($scaffold_dir, $edge_read_info_file, "$assembly_dir/single_read.map", $seq_read_file, $assembly_dir);
+    get_read_mapping($read_file, $initial_assembly, $mapping_file);
     #$end_time = time;
     #print STDERR "*** Get read sequence Elapsed time: " . ($end_time - $start_time) . "s\n";
     #$start_time = time;
@@ -96,7 +96,6 @@ else{
     print STDERR "*** Improvement of consensus assembly (1) Elapsed time: " . ($end_time - $start_time) . "s\n";
     $start_time = time;
     
-    #run_exe("mv $scaffold_dir/test_gapfil_remapped.fasta $ncr_assembly");
 }
 
 #Identify the final set of contigs used in the tiling
@@ -287,86 +286,13 @@ sub get_contig_and_corrected_read_in_gap{
 
 #Should be done once to avoid reading the read file multiple times
 sub get_read_mapping{
-    my ($scaffold_dir, $edge_read_info_file, $single_contig_on_file, $long_read_file, $out_dir) = @_;
-
-    $fastq_pool = "$out_dir/POOL.fastq";
-    if($re_run || ! -e $fastq_pool){
-	run_exe("python $opera_bin_dir/Filter_read_names_edge.py $edge_read_info_file $single_contig_on_file $scaffold_dir/scaffolds.scaf $long_read_file > $fastq_pool");
-    }
-    $end_time = time;
-    print STDERR "*** Pool read in gap Elapsed time: " . ($end_time - $start_time) . "s\n";
-    $start_time = time;
-
-    $mapping_file = "$out_dir/test_gapfil.fa.filtered.paf";
-    run_exe("$minimap2_dir/minimap2 --cs=short -w5 -m0 $scaffold_dir/test_gapfil.fa $fastq_pool > $mapping_file");
+    my ($long_read, $assembly, $mapping_file) = @_;
+    
+    run_exe("$minimap2_dir/minimap2 --cs=short -w5 -m0 $assembly $long_read > $mapping_file");
     $end_time = time;
     print STDERR "*** Map read in gap Elapsed time: " . ($end_time - $start_time) . "s\n";
     $start_time = time;
-
     
-    if(0){
-	#Get the read file
-	#$fastq_pool = "$current_dir/SECOND_POOL.fastq";
-	#$read_line = `nl $scaffold_dir/UPDATED_POOL.fastq | grep  "\@k99_" | head -n1 | awk '{print \$1}'`;chop $read_line;$read_line--;
-	#replace_quality_value("head -n $read_line $scaffold_dir/UPDATED_POOL.fastq |", $fastq_pool, "-");
-	
-	#In this case we are simply filtering the read mapping from the previous run
-	my $mapping_file = "$scaffold_dir/test_gapfil.fa.paf";
-	my $filtered_paf = "$out_dir/test_gapfil.fa.filtered.paf";
-	
-	open(FILE, "sort -k8,8 -n $mapping_file | cut -f1-10 | grep k99_ |");
-	my @contig_coord = ();
-	while(<FILE>){
-	    @line = split(/\t/, $_);
-	    push(@contig_coord, $line[7]);
-	    push(@contig_coord, $line[8]);
-	    #print OUT $_;
-	}
-	close(FILE);
-
-	#print STDERR " *** $filtered_paf\n";<STDIN>;
-	open(OUT, ">$filtered_paf");
-	open(FILE, "sort -k8,8 -n $mapping_file | grep -v k99_ |");
-	my $OVERHANG_SEQ_THRESHOLD = 200;#Read must at least be out of the gap from 200bp => if overhang is to low read filetered
-	my $UNMAPPED_SEQ_THRESHOLD = 200;#Fraction of the read that may be unmapped, if read not completly unmapped filtered
-	
-	my $current_contig_start = $contig_coord[0];
-	my $current_contig_end = $contig_coord[1];
-	my $cmp_contig_coord = 1;
-	while(<FILE>){
-	    @line = split(/\t/, $_);
-	    #
-	    $read_length = $line[1];
-	    $read_start_c = $line[2];
-	    $read_end_c = $line[3];
-	    
-	    $read_start = $line[7];
-	    $read_end = $line[8];
-	    
-
-	    if($read_end_c - $read_start_c < $read_length - ($UNMAPPED_SEQ_THRESHOLD * 2)){
-		#print STDERR " *** Read not fully mapped $_ $read_length $read_start $read_end =>  " . ($read_end - $read_start) ."\n";
-		next;
-	    }
-	    
-	    #Need to check for the next contig
-	    if($read_start > $current_contig_end){
-		$current_contig_start = $contig_coord[$cmp_contig_coord];
-		$current_contig_end = $contig_coord[$cmp_contig_coord];
-		$cmp_contig_coord += 2;
-	    }
-	    
-	    #intersection out of the current contig
-	    if($read_end > $current_contig_end + $OVERHANG_SEQ_THRESHOLD){#Read with enought sequence out of the contig
-		#print STDERR $_;
-		print OUT $_;
-	    }
-	    
-	}
-	close(FILE);
-	close(OUT);
-    }
-    #exit(0);
 }
 
 sub run_nucmmer{
@@ -401,6 +327,7 @@ sub get_paf_file{
     
     open(OUT, ">$paf_file");
     open(FILE, "$coord_file");
+    my $gap_length = 0;
     my $IDENTITY_THRESHOLD = 0.97;
     my $COVERAGE_THRESHOLD = 0.90;
     my $previous_contig_name = "";
@@ -558,7 +485,7 @@ sub get_contig_in_species{
     my $genome_path = `grep -w $scaffold_id $scaffold_info | cut -f 6`;chop $genome_path;
     
     #No psecies identified for that cluster
-    if($genome_path ne "NO SPECIES"){
+    if($genome_path ne "NA"){
 	@tmp = split(/\//, $genome_path);
 	$strain = @tmp[@tmp-1];
 	@tmp = split(/_/, $strain);

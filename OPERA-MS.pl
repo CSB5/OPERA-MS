@@ -461,10 +461,15 @@ if(! -e "$opera_ms_dir/database_updated"){
     #
     print STDOUT " *** (1/3) Download of genomeDB_Sketch.msh\n";
     run_exe("wget --no-check-certificate -O $opera_ms_dir/genomeDB_Sketch.msh https://www.dropbox.com/s/kot086vh26nds6j/genomeDB_Sketch.msh?dl=0");
-    #
-    print STDOUT " *** (2/3) Download of complete_ref_genomes.tar.gz\n";
-    run_exe("wget --no-check-certificate -O $opera_ms_dir/complete_ref_genomes.tar.gz https://www.dropbox.com/s/wcxvy2u0yhp3pw0/complete_ref_genomes.tar.gz?dl=0");
-    #
+    if($?){
+	die"\nUnfortunately the automated download of the genome data base failed.\nYou can complete the installation process manually by:\n\t(1) Downloading the data base files at: https://www.dropbox.com/sh/uawdmrh7d6d03nu/AADFlMD1_g4OihTqzb-xgXBMa?dl=0 or at https://share.weiyun.com/5dBj6T6\n\t(2) Moving the files in $opera_ms_dir\n\t(3) Running the command: tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz;touch $opera_ms_dir/database_updated\n\n";
+    }
+    else{
+	#
+	print STDOUT " *** (2/3) Download of complete_ref_genomes.tar.gz\n";
+	run_exe("wget --no-check-certificate -O $opera_ms_dir/complete_ref_genomes.tar.gz https://www.dropbox.com/s/wcxvy2u0yhp3pw0/complete_ref_genomes.tar.gz?dl=0");
+	#
+    }
     print STDOUT " *** (3/3) Extraction of complete_ref_genomes.tar.gz\n";
     run_exe("tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz --directory $opera_ms_dir");
     #
@@ -763,24 +768,27 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "GAP_FILLING"){
 	
 	my $strain_ID = 1;
 	my $scaff_strain_id = 1;
-	
+	my ($current_strain_dir, $strain_scaff_file, $strain_scaff_seq_file, $strain_contig_size_file);
 	#print STDERR " **** @strain_dir\n";
 	
 	foreach $strain (@strain_dir){
 	    $strain_ID = 1;
-	    $strain_scaff_file = "$DIR_STRAIN/$strain/STRAIN_$strain_ID/scaffolds.scaf";
-	    $strain_scaff_seq_file = "$DIR_STRAIN/$strain/STRAIN_$strain_ID/scaffoldSeq.fasta";
-	    $strain_contig_size_file = "$DIR_STRAIN/$strain/STRAIN_$strain_ID/contigs";
+	    $current_strain_dir = "$DIR_STRAIN/$strain/STRAIN_$strain_ID/";
+	    $strain_scaff_file = "$current_strain_dir/scaffolds.scaf";
 	    #print STDERR " *** $strain_scaff_file\n";
 	    while( -e $strain_scaff_file){
+		#
+		$strain_scaff_seq_file = "$current_strain_dir/scaffoldSeq.fasta";
+		$strain_contig_size_file = "$current_strain_dir/contigs";
+		#
 		run_exe("sed 's/>opera/>strain$scaff_strain_id\_opera/' $strain_scaff_file >> $opera_scaff_file");
 		run_exe("sed 's/>opera/>strain$scaff_strain_id\_opera/' $strain_scaff_seq_file >> $opera_scaff_seq_file");
 		run_exe("grep -v Length $strain_contig_size_file >> $opera_contig_size_file");
 		#
 		$strain_ID++;
 		$scaff_strain_id++;
-		$strain_scaff_file = "$DIR_STRAIN/$strain/STRAIN_$strain_ID/scaffolds.scaf";
-		$strain_scaff_seq_file = "$DIR_STRAIN/$strain/STRAIN_$strain_ID/scaffoldSeq.fasta";
+		$current_strain_dir = "$DIR_STRAIN/$strain/STRAIN_$strain_ID/";
+		$strain_scaff_file = "$current_strain_dir/scaffolds.scaf";
 	    }
 	}
     }
@@ -793,24 +801,24 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "GAP_FILLING"){
     $command="rm $output_dir/scaffoldSeq.fasta; rm $output_dir/scaffoldSeq.fasta.stats; ln -s $DIR_OPERA_LR/scaffoldSeq.fasta $output_dir/scaffoldSeq.fasta";
     run_exe($command);
 
-    $end_time_sub = time;
-    print STDOUT "***  Pre-processing Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
-    $start_time_sub = time;
+    #$end_time_sub = time;
+    #print STDOUT "***  Pre-processing Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
+    #$start_time_sub = time;
     
     #$command="python ${opera_ms_dir}/SCRIPTS/Pipeline.py --analysis_dir ${output_dir} --main_script_dir ${opera_ms_dir}/SCRIPTS/ --aux_script_dir $opera_ms_dir/$opera_version/bin/ --minimap2_dir $minimap2_dir --pilon_path $pilon_path --racon_dir $racon_dir --bwa_dir $short_read_tool_dir --samtools_dir $samtools_dir --edge_file $lr_output_dir/edge_read_info.dat --scaffolds_file $opera_scaff_file --contig_file $contigs_file --long_read_file $long_read_file --short_read_file_1 $illum_read1  --short_read_file_2 $illum_read2 --num_processor $num_processor";
     $command = "perl $opera_ms_dir/bin/match_scaffolds_clusters.pl $DIR_REF_CLUSTERING $num_processor $opera_ms_dir $DIR_OPERA_LR/scaffoldSeq.fasta $mummer_dir 2> $DIR_REF_CLUSTERING/s_info.err";
     run_exe($command);
 
-    $end_time_sub = time;
-    print STDOUT "***  Scaffold species matching Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
-    $start_time_sub = time;
+    #$end_time_sub = time;
+    #print STDOUT "***  Scaffold species matching Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
+    #$start_time_sub = time;
     
     $command="$opera_ms_dir/$opera_version/bin/gapfilling.pl $DIR_GAPFILLING $contigs_file $long_read_file $num_processor $opera_ms_dir/$opera_version/bin/ $racon_dir $minimap2_dir $mummer_dir 2> $DIR_OPERA_LR/gapfilling.log";
     run_exe($command);
 
-    $end_time_sub = time;
-    print STDOUT "***  Gappfilling core Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
-    $start_time_sub = time;
+    #$end_time_sub = time;
+    #print STDOUT "***  Gappfilling core Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
+    #$start_time_sub = time;
     
     if($?){
 	die "Error in during gapfilling. Please see $DIR_OPERA_LR/gapfilling.log for details.\n";
