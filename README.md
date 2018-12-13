@@ -11,21 +11,21 @@ OPERA-MS can assemble near complete genomes from a metagenomic dataset with as l
 
 To install OPERA-MS on a typical Linux/Unix system run the following commands:
 
-~~~~
+```
 git clone https://github.com/CSB5/OPERA-MS.git
 cd /path/to/OPERA-MS
 make
 perl OPERA-MS.pl sample_config.config TEST_INSTALLATION 2> log.err
-~~~~
+```
 If you encounter any problems during the installation, or if some third party sofware binaries are not functional on your system, please see the [**Dependencies**](#dependencies) section. 
 
-A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands: 
-~~~~
+A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands (please note that the test script runs with 2 cores which is also the minimum.): 
+```
 cd /path/to/OPERA-MS
 perl OPERA-MS.pl sample_config.config 2> log.err
 diff sample_output/assembly.stats sample_files/assembly.stats
-~~~~
-This will assemble a low diversity mock community in the folder **OPERA-MS/sample_output**. 
+```
+This will assemble a low diversity mock community in the folder **OPERA-MS/sample_output**.
 
 # Running OPERA-MS
 
@@ -54,7 +54,7 @@ The configuration file is formatted as follows:
 
 - **CONTIGS_FILE** : `path/to/contigs.fa` - Path to the contig file, if the short-reads have been assembled previously
 
-- **NUM_PROCESSOR** : `default : 1` - Number of processors to use
+- **NUM_PROCESSOR** : `default : 2` - Number of processors to use (note that 2 is the minimum)
 
 - **LONG_READ_MAPPER** `default: blasr` - Software used for long-read mapping i.e. blasr or minimap2
 
@@ -110,12 +110,34 @@ OPERA-MS is written in C++, Python, R and Perl, and makes use of the following P
 - [Getopt::Long](http://perldoc.perl.org/Getopt/Long.html)
 
 Once cpanm is installed, simply run the following command to install all the perl modules:
-~~~~
+```
 perl utils/install_perl_module.pl
-~~~~
+```
+
+# Docker
+A simple Dockerfile is provided in the root of the repository. To build the image:
+```
+docker build -t operams .
+```
+The generic command to run a OPERA-MS docker container after building:
+```
+docker run \
+    -v /host/path/to/indata/:/indata/ \
+    -v /host/path/to/outdata/:/outdata/ \
+    operams config.file
+```
+To process data with the dockerized OPERA-MS, directories for in- and outdata should be mounted into the container. An example is shown below for running the test dataset. In the below example the repo was cloned to /home/myuser/git/OPERA-MS/). The repo is needed only for the `sample_files` directory and the `sample_config.config` file. If Docker is running in a VM, as is the case for Windows or OSX, but also when deployed on a cloud platform such as AWS or Azure, a minimum of 2 available cores is required.  
+
+```
+docker run \ 
+    -v /home/myuser/git/OPERA-MS/sample_files:/sample_files \
+    -v /home/myuser/git/OPERA-MS/sample_output:/sample_output \
+     operams sample_config.config
+```
 
 # Contact information
 For additional information, help and bug reports please send an email to: 
 
 - Denis Bertrand: <bertrandd@gis.a-star.edu.sg>
+- Lorenz Gerber (docker related topics): <lorenzottogerber@gmail.com>
 - Niranjan Nagarajan: <nagarajann@gis.a-star.edu.sg>
