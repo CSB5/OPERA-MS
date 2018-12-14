@@ -1,3 +1,4 @@
+
 #include "opera.h"
 // optimal scaffolding
 
@@ -5591,7 +5592,8 @@ int main(int argc, char *argv[] )
 		cout<<"  <output-folder> \tFolder to save the scaffold results\n";
 		cout<<"  <samtools-dir> \tFolder which contains samtools binaries\n";
 		cout<<"\n\nNOTE: Please refer to test_dataset/multiLib.config for detailed settings.\n";
-		return -1;
+		exit(0);
+		//return -1;
 	}
 	else if( argc == 2 ){
 		configFileName = string( argv[ 1 ] );

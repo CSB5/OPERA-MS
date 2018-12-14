@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
-
+#include <string.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -89,8 +89,14 @@ void Sigma::readConfigFile(char* config_file) {
 
 		config_fp.close();
 	} else {
-		fprintf(stderr, "Error opening file: %s\n", config_file);
-		exit(EXIT_FAILURE);
+		if(strcmp(config_file, "help") == 0){
+			fprintf(stderr,"Usage:\n  bin/sigma <config-file>\n");
+			exit(0);
+		}
+		else{
+			fprintf(stderr, "Error opening file: %s\n", config_file);
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	configure(&params);

@@ -430,6 +430,24 @@ else{
 }
 print STDOUT " *** Racon functional\n" if($STAGE_TO_RUN eq "TEST_INSTALLATION");
 
+#Check for sigma
+my $sigma_dir = "$opera_ms_dir/bin/";
+my $exe_check = "${sigma_dir}sigma help";
+#my $exe_check = "source activate nanopore;${racon_dir}racon 2>&1 | grep options;source deactivate";
+run_exe($exe_check);
+if($?){
+    die "nsigma found in $sigma_dir not functional. Please recompile sigma on the current system using:\ncd $opera_ms_dir\nmake\n";
+}
+
+#Check for opera-lg
+my $opera_lg_dir = "$opera_ms_dir/$opera_version/bin/";
+my $exe_check = "${opera_lg_dir}OPERA-LG";
+run_exe($exe_check);
+if($?){
+    die "\nOPERA-LG found in $opera_lg_dir not functional. Please recompile OPERA-LG on the current system using:\ncd $opera_ms_dir\nmake\n";
+}
+
+#Check for input file
 if( ! -e $illum_read1) {
     die "\nError : $illum_read1 - illumina read 1 file does not exist\n";
 }
@@ -442,15 +460,15 @@ if( ! -e $long_read_file) {
     die "\nError : $long_read_file - long read file does not exist\n";
 }
 
-if( ! -d "$opera_ms_dir/$opera_version"){
-    die "\nError : the $opera_version folder is not found. \n";
-}
+#if( ! -d "$opera_ms_dir/$opera_version"){
+#    die "\nError : the $opera_version folder is not found. \n";
+#}
     
 #my $qsub = "qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -V -l mem_free=20G,h_rt=500:0:0 -pe OpenMP 20";
 my $command;
 
 if($STAGE_TO_RUN eq "TEST_INSTALLATION"){
-    print STDOUT "\n *** All third party software are functional.\n";
+    print STDOUT "\n *** All compiled software are functional.\n";
     print STDOUT " *** Please try to run OPERA-MS on the test data-set.\n\n";
     exit(1);
 }
