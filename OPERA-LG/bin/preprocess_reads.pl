@@ -109,11 +109,11 @@ elsif( $mapTool eq "bwa" )
     &buildIndexUsingBwa;
 
     # find the SA coordinates
-    &findSAWithBwa;
-    &readAndMap;
+    #&findSAWithBwa;
+    #&readAndMap;
 
     # generate alignment
-    &generateAlignmentUsingBwa;
+    &generateAlignmentUsingBwamem;
     &readAndMap;
 
     # remove the intermediate file
@@ -341,7 +341,21 @@ sub generateAlignmentUsingBwa
     }
 }
 
+sub generateAlignmentUsingBwamem
+{
+    $time = localtime;
+    print "[$time]\t";
+    print "Generate alignments of reads using bwa mem...\n";
+    $command = "${path}bwa mem -t 20 $folder$contigName[ -1 ] - | ${samtoolsDir}samtools view -S -h -b -F 0x4 -  > $folder$outputFile";
+    print $command."\n";
+    if($?){
+	die "Error during bwa mem. Please see log for details.\n";
+    }
+}
+
 sub clearBowtie
 {
     `rm ${folder}bowtie.err`;
 }
+
+# grep '\(^@\|XT:A:U\)' | /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS//utils/samtools view -S -h -b -F 0x4 -  > opera.bam

@@ -441,7 +441,7 @@ if($?){
 
 #Check for opera-lg
 my $opera_lg_dir = "$opera_ms_dir/$opera_version/bin/";
-my $exe_check = "${opera_lg_dir}OPERA-LG";
+$exe_check = "${opera_lg_dir}OPERA-LG";
 run_exe($exe_check);
 if($?){
     die "\nOPERA-LG found in $opera_lg_dir not functional. Please recompile OPERA-LG on the current system using:\ncd $opera_ms_dir\nmake\n";
