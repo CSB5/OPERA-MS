@@ -12,13 +12,14 @@ my $ref_directory = $ARGV[0];
 my $nb_process = $ARGV[1];
 my $opera_ms_dir = $ARGV[2];
 my $scaffold_seq_file = $ARGV[3];
-my $mummer_dir = $ARGV[4];
+my $scaffold_file = $ARGV[4];
+my $mummer_dir = $ARGV[5];
 #
 my $cluster_file = "$ref_directory/clusters_seq_similarity";
 my $species_file = "$ref_directory/cluster_species.dat";
 my $super_cluster_file = "$ref_directory/super_cluster.dat";
 #my $cluster_file = "../sigma/clusters";
-my $scaffold_file = "$ref_directory/../opera_long_read/scaffolds.scaf";
+#my $scaffold_file = "$ref_directory/../opera_long_read/scaffolds.scaf";
 #my $scaffold_seq_file = "$ref_directory/../opera_long_read/scaffoldSeq.fasta.filled";
 my $outfile = "$ref_directory/../../scaffold_info.txt";
 my $contigs_windows_glob = "$ref_directory/../coverage_estimation/contigs_*";

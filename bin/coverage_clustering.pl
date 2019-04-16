@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 
-my ($inter_dir, $out_dir, $contigs_file, $opera_ms_dir) = @ARGV;
+my ($inter_dir, $out_dir, $contigs_file, $reference_mapping_dir, $opera_ms_dir, $FLAG_USE_REF) = @ARGV;
 #my $out_dir = $ARGV[1];
 #my $contigs_file = $ARGV[2];
 
@@ -19,9 +19,11 @@ my %contig_info = ();
 my @windows_file = glob("$inter_dir/coverage_estimation/contigs_*");
 my $windows_file = $windows_file[0];
 #my $clusters_file = "$inter_dir/reference_mapping/NO_REPEAT/repeat_contigs_info.txt";
-my $clusters_species_file = "$inter_dir/reference_mapping/cluster_species.dat";
-my $ref_clusters = "$inter_dir/reference_mapping/clusters_seq_similarity";
-
+my $clusters_species_file = "$reference_mapping_dir/cluster_species.dat";
+#
+#Identify the clusters used 
+my $ref_clusters = "$reference_mapping_dir/clusters_seq_similarity";
+$ref_clusters = "$inter_dir/sigma/clusters" if(! $FLAG_USE_REF);
 
 #Get length and coverage of contigs
 open (FILE, $windows_file) or die;
@@ -61,159 +63,181 @@ close(REF_CLUS);
 
 my $cluster;
 my $seq_length;
-open (STRAINS, $clusters_species_file) or die;
-#Identifiy the reference associated to each species using a vote based method using the most voted reference in each cluster
-#SHOULD WE:
-# * weight based on cluster length
-# * MASH the cluster again
-#Collect the vote and summup the cluster length that belong to the same species
-while (<STRAINS>){
-    chomp $_;
-    if($_ =~ />(.*)/){
-	$cluster = $1;
-        chomp $cluster;
-        #operate at a species level
-        my $strain = <STRAINS>;
-	$strain = "$opera_ms_dir/$strain";
-        chomp $strain;
-        while($strain =~ />(.*)/){
+my %strain_contig = ();
+
+if($FLAG_USE_REF){
+    open (STRAINS, $clusters_species_file) or die;
+    #Identifiy the reference associated to each species using a vote based method using the most voted reference in each cluster
+    #SHOULD WE:
+    # * weight based on cluster length
+    # * MASH the cluster again
+    #Collect the vote and summup the cluster length that belong to the same species
+    while (<STRAINS>){
+	chomp $_;
+	if($_ =~ />(.*)/){
 	    $cluster = $1;
 	    chomp $cluster;
-            $strain = <STRAINS>;
-	    if(defined $strain){
-		chomp $strain;
-		$strain = "$opera_ms_dir/$strain";
-		#print STDERR " *** *** $strain\n";
+	    #operate at a species level
+	    my $strain = <STRAINS>;
+	    $strain = "$opera_ms_dir/$strain";
+	    chomp $strain;
+	    while($strain =~ />(.*)/){
+		$cluster = $1;
+		chomp $cluster;
+		$strain = <STRAINS>;
+		if(defined $strain){
+		    chomp $strain;
+		    $strain = "$opera_ms_dir/$strain";
+		    #print STDERR " *** *** $strain\n";
+		}
+		else{
+		    $strain = "";
+		}
+	    }
+
+	    if($strain eq ""){
+		next;
+	    }
+
+	    my @full_path = split(/\//, $strain);
+	    my $strain_name = $full_path[@full_path-2];
+	    my @strain_delim = split(/_/,$strain_name);
+	    my $species = $strain_delim[0] . "_" . $strain_delim[1];
+	    
+	    #print STDERR " *** $strain $species\n";<STDIN>;
+	    
+	    #$cluster = $1;
+	    #chomp $cluster;
+	    #print STDERR $cluster . "\n";
+	    
+	    if(!exists $cluster_lengths{$cluster}){
+		next;
+	    }
+	    my $seq;
+	    open(CHECK_REF, $strain) or die;
+	    my $header = <CHECK_REF>;
+	    my $is_plasmid = 0;
+
+	    close(CHECK_REF);
+
+	    if($header =~ /plasmid/){
+		$is_plasmid = 1;
+		#print STDERR "PLASMID DETECTED $strain\n";
+	    }
+
+	    if(!$is_plasmid){
+
+		if(!exists $species_to_ref_genome{$species}){
+		    $species_to_ref_genome{$species} -> {$strain}++;
+		}
+		else{
+		    $species_to_ref_genome{$species} -> {$strain} = 1;
+		}
+
+	    }
+
+	    if(!exists $species_to_contigs_length{$species}){
+		$species_to_contigs_length{$species} = $cluster_lengths{$cluster};
 	    }
 	    else{
-		$strain = "";
+		$species_to_contigs_length{$species} += $cluster_lengths{$cluster};
 	    }
-        }
 
-        if($strain eq ""){
-            next;
-        }
+	    $species_to_clusters{$species} -> {$cluster} = 1;
 
-        my @full_path = split(/\//, $strain);
-        my $strain_name = $full_path[@full_path-2];
-        my @strain_delim = split(/_/,$strain_name);
-        my $species = $strain_delim[0] . "_" . $strain_delim[1];
-	
-	#print STDERR " *** $strain $species\n";<STDIN>;
-	
-        #$cluster = $1;
-        #chomp $cluster;
-        #print STDERR $cluster . "\n";
+	}
+
+	else{
+	    next;
+	}
+
+	#print STDERR $cluster . "\n";
+	#print STDERR $seq_length . "\n";
+	#print STDERR $cluster_lengths{$cluster} . "\n";
+    }
+    close(STRAINS);
+
+    #Select the best refrence genome for a species
+    open(OUT, ">$out_dir/reference_length.dat");
+    foreach my $species (keys %species_to_ref_genome){
+	my $ref_genome_best;
+	my $best_count = 0;
+	foreach my $ref_genome (keys %{$species_to_ref_genome{$species}}){
+	    if (($species_to_ref_genome{$species}->{$ref_genome}) > $best_count){
+		$ref_genome_best = $ref_genome;
+		$best_count = ($species_to_ref_genome{$species}->{$ref_genome});
+	    }
+	}
         
-        if(!exists $cluster_lengths{$cluster}){
-            next;
-        }
-        my $seq;
-        open(CHECK_REF, $strain) or die;
-        my $header = <CHECK_REF>;
-        my $is_plasmid = 0;
+	my $seq;
+	print STDERR " *** $opera_ms_dir $ref_genome_best\n";
+	open (REF_GENOME, "$ref_genome_best") or die;
+	<REF_GENOME>;
+	while(<REF_GENOME>){
+	    chomp $_;
+	    $seq .= $_;
+	}
+	close(REF_GENOME);
 
-        close(CHECK_REF);
-
-        if($header =~ /plasmid/){
-            $is_plasmid = 1;
-            #print STDERR "PLASMID DETECTED $strain\n";
-        }
-
-        if(!$is_plasmid){
-
-            if(!exists $species_to_ref_genome{$species}){
-                $species_to_ref_genome{$species} -> {$strain}++;
-            }
-            else{
-                $species_to_ref_genome{$species} -> {$strain} = 1;
-            }
-
-        }
-
-        if(!exists $species_to_contigs_length{$species}){
-            $species_to_contigs_length{$species} = $cluster_lengths{$cluster};
-        }
-        else{
-            $species_to_contigs_length{$species} += $cluster_lengths{$cluster};
-        }
-
-        $species_to_clusters{$species} -> {$cluster} = 1;
-
+	$seq_length = length($seq);
+	print STDERR " *** length -> $seq_length -> $species_to_contigs_length{$species}\n";
+	if($species_to_contigs_length{$species} > $seq_length + ($seq_length * 0.1) and
+	   $seq_length > 1000000){
+	    print OUT $species . "\t" . $seq_length . "\t" . $species_to_contigs_length{$species} . "\t" . $ref_genome_best . "\n";
+	    $species_to_analyze{$species} = 1;
+	}
     }
-
-    else{
-        next;
-    }
-
-    #print STDERR $cluster . "\n";
-    #print STDERR $seq_length . "\n";
-    #print STDERR $cluster_lengths{$cluster} . "\n";
+    close(OUT);
+    
+    
 }
-close(STRAINS);
-
-#Select the best refrence genome for a species
-open(OUT, ">$out_dir/reference_length.dat");
-foreach my $species (keys %species_to_ref_genome){
-    my $ref_genome_best;
-    my $best_count = 0;
-    foreach my $ref_genome (keys %{$species_to_ref_genome{$species}}){
-        if (($species_to_ref_genome{$species}->{$ref_genome}) > $best_count){
-            $ref_genome_best = $ref_genome;
-            $best_count = ($species_to_ref_genome{$species}->{$ref_genome});
-        }
-    }
-        
-    my $seq;
-    print STDERR " *** $opera_ms_dir $ref_genome_best\n";
-    open (REF_GENOME, "$ref_genome_best") or die;
-    <REF_GENOME>;
-    while(<REF_GENOME>){
-        chomp $_;
-        $seq .= $_;
-    }
-    close(REF_GENOME);
-
-    $seq_length = length($seq);
-    print STDERR " *** length -> $seq_length -> $species_to_contigs_length{$species}\n";
-    if($species_to_contigs_length{$species} > $seq_length + ($seq_length * 0.1) and
-       $seq_length > 1000000){
-        print OUT $species . "\t" . $seq_length . "\t" . $species_to_contigs_length{$species} . "\t" . $ref_genome_best . "\n";
-        $species_to_analyze{$species} = 1;
+else{
+    #Indentify cluster with potnetially multiple strains based on the cluster size
+    #mkdir reference_mapping strain_analysis NEED to create those directories need to change that: 1) write all related file in strin_directory and not in reference_mapping 2) create a NO_REF_strain_analysis directory
+    my $c_length = 0;my $species;
+    my $NO_REF_SIZE_THRESHOLD = 2500000;#This is potentially a completegenome that can contains contigs from another strains
+    open(OUT, ">$out_dir/reference_length.dat");
+    foreach $cluster (keys %cluster_lengths){
+	$c_length = $cluster_lengths{$cluster};
+	if($c_length > $NO_REF_SIZE_THRESHOLD){
+	    $species = "S_$cluster";
+	    $species_to_clusters{$species} -> {$cluster} = 1;
+	    print OUT  $species . "\t" . $c_length . "\t" . $c_length . "\t" . "XXX" . "\n";
+	    $species_to_analyze{$species} = 1;
+	}
     }
 }
-close(OUT);
 
 #Construct the strain level directory
 #And write the matrix file: contig to coverage information
-my %strain_contig = ();
 foreach my $species (keys %species_to_analyze){
     my $cmd = "mkdir -p $out_dir/$species";
     run_exe($cmd);
-
+    
     open(REF_CLUS, $ref_clusters) or die("File $ref_clusters not found\n");
     open (MATRIX, ">$out_dir/$species/matrix");
     while(<REF_CLUS>){
-        chomp $_;
-        my @line = split(/\t/,$_); 
-        my $contig = $line[0];
-        my $cluster = $line[1];
-        if (exists ($species_to_clusters{$species} -> {$cluster})){
-            print MATRIX  $contig . "\t" . $contig_info{$contig}->{"COV"} . "\n";
+	chomp $_;
+	my @line = split(/\t/,$_); 
+	my $contig = $line[0];
+	my $cluster = $line[1];
+	if (exists ($species_to_clusters{$species} -> {$cluster})){
+	    print MATRIX  $contig . "\t" . $contig_info{$contig}->{"COV"} . "\n";
 	    $strain_contig{$contig} = 1;
 	}
     }
     close(MATRIX);
     close(REF_CLUS);
-
+    
     #Extract the edges and contigs from that cluster
     $cmd = "perl $opera_ms_dir/bin/get_edges_from_matrix.pl $inter_dir $out_dir/$species/matrix $out_dir/$species $contigs_file 0 1000";
     run_exe($cmd);
 }
 
+    
 #Read the orginal cluster file and remove any contigs that belong to species with multiple strain
 open(REF_CLUS, $ref_clusters) or die("File $ref_clusters not found\n");
-open(OUT, ">$inter_dir/reference_mapping/clusters_single_strain");
+open(OUT, ">$reference_mapping_dir/clusters_single_strain");
 while(<REF_CLUS>){
     chomp $_;
     my @line = split(/\t/,$_); 
@@ -231,7 +255,7 @@ my $prev_scaf;
 my $seq = "";
 my $contigs;
 open(FILE, $contigs_file) or die("File $contigs_file not found\n");
-open(CONTIGS, ">$inter_dir/reference_mapping/single_strain_species.fa");
+open(CONTIGS, ">$reference_mapping_dir/single_strain_species.fa");
 while (<FILE>){
     chomp $_;
     if ($_ =~ />/){

@@ -191,6 +191,15 @@ while(<$opera_ms_cf>) {
 	    
 	    case "NUM_PROCESSOR"{
 	    }
+
+	    case "OPERA_LR_OUTDIR"{
+	    }
+	    
+	    case "GENOME_DB"{
+	    }
+	    
+	    case "REF_CLUSTERING_OUTDIR"{
+	    }
 	    
 	    else {
 		die "Config option: ".$config_option." unknown";

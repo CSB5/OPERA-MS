@@ -84,7 +84,7 @@ foreach $contig (sort {$contig_info{$b}->{"MEAN_READ_COUNT"} <=> $contig_info{$a
 
 #Identify suitable mode:
 #The highest coverage mode should contain large number of contigs as it must contigs of the histes abundance species
-#The mode identificatin can be affected by widows with outlier coverage
+#The mode identification can be affected by widows with outlier coverage
 
 my ($mode, $strain_mean_value, $strain_var, $sequence_size_in_highest_mode_distribution);
 my $mode_accepted = -1;

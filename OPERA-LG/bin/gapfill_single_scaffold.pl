@@ -121,8 +121,7 @@ $start_time = time;
 print STDERR "*** Gapfilling_elapse_time\t" . ($end_time - $start_time_total) . "\n";
 
 #Delete the intermidate file
-#run_exe("rm $assembly_dir/TILING_POOL.fastq $assembly_dir/POOL.fastq");
-#run_exe("rm $assembly_dir/TILING_POOL.fastq");
+run_exe("rm $assembly_dir/consensus.err  $assembly_dir/POOL.fastq  $assembly_dir/pre_consensus.fa  $assembly_dir/pre_consensus.fa.filtered.paf $assembly_dir/racon.fa.sh  $assembly_dir/scaffolds.scaf  $assembly_dir/single_read.map");
 
 sub run_racon{
     my ($assembly_file, $read_file, $mapping, $out_file, $window_size, $match, $mismatch, $gap_open, $gap_extend, $RACON_TYPE) = @_;

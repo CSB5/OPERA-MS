@@ -4,12 +4,10 @@ use Statistics::Basic qw(:all);
 use strict;
 
 
-my $inter_dir = $ARGV[0];
-my $matrix = $ARGV[1];
-my $out_dir = $ARGV[2];
-my $contigs_file = $ARGV[3];
-my $thresh1 = $ARGV[4];
-my $thresh2 = $ARGV[5];
+
+my ($inter_dir, $matrix, $out_dir, $contigs_file, $thresh1, $thresh2, $FLAG_USE_REF) = @ARGV;
+
+
 my %species_contigs = ();
 
 open (FILE, $matrix) or die;
@@ -38,7 +36,11 @@ open (WRONG, ">", "$out_dir/wrong");
 
 #my @edge_files = ("$inter_dir/sigma/filtered_pairedEdges_i0","$inter_dir/sigma/filtered_pairedEdges_i1","$inter_dir/sigma/filtered_pairedEdges_i2","$inter_dir/sigma/filtered_pairedEdges_i3","$inter_dir/sigma/filtered_pairedEdges_i4","$inter_dir/sigma/filtered_pairedEdges_i5", "$inter_dir/reference_mapping/edges_between_clusters_good");
 
-my @edge_files = ("$inter_dir/reference_mapping/edges_between_clusters_good", "$inter_dir/long-read-mapping/pairedEdges");
+#my @edge_files = ("$inter_dir/reference_mapping/edges_between_clusters_good", "$inter_dir/long-read-mapping/pairedEdges");
+my @edge_files = ();
+push(@edge_files, "$inter_dir/reference_mapping/edges_between_clusters_good")if($FLAG_USE_REF);
+push(@edge_files, "$inter_dir/long-read-mapping/pairedEdges");
+
 
 open (MAP, "$inter_dir/coverage_estimation/contigs_340_80");
 my $header = <MAP>;

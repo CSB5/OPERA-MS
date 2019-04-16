@@ -10,7 +10,7 @@ use Statistics::Basic qw(:all);
 #2. For all clusters with edges between them, check if they have similar reference genomes.
 #3. Recover edges between clusters in within the super clusters.
 #############################################################
-my ($inter_dir, $contig_seq_file, $nb_process, $opera_ms_dir, $mash_exe_dir, $mummer_dir) = @ARGV;
+my ($inter_dir, $ref_map_folder, $contig_seq_file, $nb_process, $mash_ref, $opera_ms_dir, $mash_exe_dir, $mummer_dir) = @ARGV;
 
 my $PARSE_FILES_MASH = 1;
 my $PARSE_FILES_NUC = 1;
@@ -26,19 +26,22 @@ my @super_cluster = ();
 my %cluster_to_super_cluster_ID;
 my %super_cluster_strain_set_ = ();
 
-my $ref_map_folder = "$inter_dir/reference_mapping";
-my $cluster_results_file = "$inter_dir/reference_mapping/clusters_seq_similarity";
-my $cluster_species_file = "$inter_dir/reference_mapping/cluster_species.dat";
-my $super_cluster_file = "$inter_dir/reference_mapping/super_cluster.dat";
-my $edges_between_clusters_file = "$inter_dir/reference_mapping/edges_between_clusters";
-my $good_edges_file = "$inter_dir/reference_mapping/edges_between_clusters_good";
+#my $ref_map_folder = "$inter_dir/reference_mapping";
+my $cluster_results_file = "$ref_map_folder/clusters_seq_similarity";
+my $cluster_species_file = "$ref_map_folder/cluster_species.dat";
+my $super_cluster_file = "$ref_map_folder/super_cluster.dat";
+my $edges_between_clusters_file = "$ref_map_folder/edges_between_clusters";
+my $good_edges_file = "$ref_map_folder/edges_between_clusters_good";
 my $clusters_file = "$inter_dir/sigma/clusters";
 my $paired_edges_file = "$inter_dir/long-read-mapping/pairedEdges";
 my $paired_edges_file_above_thresh = "$inter_dir/long-read-mapping/pairedEdges_above_thresh";
+#
+#Need to update to multi sample assemblies
 my $short_edges_file = "$inter_dir/lib_1_bundles/clusters_contigs";
-my $mash_dir = "$inter_dir/reference_mapping/MASH/";
-my $mash_ref = "$opera_ms_dir/genomeDB_Sketch.msh";
-my $nucmer_dir = "$inter_dir/reference_mapping/NUCMER_OUT/"; 
+#
+my $mash_dir = "$ref_map_folder/MASH/";
+#my $mash_ref = "$opera_ms_dir/genomeDB_Sketch.msh";
+my $nucmer_dir = "$ref_map_folder/NUCMER_OUT/"; 
 
 ######################################START########################3
 
@@ -134,7 +137,7 @@ sub recover_edges{
 
     for(my $i = 0; $i < 6; $i++) {
         my $OUT;
-        open ($OUT, ">","$inter_dir/reference_mapping/filtered_pairedEdges_i$i") or die;
+        open ($OUT, ">","$ref_map_folder/filtered_pairedEdges_i$i") or die;
         $outfiles[$i] = $OUT;
     }
 
