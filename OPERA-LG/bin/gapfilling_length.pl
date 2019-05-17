@@ -418,7 +418,7 @@ sub get_paf_file{
     }
     
     open(OUT, ">$paf_file");
-    open(FILE, "sort -k10,10 -k1,1n $coord_file |");
+    open(FILE, "sort -k10,10 -k1,1n $coord_file | grep -v '\\[' | ");### NEED TO FIX
     my $gap_length = 0;
     #my $IDENTITY_THRESHOLD = 0.97;
     #
@@ -430,7 +430,7 @@ sub get_paf_file{
     my ($contig_name, $scaffold_name, $scaffold_length, $mapping_length, $contig_end, $contig_start, $scaffold_start, $scaffold_end, $tiling_length);
     $scaffold_name = "";
     open(OUT_G, ">S1_gap_size.dat");
-    <FILE>;<FILE>;<FILE>;<FILE>;#skip the header lines
+    <FILE>;<FILE>;<FILE>;#<FILE>;#skip the header lines
     while(<FILE>){
 	chop $_;
 	@line = split(/\t/, $_);
