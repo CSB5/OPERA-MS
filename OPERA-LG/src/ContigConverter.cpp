@@ -87,13 +87,20 @@ int ContigConverter::ConvertContigFile( string fileName, Graph *graph, list<PetL
 
 	//cerr<<"Done saving all contig names\n";
 
-	// calculate coverage using mapping information
+	// calculate coverage using short read mapping information
 	//if( Configure::FILE_TYPE == NORMAL && Configure::FILE_FORMAT != STATISTIC ){
 	//if( Configure::MAP_TYPE != OPERA && Configure::FILE_FORMAT != STATISTIC ){
 	if( Configure::FILE_FORMAT != STATISTIC ){
 		if( CalculateCovUsingMapping( libs ) == -1 )
 			return -1;
 	}
+	//else{//Compute the coverage based on a precomputed graph
+	//if( ReadCoverageFile(Configure::OUTPUT_FOLDER + "contigs") == -1)//THIS is a harcoded path
+	//return -1;
+		//}
+	//Read conticoverage from pre-computed contig coverage file
+	
+	
 	//}
 
 	// update contig threshold, only use pair-end libraries
@@ -130,6 +137,31 @@ int ContigConverter::ConvertContigFile( string fileName, Graph *graph, list<PetL
 		return -1;
 	//}
 
+	return 1;
+}
+
+//Read a precomputed coverage file
+int ContigConverter::ReadCoverageFile(string fileName){
+
+	cerr << " *** Read ReadCoverageFile " << fileName << endl;
+	
+	vector<string> *column = new vector<string>;
+	string line, contigName;
+	double cov;
+	std::ifstream infile( fileName.c_str() );
+	while( getline( infile, line ) ){
+		Split( line, "\t", column );
+		contigName = column->at( 0 );
+		cov = stod(column->at( 1 ));
+		//
+		unordered_map<string, int>::iterator pos = m_contigNameHashMap->find( contigName );
+		if( pos != m_contigNameHashMap->end() ){
+			// add 1 to the number of reads in this contig
+			Contig *currentContig = myContigs->at(  pos->second );
+			currentContig->SetCov( cov );
+		}
+	}
+	delete column;
 	return 1;
 }
 

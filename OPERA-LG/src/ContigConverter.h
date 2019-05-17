@@ -53,7 +53,9 @@ private:
 
 	// calculate coverage using mapping information
 	int CalculateCovUsingMapping( list<PetLibrary*> *libs );
-
+	// Read a pre-computed contig coverage file in case no short read mapping is provided
+	int ReadCoverageFile(string fileName);
+			     
 	// check if two lines represent a pair of reads
 	bool IsPair( string firstRead, string secondRead );
 	// calculate the distance of two reads in the same contig

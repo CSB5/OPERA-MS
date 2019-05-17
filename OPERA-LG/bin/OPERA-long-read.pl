@@ -169,8 +169,6 @@ chdir( $outputDir );
 my $str_full_path = "or please enter the full path";
 if ( ! -e $contigFile ) {die "\nError: $contigFile - contig file does not exist $str_full_path\n"};
 if ( ! -e $readsFile ) {die "\nError: $readsFile - long read file does not exist $str_full_path\n"};
-if ( ! -e $illum_read1 && $illum_read1 ne "NONE") {die "\nError: $illum_read1 - illumina read 1 file does not exist $str_full_path\n"};
-if ( ! -e $illum_read2 && $illum_read2 ne "NONE") {die "\nError: $illum_read2 - illumina read 2 file does not exist $str_full_path\n"};
 
 if ( ! -e "$blasrDir/blasr" && $blasrDir ne "") {die "\nError: $blasrDir - blasr does not exist in the directory $str_full_path\n"};
 
@@ -187,19 +185,34 @@ if ( ! -e "$short_read_tooldir/bwa" && $short_read_maptool eq "bwa" && $short_re
 
 
 #map illumina reads to the contigs using preprocess_reads.pl
-if(! -e "${file_pref}.bam" &&  !($illum_read1 eq "NONE" && $illum_read2 eq "NONE")){
+$str_path_dir = "";
+$str_path_dir .= "--tool-dir  $short_read_tooldir" if($short_read_tooldir ne "");
+$str_path_dir .= " --samtools-dir $samtools_dir" if($samtools_dir ne "");
+if(index($illum_read1, ",") == -1){#single sample assembly
+    if ( ! -e $illum_read1 && $illum_read1 ne "NONE") {die "\nError: $illum_read1 - illumina read 1 file does not exist $str_full_path\n"};
+    if ( ! -e $illum_read2 && $illum_read2 ne "NONE") {die "\nError: $illum_read2 - illumina read 2 file does not exist $str_full_path\n"};
+    
     $start_time = time;
     print " *** *** Mapping short-reads using  $short_read_maptool...\n";
-    $str_path_dir = "";
-    $str_path_dir .= "--tool-dir  $short_read_tooldir" if($short_read_tooldir ne "");
-    $str_path_dir .= " --samtools-dir $samtools_dir" if($samtools_dir ne "");
-    run_exe("perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam");
-    if($?){
-	die "Error in the short read mapping. Please see log for details.\n";
+    if(! -e "${file_pref}.bam" &&  !($illum_read1 eq "NONE" && $illum_read2 eq "NONE")){
+    	run_exe("perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam");
     }
-    $end_time = time;
-    print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
 }
+else{
+    @illum_read1_tab = split(/,/, $illum_read1);
+    @illum_read2_tab = split(/,/, $illum_read2);
+    for(my $i = 0; $i < @illum_read1_tab; $i++){
+	if(! -e "$file_pref\_$i.bam"){
+	    run_exe("perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1_tab[$i] --illumina-read2 $illum_read2_tab[$i] --out $file_pref\_$i.bam");
+	}
+    }
+}
+if($?){
+    die "Error in the short read mapping. Please see log for details.\n";
+}
+$end_time = time;
+print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+
 
 if(! -e "$file_pref.map.sort"){
     # map using blasr
@@ -302,6 +315,7 @@ if(0){
 	close(OUT);
     }
     #delete some intermidate file
+    #run_exe("rm anchor_contig_info.dat contig_length.dat filtered_edges.dat filtered_edges_cov.dat *.sai");
     run_exe("rm anchor_contig_info.dat contig_length.dat filtered_edges.dat filtered_edges_cov.dat *.sai");
 
     #Filter the bam file to remove repeat contigs

@@ -117,7 +117,7 @@ elsif( $mapTool eq "bwa" )
     &readAndMap;
 
     # remove the intermediate file
-    `rm ${folder}$outputFile\_read.sai`;
+    #`rm ${folder}$outputFile\_read.sai`;
 }
 else
 {
@@ -226,18 +226,18 @@ sub buildIndexUsingBwa
     print "[$time]\t";
     print "Building bwa index...\n";
     @contigName = split( "/", $contigFile );
-    if( 1 || ! -f "$folder$contigName[ -1 ].amb" )#Remove check for previous construction as it may cause bwa to crash
+    if(! -f "$folder$contigName[ -1 ].amb" )#BWA may crash due to previous construction need to clear the rirectory in this case
     {
 	if( $type eq "cs" )
 	{
 	    $command = "${path}bwa index -c -p $folder$contigName[ -1 ] $contigFile";
-	    `$command`; #or die "Error during bwa index creation.\n";
+	    `$command`;# or die "Error during bwa index creation.\n";
 	}
 	else
 	{
 	    $command = "${path}bwa index -p $folder$contigName[ -1 ] $contigFile";
 	    print $command."\n";
-	    `$command`; #or die "Error during bwa index creation.\n";
+	    `$command`;# or die "Error during bwa index creation.\n";
 	}
     }
     else
@@ -346,11 +346,11 @@ sub generateAlignmentUsingBwamem
     $time = localtime;
     print "[$time]\t";
     print "Generate alignments of reads using bwa mem...\n";
-    $command = "${path}bwa mem -t 20 $folder$contigName[ -1 ] - | ${samtoolsDir}samtools view -S -h -b -F 0x4 -  > $folder$outputFile";
+    $command = "${path}bwa mem -t 20 $folder$contigName[ -1 ] - | ${samtoolsDir}samtools view -S -h -b -F 0x4 -  > $folder$outputFile 2> $folder$outputFile.log";
     print $command."\n";
-    if($?){
-	die "Error during bwa mem. Please see log for details.\n";
-    }
+    #if($?){
+    #die "Error during bwa mem. Please see log for details.\n";
+    #}
 }
 
 sub clearBowtie

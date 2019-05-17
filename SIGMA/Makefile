@@ -1,6 +1,6 @@
 CC = g++
-sigma: CFLAGS = -std=c++0x -O3 -Wall -Wconversion
-debug: CFLAGS = -std=c++0x -g -O0 -Wall -Wconversion
+sigma: CFLAGS = -std=c++0x -O3 -Wall -Wconversion 
+debug: CFLAGS = -std=c++0x -g -O0 -Wall -Wconversion -fno-inline
 
 all: sigma
 

@@ -9,7 +9,7 @@ install : $(PROGRAM)
 $(PROGRAM) : $(OBJS)     
 #<<<<<<< HEAD
 	$(CXX) -c -O3 -std=c++11 -Wall -Wno-deprecated $(SOURCE) $<
-#	$(CXX) -c -g -std=c++11 -fno-inline -w $(CXX) $<
+#	$(CXX) -c -g -std=c++11 -fno-inline -w $(SOURCE) $<
 #	$(CXX) -c -g -fno-inline -w $(CXX) $< -pg
 #	$(CXX) -o ../bin/$(PROGRAM) *.o -pg
 	$(CXX) -o ../bin/$(PROGRAM) *.o

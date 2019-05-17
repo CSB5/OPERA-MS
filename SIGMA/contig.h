@@ -181,7 +181,9 @@ double compute_mode(std::vector<double> &Rs);
  * @return read count dispersion parameter on contig windows
  */
 double compute_R(ContigMap* contigs);
+double compute_R_multi(ContigMap* contigs);
 
-
+//Compare the R values store in a array contian mean,var,R
+bool sort_contig_R (double* t, double* g);
 
 #endif // CONTIG_H_

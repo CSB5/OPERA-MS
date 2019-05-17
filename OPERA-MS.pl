@@ -42,7 +42,7 @@ my $strain_clustering = "YES";
 my $short_read_tool_dir;
 my $short_read_maptool = "bwa";
 my $num_processor = 1;
-my $help_line = "To configure OPERA-MS, please look at the example config file inside the OPERA-MS folder.\nUsage: \n\npath/OPERA-MS/OPERA-MS.pl <config_file>\n\nNote that the config file must be inside the path/OPERA-MS directory.\n";
+my $help_line = "To configure OPERA-MS, please look at the example config file inside the OPERA-MS folder.\nUsage: \n\npath/OPERA-MS/OPERA-MS.pl <config_file>\n\n";
 my $incorrect_arguments="Please input the correct arguments. Refer to the documentation for more information or use:\n\n path/OPERA-MS/OPERA-MS.pl -h. \n\n";
 my $run_following = 0;
 my $contig_edge_len = 80;
@@ -53,6 +53,11 @@ my $DIR_OPERA_LR = "";
 my $DIR_CLUSTERING_EDGE = "";
 my $DIR_REF_CLUSTERING = "";
 my $genomeDB_msh = "";
+my $FLAG_MULTI_SAMPLE = 0;
+my $REF_REPEAT_DETECTION = 1;
+my $genomeDB_kraken = "NULL";
+my $kraken_exe_dir = "";
+my $filled_scaff_length = 499;
 
 if ( @ARGV == 0 ){
     die $incorrect_arguments; 
@@ -179,6 +184,18 @@ if ( @ARGV >= 1){
                
 			 }
 
+			 #Use kraken during sequence similarity clustering in addation to mash and mummer
+			 case "DB_KRAKEN"{
+			     $genomeDB_kraken = $split_line[1];
+			 }
+			 case "KRAKEN_DIR" {
+			     $kraken_exe_dir = $split_line[1];
+			 }
+
+			 case "FILLED_SCAFF_LENGTH" {
+			     $filled_scaff_length = $split_line[1];
+			 }
+			 
 			 case "LONG_READ_MAPPER"{
 			     $mapper = $split_line[1];
 			     if($mapper ne "blasr" && $mapper ne "minimap2"){
@@ -195,6 +212,9 @@ if ( @ARGV >= 1){
 
 			 case "ILLUMINA_READ_1"{
 			     $illum_read1 = $split_line[1];
+			     if(index($illum_read1, ",") != -1){#Their multiple illumina file provided => this is a multiple sample assembly
+				 $FLAG_MULTI_SAMPLE = 1;
+			     }
 			 }
 
 			 case "ILLUMINA_READ_2"{
@@ -205,6 +225,11 @@ if ( @ARGV >= 1){
 			     $num_processor = $split_line[1];
 			 }
 
+			 case "REF_REPEAT_DETECTION"{
+			     $REF_REPEAT_DETECTION = 1;
+			     $REF_REPEAT_DETECTION = 0 if( $split_line[1] eq "NO");
+			 }
+			 
 			 #To specify manually the cluster file used => force $STAGE_TO_RUN = "ASSEMBLY";
 			 case "CLUSTER_FILE"{
 			     $reference_cluster_file = $split_line[1];
@@ -476,17 +501,19 @@ if($?){
     die "\nOPERA-LG found in $opera_lg_dir not functional. Please recompile OPERA-LG on the current system using:\ncd $opera_ms_dir\nmake\n";
 }
 
-#Check for input file
-if( ! -e $illum_read1) {
-    die "\nError : $illum_read1 - illumina read 1 file does not exist\n";
-}
+#Check for input file NEED TO UPDATE FOR MULTIPLE INPUT FILES
+#if( ! -e $illum_read1) {
+#    die "\nError : $illum_read1 - illumina read 1 file does not exist\n";
+#}
 
-if( ! -e $illum_read2) {
-    die "\nError : $illum_read2 - illumina read 2 file does not exist\n";
-}
+#if( ! -e $illum_read2) {
+#    die "\nError : $illum_read2 - illumina read 2 file does not exist\n";
+#}
 
 if( ! -e $long_read_file) {
-    die "\nError : $long_read_file - long read file does not exist\n";
+    #
+    #die "\nError : $long_read_file - long read file does not exist\n";
+    #
 }
 
 #if( ! -d "$opera_ms_dir/$opera_version"){
@@ -589,7 +616,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CONTIG_GRAPH"){
     $long_read_mapper_option = "--minimap2 $minimap2_dir" if($mapper eq "minimap2");
     $long_read_mapper_option = "--blasr $blasr_dir" if($mapper eq "blasr");
     
-    $command= "${opera_ms_dir}${opera_version}/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $DIR_MAPPING --num-of-processors $num_processor --opera ${opera_ms_dir}${opera_version}/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --samtools-dir $samtools_dir $long_read_mapper_option --short-read-tooldir $short_read_tool_dir --skip-opera 1 > log.out  2> $DIR_MAPPING/log.err";
+    $command= "${opera_ms_dir}${opera_version}/bin/OPERA-long-read.pl --contig-file $contigs_file --kmer $kmer_size --long-read-file $long_read_file --output-prefix opera --output-directory $DIR_MAPPING --num-of-processors $num_processor --opera ${opera_ms_dir}${opera_version}/bin/ --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --samtools-dir $samtools_dir $long_read_mapper_option --short-read-tooldir $short_read_tool_dir --skip-opera 1 > $DIR_MAPPING/log.out  2> $DIR_MAPPING/log.err";
     
     run_exe($command);
     #
@@ -599,10 +626,10 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CONTIG_GRAPH"){
     }
     $end_time_sub = time;
     print STDOUT "***  Contig graph generation Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
-
+    
     ### Softlink opera.bam
-    $command="ln -s $DIR_MAPPING/opera.bam $output_dir/contigs.bam";
-    run_exe($command);
+    #$command="ln -s $DIR_MAPPING/opera.bam $output_dir/contigs.bam";
+    #run_exe($command);
     
     ### runOperaMS
     #Generate the config file
@@ -612,8 +639,25 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CONTIG_GRAPH"){
     if($flag_megahit_assembly){#Add the contig file name to the config file
 	print CONF "\nCONTIGS_FILE $contigs_file\n";
     }
-    print CONF "\nLIB $output_dir/contigs.bam\n";
-    print CONF "\nMAPPING_FILES $output_dir/contigs.bam\n";
+    if(index($illum_read1, ",") == -1){#single sample assembly
+	print CONF "\nLIB $DIR_MAPPING/opera.bam\n";
+	print CONF "\nMAPPING_FILES $DIR_MAPPING/opera.bam\n";
+    }
+    else{
+	
+	@illum_read1_tab = split(/,/, $illum_read1);
+	my $str_bam = "";
+	for(my $i = 0; $i < @illum_read1_tab; $i++){
+	    $str_bam .= "$DIR_MAPPING/opera_$i.bam,";
+	}
+	chop $str_bam;
+	#
+	print CONF "\nLIB $DIR_MAPPING/opera_1.bam\n";#NEED TO MERGE THE BAM
+	#
+	#
+	print CONF "\nMAPPING_FILES $str_bam\n";
+    }
+    
     #
     print CONF "SAMTOOLS_DIR $samtools_dir\n";
     
@@ -631,8 +675,19 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "CONTIG_GRAPH"){
     $end_time_sub = time;
     print STDOUT "***  Coverage estimation Elapsed time: " . ($end_time_sub - $start_time_sub) . "s\n";
     #Remove edge with an outlier edge support/contig coverage ratio => good to remove error due to missmapping
-    $command = "perl ${opera_ms_dir}bin/filter_edge_coverage_ratio.pl $DIR_MAPPING $DIR_COV/contigs_*";
-    run_exe($command);
+    #This step must be skipped in case of multi sample assembly
+    #GGG
+    #
+    if(! $FLAG_MULTI_SAMPLE){
+	$command = "perl ${opera_ms_dir}bin/filter_edge_coverage_ratio.pl $DIR_MAPPING $DIR_COV/contigs_* 2> $DIR_COV/filter_edge_coverage_ratio.log";
+	run_exe($command);
+    }
+    else{
+	#create soft links
+    }
+    #
+    #
+    
     $end_time = time;
     print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
@@ -686,7 +741,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "REF_CLUSTERING"){
     print STDOUT "\n---  STEP 3: SPECIES CLUSTERING  ---\n";
     $command="mkdir -p $DIR_REF_CLUSTERING";
     run_exe($command);
-    $command="perl ${opera_ms_dir}bin/sequence_similarity_clustering.pl $output_dir/$inter $DIR_REF_CLUSTERING $contigs_file $num_processor $genomeDB_msh $opera_ms_dir $mash_dir $mummer_dir 2> $DIR_REF_CLUSTERING/log.err";
+    $command="perl ${opera_ms_dir}bin/sequence_similarity_clustering.pl $output_dir/$inter $DIR_REF_CLUSTERING $contigs_file $num_processor $genomeDB_msh $genomeDB_kraken $opera_ms_dir $mash_dir $mummer_dir $kraken_exe_dir 2> $DIR_REF_CLUSTERING/log.err";
     run_exe($command);
     if($?){
 	die "Error in during reference based clustering. Please see $DIR_REF_CLUSTERING/log.err for details.\n";
@@ -753,6 +808,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "ASSEMBLY"){
 
     #Add the contigs in cluster strain 0 back to the opera assembly
     if($strain_clustering eq "YES"){
+	run_exe("rm $DIR_OPERA_LR/*single*") if(-e "$DIR_OPERA_LR/contigs_single");#Deletion required to avoid re-using previous assemblies for the gapfilling
 	run_exe("cat $DIR_REF_CLUSTERING/single_strain_species.fa $DIR_STRAIN/*/excluded_contigs.fa > $DIR_REF_CLUSTERING/single_strain_species_with_excluded.fa");
     }
     
@@ -775,6 +831,9 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "ASSEMBLY"){
     }
     
     $contig_coverage_file = "$DIR_COV/contigs_$contig_window_len\_$contig_edge_len";
+    if(! $REF_REPEAT_DETECTION){#The mapping detection option have been set off
+	$contig_mapping_to_reference = "NULL";
+    }
     $command = "${opera_ms_dir}bin/filter_cluster_coverage.pl $contig_coverage_file $reference_cluster_file $DIR_CLUSTERING_EDGE 1.5 $DIR_CLUSTERING_EDGE/NO_REPEAT $contig_mapping_to_reference $mummer_dir";
     #$command="outcontig=`ls $DIR_COV/contigs_\*`; ${opera_ms_dir}bin/filter_cluster_coverage.pl `echo \$outcontig` $reference_cluster_file $DIR_REF_CLUSTERING 1.5 $DIR_REF_CLUSTERING/NO_REPEAT $DIR_REF_CLUSTERING/NUCMER_OUT/";
     
@@ -877,7 +936,7 @@ if($STAGE_TO_RUN eq "ALL" || $STAGE_TO_RUN eq "GAP_FILLING"){
     #$start_time_sub = time;
 
     run_exe("rm -r $DIR_GAPFILLING");
-    $command="$opera_ms_dir/$opera_version/bin/gapfilling.pl $DIR_GAPFILLING $contigs_file $long_read_file $num_processor $opera_ms_dir/$opera_version/bin/ $racon_dir $minimap2_dir $mummer_dir 2> $DIR_OPERA_LR/gapfilling.log";
+    $command="$opera_ms_dir/$opera_version/bin/gapfilling_length.pl $DIR_GAPFILLING $contigs_file $long_read_file $num_processor $filled_scaff_length $opera_ms_dir/$opera_version/bin/ $racon_dir $minimap2_dir $mummer_dir 2> $DIR_OPERA_LR/gapfilling.log";
     run_exe($command);
 
     #$end_time_sub = time;

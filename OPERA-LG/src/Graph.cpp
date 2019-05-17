@@ -80,13 +80,11 @@ void Graph::AddContig( Contig *c ){
 	c->SetID( m_numberOfContigs );
 	//m_contigNameMap->insert( pair<string, int>(c->GetName(), c->GetID() ) );
 
-	cerr << " *** Add contig " << c->GetName() << " -> " << c->GetName().c_str() << endl;//cin.get();
+	//cerr << " *** Add contig " << c->GetName() << " -> " << c->GetName().c_str() << endl;//cin.get();
 	m_contigNameHashMap->insert( pair<string, int>(c->GetName(), c->GetID() ) );
 	
 	//GetContigIndex(string(c->GetName().c_str()));
-	//GetContigIndex(string("k99_2"));//cin.get();
 	//cin.get();
-	
 	
 	m_numberOfContigs++;
 
@@ -128,29 +126,39 @@ void Graph::InitializeContig( int libNum ){
 // output the contigs into a new file
 // return -1 if failed
 int Graph::OutputContigs( string fileName ){
-	ofstream contigWriter( fileName.c_str() );
 
-	if( contigWriter.fail() )
-	{
-		cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
-		return -1;
-	}
-
-	string head = "Contig ID\tLength\tCoverage\n";
-	contigWriter.write( head.c_str(), head.length() );
+	//cerr<<" *** OutputContigs"<<"\n";
+	//return 1;
 	
-	list<Contig*>::const_iterator iter;
-	for( iter = m_contigsList->begin(); iter != m_contigsList->end(); iter++ ){
-		string line = (*iter)->GetName() + "\t";
-		char buffer[30];
-		sprintf( buffer, "%.0f\t%.0f\n", (*iter)->GetLength(), (*iter)->GetCov() );
-		string tempString( buffer );
-		line += tempString;
-		//line += ( itos( (*iter)->GetLength() )+ "\n");
-		contigWriter.write( line.c_str(), line.length() );
+	//Check if the file already exists
+	std::ifstream infile( fileName.c_str() );
+	if( infile.good()){
+		return 1;
 	}
+	else{
+		ofstream contigWriter( fileName.c_str() );
 
-	return 1;
+		if( contigWriter.fail() )
+			{
+				cout<<"ERROR: Cannot open "<<fileName<<" file"<<endl;
+				return -1;
+			}
+
+		string head = "Contig ID\tLength\tCoverage\n";
+		contigWriter.write( head.c_str(), head.length() );
+	
+		list<Contig*>::const_iterator iter;
+		for( iter = m_contigsList->begin(); iter != m_contigsList->end(); iter++ ){
+			string line = (*iter)->GetName() + "\t";
+			char buffer[30];
+			sprintf( buffer, "%.0f\t%.0f\n", (*iter)->GetLength(), (*iter)->GetCov() );
+			string tempString( buffer );
+			line += tempString;
+			//line += ( itos( (*iter)->GetLength() )+ "\n");
+			contigWriter.write( line.c_str(), line.length() );
+		}
+		return 1;
+	}
 }
 
 // get contig index according to contig name

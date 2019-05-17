@@ -27,8 +27,8 @@ MapConverter::~MapConverter(void)
 
 MapConverter::MapConverter( Graph *graph ){
 	m_graph = graph;
-	m_graph->GetContigIndex( string("k99_2"));
-	graph->GetContigIndex( string("k99_2"));
+	//m_graph->GetContigIndex( string("k99_2"));
+	//graph->GetContigIndex( string("k99_2"));
 	//cin.get();
 	
 	m_singlePetsMap = new map<pair<int, int>, multiset<SinglePet*, less_distance>*>;

@@ -15,6 +15,8 @@
 
 #include "sigma.h"
 
+
+
 Contig::Contig(std::string id, int length) : id_(id), length_(length) {
 	if (Sigma::contig_window_len > 0) {
 		num_windows_ = (length_ - 2 * Sigma::contig_edge_len) / Sigma::contig_window_len;
@@ -158,8 +160,109 @@ void ContigIO::load_contigs(const char* sigma_contigs_file_path, ContigMap* cont
 
 
 
-
+//Conservative R computation that remove 20% of the outlier in the assembly
+//This method only works for single sample assembly
 double compute_R(ContigMap* contigs) {
+	
+	double numerator = 0;
+	double denominator = 0;
+	
+	
+	double current_R = 0;
+	double max_R = 0.001;
+	//min_R should be positif
+	double min_R = 1;
+	
+	std::vector<double*>* contig_info = new std::vector<double*>();
+	int sample_index;
+	for (auto it = contigs->begin(); it != contigs->end(); ++it) {
+		Contig* contig = (*it).second;
+
+		if (contig->length() < 10000) continue;
+
+		//fprintf(stderr, " *** contig length %d",contig->length());
+		sample_index = 0;
+		//for (int sample_index = 0; sample_index < Sigma::num_samples; ++sample_index) {
+		int* read_counts = contig->read_counts()[sample_index];
+
+		double* c_info = new double[3];
+		
+		//Mean
+		double mean = 0.0;
+		for (int window_index = 0; window_index < contig->num_windows(); ++window_index) {
+			mean += read_counts[window_index];
+		}
+		mean /= contig->num_windows();
+		
+		
+		//Variance
+		double variance = 0.0;
+		for (int window_index = 0; window_index < contig->num_windows(); ++window_index) {
+			variance += (read_counts[window_index] - mean) * (read_counts[window_index] - mean);
+		}
+		variance /= contig->num_windows();
+
+		if(variance - mean > 0 && variance != mean){
+			c_info[0] = mean;
+			c_info[1] = variance;
+			//fprintf(stderr, "%f\t%f\n", mean, variance);
+			//Need to check for the division by zero
+			current_R = pow(mean, 2) / ( variance - mean);
+			c_info[2] = current_R;
+			contig_info->push_back(c_info);
+		}
+	       
+	}
+	//fprintf(stderr, "*** Size:\n");
+	//fprintf(stderr, "*** Size: %i\n", (int)contig_info->size());
+	
+	//Sort the contig info vector
+	std::sort (contig_info->begin(), contig_info->end(), sort_contig_R);
+	
+	
+	//Exclude the top/last 10% of the contig R values
+	int exluded_contig = (int) (contig_info->size() / 10);
+	std::vector<double*>::iterator it_start = contig_info->begin() + exluded_contig;
+	std::vector<double*>::iterator it_last = contig_info->end() - exluded_contig;
+	min_R = (*it_start)[2];
+	
+	double mean,variance;
+	for (std::vector<double*>::iterator it = it_start; it != it_last; ++it){
+		mean = (*it)[0];
+		variance = (*it)[1];
+		numerator += pow(mean, 4);
+		denominator += pow(mean, 2) * variance - pow(mean, 3);
+	}
+
+	
+	double least_square_R = numerator / denominator;
+	
+
+	double res = -1;
+	res = min_R;
+	
+	std::string r_estimation_file = Sigma::output_dir + "/r_estimate_value.dat";   
+	FILE* r_estimate = fopen(r_estimation_file.c_str(), "w");
+	fprintf(r_estimate, "%f\t%f\n", min_R, least_square_R);
+	fclose(r_estimate);
+	
+	fprintf(stderr, " *** Global R: min_R %f least square %f  max_R %f\n *** RES: %f\n", min_R, least_square_R, max_R, res);
+
+	//delete the vector
+	for (std::vector<double*>::iterator it = contig_info->begin(); it != contig_info->end(); ++it){
+		delete[] (*it);
+	}
+	delete contig_info;
+		
+	return res;
+}
+
+bool sort_contig_R (double* t, double* g) {
+	return (t[2] < g[2]);
+}
+
+//This function work for multi smple but may be very sensitive to contigs outlying R value  
+double compute_R_multi(ContigMap* contigs) {
 	
 	double numerator = 0;
 	double denominator = 0;
@@ -169,9 +272,8 @@ double compute_R(ContigMap* contigs) {
 	double max_R = 0.001;
 	//min_R should be positif
 	bool init_bin = false;
-	double min_R = 0;
+	double min_R = 1;
 	
-
 	for (auto it = contigs->begin(); it != contigs->end(); ++it) {
 		Contig* contig = (*it).second;
 
@@ -209,8 +311,9 @@ double compute_R(ContigMap* contigs) {
 				denominator += pow(mean, 2) * variance - pow(mean, 3);
 			}
 			
-
+			//Need to check for the division by zero
 			current_R = pow(mean, 2) / ( variance - mean);
+			
 			if(current_R > max_R){
 				max_R = current_R;
 			}
@@ -220,7 +323,6 @@ double compute_R(ContigMap* contigs) {
 				init_bin = true;
 			}
 		}
-		
 	}
 	
 

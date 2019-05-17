@@ -114,15 +114,18 @@ if($FLAG_USE_REF){
 		next;
 	    }
 	    my $seq;
-	    open(CHECK_REF, $strain) or die;
-	    my $header = <CHECK_REF>;
 	    my $is_plasmid = 0;
+	    if(index($strain, "XXX") == -1){
+		print STDERR " *** Open file $strain\n";
+		open(CHECK_REF, $strain) or die;
+		my $header = <CHECK_REF>;
+		
+		close(CHECK_REF);
 
-	    close(CHECK_REF);
-
-	    if($header =~ /plasmid/){
-		$is_plasmid = 1;
-		#print STDERR "PLASMID DETECTED $strain\n";
+		if($header =~ /plasmid/){
+		    $is_plasmid = 1;
+		    #print STDERR "PLASMID DETECTED $strain\n";
+		}
 	    }
 
 	    if(!$is_plasmid){
@@ -159,37 +162,50 @@ if($FLAG_USE_REF){
 
     #Select the best refrence genome for a species
     open(OUT, ">$out_dir/reference_length.dat");
+    my ($ref_genome_best, $best_count);
     foreach my $species (keys %species_to_ref_genome){
-	my $ref_genome_best;
-	my $best_count = 0;
+	$ref_genome_best = "NA";
+	$best_count = 0;
 	foreach my $ref_genome (keys %{$species_to_ref_genome{$species}}){
+	    next if(index($ref_genome, "XXX") != -1);#This is a reference obtain using kraken
 	    if (($species_to_ref_genome{$species}->{$ref_genome}) > $best_count){
 		$ref_genome_best = $ref_genome;
 		$best_count = ($species_to_ref_genome{$species}->{$ref_genome});
 	    }
 	}
-        
-	my $seq;
-	print STDERR " *** $opera_ms_dir $ref_genome_best\n";
-	open (REF_GENOME, "$ref_genome_best") or die;
-	<REF_GENOME>;
-	while(<REF_GENOME>){
-	    chomp $_;
-	    $seq .= $_;
+	############### NEED TO UPDATE
+	$seq_length = 3500000;
+	if($ref_genome_best ne "NA"){
+	    my $seq;
+	    #print STDERR " *** $opera_ms_dir $ref_genome_best\n";
+	    open (REF_GENOME, "$ref_genome_best") or die;
+	    <REF_GENOME>;
+	    while(<REF_GENOME>){
+		chomp $_;
+		$seq .= $_;
+	    }
+	    close(REF_GENOME);
+	    $seq_length = length($seq);
 	}
-	close(REF_GENOME);
-
-	$seq_length = length($seq);
-	print STDERR " *** length -> $seq_length -> $species_to_contigs_length{$species}\n";
-	if($species_to_contigs_length{$species} > $seq_length + ($seq_length * 0.1) and
-	   $seq_length > 1000000){
+	#####################
+	
+	#print STDERR " *** length -> $seq_length -> $species_to_contigs_length{$species}\n";
+	if(#$species_to_contigs_length{$species} > $seq_length + ($seq_length * 0.1) and
+	   $species_to_contigs_length{$species} > 1000000
+	   #$seq_length > 1000000
+	    ){
 	    print OUT $species . "\t" . $seq_length . "\t" . $species_to_contigs_length{$species} . "\t" . $ref_genome_best . "\n";
 	    $species_to_analyze{$species} = 1;
 	}
+	else{
+	    print STDERR $species . "\t" . $seq_length . "\t" . $species_to_contigs_length{$species} . "\t" . $ref_genome_best . "\n";
+	}
     }
     close(OUT);
-    
-    
+
+    #
+    #exit();
+    #
 }
 else{
     #Indentify cluster with potnetially multiple strains based on the cluster size
@@ -250,6 +266,12 @@ while(<REF_CLUS>){
 close(OUT);
 close(REF_CLUS);
 
+
+################3
+#print STDERR " **** Exit before creating single_strain_species.fa file\n";
+#exit();
+####################
+
 #Read the original contig sequence file and remove any contigs that belong to species with multiple strain
 my $prev_scaf;
 my $seq = "";
@@ -291,5 +313,4 @@ sub run_exe{
     print STDERR "\n".$exe."\n";#<STDIN>;
     print STDERR `$exe` if($run);
 }
-
 

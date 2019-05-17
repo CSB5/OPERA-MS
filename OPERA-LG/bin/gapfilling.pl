@@ -31,7 +31,9 @@ $start_time = time;
 my $edge_read_info_file = "$working_dir/../../long-read-mapping/edge_read_info.dat";
 my $long_read_mapping = "$working_dir/../../long-read-mapping/opera.map.sort.status";
 
-get_read_on_single_contig($working_dir, $long_read_mapping);
+#Actulally never used
+#get_read_on_single_contig($working_dir, $long_read_mapping);
+#
 
 run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --scaffold-file $assembly_scaffold_file --read-file $read_file --output-directory $working_dir");
 
@@ -268,6 +270,7 @@ sub split_scaffold_file{
 }
 
 
+#Extract read that maps to a single contig to avoid adding long-read errors on long contigs during racon
 sub get_read_on_single_contig{
     my ($working_dir, $status_maping_file) = @_;
     #print STDERR "get_read_on_single_contig  $working_dir $status_maping_file\n";<STDIN>;
@@ -429,7 +432,7 @@ sub get_paf_file{
 
     #Add the contigs for the same species
     if($flag_set_type eq "ALL"){
-	get_contig_in_species($scaffold_dir, \%contig_set_to_keep);
+	#get_contig_in_species(\%contig_set_to_keep, $scaffold_dir);
     }
     
     open(OUT, ">$paf_file");

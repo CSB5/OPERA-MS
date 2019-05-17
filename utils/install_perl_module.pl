@@ -22,7 +22,7 @@ check_module("Getopt::Long");
 sub check_module{
     my ($module) = @_;
     print STDERR " *** Check perl module $module\n";
-    system("perl -e 'use $module ' 2> tmp_module.str");
+    system("/usr/bin/perl -e 'use $module ' 2> tmp_module.str");
     open(F, "tmp_module.str");
     while(<F>){
 	if($_ ne ""){

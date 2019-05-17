@@ -222,7 +222,7 @@ while(<SCAFFOLDS>){
                 print OUTFILE $scaff_id . "\t$length\tNA\t";
             }
 	    #print STDERR " **** $scaf_name $length\n";
-            if ($length > 999){
+            if (1 || $length > 999){
                 
                 if (exists $cluster_to_species{$cluster_for_scaffold}){
 		    $species_info_line = "";

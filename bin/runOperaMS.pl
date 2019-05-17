@@ -200,6 +200,16 @@ while(<$opera_ms_cf>) {
 	    
 	    case "REF_CLUSTERING_OUTDIR"{
 	    }
+
+	    case "REF_REPEAT_DETECTION"{
+	    }
+
+	    case "DB_KRAKEN"{
+	    }
+	    case "KRAKEN_DIR" {
+	    }
+	    case "FILLED_SCAFF_LENGTH" {
+	    }
 	    
 	    else {
 		die "Config option: ".$config_option." unknown";
@@ -276,7 +286,7 @@ foreach $k (keys %LIB) {
 	$lib_name_ending_index = index($LIB{$k}, ".");#NEED TO UPDATE THAT TO AVOID PROBLEMS WITH DIRECTORY NAMES WITH .
 	$lib_name = substr($LIB{$k}, $lib_name_starting_index, $lib_name_ending_index - $lib_name_starting_index);
 	
-	$edges_file = $output_dir."/".$k."_bundles/clusters_contigs";
+	$edges_file = $output_dir."/".$k."_bundles/clusters_opera";#Use the mapping obtained at previous stage
 	#NEED TO CHANGE THAT STUFF !!!!	#$edges_file = $output_dir."/".$k."_bundles/clusters_".$lib_name;
 	$edges_files .= $edges_file.",";
 

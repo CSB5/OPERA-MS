@@ -91,6 +91,7 @@ foreach $cluster (keys %cluster_info){
 }
 
 #Reference genome repeat detection
+#NEED A FLAG TO AVOID REPEAT DETECTION USING REFERENCE
 if($nucmer_dir ne "NULL"){
     opendir(my $nuc_dir, $nucmer_dir) or die "NUCMER directory $nucmer_dir not found.\n";
     #A contig is defined as repeat is is mapping length over a genome is higher than 150%
@@ -204,5 +205,3 @@ foreach my $cluster (keys %cluster_info){
         }
     }
 }
-
-    

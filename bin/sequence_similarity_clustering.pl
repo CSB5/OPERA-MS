@@ -10,7 +10,7 @@ use Statistics::Basic qw(:all);
 #2. For all clusters with edges between them, check if they have similar reference genomes.
 #3. Recover edges between clusters in within the super clusters.
 #############################################################
-my ($inter_dir, $ref_map_folder, $contig_seq_file, $nb_process, $mash_ref, $opera_ms_dir, $mash_exe_dir, $mummer_dir) = @ARGV;
+my ($inter_dir, $ref_map_folder, $contig_seq_file, $nb_process, $mash_ref, $kraken_ref, $opera_ms_dir, $mash_exe_dir, $mummer_dir, $kraken_exe_dir) = @ARGV;
 
 my $PARSE_FILES_MASH = 1;
 my $PARSE_FILES_NUC = 1;
@@ -32,12 +32,13 @@ my $cluster_species_file = "$ref_map_folder/cluster_species.dat";
 my $super_cluster_file = "$ref_map_folder/super_cluster.dat";
 my $edges_between_clusters_file = "$ref_map_folder/edges_between_clusters";
 my $good_edges_file = "$ref_map_folder/edges_between_clusters_good";
+
 my $clusters_file = "$inter_dir/sigma/clusters";
 my $paired_edges_file = "$inter_dir/long-read-mapping/pairedEdges";
 my $paired_edges_file_above_thresh = "$inter_dir/long-read-mapping/pairedEdges_above_thresh";
 #
 #Need to update to multi sample assemblies
-my $short_edges_file = "$inter_dir/lib_1_bundles/clusters_contigs";
+my $short_edges_file = `ls $inter_dir/lib_1_bundles/clusters_*`;chop $short_edges_file;#"$inter_dir/lib_1_bundles/clusters_opera";
 #
 my $mash_dir = "$ref_map_folder/MASH/";
 #my $mash_ref = "$opera_ms_dir/genomeDB_Sketch.msh";
@@ -74,11 +75,61 @@ $start_time = time;
 if ($MERGE_CLUSTERS){
     merge_clusters(\%contig_info_, \%cluster_species_set_, \%super_cluster_species_set_, \%super_cluster_strain_set_);
     recover_edges(\%contig_info_);
+    #
+    #ADD annotation from kraken NEED TO UPDATE HE WHOLE CODE TO CHECK FOR KRAKEN DEPENDENCY
+    if($kraken_ref ne "NULL"){
+	run_kraken_annotation($contig_seq_file);
+	add_kraken_annotation(\%contig_info_, \%cluster_species_set_, "$ref_map_folder/KRAKEN_OUT/kraken.out.annot");
+    }
+    #
     export_info(\%contig_info_, \%cluster_species_set_, \%super_cluster_strain_set_);
 }
 $end_time = time;
 print STDERR "***  Cluster merging Elapsed time: " . ($end_time - $start_time) . "s\n";#<STDIN>;
 ###################################END################################
+
+sub run_kraken_annotation{
+    my ($contig_seq_file) = @_;
+    run_exe("mkdir $ref_map_folder/KRAKEN_OUT");
+    $kraken_out_file = "$ref_map_folder/KRAKEN_OUT/kraken.out";
+    #
+    #my $kraken_db = "/mnt/genomeDB/misc/softwareDB/kraken/minikraken_20171101_8GB_dustmasked";
+    run_exe("$kraken_exe_dir/kraken --threads $nb_process -db $kraken_ref --fasta-input --output $kraken_out_file $contig_seq_file 2> $kraken_out_file.log");
+    run_exe("$kraken_exe_dir/kraken-report --db $kraken_ref $kraken_out_file > $kraken_out_file.report 2> $kraken_out_file.report.log"); #<STDIN>;
+    run_exe("$opera_ms_dir/bin/kraken_bin_file.py -k $kraken_out_file -r $kraken_out_file.report -o $kraken_out_file.annot 2> $kraken_out_file.annot.log");#<STDIN>
+}
+
+sub add_kraken_annotation{
+    my ($contig_info, $cluster_species_set, $kraken_result_file) = @_;
+
+    open(FILE, $kraken_result_file);
+    while(<FILE>){
+	($contig, $species) = split(/\s+/, $_);
+	$contig_info{$contig}->{"KRAKEN"} = $species;
+    }
+    close(FILE);
+    open(OUT_K, ">$kraken_result_file.log");
+    my %annot_cluster = ();
+    foreach my $contig (keys %{$contig_info}){
+	$cluster = $contig_info->{$contig}->{"CLUSTER"};
+	#
+	next if(! defined $cluster);
+	
+	if(! exists $annot_cluster{$cluster}){
+	    $annot_cluster{$cluster} = 1;
+	    $annot_cluster{$cluster} = 0 if(@{$cluster_species_set->{$cluster}} + 0 == 0);
+	}
+	
+	if(! $annot_cluster{$cluster}){
+	    push(@{$cluster_species_set->{$cluster}}, "XXX/" . $contig_info{$contig}->{"KRAKEN"} . "/XXX") if(exists $contig_info{$contig}->{"KRAKEN"});
+	}
+	else{
+	    print OUT_K $contig . "\t" . $contig_info{$contig}->{"KRAKEN"} . "\t" . $cluster . "\t" . join(";", @{$cluster_species_set->{$cluster}}) . "\n";
+	}
+    }
+    close(OUT_K);
+}
+
 
 #Export some info about the clusters. The clusters file, the species file, and a super cluster file.
 sub export_info{
@@ -585,8 +636,8 @@ sub generate_clusters_species{
     
     foreach my $cluster_name (keys %{$cluster_info}){
 	#print STDERR " *** ".$cluster. "\t" . $cluster_name. "\n";
-	open(FILE, "sort -k3,3 -g $mash_dir/$cluster_name.dat |");
-	$cluster_species_set->{$cluster_name} = [];
+	open(FILE, "$mash_dir/$cluster_name.dat");
+	$cluster_species_set->{$cluster_name} = [];#Should be an array
 	$nb_prediction = 0;
 	while(<FILE>){
 	    @line = split(/\t/, $_);
@@ -711,7 +762,8 @@ sub run_mash_on_clusters{
     open(FILE, $contig_seq_file) or die "Could not open contigs file $contig_seq_file $!.\n";
     my ($contig_name, $contig_seq);
     $contig_size = 0;
-    
+
+    #Generation of the cluster fasta file
     my %cluster_length = ();
     my @tmp;my $cluster_name;my $contig_cluster;
     while(<FILE>){
@@ -729,7 +781,7 @@ sub run_mash_on_clusters{
 		    
 		}
 		
-		$contig_seq = $_."\n";
+		$contig_seq = $_ . "\n";
 		$contig_name = $tmp[0];
 		$contig_cluster = $contig_info->{$contig_name}->{"CLUSTER"};
 		$contig_size = 0;
@@ -737,7 +789,7 @@ sub run_mash_on_clusters{
 		#print STDERR "\n".$contig_seq;
             }
             else{
-		$contig_seq = $contig_seq.$_."\n";
+		$contig_seq = $contig_seq . $_ . "\n";
 	    }
         }
     }
@@ -755,7 +807,7 @@ sub run_mash_on_clusters{
     foreach my $clust (keys %{$cluster_info}){
 	#if(exists $cluster_info->{$clust}->{"OUT_FILE"}){
 	    #if ($cluster_length{$clust}->{"SIZE"} > 0){
-	print $CMD "${mash_exe_dir}mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa > $mash_dir/$clust.dat\n";
+	print $CMD "${mash_exe_dir}mash dist -d 0.90 $mash_ref $mash_dir/$clust.fa | sort -k3,3 -g > $mash_dir/$clust.dat\n";
 	    #}
 	#}
     }

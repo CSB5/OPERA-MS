@@ -34,19 +34,21 @@ ClusterGraph::ClusterGraph(ContigMap* contigs, EdgeQueue* edges) {
 		}
 
 		edges->pop();
+		/*
+		//Average linkage !!!
+		for(int i = 0; i < (int) edges->size(); ++i){
+			
+			if(edges->size() < num_edges_to_resort){
+				break;
+			}
 
-        for(int i = 0; i < (int) edges->size(); ++i){
-
-            if(edges->size() < num_edges_to_resort){
-                break;
-            }
-
-            Edge resort_edge = edges->top();
-            edges->pop();
-            resort_edge.computeDistanceCluster();
-
-            edges->push(resort_edge);
-        }
+			Edge resort_edge = edges->top();
+			edges->pop();
+			resort_edge.computeDistanceCluster();
+			
+			edges->push(resort_edge);
+		}
+		*/
 	}
 
 	updateClusters();

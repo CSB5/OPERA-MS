@@ -81,6 +81,13 @@ foreach $contig (sort {$contig_info{$b}->{"MEAN_READ_COUNT"} <=> $contig_info{$a
     $min_contig_cov = $contig_read_count;
 }
 
+#Indicate the contig that have been slected and their assignation
+open(OUT_W, ">$species_dir/window_distibution.dat");
+foreach $contig (keys %contig_info){
+    print OUT_W "" . join("\n", @{$contig_info{$contig}->{"WINDOW"}}) . "\n";
+}
+print STDERR " *** End window construction\n";
+#<STDIN>;
 
 #Identify suitable mode:
 #The highest coverage mode should contain large number of contigs as it must contigs of the histes abundance species
@@ -99,10 +106,10 @@ while($mode_accepted == -1){
     #Select the higher mode that covers a significant number of contigs
     print STDERR " *** MODE DETECTED @{$mode}\n";
 
-    if(@{$mode} == 1){
-	#update the smoothing parameter
-	next;
-    }
+    #if(@{$mode} == 1){
+    #update the smoothing parameter
+    #next;
+    #}
 
     for(my $i = @{$mode} - 1; $i >= 0; $i--){
 	
@@ -144,7 +151,8 @@ while($mode_accepted == -1){
 	
 	if((0.70 < ($mean_cov_in_dist  / $strain_mean_value) && ($mean_cov_in_dist  / $strain_mean_value) < 1.3) && #the mean estimate and the mean obtain by the confidance interval are comparable => good fitting
 	   # The sequence is big enough to be a complete genome for the first mode that should be a whole genomes, all the mode will lowest coverage value that pass the pervious test will be taken into account
-	   ($mode_accepted != -1 || $sequence_size_in_h_mode_distribution > $reference_size*0.5)){
+	   #($mode_accepted != -1 || $sequence_size_in_h_mode_distribution > $reference_size*0.5)){
+	   (($mode_accepted != -1 && $sequence_size_in_h_mode_distribution > 100000) || $sequence_size_in_h_mode_distribution > 500000)){
 
 	    $mode_accepted = 0 if($mode_accepted == -1);
 	    $mode_accepted++;
@@ -164,7 +172,8 @@ while($mode_accepted == -1){
 	}
     }
 }
-
+print STDERR " *** End mode detection\n";
+#<STDIN>;
 #exit(0);
 
 #filter contig base on reference mapping
@@ -197,6 +206,9 @@ foreach $strain_id (@strain_list){
     }
     close($OPERA_LG_CONFIG);
 }
+print STDERR " *** OPERA-LG data generation\n";
+#<STDIN>;
+
 
 #generate the strain contig file
 foreach $strain_id (@strain_list){
@@ -210,9 +222,11 @@ foreach $strain_id (@strain_list){
     while(<FILE>){
 	if($_ =~ m/>(.*)/){
 	    $c = $1;@tmp = split(/\s+/, $c);$c = $tmp[0];
+	    #print STDERR $c . "\n";
+	    #next if(! exists $contig_info{$c});
 	    #print STDERR " *** Contig name $c\n";<STDIN>;
 	    $seq = <FILE>;
-	    if($contig_info{$c}->{"STRAIN_ID"} ne "NA" && ($contig_info{$c}->{"STRAIN_ID"} == $strain_id || $contig_info{$c}->{"SHARED_CONTIG"})){
+	    if(exists $contig_info{$c}->{"STRAIN_ID"} && $contig_info{$c}->{"STRAIN_ID"} ne "NA" && ($contig_info{$c}->{"STRAIN_ID"} == $strain_id || $contig_info{$c}->{"SHARED_CONTIG"})){
 		print OUT ">$c\n";
 		print OUT $seq;
 	    }
@@ -225,7 +239,7 @@ foreach $strain_id (@strain_list){
 open(OUT, ">$species_dir/strain_cluster.dat");
 open(OUT_W, ">$species_dir/window_distibution.dat");
 foreach $contig (keys %contig_info){
-    if($contig_info{$contig}->{"STRAIN_ID"} ne "NA"){
+    if(exists $contig_info{$contig}->{"STRAIN_ID"} && $contig_info{$contig}->{"STRAIN_ID"} ne "NA"){
 	print OUT $contig . "\t" . $contig_info{$contig}->{"MEAN_READ_COUNT"} . "\t" . $contig_info{$contig}->{"STRAIN_ID"} . "\t" . $contig_info{$contig}->{"SHARED_CONTIG"} . "\n";
 	print OUT_W "" . join("\n", @{$contig_info{$contig}->{"WINDOW"}}) . "\n";
     }
@@ -237,10 +251,14 @@ print STDOUT "*** ***  Clustering $species_name Elapsed time: " . ($end_time - $
 
 #Run OPERA-LG
 foreach $strain_id (@strain_list){
-    #next if($strain_id == 1);
+    #next if($strain_id == 2);
     $start_time = time;
     $strain_dir = "$species_dir/STRAIN_$strain_id";
-    run_exe("$opera_ms_dir/OPERA-LG/bin/OPERA-LG $strain_dir/opera.config  > $strain_dir/log.txt");
+    #run_exe("$opera_ms_dir/OPERA-LG/bin/OPERA-LG $strain_dir/opera.config  > $strain_dir/log.txt");
+    run_exe("timeout 5m $opera_ms_dir/OPERA-LG/bin/OPERA-LG $strain_dir/opera.config  > $strain_dir/log.txt");
+    if(! -e "$strain_dir/scaffoldSeq.fasta"){#NEED TO IN THE MAKE FILE THE COMMAND TO GET THE FASTS OPERA-MS
+	run_exe("timeout 20m $opera_ms_dir/OPERA-LG/bin/OPERA-LG-fast $strain_dir/opera.config  > $strain_dir/log_fast.txt");
+    }
     $end_time = time;
     my @tmp = split(/\//,$species_dir);
     my $species_name = $tmp[-1];
@@ -253,9 +271,11 @@ get_contig_sequence("$species_dir/excluded_contigs.fa", "$species_dir/contigs.fa
 sub select_mode_contigs{
     my ($strain_id, $mode_value, $strain_mean_value, $window_count_in_h_mode_distribution) = @_;
     #Restimation of R
-    my $strain_var = int(variance ($window_count_in_h_mode_distribution));
+    #my $strain_var = int(variance ($window_count_in_h_mode_distribution));
+    my $strain_var = variance ($window_count_in_h_mode_distribution);
     #
     my $dispersion_value = ($strain_mean_value * $strain_mean_value) / ($strain_var - $strain_mean_value);
+    $dispersion_value = 500 if($strain_var - $strain_mean_value < 0);#Case of distribution very close to poisson => give a high dispertion value
     print STDERR "\n Strain $strain_id\n";
     print STDERR "DISPERTION VALUE " . $dispersion_value . " ESTIMATED USING " . $strain_mean_value . " AND VARIANCE |". $strain_var . "|\n";
     #Restimate the mean using the restimated R value
@@ -451,10 +471,11 @@ sub filter_mapping{
 	my $reference = `grep $species_name $species_dir/../reference_length.dat | cut -f4`;chop $reference;
 
 	run_exe("nucmer -p $species_dir/out $reference $species_dir/contigs.fa");
-	run_exe("show-coords -lrcT $species_dir/out.delta > $species_dir/contig.map");
+	run_exe("show-coords -lrcT $species_dir/out.delta | sort -k1,1 -n > $species_dir/contig.map");
     }
     
-    open(NUC_MAPPING, "sort -k1,1 -n $contig_mapping | ")
+    #open(NUC_MAPPING, "sort -k1,1 -n $contig_mapping | ")
+    open(NUC_MAPPING, "$contig_mapping")
 	or die "Parsing problem during read rescue using NUCMER mapping.\n";
     
     #skip the first four lines of the cluster-vs-cluster.txt file.
@@ -485,6 +506,7 @@ sub filter_mapping{
 	$length = $line[8];
 	$map_length = $line[5];
 	$start = $line[0];$end = $line[1];
+	$cov = $contig_info{$contig}->{"MEAN_READ_COUNT"};
 	#
 
 	next if($map_length < 400 || $percent_mapped < 20);
@@ -493,14 +515,18 @@ sub filter_mapping{
 	if(($prev_start <= $start && $end <= $prev_end) ||#current alignement is incuded the previous alignement
 	   ($start <= $prev_start && $prev_end <= $end)#previous alignement incuded the current alignement
 	    ){
-	    if($contig_info{$contig}->{"STRAIN_ID"} eq $contig_info{$prev_contig}->{"STRAIN_ID"} ){
+	    if($contig_info{$contig}->{"STRAIN_ID"} ne "NA" && $contig_info{$contig}->{"STRAIN_ID"} != 0 && $contig_info{$contig}->{"STRAIN_ID"} == $contig_info{$prev_contig}->{"STRAIN_ID"} ){
 		$filter_contig = $contig;
-		if($prev_length < $length){
+		$filter_cov = $cov;
+		#if($prev_length < $length){
+		if($prev_cov < $cov){
 		    $filter_contig = $prev_contig;
+		    $filter_cov = $prev_cov;
 		}
-		print OUT $filter_contig .  "\t" . $contig_info{$filter_contig}->{"LENGTH"} . "\t" . $contig_info{$filter_contig}->{"STRAIN_ID"} . "\t" . 
-		    $contig . "\t" . $start . "\t" . $end . "\t" .
-		    $prev_contig . "\t" . $prev_start . "\t" . $prev_end . "\n";#<STDIN>;
+		
+		print OUT $filter_contig .  "\t" . $contig_info{$filter_contig}->{"STRAIN_ID"} . "\t" . $filter_cov . "\t" . 
+		    $contig . "\t" . $start . "\t" . $end . "\t" . $cov . "\t" .
+		    $prev_contig . "\t" . $prev_start . "\t" . $prev_end . "\t" . $prev_cov . "\n";#<STDIN>;
 		$contig_info{$filter_contig}->{"STRAIN_ID"} = "NA";
 	    }
 	}
@@ -508,6 +534,7 @@ sub filter_mapping{
 	#Update the prev values
 	$prev_contig = $contig;
 	$prev_length = $length;
+	$prev_cov = $cov;
 	$prev_start = $start;
 	$prev_end = $end;
 	
@@ -533,7 +560,7 @@ sub get_contig_sequence{
 	    $ID = $line[0];
 	    
 	    
-	    if($contig_info->{$ID}->{"STRAIN_ID"} == 0 ){
+	    if(exists $contig_info->{$ID}->{"STRAIN_ID"} && ($contig_info->{$ID}->{"STRAIN_ID"} eq "NA" || $contig_info->{$ID}->{"STRAIN_ID"} == 0 )){
 		$print_flag = 1;
 		print OUT ">" . $ID . "\n";
 	    }

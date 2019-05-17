@@ -53,9 +53,6 @@ int Configure::KMER = 49;
 // multiple libraries variables
 vector<LibInfo*> *Configure::MULTI_LIB_INFO = new vector<LibInfo*>;
 
-//FAST
-//int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 100000;
-//int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 5;
 //SLOW
 int Configure::MAX_NUMBER_OF_PARTIAL_SCAFFOLDS = 10000000;
 int Configure::PERCENTAGE_OF_INCREASING_THRESHOLD_GRAPHS = 1;

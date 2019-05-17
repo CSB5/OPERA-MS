@@ -65,6 +65,7 @@ sub evaluate_cluster{
     $max_cluster_length = $cluster_eval_measure[2];
     #
     $max_cluster_outlier_fraction = $cluster_eval_measure[3];
+    $max_cluster_outlier_fraction_length = -1;
     $max_cluster_outlier_fraction_length = $cluster_eval_measure[4];
     print OUT_SUM $r_value . "\t" . 
 	$outlier_fraction . "\t" . $FRACTION_THRESHOLD  . "\t" . 

@@ -60,7 +60,7 @@ print STDERR " *** Starting the sequence extraction\n";#<STDIN>;
 #run_exe("rm -r $ana_dir");
 run_exe("rm -rf $ana_dir/LOG");
 run_exe("mkdir -p $ana_dir/LOG");
-my $run_racon_log = "$ana_dir/LOG/run_racon_log.txt";
+#my $run_racon_log = "$ana_dir/LOG/run_racon_log.txt";
 
 #Structure that indicate sequence required to fill the gap between the 2 contigs involvolved in the edge
 my %edge_info = ();
@@ -256,6 +256,7 @@ my %wrote_on_scaff = ();
 open(ERR_F, ">$ana_dir/edge_err");
 #open(ERR_F2, ">$ana_dir/edge_err_nf");
 my $wrote_on_scaff = ();
+my %scaff_not_filled = ();
 while(<READ_FILE>){
     
     chop $_;
@@ -281,7 +282,13 @@ while(<READ_FILE>){
 		    
 		    #Write read file on the scaffold directory
 		    $scaff_name = $edge_info{$edge_ID}->{"SCAFF"};
-
+		    next if(exists $scaff_not_filled{$scaff_name});
+		    if(! -d "$ana_dir/$scaff_name/"){
+			$scaff_not_filled{$scaff_name} = 1;
+			next;
+		    }
+		    
+		    
 		    #print STDERR " *** Process edge $edge_ID $scaff_name\n";
 		    
 		    if(! exists $wrote_on_scaff{$scaff_name}){
@@ -326,8 +333,7 @@ while(<READ_FILE>){
 	    }
 	}
 
-	#If the file is in fastq format, we assume that the sequence is on 
-	#one line.
+	#If the file is in fastq format, we assume that the sequence is on one line.
 	if($is_fastq){
 	    @line = split(/\s/, $_);
 	    $read_name = substr($line[0],1);
@@ -419,7 +425,7 @@ sub read_scaffold_file{
 sub write_filled_gap_scaffold{
     #need contig sequences, scaf file and smith-waterman mapping of contigs to consensus
     
-    #Get all the the contig sequence $contig_to_edge should have been already computed
+    #Get all the contig sequence $contig_to_edge should have been already computed
     my %all_contig_seq = ();
     open(FILE, $contig_file);
     print STDERR " *** Reading contig file\n";
@@ -457,7 +463,7 @@ sub write_filled_gap_scaffold{
 	if($line[0] =~ m />(.+)/){
 	    
 	    #Write the sequence of the last contig, sngleton scaffolds for which only contig_1 is not empty are skipted
-	    if($contig_2 ne ""){
+	    if(! exists $scaff_not_filled{$scaff_name} && $contig_2 ne ""){
 		open(OUT, ">$ana_dir/$scaff_name/pre_consensus.fa");
 		print OUT ">$scaff_name\n";
 		print OUT $scaff_seq."".(get_contig_seq($contig_2, $contig_2_ori, \%all_contig_seq))."\n";
@@ -479,6 +485,7 @@ sub write_filled_gap_scaffold{
 	    $contig_2 = "";
 	}
 	else{
+	    next if(exists $scaff_not_filled{$scaff_name});
 	    $contig_2 = $line[0];
 	    $contig_2_ori = "+"; $contig_2_ori = "-" if($line[1] eq "EB");
 	    @contig_order = sort($contig_1, $contig_2);
@@ -518,17 +525,6 @@ sub write_filled_gap_scaffold{
 		    #This a gap sequence
 		    #$gap_filled_stats = length($gap_seq);
 		    $contig_trimming_length = 0;
-		    #Formula for taking out edges that are way off from the predicted gap size. 
-		    #Formula works out to : skip filling if predicted or actual gap size is greater than 3 times the other by 250.
-		    # if((abs($gap_filled_stats - $gap_length)/(abs($gap_length + $gap_filled_stats) + 500)) < 0.5){
-		    #     print OUT $gap_seq;
-		    # }
-		    # 
-		    # elsif($gap_length > 0){
-		    #     print OUT ( "N" x $gap_length);
-		    #     $gap_diff_large = "BIGDIFF";
-		    # }
-		    # }
 		    
 		    #print STDERR " *** Fill gap seq\n$gap_seq\n";#<STDIN>;
 		    $scaff_seq .= $gap_seq;
@@ -553,12 +549,14 @@ sub write_filled_gap_scaffold{
 	}
     }
     #The last contig of the last scaffold
-    if($contig_2 ne ""){
+    #if($contig_2 ne ""){
+    if(! exists $scaff_not_filled{$scaff_name} && $contig_2 ne ""){
 	open(OUT, ">$ana_dir/$scaff_name/scaffolds.scaf");
 	print OUT ">$scaff_name\n";
 	print OUT $scaff_seq.(get_contig_seq($contig_2, $contig_2_ori, \%all_contig_seq))."\n";
 	close(OUT);
     }
+    #}
     
     close(FILE);
     close(OUT_S);
