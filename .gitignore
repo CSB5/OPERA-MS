@@ -13,7 +13,6 @@ utils/download
 utils/tmp_module.str
 OPERA-LG/bin/OPERA-LG-fast
 OPERA-LG/bin/get_paf_file.pl
-OPERA-LG/bin/run_scaffold_racon.pl
 OPERA-MS-1.1
 SIGMA/debug
 bin/OPERA-LG-fast
