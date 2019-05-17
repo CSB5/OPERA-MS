@@ -87,7 +87,7 @@ $start_time = time;
 my $first_filling =  "$tilling_dir/first_tilling";
 if(1 || ! -e $first_filling){
     $start_time = time;
-    run_exe("/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/run_mummer_large_ref.pl $consensus_file $tilling_dir/REF $contig_file $tilling_dir/QUERY $working_dir $first_filling.coords $nb_process");
+    run_exe("$opera_bin_dir/run_mummer_large_ref.pl $consensus_file $tilling_dir/REF $contig_file $tilling_dir/QUERY $working_dir $first_filling.coords $nb_process $mummer_dir");
     $end_time = time;
     print STDERR "***  Mapping (1) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
@@ -99,7 +99,7 @@ print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s
 
 get_contig_in_gap("$first_filling.paf", $contig_file, "$first_filling\_contig.fa");
 
-run_exe("/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/OPERA-LG/bin/Remap.py $first_filling.paf $consensus_file $first_filling\_contig.fa > $tilling_dir/first_remap.log");
+run_exe("$opera_bin_dir/Remap.py $first_filling.paf $consensus_file $first_filling\_contig.fa > $tilling_dir/first_remap.log");
 $end_time = time;
 print STDERR "***  Get first tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
 
@@ -119,7 +119,7 @@ close(FILE);
 my $second_tilling =  "$tilling_dir/second_tilling";
 if(1 || ! -e $second_tilling){
     $start_time = time;
-    run_exe("/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process");
+    run_exe("$opera_bin_dir/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process $mummer_dir");
     $end_time = time;
     print STDERR "***  Mapping (2) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
@@ -131,7 +131,7 @@ print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s
 
 get_contig_in_gap("$second_tilling.paf", $contig_file, "$second_tilling\_contig.fa");
     
-run_exe("/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/OPERA-LG/bin/Remap.py $second_tilling.paf $tilling_dir/consensus_remapped.fasta $second_tilling\_contig.fa > $tilling_dir/second_remap.log");
+run_exe("$opera_bin_dir/Remap.py $second_tilling.paf $tilling_dir/consensus_remapped.fasta $second_tilling\_contig.fa > $tilling_dir/second_remap.log");
 $end_time = time;
 print STDERR "***  Get second tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
 
