@@ -2,7 +2,6 @@
 use warnings;
 use Statistics::Basic qw(:all);
 
-require '/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_time.pl';
 #use strict;
 
 
@@ -13,6 +12,8 @@ require '/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-
 #3. Recover edges between clusters in within the super clusters.
 #############################################################
 my ($inter_dir, $ref_map_folder, $mapping_folder, $sigma_folder, $contig_seq_file, $nb_process, $mash_ref, $kraken_ref, $opera_ms_dir, $mash_exe_dir, $mummer_dir, $kraken_exe_dir) = @ARGV;
+
+require "$opera_ms_dir/test_time.pl";
 
 my $PARSE_FILES_MASH = 1;
 my $PARSE_FILES_NUC = 1;

@@ -9,11 +9,14 @@ use File::Spec::Functions qw(rel2abs);
 use File::Basename;
 use File::Which;
 
-require '/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_time.pl';
 
 my %opera_ms_option = ();
-$opera_ms_option{"OPERA_MS_DIR"} = dirname(rel2abs($0)) . "/";
+my $opera_ms_full_path = dirname(rel2abs($0)) . "/";
+$opera_ms_option{"OPERA_MS_DIR"} = $opera_ms_full_path;
+
 my %opera_ms_dependency = ();
+
+require "$opera_ms_full_path/test_time.pl";
 
 #Error message
 my $help_line = "To configure OPERA-MS, please look at the example config file inside the OPERA-MS folder.\nUsage: \n\npath/OPERA-MS/OPERA-MS.pl <config_file>\n\n";

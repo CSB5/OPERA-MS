@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 #use strict;
 use warnings;
-require '/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_time.pl';
 
 my ($working_dir, $contig_file, $read_file, $read_mapping_dir, $nb_process, $scaffold_length_threshold, $opera_bin_dir, $racon_dir,  $minimap2_dir, $mummer_dir) = @ARGV;
 
+require "$opera_bin_dir/../../test_time.pl";
 
 run_exe("mkdir $working_dir") if(! -d $working_dir);
 
