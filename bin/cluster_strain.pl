@@ -13,7 +13,7 @@ my @confidance_interval;
 
 my ($species_dir, $reference_size, $dispersion_value, $step_dispersion_value_increase, $opera_ms_dir) = @ARGV;
 
-my $coverage_file = "$species_dir/contigs_340_80";
+my $coverage_file = "$species_dir/contigs_window_cov";
 
 my %contig_info = ();
 
@@ -257,7 +257,7 @@ foreach $strain_id (@strain_list){
     #run_exe("$opera_ms_dir/OPERA-LG/bin/OPERA-LG $strain_dir/opera.config  > $strain_dir/log.txt");
     run_exe("timeout 5m $opera_ms_dir/OPERA-LG/bin/OPERA-LG $strain_dir/opera.config  > $strain_dir/log.txt");
     if(! -e "$strain_dir/scaffoldSeq.fasta"){#NEED TO IN THE MAKE FILE THE COMMAND TO GET THE FASTS OPERA-MS
-	run_exe("timeout 20m $opera_ms_dir/OPERA-LG/bin/OPERA-LG-fast $strain_dir/opera.config  > $strain_dir/log_fast.txt");
+	run_exe("$opera_ms_dir/OPERA-LG/bin/OPERA-LG-fast $strain_dir/opera.config  > $strain_dir/log_fast.txt");
     }
     $end_time = time;
     my @tmp = split(/\//,$species_dir);
@@ -397,12 +397,26 @@ sub compute_confidance_interval{
 
 sub compute_mode{
     my ($window_distrib) = @_;
+
+    #$window_distrib = [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10];
+
+    #Resolve weird problem
+    my @temp = @{$window_distrib}[0..@{$window_distrib}-2];#NEED TO FIX uninitiallized value push in the array
+    print STDERR $window_distrib[@{$window_distrib}-1];
+    #@temp = @{$window_distrib};
     
-    $R->set( 'values', $window_distrib);
+    #foreach $f (@temp){
+    #print STDERR "xx" . $f . "\n";
+    #}
+    
+    #$R->set( 'values', $window_distrib);
+    $R->set( 'values', \@temp);
     $R->set( 'span', 11);
     
     $a = $R->run(
 	## adpated from EDDA
+	q `print(sessionInfo())`,	
+	q `length(values)`,
 	q `dens <- density(values)`,
 	q `series <-dens$y`,
 	q `z <- embed(series, span)`,
@@ -470,8 +484,8 @@ sub filter_mapping{
 	my $species_name = $tmp[-1];
 	my $reference = `grep $species_name $species_dir/../reference_length.dat | cut -f4`;chop $reference;
 
-	run_exe("nucmer -p $species_dir/out $reference $species_dir/contigs.fa");
-	run_exe("show-coords -lrcT $species_dir/out.delta | sort -k1,1 -n > $species_dir/contig.map");
+	run_exe("nucmer -p $species_dir/out $reference $species_dir/contigs.fa 2> $species_dir/nucmer.log");
+	run_exe("show-coords -lrcT $species_dir/out.delta | sort -k1,1 -n > $species_dir/contig.map 2> $species_dir/coords.log");
     }
     
     #open(NUC_MAPPING, "sort -k1,1 -n $contig_mapping | ")

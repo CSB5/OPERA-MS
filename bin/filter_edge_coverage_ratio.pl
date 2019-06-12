@@ -33,8 +33,7 @@ for (my $i = 0; $i <=5; $i++){
     my $old_paired_edges_file = "$output_lr_directory/prefiltered_pairedEdges_i$i";
     my $filtered_paired_edges_file = "$output_lr_directory/pairedEdges_i$i"; 
     my $below_thresh_paired_edges_file = "$output_lr_directory/below_thresh_pairedEdges_i$i"; 
-    my $rename_cmd = "mv $filtered_paired_edges_file $old_paired_edges_file";
-    run_exe($rename_cmd);
+    run_exe("mv $filtered_paired_edges_file $old_paired_edges_file");
     
     my @edges = ();
     my @good_edges = ();
@@ -116,8 +115,7 @@ for (my $i = 0; $i <=5; $i++){
     close(OUT_FAIL);
 }
 
-my $cmd = "cat $output_lr_directory/pairedEdges_i0 $output_lr_directory/pairedEdges_i1 $output_lr_directory/pairedEdges_i2  $output_lr_directory/pairedEdges_i3 $output_lr_directory/pairedEdges_i4 $output_lr_directory/pairedEdges_i5 > $output_lr_directory/pairedEdges_above_thresh";
-run_exe ($cmd);
+run_exe ("cat $output_lr_directory/pairedEdges_i0 $output_lr_directory/pairedEdges_i1 $output_lr_directory/pairedEdges_i2  $output_lr_directory/pairedEdges_i3 $output_lr_directory/pairedEdges_i4 $output_lr_directory/pairedEdges_i5 > $output_lr_directory/pairedEdges_above_thresh");
 
 sub run_exe{
     my ($exe) = @_;

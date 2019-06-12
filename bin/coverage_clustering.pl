@@ -227,8 +227,7 @@ else{
 #Construct the strain level directory
 #And write the matrix file: contig to coverage information
 foreach my $species (keys %species_to_analyze){
-    my $cmd = "mkdir -p $out_dir/$species";
-    run_exe($cmd);
+    run_exe("mkdir -p $out_dir/$species");
     
     open(REF_CLUS, $ref_clusters) or die("File $ref_clusters not found\n");
     open (MATRIX, ">$out_dir/$species/matrix");
@@ -246,8 +245,7 @@ foreach my $species (keys %species_to_analyze){
     close(REF_CLUS);
     
     #Extract the edges and contigs from that cluster
-    $cmd = "perl $opera_ms_dir/bin/get_edges_from_matrix.pl $inter_dir $out_dir/$species/matrix $out_dir/$species $contigs_file 0 1000";
-    run_exe($cmd);
+    run_exe("perl $opera_ms_dir/bin/get_edges_from_matrix.pl $inter_dir $out_dir/$species/matrix $out_dir/$species $contigs_file 0 1000");
 }
 
     

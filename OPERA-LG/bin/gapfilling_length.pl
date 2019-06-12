@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 #use strict;
 use warnings;
+require '/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_time.pl';
 
-my ($working_dir, $contig_file, $read_file, $nb_process, $scaffold_length_threshold, $opera_bin_dir, $racon_dir,  $minimap2_dir, $mummer_dir) = @ARGV;
+my ($working_dir, $contig_file, $read_file, $read_mapping_dir, $nb_process, $scaffold_length_threshold, $opera_bin_dir, $racon_dir,  $minimap2_dir, $mummer_dir) = @ARGV;
 
 
 run_exe("mkdir $working_dir") if(! -d $working_dir);
@@ -11,8 +12,9 @@ my $start_time = time;
 my $start_time_begin = time;
 my $end_time;
 #split the scaffold
-my $assembly_scaffold_file = "$working_dir/../scaffolds.scaf";
-my $assembly_scaffold_seq_file = "$working_dir/../scaffoldSeq.fasta";
+my $opera_lr_dir = "$working_dir/../";
+my $assembly_scaffold_file = "$opera_lr_dir/scaffolds.scaf";
+my $assembly_scaffold_seq_file = "$opera_lr_dir/scaffoldSeq.fasta";
 
 #print STDERR " *** $assembly_scaffold_file\n";
 my %scaff_info = ();
@@ -20,7 +22,8 @@ my %singleton_contig = ();
 my @scaffold_order = ();
 split_scaffold_file($working_dir, $assembly_scaffold_file);
 $end_time = time;
-print STDERR "***  Construt scaffold dir Elapsed time: " . ($end_time - $start_time) . "s\n";
+#print STDERR "***  Construt scaffold dir Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_dir_constriction", ($end_time - $start_time));
 $start_time = time;
 
 ################oNLY FOR TESTIN PURPOSE
@@ -29,17 +32,18 @@ $start_time = time;
 ######################################3
 
 #Get the reads that map to a single contig
-my $edge_read_info_file = "$working_dir/../../long-read-mapping/edge_read_info.dat";
-my $long_read_mapping = "$working_dir/../../long-read-mapping/opera.map.sort.status";
+my $edge_read_info_file = "$read_mapping_dir/edge_read_info.dat";
+my $long_read_mapping = "$read_mapping_dir/opera.map.sort.status";
 
 #Actulally never used
 #get_read_on_single_contig($working_dir, $long_read_mapping);
 #
 
-run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --scaffold-file $assembly_scaffold_file --read-file $read_file --output-directory $working_dir");
+run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --opera-lr-dir $opera_lr_dir --read-file $read_file --output-directory $working_dir");
 
 $end_time = time;
-print STDERR "***  Identify read in gap and construt pre_consensus assembly Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_extract_read", ($end_time - $start_time));
+#print STDERR "***  Identify read in gap and construt pre_consensus assembly Elapsed time: " . ($end_time - $start_time) . "s\n";
 $start_time = time;
 
 
@@ -77,7 +81,8 @@ run_exe("cat $working_dir/*opera_scaffold_*/racon.fa | sed 's/Consensus_//' > $c
 #
 #
 $end_time = time;
-print STDERR "***  Consensus sequence creation Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_racon", ($end_time - $start_time));
+#print STDERR "***  Consensus sequence creation Elapsed time: " . ($end_time - $start_time) . "s\n";
 $start_time = time;
 
 #Perform the scaffold tilling to add back the high bp quality illumina contigs
@@ -88,20 +93,21 @@ my $first_filling =  "$tilling_dir/first_tilling";
 if(1 || ! -e $first_filling){
     $start_time = time;
     run_exe("$opera_bin_dir/run_mummer_large_ref.pl $consensus_file $tilling_dir/REF $contig_file $tilling_dir/QUERY $working_dir $first_filling.coords $nb_process $mummer_dir");
-    $end_time = time;
-    print STDERR "***  Mapping (1) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
+    #$end_time = time;
+    #print STDERR "***  Mapping (1) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
 
-$start_time = time;
+#$start_time = time;
 get_paf_file($assembly_scaffold_file, "$first_filling.coords", "$first_filling.paf", "ONLY_SCAFF_CONTIG");
-$end_time = time;
-print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s\n";
+#$end_time = time;
+#print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s\n";
 
 get_contig_in_gap("$first_filling.paf", $contig_file, "$first_filling\_contig.fa");
 
 run_exe("$opera_bin_dir/Remap.py $first_filling.paf $consensus_file $first_filling\_contig.fa > $tilling_dir/first_remap.log");
 $end_time = time;
-print STDERR "***  Get first tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_tilling_1", ($end_time - $start_time));
+#print STDERR "***  Get first tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
 
 #[minor change with previous version]
 #Potential rescue of pre-consensus files if the tilling failed => no contigs mapped to the scaffold may only happen to very short scaffolds
@@ -120,20 +126,21 @@ my $second_tilling =  "$tilling_dir/second_tilling";
 if(1 || ! -e $second_tilling){
     $start_time = time;
     run_exe("$opera_bin_dir/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process $mummer_dir");
-    $end_time = time;
-    print STDERR "***  Mapping (2) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
+    #$end_time = time;
+    #print STDERR "***  Mapping (2) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
 
-$start_time = time;
+#$start_time = time;
 get_paf_file($assembly_scaffold_file, "$second_tilling.coords", "$second_tilling.paf",  "ALL");
-$end_time = time;
-print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s\n";
+#$end_time = time;
+#print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s\n";
 
 get_contig_in_gap("$second_tilling.paf", $contig_file, "$second_tilling\_contig.fa");
     
 run_exe("$opera_bin_dir/Remap.py $second_tilling.paf $tilling_dir/consensus_remapped.fasta $second_tilling\_contig.fa > $tilling_dir/second_remap.log");
 $end_time = time;
-print STDERR "***  Get second tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
+#print STDERR "***  Get second tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_tilling_2", ($end_time - $start_time));
 
 #Rescue pre-consensus contigs if there is no valid tilling available for a given scaffold.
 #This can only happen if mummer does not remap the contigs mapped at the previous stage
@@ -422,7 +429,7 @@ sub get_paf_file{
     my $gap_length = 0;
     #my $IDENTITY_THRESHOLD = 0.97;
     #
-    my $IDENTITY_THRESHOLD = 0.85;#Low identy threshold to allows mapping of repeat contigs on gaps covered by low number of reads thereshold can be scaffold specific and dependent of the coverage => high threshold due to improve sequence quality
+    my $IDENTITY_THRESHOLD = 0.95;#Low identy threshold to allows mapping of repeat contigs on gaps covered by low number of reads thereshold can be scaffold specific and dependent of the coverage => high threshold due to improve sequence quality
     #
     my $COVERAGE_THRESHOLD = 0.90;
     my $previous_contig_name = "";

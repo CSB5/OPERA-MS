@@ -14,7 +14,8 @@ my $is_fastq = 0;
 GetOptions(
     "edge-file=s"    => \$edge_file_info,
     "contig-file=s"    => \$contig_file,
-    "scaffold-file=s" => \$scaffold_file,
+    "opera-lr-dir=s" => \$opera_lr_dir,
+    #"scaffold-file=s" => \$scaffold_file,
     "read-file=s"     => \$read_file,
     #
     "output-directory=s" => \$ana_dir,
@@ -28,9 +29,9 @@ if(!(-e $contig_file)){
     die "CONTIG FILE NOT FOUND \n";
 }	
 
-if(!(-e $scaffold_file)){
-    die "SCAFFOLD FILE NOT FOUND \n";
-}
+#if(!(-e $scaffold_file)){
+#    die "SCAFFOLD FILE NOT FOUND \n";
+#}
 
 if(!(-e $read_file)){
     die "READ FILE NOT FOUND \n";
@@ -76,6 +77,8 @@ my $nb_selected_edges = 0;
 my $cmp_multi_edge = 1;my $str_multi = "";
 
 #open(FILE, "head -n5 $scaffold_file |");
+my $contig_len_file = "$opera_lr_dir/contigs";
+my $scaffold_file = "$opera_lr_dir/scaffolds.scaf";
 read_scaffold_file($scaffold_file);
 
 print STDERR " *** Number of edges selected for gapfilling $nb_selected_edges\n";#<STDIN>;
@@ -87,8 +90,11 @@ my %contig_in_gap_to_extract = ();#list of contig for which the full sequence ne
 my %contig_in_gap_support = ();#To compute the support of the contig in the gap, the contig should be at least supported by 2 reads
 
 my %contig_lengths = ();	# Temporarily holds the contig lengths so as to compute the coordinates for cutting the reads
-my @tmp_path = split(/long-read-mapping/,$edge_file_info);
-my $contig_len_file = $tmp_path[0]."/opera_long_read/contigs";
+#
+#my @tmp_path = split(/long-read-mapping/,$edge_file_info);
+
+#
+
 open(LEN_FILE, $contig_len_file);
 <LEN_FILE>;
 while(<LEN_FILE>){

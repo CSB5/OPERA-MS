@@ -383,13 +383,13 @@ foreach $k (keys %LIB) {
 }
 
 
-print STDERR "\nRunning Opera on partitions ... \n"; 
-my $opera_output_folder = "$results_folder/scaffolds";
-unless (-d $opera_output_folder){
-    mkdir $opera_output_folder  or die $!;  
-}
-my $opera_config_file = "opera.config"; 
-&construct_opera_config_file($contigs_file, $opera_output_folder, \%opera_filtered_files, $opera_output_folder."/".$opera_config_file);
+#print STDERR "\nRunning Opera on partitions ... \n"; 
+#my $opera_output_folder = "$results_folder/scaffolds";
+#unless (-d $opera_output_folder){
+#    mkdir $opera_output_folder  or die $!;  
+#}
+#my $opera_config_file = "opera.config"; 
+#&construct_opera_config_file($contigs_file, $opera_output_folder, \%opera_filtered_files, $opera_output_folder."/".$opera_config_file);
 
 #Uncomment if you want to run OPERA.
 #run_exe("$opera_path $opera_output_folder/opera.config > $results_folder/log.txt");
@@ -431,7 +431,7 @@ sub bundleBAMs {
         print $config "\ncluster_increased_step=5\n"; 
         print $config "\nkmer=$kmer_size\n";
 	close($config); 
-        run_exe("$bundler_path $lib_bundles_dir/$lib_bundles_config");
+        run_exe("$bundler_path $lib_bundles_dir/$lib_bundles_config 2> bundler_log.err");
     }
 }
 

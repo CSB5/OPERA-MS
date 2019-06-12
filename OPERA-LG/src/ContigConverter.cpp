@@ -501,7 +501,8 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 			if( Configure::CALCULATE_ORI ){
 				int max = 0;
 				maxID = -1;
-				for( int i = 0; i < 5; i++ ){
+				//for( int i = 0; i < 5; i++ ){
+				for( int i = IN; i < FORWARD2; i++ ){//Avoid looking at error case as some library can have quite a lot of reads that maps at the same position
 					if( oriNum[ i ] > max ){
 						max = oriNum[ i ];
 						maxID = i;
@@ -509,6 +510,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 				}
 			
 				if( maxID == ERROR ){
+					
 					cout<<"ERROR: The orientation of reads is not \"in\", \"out\", neither \"forward\", Opera could not handle such orientation. "
 					    <<"Please check the mapping files. Please feel free to contact gaosong@nus.edu.sg for further support. \n";
 				

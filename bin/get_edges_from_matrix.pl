@@ -24,7 +24,7 @@ close(FILE);
 
 my $cmd = "mkdir $out_dir/pairedEdges_i0 $out_dir/pairedEdges_i1 $out_dir/pairedEdges_i2 $out_dir/pairedEdges_i3 $out_dir/pairedEdges_i4 $out_dir/pairedEdges_i5";
 `$cmd`;
-open (OUTMAP, ">", "$out_dir/contigs_340_80");
+open (OUTMAP, ">", "$out_dir/contigs_window_cov");
 open(OUT_0, , ">", "$out_dir/pairedEdges_i0/pairedEdges_i0");
 open(OUT_1, , ">", "$out_dir/pairedEdges_i1/pairedEdges_i1");
 open(OUT_2, , ">", "$out_dir/pairedEdges_i2/pairedEdges_i2");
@@ -39,10 +39,12 @@ open (WRONG, ">", "$out_dir/wrong");
 #my @edge_files = ("$inter_dir/reference_mapping/edges_between_clusters_good", "$inter_dir/long-read-mapping/pairedEdges");
 my @edge_files = ();
 push(@edge_files, "$inter_dir/reference_mapping/edges_between_clusters_good")if($FLAG_USE_REF);
-push(@edge_files, "$inter_dir/long-read-mapping/pairedEdges");
+push(@edge_files, "$inter_dir/read_mapping/pairedEdges");
 
 
-open (MAP, "$inter_dir/coverage_estimation/contigs_340_80");
+my @windows_file = glob("$inter_dir/coverage_estimation/contigs_*");
+my $windows_file = $windows_file[0];
+open (MAP, "$windows_file");
 my $header = <MAP>;
 print OUTMAP $header;
 while (<MAP>){

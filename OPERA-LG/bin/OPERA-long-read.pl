@@ -17,14 +17,14 @@ my $FLAG_FILTER_CONFLICTING_ALIGNEMENT = 0;
 my $min_opera_contig_size = 500;
 my $min_contig_size = 500;
 my $min_contig_size_for_gap_filling = 100;
-#Minimum fraction of contig mapped to be concider fully contained on the read
+#Minimum fraction of contig mapped to be considered fully contained on the read
 my $fraction = 0.9;
 my $fraction_in_gap = 0.8;
-#Minimum contig alignemnt length
-my $min_alignment_length = 400;#Allows to have partially mapped short contigs at the edge of reads and allows 
+#Minimum contig alignement length
+my $min_alignment_length = 400;#Allows to have partially mapped short contigs at the edge of reads
 #Used for 2 different purpose:
 #1) maximum overlap allowed between 2 mapped contigs
-#2) non-ovelapping sequences allowed on the contig and read to be concidered as a valide alignement
+#2) non-ovelapping sequences allowed on the contig and read to be concidered as a valid alignement
 my $overlap = 200;
 
 #my $mapper_extention 
