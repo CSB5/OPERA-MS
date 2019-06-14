@@ -459,7 +459,7 @@ sub setup_directory_path{
     #Make paths absolute if they are not already.
     $opera_ms_option->{"LONG_READ"} = $main_dir . $opera_ms_option->{"LONG_READ"} if(substr($opera_ms_option->{"LONG_READ"}, 0, 1) ne "/");
     $opera_ms_option->{"ILLUMINA_READ_1"} = $main_dir . $opera_ms_option->{"ILLUMINA_READ_1"} if(substr($opera_ms_option->{"ILLUMINA_READ_1"}, 0, 1) ne "/");
-    $opera_ms_option->{"ILLUMINA_READ_2"} = $main_dir . $opera_ms_option->{"ILLUMINA_READ_2"} if(substr($opera_ms_option->{"ILLUMINA_READ_1"}, 0, 1) ne "/");
+    $opera_ms_option->{"ILLUMINA_READ_2"} = $main_dir . $opera_ms_option->{"ILLUMINA_READ_2"} if(substr($opera_ms_option->{"ILLUMINA_READ_2"}, 0, 1) ne "/");
     if(defined $opera_ms_option->{"CONTIGS_FILE"}){
 	$opera_ms_option->{"CONTIGS_FILE"} = $main_dir . $opera_ms_option->{"CONTIGS_FILE"} if(substr($opera_ms_option->{"CONTIGS_FILE"}, 0, 1) ne "/");
     }

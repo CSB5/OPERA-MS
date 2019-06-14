@@ -38,12 +38,12 @@ open (WRONG, ">", "$out_dir/wrong");
 
 #my @edge_files = ("$inter_dir/reference_mapping/edges_between_clusters_good", "$inter_dir/long-read-mapping/pairedEdges");
 my @edge_files = ();
-push(@edge_files, "$inter_dir/reference_mapping/edges_between_clusters_good")if($FLAG_USE_REF);
+push(@edge_files, "$inter_dir/reference_clustering/edges_between_clusters_good")if($FLAG_USE_REF);
 push(@edge_files, "$inter_dir/read_mapping/pairedEdges");
-
 
 my @windows_file = glob("$inter_dir/coverage_estimation/contigs_*");
 my $windows_file = $windows_file[0];
+
 open (MAP, "$windows_file");
 my $header = <MAP>;
 print OUTMAP $header;
