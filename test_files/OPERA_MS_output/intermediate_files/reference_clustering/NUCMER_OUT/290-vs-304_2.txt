@@ -1,0 +1,6 @@
+/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output/intermediate_files/reference_clustering/NUCMER_OUT/290-vs-304.fa /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/../complete_ref_genomes/Klebsiella_pneumoniae_NTUH_K2044_uid59073/NC_012731.fna
+NUCMER
+
+[S1]	[E1]	[S2]	[E2]	[LEN 1]	[LEN 2]	[% IDY]	[LEN R]	[LEN Q]	[COV R]	[COV Q]	[TAGS]
+1	23646	1856913	1880557	23646	23645	99.56	23745	5248520	99.58	0.45	k99_2204	gi|238892256|ref|NC_012731.1|
+1	52990	4215729	4268718	52990	52990	99.43	52990	5248520	100.00	1.01	k99_375	gi|238892256|ref|NC_012731.1|

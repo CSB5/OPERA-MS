@@ -601,3 +601,7 @@ sub run_exe{
     print STDERR "\n".$exe."\n";#<STDIN>;
     print STDERR `$exe` if($run);
 }
+
+#add plot for each species representing the histogram of the window size, the density of the estimated neg-binom and the interval used for the window selection
+#perhaps can also add the assembly size
+#m=10;N <- rnbinom(n = 1000, size = 5, mu = m);g=density(N);plot(g);abline(v=m)

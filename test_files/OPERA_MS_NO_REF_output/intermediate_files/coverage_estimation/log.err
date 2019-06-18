@@ -1,0 +1,24 @@
+
+Reading config file: /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/coverage_estimation/cov_estimate.config
+
+Constructing edge bundles ... 
+
+Some edges files need to be computed:
+
+Computing /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/read_mapping/opera.bam
+mkdir OPERA_MS_NO_REF_output/intermediate_files/lib_1_bundles
+/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/../bin/bundler OPERA_MS_NO_REF_output/intermediate_files/lib_1_bundles/lib_1.ebconfig 2> OPERA_MS_NO_REF_output/intermediate_files/lib_1_bundles/bundler_log.err
+Step 1: Reading configuration file ...
+Time Taken: 0.081006 seconds
+Step 2: Reading contig file ...
+Time Taken: 7.66612 seconds
+Step 3: Reading mapping file ...
+Time Taken: 2.30358 seconds
+Step 4: Bundling paired-end reads ...
+Time Taken: 32.0826 seconds
+Total running time is 43 seconds 
+The results are in OPERA_MS_NO_REF_output/intermediate_files/lib_1_bundles
+Done!
+
+Running Sigma ... 
+/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/../bin/sigma OPERA_MS_NO_REF_output/intermediate_files/coverage_estimation/sigma.config 2> OPERA_MS_NO_REF_output/intermediate_files/coverage_estimation/sigma.err

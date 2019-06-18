@@ -1,0 +1,27 @@
+/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output/intermediate_files/opera_long_read/GAPFILLING/TILLING/REF/split_5.fa /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output/intermediate_files/opera_long_read/GAPFILLING/TILLING/QUERY/split_1.fa
+NUCMER
+>opera_scaffold_34 k99_11514 57428 23252
+26551 26681 23122 23252 5 5 0
+-62
+29
+0
+>opera_scaffold_34 k99_12359 57428 7797
+32054 32150 7797 7699 3 3 0
+-48
+-38
+0
+>opera_scaffold_33 k99_201 52511 3697
+48815 52511 1 3697 0 0 0
+0
+>opera_scaffold_34 k99_361 57428 25117
+32312 57428 25117 1 0 0 0
+0
+>opera_scaffold_34 k99_393 57428 226
+31877 32101 226 2 0 0 0
+0
+>opera_scaffold_34 k99_399 57428 26649
+1 26649 26649 1 0 0 0
+0
+>opera_scaffold_33 k99_415 52511 48771
+1 48771 1 48771 0 0 0
+0

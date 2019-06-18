@@ -1,0 +1,2184 @@
+Scaffolding a subgraph with 2 nodes...
+k99_90	id is 63 length is 79701.000000
+k99_557	-	k99_90	+	-80	58	5
+k99_557	id is 429 length is 99601.000000
+k99_557	-	k99_90	+	-80	58	5
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_188	id is 143 length is 11766.000000
+k99_188	-	k99_3342	+	-75	57	18
+k99_3342	id is 566 length is 5722.000000
+k99_188	-	k99_3342	+	-75	57	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_188	id is 143 length is 17488.000000
+k99_2807	-	k99_3342	-	-24	52	17
+k99_2807	id is 550 length is 15039.000000
+k99_2807	-	k99_3342	-	-24	52	17
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_188	id is 143 length is 32527.000000
+k99_1519	-	k99_2807	-	-79	58	11
+k99_1519	id is 521 length is 31006.000000
+k99_1519	-	k99_2807	-	-79	58	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_201	id is 155 length is 3697.000000
+k99_201	-	k99_415	-	-52	55	8
+k99_415	id is 325 length is 48771.000000
+k99_201	-	k99_415	-	-52	55	8
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_208	id is 161 length is 15241.000000
+k99_208	+	k99_3874	+	36	53	15
+k99_3874	id is 576 length is 7645.000000
+k99_208	+	k99_3874	+	36	53	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_208	id is 161 length is 22886.000000
+k99_3727	+	k99_3874	-	102	60	16
+k99_3727	id is 573 length is 27599.000000
+k99_3727	+	k99_3874	-	102	60	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_208	id is 161 length is 50485.000000
+k99_219	+	k99_3727	+	-21	52	17
+k99_219	id is 170 length is 128615.000000
+k99_219	+	k99_3727	+	-21	52	17
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_232	id is 182 length is 59207.000000
+k99_232	-	k99_4054	-	-84	58	16
+k99_4054	id is 583 length is 70382.000000
+k99_232	-	k99_4054	-	-84	58	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_275	id is 215 length is 25239.000000
+k99_275	+	k99_327	+	-74	57	32
+k99_327	id is 257 length is 8283.000000
+k99_275	+	k99_327	+	-74	57	32
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_305	id is 238 length is 42095.000000
+k99_305	+	k99_313	+	-35	53	6
+k99_313	id is 246 length is 20110.000000
+k99_305	+	k99_313	+	-35	53	6
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_305	id is 238 length is 62205.000000
+k99_305	-	k99_472	-	8	50	8
+k99_472	id is 366 length is 35977.000000
+k99_305	-	k99_472	-	8	50	8
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_341	id is 267 length is 30883.000000
+k99_341	+	k99_930	+	-74	57	9
+k99_930	id is 511 length is 24694.000000
+k99_341	+	k99_930	+	-74	57	9
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_341	id is 267 length is 55577.000000
+k99_341	-	k99_6379	+	51	55	14
+k99_6379	id is 623 length is 5504.000000
+k99_341	-	k99_6379	+	51	55	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_341	id is 267 length is 61081.000000
+k99_13336	-	k99_6379	-	-28	52	13
+k99_13336	id is 675 length is 690.000000
+k99_13336	-	k99_6379	-	-28	52	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_341	id is 267 length is 61771.000000
+k99_13336	+	k99_4280	+	-75	57	15
+k99_4280	id is 593 length is 8046.000000
+k99_13336	+	k99_4280	+	-75	57	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_341	id is 267 length is 69817.000000
+k99_4280	+	k99_910	+	-58	55	16
+k99_910	id is 510 length is 20322.000000
+k99_4280	+	k99_910	+	-58	55	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 296 length is 52990.000000
+k99_375	+	k99_5250	-	-89	59	10
+k99_5250	id is 606 length is 26851.000000
+k99_375	+	k99_5250	-	-89	59	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 296 length is 79841.000000
+k99_3355	-	k99_5250	+	68	56	13
+k99_3355	id is 568 length is 52347.000000
+k99_3355	-	k99_5250	+	68	56	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 296 length is 132188.000000
+k99_3355	+	k99_3807	-	24	52	12
+k99_3807	id is 575 length is 84946.000000
+k99_3355	+	k99_3807	-	24	52	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 296 length is 217134.000000
+k99_2305	-	k99_3807	+	-89	59	13
+k99_2305	id is 538 length is 14490.000000
+k99_2305	-	k99_3807	+	-89	59	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 296 length is 231624.000000
+k99_375	-	k99_4256	-	-89	59	10
+k99_4256	id is 592 length is 99217.000000
+k99_375	-	k99_4256	-	-89	59	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 296 length is 330841.000000
+k99_4256	-	k99_6212	-	230	73	10
+k99_6212	id is 620 length is 554.000000
+k99_4256	-	k99_6212	-	230	73	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 296 length is 331395.000000
+k99_6212	-	k99_6619	-	-89	59	7
+k99_6619	id is 625 length is 68717.000000
+k99_6212	-	k99_6619	-	-89	59	7
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_458	id is 353 length is 15541.000000
+k99_458	-	k99_701	-	-66	56	17
+k99_701	id is 503 length is 28895.000000
+k99_458	-	k99_701	-	-66	56	17
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_458	id is 353 length is 44436.000000
+k99_3347	-	k99_701	+	84	58	14
+k99_3347	id is 567 length is 70566.000000
+k99_3347	-	k99_701	+	84	58	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_467	id is 362 length is 17344.000000
+k99_11744	-	k99_467	-	-81	58	23
+k99_11744	id is 668 length is 5503.000000
+k99_11744	-	k99_467	-	-81	58	23
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_467	id is 362 length is 22847.000000
+k99_11744	+	k99_863	+	-86	58	23
+k99_863	id is 509 length is 38268.000000
+k99_11744	+	k99_863	+	-86	58	23
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_467	id is 362 length is 61115.000000
+k99_467	-	k99_684	+	-57	55	19
+k99_684	id is 501 length is 799.000000
+k99_467	-	k99_684	+	-57	55	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_467	id is 362 length is 61914.000000
+k99_684	+	k99_9248	+	239	73	16
+k99_9248	id is 651 length is 45922.000000
+k99_684	+	k99_9248	+	239	73	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_467	id is 362 length is 107836.000000
+k99_3977	-	k99_9248	-	99	59	20
+k99_3977	id is 580 length is 35365.000000
+k99_3977	-	k99_9248	-	99	59	20
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_467	id is 362 length is 143201.000000
+k99_2684	-	k99_863	-	113	61	16
+k99_2684	id is 547 length is 10211.000000
+k99_2684	-	k99_863	-	113	61	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_608	id is 475 length is 10762.000000
+k99_608	+	k99_7416	+	42	54	10
+k99_7416	id is 640 length is 1033.000000
+k99_608	+	k99_7416	+	42	54	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_608	id is 475 length is 11795.000000
+k99_7416	+	k99_7847	-	-86	58	12
+k99_7847	id is 644 length is 925.000000
+k99_7416	+	k99_7847	-	-86	58	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_608	id is 475 length is 12720.000000
+k99_6853	+	k99_7847	+	-72	57	11
+k99_6853	id is 631 length is 4684.000000
+k99_6853	+	k99_7847	+	-72	57	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_608	id is 475 length is 17404.000000
+k99_2596	+	k99_6853	+	-73	57	10
+k99_2596	id is 544 length is 5016.000000
+k99_2596	+	k99_6853	+	-73	57	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_608	id is 475 length is 22420.000000
+k99_1889	+	k99_2596	+	148	64	20
+k99_1889	id is 528 length is 1396.000000
+k99_1889	+	k99_2596	+	148	64	20
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_680	id is 500 length is 76963.000000
+k99_6716	-	k99_680	+	189	68	19
+k99_6716	id is 629 length is 43472.000000
+k99_6716	-	k99_680	+	189	68	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_699	id is 502 length is 40242.000000
+k99_699	-	k99_7251	+	-41	54	14
+k99_7251	id is 637 length is 60544.000000
+k99_699	-	k99_7251	+	-41	54	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_699	id is 502 length is 100786.000000
+k99_3287	-	k99_7251	-	-89	59	21
+k99_3287	id is 562 length is 32876.000000
+k99_3287	-	k99_7251	-	-89	59	21
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_705	id is 504 length is 29537.000000
+k99_3237	+	k99_705	-	-88	58	13
+k99_3237	id is 560 length is 65349.000000
+k99_3237	+	k99_705	-	-88	58	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_706	id is 505 length is 51008.000000
+k99_4076	-	k99_706	-	-64	56	19
+k99_4076	id is 586 length is 17692.000000
+k99_4076	-	k99_706	-	-64	56	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_744	id is 506 length is 38514.000000
+k99_11533	-	k99_744	+	101	60	19
+k99_11533	id is 666 length is 1386.000000
+k99_11533	-	k99_744	+	101	60	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_744	id is 506 length is 39900.000000
+k99_11533	+	k99_8450	+	-90	59	18
+k99_8450	id is 646 length is 3471.000000
+k99_11533	+	k99_8450	+	-90	59	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_744	id is 506 length is 43371.000000
+k99_1439	+	k99_8450	-	-79	58	21
+k99_1439	id is 519 length is 4095.000000
+k99_1439	+	k99_8450	-	-79	58	21
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_756	id is 507 length is 39893.000000
+k99_4237	+	k99_756	+	269	76	14
+k99_4237	id is 590 length is 24594.000000
+k99_4237	+	k99_756	+	269	76	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_758	id is 508 length is 2933.000000
+k99_2795	+	k99_758	+	-90	59	23
+k99_2795	id is 549 length is 891.000000
+k99_2795	+	k99_758	+	-90	59	23
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_758	id is 508 length is 3824.000000
+k99_10909	+	k99_2795	+	-77	57	24
+k99_10909	id is 660 length is 18176.000000
+k99_10909	+	k99_2795	+	-77	57	24
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_758	id is 508 length is 22000.000000
+k99_10909	-	k99_7049	-	45	54	23
+k99_7049	id is 635 length is 13154.000000
+k99_10909	-	k99_7049	-	45	54	23
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1084	id is 515 length is 43557.000000
+k99_1084	+	k99_3709	-	11	51	15
+k99_3709	id is 572 length is 23058.000000
+k99_1084	+	k99_3709	-	11	51	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1084	id is 515 length is 66615.000000
+k99_1084	-	k99_6327	+	-49	55	22
+k99_6327	id is 622 length is 19285.000000
+k99_1084	-	k99_6327	+	-49	55	22
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1084	id is 515 length is 85900.000000
+k99_5559	+	k99_6327	-	28	52	19
+k99_5559	id is 610 length is 81807.000000
+k99_5559	+	k99_6327	-	28	52	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1138	id is 516 length is 765.000000
+k99_1138	-	k99_4445	-	-51	55	25
+k99_4445	id is 595 length is 20595.000000
+k99_1138	-	k99_4445	-	-51	55	25
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1334	id is 517 length is 4485.000000
+k99_11697	-	k99_1334	-	-21	52	18
+k99_11697	id is 667 length is 46440.000000
+k99_11697	-	k99_1334	-	-21	52	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1478	id is 520 length is 8998.000000
+k99_11526	+	k99_1478	+	-47	54	13
+k99_11526	id is 665 length is 1917.000000
+k99_11526	+	k99_1478	+	-47	54	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1478	id is 520 length is 10915.000000
+k99_11526	-	k99_3235	+	-66	56	12
+k99_3235	id is 559 length is 28485.000000
+k99_11526	-	k99_3235	+	-66	56	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1478	id is 520 length is 39400.000000
+k99_3046	-	k99_3235	-	-87	58	15
+k99_3046	id is 555 length is 15279.000000
+k99_3046	-	k99_3235	-	-87	58	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1556	id is 522 length is 3752.000000
+k99_1556	+	k99_7286	-	-88	58	18
+k99_7286	id is 638 length is 512.000000
+k99_1556	+	k99_7286	-	-88	58	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1556	id is 522 length is 4264.000000
+k99_5627	-	k99_7286	+	-87	58	18
+k99_5627	id is 612 length is 5177.000000
+k99_5627	-	k99_7286	+	-87	58	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1556	id is 522 length is 9441.000000
+k99_15299	-	k99_5627	-	-70	57	21
+k99_15299	id is 686 length is 1065.000000
+k99_15299	-	k99_5627	-	-70	57	21
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1556	id is 522 length is 10506.000000
+k99_15299	+	k99_5577	-	-65	56	20
+k99_5577	id is 611 length is 1498.000000
+k99_15299	+	k99_5577	-	-65	56	20
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1556	id is 522 length is 12004.000000
+k99_1592	+	k99_5577	+	81	58	23
+k99_1592	id is 525 length is 549.000000
+k99_1592	+	k99_5577	+	81	58	23
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1571	id is 523 length is 17339.000000
+k99_1571	-	k99_2135	+	-82	58	15
+k99_2135	id is 533 length is 74601.000000
+k99_1571	-	k99_2135	+	-82	58	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1571	id is 523 length is 91940.000000
+k99_2033	-	k99_2135	-	-87	58	17
+k99_2033	id is 529 length is 4977.000000
+k99_2033	-	k99_2135	-	-87	58	17
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1577	id is 524 length is 20424.000000
+k99_1577	+	k99_7377	+	-85	58	15
+k99_7377	id is 639 length is 63930.000000
+k99_1577	+	k99_7377	+	-85	58	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1577	id is 524 length is 84354.000000
+k99_1577	-	k99_4027	-	60	56	12
+k99_4027	id is 581 length is 34961.000000
+k99_1577	-	k99_4027	-	60	56	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1577	id is 524 length is 119315.000000
+k99_2485	-	k99_4027	+	-80	58	13
+k99_2485	id is 540 length is 6434.000000
+k99_2485	-	k99_4027	+	-80	58	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1577	id is 524 length is 125749.000000
+k99_2485	+	k99_9266	-	-74	57	16
+k99_9266	id is 653 length is 35045.000000
+k99_2485	+	k99_9266	-	-74	57	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1577	id is 524 length is 160794.000000
+k99_2785	-	k99_9266	+	-85	58	14
+k99_2785	id is 548 length is 41753.000000
+k99_2785	-	k99_9266	+	-85	58	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1577	id is 524 length is 202547.000000
+k99_2785	+	k99_3064	+	256	75	21
+k99_3064	id is 556 length is 5524.000000
+k99_2785	+	k99_3064	+	256	75	21
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1577	id is 524 length is 208071.000000
+k99_3064	+	k99_6155	-	-29	53	19
+k99_6155	id is 619 length is 4589.000000
+k99_3064	+	k99_6155	-	-29	53	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1577	id is 524 length is 212660.000000
+k99_4252	+	k99_6155	+	-91	59	19
+k99_4252	id is 591 length is 18277.000000
+k99_4252	+	k99_6155	+	-91	59	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1730	id is 526 length is 685.000000
+k99_1730	-	k99_2603	-	27	52	24
+k99_2603	id is 545 length is 1435.000000
+k99_1730	-	k99_2603	-	27	52	24
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2045	id is 530 length is 10474.000000
+k99_13684	-	k99_2045	-	-88	58	10
+k99_13684	id is 676 length is 164710.000000
+k99_13684	-	k99_2045	-	-88	58	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2045	id is 530 length is 175184.000000
+k99_12869	-	k99_13684	-	-73	57	11
+k99_12869	id is 674 length is 18034.000000
+k99_12869	-	k99_13684	-	-73	57	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2045	id is 530 length is 193218.000000
+k99_12869	+	k99_6061	+	51	55	9
+k99_6061	id is 617 length is 9158.000000
+k99_12869	+	k99_6061	+	51	55	9
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2108	id is 532 length is 8345.000000
+k99_2108	+	k99_4341	-	-79	58	19
+k99_4341	id is 594 length is 1522.000000
+k99_2108	+	k99_4341	-	-79	58	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2108	id is 532 length is 9867.000000
+k99_2108	-	k99_4062	+	-54	55	21
+k99_4062	id is 585 length is 49607.000000
+k99_2108	-	k99_4062	+	-54	55	21
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2108	id is 532 length is 59474.000000
+k99_4062	+	k99_9396	-	-88	58	20
+k99_9396	id is 655 length is 81146.000000
+k99_4062	+	k99_9396	-	-88	58	20
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2218	id is 536 length is 1494.000000
+k99_10895	+	k99_2218	-	-46	54	24
+k99_10895	id is 659 length is 646.000000
+k99_10895	+	k99_2218	-	-46	54	24
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2537	id is 541 length is 82507.000000
+k99_2537	-	k99_3762	-	-88	58	19
+k99_3762	id is 574 length is 17010.000000
+k99_2537	-	k99_3762	-	-88	58	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2542	id is 542 length is 38558.000000
+k99_2542	-	k99_9387	+	-77	57	19
+k99_9387	id is 654 length is 170017.000000
+k99_2542	-	k99_9387	+	-77	57	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2665	id is 546 length is 3624.000000
+k99_2665	+	k99_5874	+	-53	55	16
+k99_5874	id is 615 length is 12478.000000
+k99_2665	+	k99_5874	+	-53	55	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2665	id is 546 length is 16102.000000
+k99_4915	-	k99_5874	-	61	56	15
+k99_4915	id is 601 length is 22229.000000
+k99_4915	-	k99_5874	-	61	56	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2827	id is 552 length is 48487.000000
+k99_2827	+	k99_5719	+	147	64	11
+k99_5719	id is 613 length is 741.000000
+k99_2827	+	k99_5719	+	147	64	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2827	id is 552 length is 49228.000000
+k99_2827	-	k99_7612	-	-74	57	15
+k99_7612	id is 642 length is 54390.000000
+k99_2827	-	k99_7612	-	-74	57	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3205	id is 558 length is 4411.000000
+k99_3205	-	k99_4048	-	-60	56	15
+k99_4048	id is 582 length is 32479.000000
+k99_3205	-	k99_4048	-	-60	56	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3205	id is 558 length is 36890.000000
+k99_4048	-	k99_4056	-	11	51	13
+k99_4056	id is 584 length is 5043.000000
+k99_4048	-	k99_4056	-	11	51	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3205	id is 558 length is 41933.000000
+k99_4056	-	k99_6024	+	294	79	16
+k99_6024	id is 616 length is 63611.000000
+k99_4056	-	k99_6024	+	294	79	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3258	id is 561 length is 22136.000000
+k99_3258	-	k99_9815	-	17	51	13
+k99_9815	id is 658 length is 5097.000000
+k99_3258	-	k99_9815	-	17	51	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3258	id is 561 length is 27233.000000
+k99_11113	-	k99_9815	+	-58	55	18
+k99_11113	id is 662 length is 4906.000000
+k99_11113	-	k99_9815	+	-58	55	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3258	id is 561 length is 32139.000000
+k99_11113	+	k99_12359	+	-66	56	16
+k99_12359	id is 672 length is 7797.000000
+k99_11113	+	k99_12359	+	-66	56	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3322	id is 564 length is 2126.000000
+k99_3322	-	k99_7069	+	-63	56	24
+k99_7069	id is 636 length is 688.000000
+k99_3322	-	k99_7069	+	-63	56	24
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3622	id is 570 length is 38202.000000
+k99_3622	-	k99_5788	-	-58	55	18
+k99_5788	id is 614 length is 38686.000000
+k99_3622	-	k99_5788	-	-58	55	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3622	id is 570 length is 76888.000000
+k99_5788	-	k99_6944	+	-87	58	14
+k99_6944	id is 633 length is 5385.000000
+k99_5788	-	k99_6944	+	-87	58	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3885	id is 577 length is 763.000000
+k99_3885	-	k99_6700	-	-53	55	18
+k99_6700	id is 628 length is 699.000000
+k99_3885	-	k99_6700	-	-53	55	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4159	id is 587 length is 32332.000000
+k99_4159	-	k99_4519	-	46	54	12
+k99_4519	id is 596 length is 32311.000000
+k99_4159	-	k99_4519	-	46	54	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4533	id is 597 length is 32093.000000
+k99_4533	-	k99_5268	+	-86	58	20
+k99_5268	id is 607 length is 9675.000000
+k99_4533	-	k99_5268	+	-86	58	20
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4638	id is 599 length is 13251.000000
+k99_4638	-	k99_5489	-	267	76	11
+k99_5489	id is 609 length is 9291.000000
+k99_4638	-	k99_5489	-	267	76	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4638	id is 599 length is 22542.000000
+k99_5489	-	k99_6629	+	-91	59	10
+k99_6629	id is 626 length is 179554.000000
+k99_5489	-	k99_6629	+	-91	59	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4649	id is 600 length is 599.000000
+k99_14899	+	k99_4649	+	-89	59	19
+k99_14899	id is 682 length is 889.000000
+k99_14899	+	k99_4649	+	-89	59	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4649	id is 600 length is 1488.000000
+k99_11422	+	k99_14899	+	293	79	22
+k99_11422	id is 663 length is 707.000000
+k99_11422	+	k99_14899	+	293	79	22
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4970	id is 603 length is 5932.000000
+k99_4970	+	k99_6953	-	-85	58	16
+k99_6953	id is 634 length is 18873.000000
+k99_4970	+	k99_6953	-	-85	58	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4970	id is 603 length is 24805.000000
+k99_4970	-	k99_5180	-	-87	58	18
+k99_5180	id is 605 length is 9769.000000
+k99_4970	-	k99_5180	-	-87	58	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4970	id is 603 length is 34574.000000
+k99_11058	-	k99_6953	+	-88	58	12
+k99_11058	id is 661 length is 76579.000000
+k99_11058	-	k99_6953	+	-88	58	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_4970	id is 603 length is 111153.000000
+k99_11058	+	k99_12867	+	-87	58	14
+k99_12867	id is 673 length is 8213.000000
+k99_11058	+	k99_12867	+	-87	58	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_6406	id is 624 length is 45336.000000
+k99_6406	-	k99_6849	-	-79	58	15
+k99_6849	id is 630 length is 16816.000000
+k99_6406	-	k99_6849	-	-79	58	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_8700	id is 648 length is 610.000000
+k99_14922	+	k99_8700	-	229	72	19
+k99_14922	id is 683 length is 1000.000000
+k99_14922	+	k99_8700	-	229	72	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_8700	id is 648 length is 1610.000000
+k99_8700	-	k99_9555	+	-92	59	19
+k99_9555	id is 656 length is 1323.000000
+k99_8700	-	k99_9555	+	-92	59	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_8700	id is 648 length is 2933.000000
+k99_8843	-	k99_9555	-	61	56	19
+k99_8843	id is 650 length is 667.000000
+k99_8843	-	k99_9555	-	61	56	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_8700	id is 648 length is 3600.000000
+k99_14922	-	k99_14987	-	105	60	18
+k99_14987	id is 684 length is 1090.000000
+k99_14922	-	k99_14987	-	105	60	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_14078	id is 679 length is 86906.000000
+k99_14078	-	k99_14865	-	-66	56	12
+k99_14865	id is 680 length is 92999.000000
+k99_14078	-	k99_14865	-	-66	56	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_14060	id is 2 length is 20354.000000
+k99_14060	+	k99_706	+	1025	152	11
+k99_706	id is 543 length is 68700.000000
+k99_14060	+	k99_706	+	1025	152	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_14060	id is 2 length is 89054.000000
+k99_3977	+	k99_4076	-	2897	339	10
+k99_467	id is 538 length is 153412.000000
+k99_3977	+	k99_4076	-	2897	339	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_14060	id is 2 length is 242466.000000
+k99_2684	+	k99_6865	+	1840	234	12
+k99_6865	id is 15 length is 14561.000000
+k99_2684	+	k99_6865	+	1840	234	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_14060	id is 2 length is 257027.000000
+k99_4054	-	k99_6865	-	817	131	11
+k99_232	id is 532 length is 129589.000000
+k99_4054	-	k99_6865	-	817	131	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_11799	id is 6 length is 95188.000000
+k99_11799	+	k99_7612	+	4923	542	5
+k99_11799	+	k99_2554	-	1220	172	10
+k99_2827	id is 561 length is 103618.000000
+k99_11799	+	k99_7612	+	4923	542	5
+k99_2554	-	k99_7612	+	511	101	10
+k99_2554	id is 35 length is 2913.000000
+k99_2554	-	k99_7612	+	511	101	10
+k99_11799	+	k99_2554	-	1220	172	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_11799	id is 6 length is 201719.000000
+k99_11799	-	k99_5559	+	1347	184	16
+k99_1084	id is 547 length is 167707.000000
+k99_11799	-	k99_5559	+	1347	184	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_11799	id is 6 length is 369426.000000
+k99_11697	+	k99_3709	+	1032	153	15
+k99_1334	id is 549 length is 50925.000000
+k99_11697	+	k99_3709	+	1032	153	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_11799	id is 6 length is 420351.000000
+k99_10909	+	k99_1334	+	4494	499	16
+k99_1334	-	k99_758	-	578	107	20
+k99_1334	-	k99_2795	-	3611	411	16
+k99_758	id is 546 length is 35154.000000
+k99_10909	+	k99_1334	+	4494	499	16
+k99_1334	-	k99_758	-	578	107	20
+k99_1334	-	k99_2795	-	3611	411	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 8 nodes...
+k99_11799	id is 6 length is 455505.000000
+k99_5719	+	k99_6700	-	1566	206	15
+k99_3885	+	k99_5719	-	801	130	16
+k99_2827	+	k99_3289	+	4278	477	6
+k99_2827	+	k99_6700	-	2490	299	10
+k99_2827	+	k99_3885	-	1736	223	11
+k99_3289	-	k99_5719	-	3384	388	11
+k99_3885	id is 566 length is 1462.000000
+k99_5719	+	k99_6700	-	1566	206	15
+k99_3885	+	k99_5719	-	801	130	16
+k99_2827	+	k99_6700	-	2490	299	10
+k99_2827	+	k99_3885	-	1736	223	11
+k99_3289	-	k99_6700	+	1059	155	17
+k99_3289	-	k99_3885	+	1745	224	14
+k99_3289	id is 30 length is 1968.000000
+k99_2827	+	k99_3289	+	4278	477	6
+k99_3289	-	k99_6700	+	1059	155	17
+k99_3289	-	k99_3885	+	1745	224	14
+k99_3289	-	k99_5719	-	3384	388	11
+k99_3289	+	k99_4649	-	4036	453	11
+k99_14899	+	k99_3289	-	4590	509	11
+k99_4649	id is 570 length is 2195.000000
+k99_3289	+	k99_4649	-	4036	453	11
+k99_14899	+	k99_3289	-	4590	509	11
+k99_4649	-	k99_6258	+	4806	530	8
+k99_14899	-	k99_6258	+	3953	445	13
+k99_11422	-	k99_6258	+	2896	339	15
+k99_11422	-	k99_92	-	4950	545	11
+k99_6258	id is 17 length is 566.000000
+k99_4649	-	k99_6258	+	4806	530	8
+k99_14899	-	k99_6258	+	3953	445	13
+k99_11422	-	k99_6258	+	2896	339	15
+k99_6258	+	k99_92	-	1437	193	15
+k99_4222	+	k99_6258	-	4427	492	6
+k99_4941	-	k99_6258	-	3165	366	15
+k99_92	id is 463 length is 931.000000
+k99_4222	+	k99_92	+	2008	250	12
+k99_4941	-	k99_92	+	718	121	19
+k99_6258	+	k99_92	-	1437	193	15
+k99_11422	-	k99_92	-	4950	545	11
+k99_4222	id is 23 length is 10806.000000
+k99_4222	+	k99_92	+	2008	250	12
+k99_4222	+	k99_6258	-	4427	492	6
+k99_4222	+	k99_4941	-	672	117	13
+k99_4941	id is 21 length is 571.000000
+k99_4941	-	k99_92	+	718	121	19
+k99_4941	-	k99_6258	-	3165	366	15
+k99_4222	+	k99_4941	-	672	117	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 9 nodes...
+k99_11799	id is 6 length is 474004.000000
+k99_4222	-	k99_8579	-	478	97	7
+k99_8579	id is 11 length is 826.000000
+k99_6063	-	k99_8579	+	4420	492	9
+k99_4222	-	k99_8579	-	478	97	7
+k99_3933	-	k99_8579	-	438	93	8
+k99_2990	-	k99_8579	-	367	86	8
+k99_6063	id is 18 length is 3749.000000
+k99_6063	-	k99_8579	+	4420	492	9
+k99_6063	+	k99_7069	+	4295	479	9
+k99_3322	+	k99_6063	-	2065	256	16
+k99_3933	id is 26 length is 47897.000000
+k99_3933	-	k99_8579	-	438	93	8
+k99_2990	id is 33 length is 2895.000000
+k99_2990	-	k99_8579	-	367	86	8
+k99_3322	id is 564 length is 2814.000000
+k99_6063	+	k99_7069	+	4295	479	9
+k99_3322	+	k99_6063	-	2065	256	16
+k99_4630	+	k99_7069	-	1265	176	19
+k99_3322	-	k99_4630	-	1936	243	19
+k99_14987	-	k99_3322	+	4133	463	12
+k99_14987	-	k99_7069	-	3459	395	12
+k99_14922	-	k99_7069	-	4792	529	9
+k99_4630	id is 22 length is 1470.000000
+k99_4630	-	k99_9555	+	3799	429	14
+k99_4630	-	k99_8700	-	3230	373	12
+k99_14987	-	k99_4630	+	593	109	18
+k99_14922	-	k99_4630	+	1896	239	15
+k99_4630	+	k99_7069	-	1265	176	19
+k99_3322	-	k99_4630	-	1936	243	19
+k99_8700	id is 573 length is 4690.000000
+k99_11514	-	k99_8700	+	2008	250	12
+k99_11514	-	k99_9555	-	677	117	17
+k99_11514	-	k99_14987	-	4122	462	9
+k99_11514	-	k99_14922	-	2909	340	15
+k99_4630	-	k99_9555	+	3799	429	14
+k99_4630	-	k99_8700	-	3230	373	12
+k99_14987	-	k99_4630	+	593	109	18
+k99_14987	-	k99_3322	+	4133	463	12
+k99_14987	-	k99_7069	-	3459	395	12
+k99_14922	-	k99_4630	+	1896	239	15
+k99_14922	-	k99_7069	-	4792	529	9
+k99_11514	id is 7 length is 23252.000000
+k99_11514	-	k99_8700	+	2008	250	12
+k99_11514	-	k99_9555	-	677	117	17
+k99_11514	-	k99_14987	-	4122	462	9
+k99_11514	-	k99_14922	-	2909	340	15
+Current maximum number of discordant edges is 0.
+total trial: 157
+Num of scaffolds is: -1
+Current maximum number of discordant edges is 1.
+total trial: 408
+Num of scaffolds is: -1
+Current maximum number of discordant edges is 2.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3940	id is 25 length is 78077.000000
+k99_1571	+	k99_3940	+	1081	158	18
+k99_1571	id is 552 length is 96917.000000
+k99_1571	+	k99_3940	+	1081	158	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3933	id is 26 length is 47897.000000
+k99_3933	+	k99_4915	-	316	81	20
+k99_2665	id is 560 length is 38331.000000
+k99_3933	+	k99_4915	-	316	81	20
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3703	id is 27 length is 32233.000000
+k99_3703	+	k99_6406	-	1503	200	18
+k99_6406	id is 572 length is 62152.000000
+k99_3703	+	k99_6406	-	1503	200	18
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3703	id is 27 length is 94385.000000
+k99_5180	-	k99_6849	+	377	87	14
+k99_4970	id is 571 length is 119366.000000
+k99_5180	-	k99_6849	+	377	87	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_3703	id is 27 length is 213751.000000
+k99_12867	+	k99_188	-	3382	388	11
+k99_1060	+	k99_12867	-	698	119	10
+k99_188	id is 529 length is 63533.000000
+k99_12867	+	k99_188	-	3382	388	11
+k99_1060	-	k99_188	-	2126	262	9
+k99_1060	id is 44 length is 523.000000
+k99_1060	-	k99_188	-	2126	262	9
+k99_1060	+	k99_12867	-	698	119	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3703	id is 27 length is 277807.000000
+k99_1519	+	k99_2420	+	2207	270	11
+k99_2420	id is 36 length is 77358.000000
+k99_1519	+	k99_2420	+	2207	270	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3565	id is 28 length is 66979.000000
+k99_1784	+	k99_3565	-	2277	277	13
+k99_1784	id is 41 length is 107268.000000
+k99_1784	+	k99_3565	-	2277	277	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3565	id is 28 length is 174247.000000
+k99_3041	+	k99_3565	+	1077	157	21
+k99_3041	id is 32 length is 304778.000000
+k99_3041	+	k99_3565	+	1077	157	21
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3565	id is 28 length is 479025.000000
+k99_1784	-	k99_4237	+	4537	503	9
+k99_756	id is 545 length is 64487.000000
+k99_1784	-	k99_4237	+	4537	503	9
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3565	id is 28 length is 543512.000000
+k99_3041	-	k99_3347	-	1089	158	12
+k99_458	id is 537 length is 115002.000000
+k99_3041	-	k99_3347	-	1089	158	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_3565	id is 28 length is 658514.000000
+k99_14866	-	k99_458	-	4498	499	5
+k99_14866	id is 1 length is 592.000000
+k99_14866	-	k99_458	-	4498	499	5
+k99_14866	+	k99_910	-	1030	153	13
+k99_341	id is 535 length is 90139.000000
+k99_14866	+	k99_910	-	1030	153	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2271	id is 37 length is 50778.000000
+k99_1405	-	k99_2271	-	1850	235	12
+k99_1405	id is 42 length is 35538.000000
+k99_1405	-	k99_2271	-	1850	235	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2271	id is 37 length is 86316.000000
+k99_1405	+	k99_3205	-	521	102	10
+k99_3205	id is 562 length is 105544.000000
+k99_1405	+	k99_3205	-	521	102	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2271	id is 37 length is 191860.000000
+k99_208	-	k99_2271	+	1852	235	14
+k99_208	id is 531 length is 179100.000000
+k99_208	-	k99_2271	+	1852	235	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2271	id is 37 length is 370960.000000
+k99_219	-	k99_6061	-	784	128	15
+k99_2045	id is 555 length is 202376.000000
+k99_219	-	k99_6061	-	784	128	15
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2271	id is 37 length is 573336.000000
+k99_3335	-	k99_6024	-	591	109	5
+k99_3335	id is 29 length is 517.000000
+k99_3335	-	k99_6024	-	591	109	5
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2204	id is 38 length is 23745.000000
+k99_2204	-	k99_4638	-	1234	173	12
+k99_4638	id is 569 length is 202096.000000
+k99_2204	-	k99_4638	-	1234	173	12
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_2204	id is 38 length is 225841.000000
+k99_6629	+	k99_7601	+	2917	341	17
+k99_5332	-	k99_6629	-	4217	471	20
+k99_7601	id is 14 length is 568.000000
+k99_6629	+	k99_7601	+	2917	341	17
+k99_5332	-	k99_7601	-	670	117	19
+k99_5332	id is 19 length is 4635.000000
+k99_5332	-	k99_7601	-	670	117	19
+k99_5332	-	k99_6629	-	4217	471	20
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2095	id is 40 length is 53666.000000
+k99_14865	-	k99_2095	-	1092	159	19
+k99_14078	id is 574 length is 179905.000000
+k99_14865	-	k99_2095	-	1092	159	19
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_529	id is 136 length is 20379.000000
+k99_529	-	k99_557	-	1028	152	5
+k99_90	id is 528 length is 179302.000000
+k99_529	-	k99_557	-	1028	152	5
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_505	id is 153 length is 82046.000000
+k99_182	-	k99_505	+	1308	180	3
+k99_182	id is 389 length is 65410.000000
+k99_182	-	k99_505	+	1308	180	3
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_411	id is 218 length is 17377.000000
+k99_374	+	k99_411	+	1371	187	6
+k99_374	id is 243 length is 65391.000000
+k99_374	+	k99_411	+	1371	187	6
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_233	id is 350 length is 109895.000000
+k99_129	-	k99_233	-	462	96	10
+k99_129	id is 435 length is 14397.000000
+k99_129	-	k99_233	-	462	96	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 536 length is 400112.000000
+k99_5627	+	k99_6619	+	4678	517	10
+k99_15299	+	k99_6619	+	3634	413	11
+k99_5577	-	k99_6619	+	2129	262	17
+k99_1592	-	k99_6619	+	1454	195	17
+k99_1556	id is 551 length is 12553.000000
+k99_5627	+	k99_6619	+	4678	517	10
+k99_15299	+	k99_6619	+	3634	413	11
+k99_5577	-	k99_6619	+	2129	262	17
+k99_1592	-	k99_6619	+	1454	195	17
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_705	id is 542 length is 94886.000000
+k99_3237	-	k99_7377	-	1358	185	7
+k99_1577	id is 553 length is 230937.000000
+k99_3237	-	k99_7377	-	1358	185	7
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_744	id is 544 length is 47466.000000
+k99_6687	-	k99_744	-	1178	167	8
+k99_6687	id is 16 length is 4796.000000
+k99_6687	-	k99_744	-	1178	167	8
+k99_3258	+	k99_6687	-	4223	472	13
+k99_3258	id is 563 length is 39936.000000
+k99_3258	+	k99_6687	-	4223	472	13
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2108	id is 556 length is 140620.000000
+k99_3089	+	k99_4341	+	429	92	19
+k99_2108	+	k99_3089	-	1988	248	17
+k99_3089	id is 31 length is 5963.000000
+k99_3089	+	k99_4341	+	429	92	19
+k99_2108	+	k99_3089	-	1988	248	17
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2108	id is 556 length is 146583.000000
+k99_2542	+	k99_9396	+	539	103	7
+k99_2542	id is 559 length is 208575.000000
+k99_2542	+	k99_9396	+	539	103	7
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3622	id is 565 length is 82273.000000
+k99_4519	-	k99_6944	-	610	111	16
+k99_4159	id is 567 length is 64643.000000
+k99_4519	-	k99_6944	-	610	111	16
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_4533	id is 568 length is 41768.000000
+k99_13908	-	k99_5268	-	3597	409	5
+k99_13908	id is 3 length is 601.000000
+k99_13908	-	k99_5268	-	3597	409	5
+k99_13908	+	k99_15124	-	433	93	6
+k99_15124	id is 0 length is 726.000000
+k99_13908	+	k99_15124	-	433	93	6
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_627	id is 57 length is 652.000000
+k99_351	-	k99_627	-	4141	464	8
+k99_351	id is 262 length is 4816.000000
+k99_351	-	k99_627	-	4141	464	8
+k99_351	-	k99_626	-	924	142	14
+k99_626	id is 58 length is 652.000000
+k99_351	-	k99_626	-	924	142	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_493	id is 162 length is 540.000000
+k99_196	-	k99_493	-	2576	307	10
+k99_196	id is 378 length is 578.000000
+k99_196	-	k99_493	-	2576	307	10
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1730	id is 554 length is 2120.000000
+k99_1730	+	k99_2218	+	320	82	24
+k99_10895	+	k99_2603	-	2651	315	17
+k99_10895	+	k99_1730	-	1879	237	17
+k99_2218	-	k99_2603	-	1091	159	23
+k99_2218	id is 557 length is 2140.000000
+k99_1730	+	k99_2218	+	320	82	24
+k99_10895	+	k99_2603	-	2651	315	17
+k99_10895	+	k99_1730	-	1879	237	17
+k99_2218	-	k99_2603	-	1091	159	23
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_2537	id is 0 length is 99517.000000
+k99_3762	-	k99_4445	+	5661	616	8
+k99_1138	id is 2 length is 21360.000000
+k99_3762	-	k99_4445	+	5661	616	8
+k99_4445	+	k99_7049	+	5585	608	14
+k99_11799	id is 492 length is 510805.000000
+k99_4445	+	k99_7049	+	5585	608	14
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2537	id is 0 length is 631682.000000
+k99_2537	+	k99_2665	+	5611	611	6
+k99_3933	id is 495 length is 86228.000000
+k99_2537	+	k99_2665	+	5611	611	6
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_1478	id is 1 length is 54679.000000
+k99_3046	+	k99_705	+	10768	1126	2
+k99_705	id is 506 length is 325823.000000
+k99_3046	+	k99_705	+	10768	1126	2
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_699	id is 3 length is 133662.000000
+k99_3287	+	k99_680	-	5209	570	11
+k99_680	id is 4 length is 120435.000000
+k99_3287	+	k99_680	-	5209	570	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_699	id is 3 length is 254097.000000
+k99_699	+	k99_8450	-	9771	1027	6
+k99_1439	-	k99_699	-	5412	591	7
+k99_744	id is 507 length is 92198.000000
+k99_699	+	k99_8450	-	9771	1027	6
+k99_1439	-	k99_699	-	5412	591	7
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_361	id is 277 length is 25117.000000
+k99_361	+	k99_399	+	6323	682	6
+k99_399	id is 303 length is 26649.000000
+k99_361	+	k99_399	+	6323	682	6
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 3 nodes...
+k99_432	id is 325 length is 25998.000000
+k99_273	-	k99_432	+	6144	664	3
+k99_273	id is 211 length is 10570.000000
+k99_273	-	k99_432	+	6144	664	3
+k99_273	+	k99_374	+	5221	572	5
+k99_411	id is 503 length is 82768.000000
+k99_273	+	k99_374	+	5221	572	5
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_14060	id is 491 length is 386616.000000
+k99_14060	-	k99_2420	-	5676	617	11
+k99_3703	id is 496 length is 355165.000000
+k99_14060	-	k99_2420	-	5676	617	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_14060	id is 491 length is 741781.000000
+k99_2095	-	k99_3703	+	5605	610	7
+k99_2095	id is 500 length is 233571.000000
+k99_2095	-	k99_3703	+	5605	610	7
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_3940	id is 494 length is 174994.000000
+k99_3940	+	k99_930	-	7242	774	2
+k99_3565	id is 497 length is 749245.000000
+k99_3940	+	k99_930	-	7242	774	2
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2204	id is 499 length is 231044.000000
+k99_2108	+	k99_5332	-	9068	956	9
+k99_4341	-	k99_7601	-	13177	1367	3
+k99_4341	-	k99_5332	-	7523	802	11
+k99_3089	-	k99_7601	-	6196	669	6
+k99_2108	id is 508 length is 355158.000000
+k99_2108	+	k99_5332	-	9068	956	9
+k99_4341	-	k99_7601	-	13177	1367	3
+k99_4341	-	k99_5332	-	7523	802	11
+k99_3089	-	k99_7601	-	6196	669	6
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_2204	id is 499 length is 586202.000000
+k99_2204	+	k99_4533	-	8594	909	3
+k99_4533	id is 510 length is 43095.000000
+k99_2204	+	k99_4533	-	8594	909	3
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_375	id is 505 length is 412665.000000
+k99_1556	-	k99_6853	+	13630	1413	2
+k99_1556	-	k99_2596	+	8518	901	6
+k99_1556	-	k99_1889	+	6701	720	11
+k99_608	id is 5 length is 23816.000000
+k99_1556	-	k99_6853	+	13630	1413	2
+k99_1556	-	k99_2596	+	8518	901	6
+k99_1556	-	k99_1889	+	6701	720	11
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+
+Scaffolding a subgraph with 2 nodes...
+k99_9603	id is 488 length is 853.000000
+k99_11961	+	k99_9603	-	5916	641	9
+k99_11961	id is 489 length is 521.000000
+k99_11961	+	k99_9603	-	5916	641	9
+Current maximum number of discordant edges is 0.
+Num of scaffolds is: 1
+Starting separating scaffolds...
+Finish separating scaffolds
+Updating related edges of assembled scaffolds...
+Finish current subgraph.
+

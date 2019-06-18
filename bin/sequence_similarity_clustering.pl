@@ -990,8 +990,8 @@ sub check_reference_position{
    my @positions_reference;
    my ($contig, $percent_mapped, $index);
    for (my $i=0; $i < $number_of_files; $i++){
-        open(NUC_MAPPING, "$nucmer_dir/$mapfile_name\_$i.txt")
-        or die "Parsing problem during read rescue using NUCMER mapping.\n";
+       open(NUC_MAPPING, "$nucmer_dir/$mapfile_name\_$i.txt")
+	   or die "Parsing problem during read rescue using NUCMER mapping.\n";
 
         #skip the first four lines of the cluster-vs-cluster.txt file.
         <NUC_MAPPING>;

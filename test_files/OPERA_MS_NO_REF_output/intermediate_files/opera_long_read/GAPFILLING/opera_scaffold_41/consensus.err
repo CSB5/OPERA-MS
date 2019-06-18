@@ -1,0 +1,39 @@
+
+mkdir /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41/
+mkdir: cannot create directory `/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41/': File exists
+
+
+/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/..//utils//minimap2 --cs=short -w5 -m0 /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41//pre_consensus.fa /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41//POOL.fastq > /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41//pre_consensus.fa.filtered.paf
+[M::mm_idx_gen::0.008*0.89] collected minimizers
+[M::mm_idx_gen::0.014*1.24] sorted minimizers
+[M::main::0.014*1.24] loaded/built the index for 1 target sequence(s)
+[M::mm_mapopt_update::0.015*1.22] mid_occ = 3
+[M::mm_idx_stat] kmer size: 15; skip: 5; is_hpc: 0; #seq: 1
+[M::mm_idx_stat::0.016*1.22] distinct minimizers: 11361 (99.53% are singletons); average occurrences: 1.005; average spacing: 2.935
+[M::worker_pipeline::0.141*2.44] mapped 32 sequences
+[M::main] Version: 2.11-r797
+[M::main] CMD: /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/..//utils//minimap2 --cs=short -w5 -m0 /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41//pre_consensus.fa /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41//POOL.fastq
+[M::main] Real time: 0.146 sec; CPU: 0.350 sec
+
+*** Map read in gap Elapsed time: 0s
+
+sh /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41//racon.fa.sh
+[09:36:50 main] Using PAF for input alignments. (/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_41//pre_consensus.fa.filtered.paf)
+[09:36:50 main] Loading reads.
+[09:36:50 main] Hashing qnames.
+[09:36:50 main] Parsing the overlaps file.
+[09:36:50 main] Unique overlaps will be filtered on the fly.
+[09:36:50 main] Overlaps will be fully aligned.
+[09:36:50 ConsensusFromOverlaps] Running consensus.
+[09:36:50 ConsensusFromOverlaps] Separating overlaps to individual contigs.
+[09:36:50 ConsensusFromOverlaps] In total, there are 1 contigs for consensus, each containing:
+[09:36:50 ConsensusFromOverlaps] 	[0] opera_scaffold_41 32 alignments, contig len: 33522
+
+[09:36:50 ConsensusFromOverlaps] Started processing contig 1 / 1 (100.00%): opera_scaffold_41
+[09:36:50 ConsensusFromOverlaps] (thread_id = 0) Aligning overlaps for contig 1 / 1 (100.00%): opera_scaffold_41                       
+[09:36:50 AlignOverlaps] Aligning overlap: 0 / 31 (3.23%), skipped 0 / 31 (0.00%)[09:36:50 AlignOverlaps] Aligning overlap: 4 / 31 (16.13%), skipped 0 / 31 (0.00%)[09:36:50 AlignOverlaps] Aligning overlap: 11 / 31 (38.71%), skipped 0 / 31 (0.00%)[09:36:50 AlignOverlaps] Aligning overlap: 18 / 31 (61.29%), skipped 0 / 31 (0.00%)[09:36:50 AlignOverlaps] Aligning overlap: 20 / 31 (67.74%), skipped 0 / 31 (0.00%)[09:36:50 AlignOverlaps] Aligning overlap: 25 / 31 (83.87%), skipped 0 / 31 (0.00%)
+[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 500 bp to 999 bp (1.49%), coverage: 1x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 3500 bp to 3999 bp (10.44%), coverage: 1x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 5500 bp to 5999 bp (16.41%), coverage: 1x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 9000 bp to 9499 bp (26.85%), coverage: 1x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 11500 bp to 11999 bp (34.31%), coverage: 1x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 14500 bp to 14999 bp (43.26%), coverage: 2x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 16500 bp to 16999 bp (49.22%), coverage: 4x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 19500 bp to 19999 bp (58.17%), coverage: 6x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 21000 bp to 21499 bp (62.65%), coverage: 11x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 23000 bp to 23499 bp (68.61%), coverage: 10x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 24500 bp to 24999 bp (73.09%), coverage: 11x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 26000 bp to 26499 bp (77.56%), coverage: 14x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 27500 bp to 27999 bp (82.04%), coverage: 11x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 28500 bp to 28999 bp (85.02%), coverage: 9x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 30500 bp to 30999 bp (90.99%), coverage: 7x[09:36:50 CreateConsensusAln] (thread_id = 0) Processing window: 32500 bp to 32999 bp (96.95%), coverage: 5x[09:36:50 CreateConsensusAln] Batch checkpoint: Performed consensus on all windows, joining the windows now.
+[09:36:50 CreateConsensusAln] Batch checkpoint: Processed 20000 windows and exported the consensus.[09:36:50 ConsensusFromOverlaps] Processed 33522 bp of 33522 bp (100.00%)
+
+
+*** Racon consensus assembly construction Elapsed time: 0s

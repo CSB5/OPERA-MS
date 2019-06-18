@@ -1,0 +1,49 @@
+#
+# Essential Parameters
+#
+
+# Output folder for final results
+output_folder=results
+# Contig file
+contig_file=/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/contigs.fasta
+kmer=60
+# Mapped read locations
+[LIB]
+map_file=opera.bam
+cluster_threshold=3
+[LIB]
+cluster_threshold=2
+map_file=pairedEdges_i0
+lib_mean=300
+lib_std=30
+map_type=opera
+[LIB]
+cluster_threshold=2
+map_file=pairedEdges_i1
+lib_mean=1000
+lib_std=100
+map_type=opera
+[LIB]
+cluster_threshold=2
+map_file=pairedEdges_i2
+lib_mean=2000
+lib_std=200
+map_type=opera
+[LIB]
+cluster_threshold=2
+map_file=pairedEdges_i3
+lib_mean=5000
+lib_std=500
+map_type=opera
+[LIB]
+cluster_threshold=2
+map_file=pairedEdges_i4
+lib_mean=15000
+lib_std=1500
+map_type=opera
+[LIB]
+cluster_threshold=2
+map_file=pairedEdges_i5
+lib_mean=40000
+lib_std=4000
+map_type=opera

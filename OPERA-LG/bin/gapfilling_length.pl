@@ -39,7 +39,7 @@ my $long_read_mapping = "$read_mapping_dir/opera.map.sort.status";
 #get_read_on_single_contig($working_dir, $long_read_mapping);
 #
 
-run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --opera-lr-dir $opera_lr_dir --read-file $read_file --output-directory $working_dir");
+run_exe("$opera_bin_dir/../../utils/perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --opera-lr-dir $opera_lr_dir --read-file $read_file --output-directory $working_dir");
 
 $end_time = time;
 write_time("$working_dir/../../", "g_extract_read", ($end_time - $start_time));
@@ -125,7 +125,7 @@ close(FILE);
 my $second_tilling =  "$tilling_dir/second_tilling";
 if(1 || ! -e $second_tilling){
     $start_time = time;
-    run_exe("$opera_bin_dir/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process $mummer_dir");
+    run_exe("$opera_bin_dir/../../utils/perl $opera_bin_dir/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process $mummer_dir");
     #$end_time = time;
     #print STDERR "***  Mapping (2) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
 }

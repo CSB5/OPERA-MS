@@ -33,8 +33,6 @@ my $bin_dir = dirname(rel2abs($0)) . "/";
 my $bundler_path = $bin_dir . "bundler"; 
 my $opera_path = $bin_dir . "opera";
 my $sigma_path = $bin_dir . "sigma";
-my $compute_n50_path = $bin_dir . "scaffold_stats_opt.pl";
-
 
 
 ############################## PARSING CONFIG FILE ##############################
@@ -212,7 +210,7 @@ while(<$opera_ms_cf>) {
 	    }
 	    
 	    else {
-		die "Config option: ".$config_option." unknown";
+		#die "Config option: ".$config_option." unknown";
 	    }	
 	}
     }
@@ -431,7 +429,7 @@ sub bundleBAMs {
         print $config "\ncluster_increased_step=5\n"; 
         print $config "\nkmer=$kmer_size\n";
 	close($config); 
-        run_exe("$bundler_path $lib_bundles_dir/$lib_bundles_config 2> bundler_log.err");
+        run_exe("$bundler_path $lib_bundles_dir/$lib_bundles_config 2> $lib_bundles_dir/bundler_log.err");
     }
 }
 

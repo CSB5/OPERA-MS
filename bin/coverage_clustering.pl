@@ -245,7 +245,7 @@ foreach my $species (keys %species_to_analyze){
     close(REF_CLUS);
     
     #Extract the edges and contigs from that cluster
-    run_exe("perl $opera_ms_dir/bin/get_edges_from_matrix.pl $inter_dir $out_dir/$species/matrix $out_dir/$species $contigs_file 0 1000");
+    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/get_edges_from_matrix.pl $inter_dir $out_dir/$species/matrix $out_dir/$species $contigs_file 0 1000");
 }
 
     

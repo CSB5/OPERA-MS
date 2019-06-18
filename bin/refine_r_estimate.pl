@@ -56,7 +56,7 @@ sub evaluate_cluster{
 
     $res = 0;
     
-    run_exe("$opera_ms_dir/bin/cluster_evaluation.pl $coverage_contig_file $cluster_file 2> $out_file");
+    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_evaluation.pl $coverage_contig_file $cluster_file 2> $out_file");
     
     #get the fraction of the assembly with outlier contigs
     $tmp = `tail -n1 $out_file`; chop $tmp;
@@ -75,7 +75,6 @@ sub evaluate_cluster{
     #r value should be higher than 1 as value below does not fit our model
     $res = 1 if($r_value > 1 && $outlier_fraction < $FRACTION_THRESHOLD && $max_cluster_length < $LENGTH_THRESHOLD && $max_cluster_outlier_fraction < $CLUSTER_FRACTION_THRESHOLD);    
     
-    #run_exe("evaluate_cluster.pl
     return $res;
 }
 

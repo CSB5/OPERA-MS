@@ -1,0 +1,103 @@
+/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output/intermediate_files/opera_long_read/GAPFILLING/TILLING/REF/split_1.fa /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output/intermediate_files/opera_long_read/GAPFILLING/TILLING/QUERY/split_1.fa
+NUCMER
+>opera_scaffold_121 k99_10895 4530 646
+3885 4530 646 1 0 0 0
+0
+>opera_scaffold_189 k99_11422 6809 707
+4019 4725 1 707 0 0 0
+0
+>opera_scaffold_189 k99_11961 6809 521
+6290 6809 521 1 1 1 0
+-82
+0
+>opera_scaffold_16 k99_129 124721 14397
+110328 124721 4 14397 0 0 0
+0
+>opera_scaffold_121 k99_1730 4530 685
+1461 2145 1 685 0 0 0
+0
+>opera_scaffold_12 k99_182 148652 65410
+83243 148652 1 65410 0 0 0
+0
+>opera_scaffold_13 k99_184 147370 769
+82014 82783 769 1 1 1 0
+99
+0
+>opera_scaffold_121 k99_2218 4530 1494
+2443 3936 1 1494 0 0 0
+0
+>opera_scaffold_16 k99_233 124721 109895
+1 109895 1 109895 0 0 0
+0
+>opera_scaffold_121 k99_2603 4530 1435
+1 1435 1 1435 0 0 0
+0
+>opera_scaffold_17 k99_273 131111 10570
+88812 99370 10570 12 0 0 0
+0
+>opera_scaffold_17 k99_320 131111 13359
+17285 17382 99 1 1 1 0
+-94
+0
+>opera_scaffold_103 k99_351 9262 4816
+1486 1583 1 99 1 1 0
+-88
+0
+4447 9262 1 4816 0 0 0
+0
+>opera_scaffold_13 k99_3622 147370 38202
+1 38202 38202 1 0 0 0
+0
+>opera_scaffold_17 k99_374 131111 65391
+18611 84001 65391 1 0 0 0
+0
+>opera_scaffold_17 k99_411 131111 17377
+1 17377 17377 1 0 0 0
+0
+>opera_scaffold_13 k99_4159 147370 32332
+115039 147370 1 32332 0 0 0
+0
+>opera_scaffold_17 k99_432 131111 25998
+105114 131111 1 25998 0 0 0
+0
+>opera_scaffold_13 k99_4519 147370 32311
+82685 114987 1 32302 1 1 0
+99
+0
+>opera_scaffold_189 k99_456 6809 288
+4627 4915 288 1 1 1 0
+99
+0
+>opera_scaffold_189 k99_4649 6809 599
+5772 6370 1 599 0 0 0
+0
+>opera_scaffold_12 k99_505 148652 82046
+1 82046 82046 1 0 0 0
+0
+>opera_scaffold_17 k99_571 131111 905
+87892 88792 5 905 0 0 0
+0
+>opera_scaffold_13 k99_5788 147370 38686
+38137 76823 38686 1 1 1 0
+66
+0
+>opera_scaffold_189 k99_580 6809 417
+2754 3170 417 1 0 0 0
+0
+>opera_scaffold_103 k99_626 9262 652
+2959 3610 1 652 0 0 0
+0
+>opera_scaffold_103 k99_627 9262 652
+1 652 1 652 0 0 0
+0
+>opera_scaffold_17 k99_636 131111 18703
+83894 84002 108 1 3 3 0
+10
+0
+>opera_scaffold_13 k99_6944 147370 5385
+76727 82112 1 5385 1 1 0
+97
+0
+>opera_scaffold_189 k99_9603 6809 853
+1 853 1 853 0 0 0
+0

@@ -22,7 +22,8 @@ If you encounter any problems during the installation, or if some third party so
 A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands (please note that the test script runs with 2 cores which is also the minimum.): 
 ```
 cd /path/to/OPERA-MS
-perl OPERA-MS.pl sample_config.config 2> log.err
+cd test_files
+perl ../OPERA-MS.pl test.config 2> log.err
 diff sample_output/assembly.stats sample_files/assembly.stats
 ```
 This will assemble a low diversity mock community in the folder **OPERA-MS/sample_output**.

@@ -1,0 +1,35 @@
+Step 1: Reading configuration file ...
+Time Taken: 0.007264 seconds
+Step 2: Reading contig file ...
+Time Taken: 0.050467 seconds
+Step 3: Reading mapping file ...
+Time Taken: 0.004061 seconds
+Step 4: Bundling paired-end reads ...
+Time Taken: 0.012583 seconds
+Step 5: Scaffolding ...
+Scaffolding with library: super library (small libraries)
+Percentage of subgraphs which need to increase the cluster size threhold: 0
+Percentage of nodes which need to increase the cluster size threhold: 0
+Time Taken: 0.008466 seconds
+Scaffolding with library: super library (medium libraries)
+Percentage of subgraphs which need to increase the cluster size threhold: 0
+Percentage of nodes which need to increase the cluster size threhold: 0
+Time Taken: 0.019687 seconds
+Scaffolding with library: /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/hierarchical_clustering/NO_REPEAT/filtered_pairedEdges_i4
+Percentage of subgraphs which need to increase the cluster size threhold: 0
+Percentage of nodes which need to increase the cluster size threhold: 0
+Time Taken: 0.02237 seconds
+Scaffolding with library: /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/hierarchical_clustering/NO_REPEAT/filtered_pairedEdges_i5
+Percentage of subgraphs which need to increase the cluster size threhold: -nan
+Percentage of nodes which need to increase the cluster size threhold: 0
+Time Taken: 0.022519 seconds
+Step 6: Outputing results ...
+Time Taken: 0.144524 seconds
+
+Scaffold statistics:
+	N50: 346.30 Kb
+	Total length: 9.33 Mb
+	Longest scaffold: 975.35 Kb
+
+Total running time is 0 seconds
+The results are in /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_NO_REF_output//intermediate_files/opera_long_read

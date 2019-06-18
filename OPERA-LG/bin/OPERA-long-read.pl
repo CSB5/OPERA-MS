@@ -195,7 +195,7 @@ if(index($illum_read1, ",") == -1){#single sample assembly
     $start_time = time;
     print " *** *** Mapping short-reads using  $short_read_maptool...\n";
     if(! -e "${file_pref}.bam" &&  !($illum_read1 eq "NONE" && $illum_read2 eq "NONE")){
-    	run_exe("perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam");
+    	run_exe("$operaDir/../../utils/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam");
     }
 }
 else{
@@ -203,7 +203,7 @@ else{
     @illum_read2_tab = split(/,/, $illum_read2);
     for(my $i = 0; $i < @illum_read1_tab; $i++){
 	if(! -e "$file_pref\_$i.bam"){
-	    run_exe("perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1_tab[$i] --illumina-read2 $illum_read2_tab[$i] --out $file_pref\_$i.bam");
+	    run_exe("$operaDir/../../utils/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1_tab[$i] --illumina-read2 $illum_read2_tab[$i] --out $file_pref\_$i.bam");
 	}
     }
 }
@@ -297,7 +297,7 @@ if(0){
     for (my $i = 0; $i <= 0; $i++){
 	$edge_file = $all_edge_file."_i$i";
 	#run_exe("$operaDir/filter_conflicting_edge.pl results-short-reads/clustersInfo_opera-lr results-short-reads/contigs 100 $short_read_cluster_threshold");
-	run_exe("$operaDir/filter_conflicting_edge.pl pairedEdges_i0 contig_length.dat 100 $cluster_threshold_tab[0]");
+	run_exe("$operaDir/../../utils/perl $operaDir/filter_conflicting_edge.pl pairedEdges_i0 contig_length.dat 100 $cluster_threshold_tab[0]");
 	
 	#read the anchor_contig_info file and consider all contigs as repeat
 	open(FILE, "anchor_contig_info.dat");
@@ -322,7 +322,7 @@ if(0){
     #need to change that and add the repeat module in the OPERA-LG code
     if(! -e "$file_pref-with-repeat.bam"){
 	run_exe("mv $file_pref.bam $file_pref-with-repeat.bam");
-	run_exe("$operaDir/filter_repeat.pl $file_pref-with-repeat.bam repeat.dat | ${samtools_dir}samtools view - -h -S -b > $file_pref.bam");
+	run_exe("$operaDir/../../utils/perl $operaDir/filter_repeat.pl $file_pref-with-repeat.bam repeat.dat | ${samtools_dir}samtools view - -h -S -b > $file_pref.bam");
 	run_exe("rm $file_pref-with-repeat.bam");
     }
 

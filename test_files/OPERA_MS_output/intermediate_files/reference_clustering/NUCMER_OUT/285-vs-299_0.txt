@@ -1,0 +1,7 @@
+/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output/intermediate_files/reference_clustering/NUCMER_OUT/285-vs-299.fa /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/../complete_ref_genomes/Salmonella_enterica_serovar_Weltevreden_2007_60_3289_1_uid178014/NT_187119.fna
+NUCMER
+
+[S1]	[E1]	[S2]	[E2]	[LEN 1]	[LEN 2]	[% IDY]	[LEN R]	[LEN Q]	[COV R]	[COV Q]	[TAGS]
+1	521	23669	23149	521	521	97.31	521	28804	100.00	1.81	k99_11961	gi|409247109|ref|NT_187119.1|
+1	582	15451	16032	582	582	99.83	582	28804	100.00	2.02	k99_346	gi|409247109|ref|NT_187119.1|
+1	853	16857	17709	853	853	94.96	853	28804	100.00	2.96	k99_9603	gi|409247109|ref|NT_187119.1|
