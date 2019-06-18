@@ -18,3 +18,5 @@ SIGMA/debug
 bin/OPERA-LG-fast
 database_updated.bk
 utils/perl
+test_files/OPERA_MS*/
+test_files/sample_output/
