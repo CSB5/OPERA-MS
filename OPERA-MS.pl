@@ -1001,28 +1001,28 @@ sub gap_filling{
 	    
 	    #Add the scaffold obtain during the strain level assembly back in
 	    my $opera_scaff_file = "$opera_lr_dir/scaffolds.scaf";
-	    if($opera_ms_option->{"STRAIN_CLUSTERING"} eq "YES"){
+	    if($opera_ms_option->{"USE_REF_CLUSTERING"} && $opera_ms_option->{"STRAIN_CLUSTERING"} eq "YES"){
 		my $opera_scaff_file_single = "$opera_lr_dir/scaffolds_single.scaf";
 		run_exe("mv $opera_scaff_file $opera_scaff_file_single") if(! -e $opera_scaff_file_single);
 		run_exe("cp $opera_scaff_file_single $opera_scaff_file");
 	    }
     
 	    my $opera_scaff_seq_file = "$opera_lr_dir/scaffoldSeq.fasta";
-	    if($opera_ms_option->{"STRAIN_CLUSTERING"} eq "YES"){
+	    if($opera_ms_option->{"USE_REF_CLUSTERING"} && $opera_ms_option->{"STRAIN_CLUSTERING"} eq "YES"){
 		my $opera_scaff_seq_file_single = "$opera_lr_dir/scaffoldSeq_single.fasta";
 		run_exe("mv $opera_scaff_seq_file $opera_scaff_seq_file_single") if(! -e $opera_scaff_seq_file_single);
 		run_exe("cp $opera_scaff_seq_file_single $opera_scaff_seq_file");
 	    }
 
 	    my $opera_contig_size_file = "$opera_lr_dir/contigs";
-	    if($opera_ms_option->{"STRAIN_CLUSTERING"} eq "YES"){
+	    if($opera_ms_option->{"USE_REF_CLUSTERING"} && $opera_ms_option->{"STRAIN_CLUSTERING"} eq "YES"){
 		my $opera_contig_size_file_single = "$opera_lr_dir/contigs_single";
 		run_exe("mv $opera_contig_size_file $opera_contig_size_file_single") if(! -e $opera_contig_size_file_single);
 		run_exe("cp $opera_contig_size_file_single $opera_contig_size_file");
 	    }
     
 	    #Add the multiple strain genome scaffold to the pool
-	    if($opera_ms_option->{"STRAIN_CLUSTERING"} eq "YES"){
+	    if($opera_ms_option->{"USE_REF_CLUSTERING"} && $opera_ms_option->{"STRAIN_CLUSTERING"} eq "YES"){
 		opendir(DIR, "$strain_dir");
 		my @strain_dir = readdir(DIR);
 		close(DIR);
@@ -1056,12 +1056,12 @@ sub gap_filling{
     
 	    #perform the gap fill
 	    if($opera_ms_option->{"USE_REF_CLUSTERING"}){
-		run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/match_scaffolds_clusters.pl " . 
-			$opera_ms_option->{"REF_CLUSTERING_DIR"} . " " .
-			$opera_ms_option->{"NUM_PROCESSOR"} . " " .
-			"$opera_lr_dir/scaffoldSeq.fasta" . " " .
-			"$opera_lr_dir/scaffolds.scaf" . " " .
-			$opera_ms_dependency->{"mummer"} . " 2> $opera_lr_dir/s_info.err");
+		#run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/match_scaffolds_clusters.pl " . 
+		#	$opera_ms_option->{"REF_CLUSTERING_DIR"} . " " .
+		#	$opera_ms_option->{"NUM_PROCESSOR"} . " " .
+		#	"$opera_lr_dir/scaffoldSeq.fasta" . " " .
+		#	"$opera_lr_dir/scaffolds.scaf" . " " .
+		#	$opera_ms_dependency->{"mummer"} . " 2> $opera_lr_dir/s_info.err");
 
 		if($?){
 		    die "Error in during bin/match_scaffolds_clusters.pl. Please see $opera_lr_dir/s_info.err for details.\n";
@@ -1100,6 +1100,16 @@ sub generate_assembly_stats{
     my $opera_ms_dir = $opera_ms_option{"OPERA_MS_DIR"};
     my $opera_lr_dir = $opera_ms_option->{"OPERA_LR_DIR"};
     
+    my $cluster_file =  $opera_ms_option->{"SIGMA_DIR"}."/clusters";
+    my $species_file = "NULL";
+    my $coverage_file = $opera_ms_option->{"COV_DIR"}."/contigs_*";
+    my $strain_dir = "NULL";
+    if($opera_ms_option->{"USE_REF_CLUSTERING"}){
+	my $ref_clustering_dir = $opera_ms_option->{"REF_CLUSTERING_DIR"};
+	$cluster_file =  "$ref_clustering_dir/clusters_seq_similarity";
+	$species_file =  "$ref_clustering_dir/cluster_species.dat";
+	$strain_dir = $opera_ms_option->{"STRAIN_DIR"};
+    }
     
     #if(1)$opera_ms_option->{"STAGE"} eq "ALL" || $opera_ms_option->{"STAGE"} eq "INFO"){
     $start_time = time;
@@ -1107,24 +1117,28 @@ sub generate_assembly_stats{
     #print STDOUT "\n---  STEP 7: ASSEMBLY STATS GENERATION  ---\n";
     #For the scaffold_info.dat file generation
     #if($opera_ms_option->{"USE_REF_CLUSTERING"}){#Need to have way to obtain detailled assembly in case of the reference clustering is skipped
-    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/match_scaffolds_clusters.pl " . 
-	    $ref_clustering_dir . " " . 
-	    $opera_ms_option->{"NUM_PROCESSOR"} . " " . 
-	    $opera_ms_dir . " " .
+    #my ($scaffold_file, $cluster_file, $coverage_file, $species_file, $scaffold_seq_file, $outfile, $opera_ms_dir, $nb_process, $mummer_dir) = @ARGV;
+
+    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/generate_assembly_stats.pl " .
+	    "$opera_lr_dir/scaffolds.scaf" . " " .
+	    $cluster_file . " " .
+	    $coverage_file . " " .
+	    $species_file . " " .
+	    $strain_dir . " " .
 	    "$opera_lr_dir/scaffoldSeq.fasta.filled" . " " .
-	    "$opera_lr_dir/scaffolds.scaf" . " " . 
-	    $opera_ms_dependency->{"mummer"} . " 2> $ref_clustering_dir/s_info.err");
+	    "$final_output_dir/scaffold_info.txt" . " " . 
+	    $opera_ms_dir . " " .
+	    $opera_ms_option->{"NUM_PROCESSOR"} . " " . 
+	    $opera_ms_dependency->{"mummer"} . " 2> $opera_lr_dir/g_assembly_stats.err");
     if($?){
 	die "Error in during assembly statistices generation. Please see $ref_clustering_dir/s_info.err for details.\n";
     }
     run_exe("sed 's/_scaffold_/_contig_/' $final_output_dir/scaffold_info.txt > $final_output_dir/contig_info.txt");
     run_exe("rm $final_output_dir/scaffold_info.txt");
-    #}
     
     #Remove the contigs that have been used during gapfiling in the .fa file
     #$command = "perl $opera_ms_dir/bin/clean_scaffolds_repeats.pl $output_dir/$inter";
     #run_exe($command);
-    
     #$command = "mv $output_dir/lib_* $output_dir/$inter; rm -r $output_dir/$inter/scaffolds; mv $output_dir/runOperaMS.config $output_dir/$inter/";
     #run_exe($command);
     
@@ -1171,9 +1185,11 @@ sub generate_assembly_stats{
     print OUT $str_stats . "\n";
     close(OUT);
 
-    my $strain_assembly_dir = "$final_output_dir/strain_assembly";
-    init_dir($strain_assembly_dir);
-    get_contig_sequence("$final_output_dir/contig_info.txt", $strain_assembly_dir, "$final_output_dir/contig.fasta");
+    if($opera_ms_option->{"USE_REF_CLUSTERING"}){
+	my $strain_assembly_dir = "$final_output_dir/strain_assembly";
+	init_dir($strain_assembly_dir);
+	get_contig_sequence("$final_output_dir/contig_info.txt", $strain_assembly_dir, "$final_output_dir/contig.fasta");
+    }
 
     $end_time = time;
     write_time($opera_ms_option->{"INTER_DIR"}, "stats_generation", ($end_time - $start_time));
