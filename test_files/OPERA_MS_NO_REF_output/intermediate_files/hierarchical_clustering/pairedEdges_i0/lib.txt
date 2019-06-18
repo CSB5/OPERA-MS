@@ -1,6 +1,0 @@
-For the mapping file: 
-Mean length of the library is: 300
-Standard deviation of the library is: 30
-Orientation of paired-reads is: forward ->...->  1st read...2nd read
-Number of used paired reads for estimating the mean and the standard deviation of the library is: NA
-Percentage of outliers is: NA%

@@ -1,39 +1,0 @@
-
-mkdir /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32/
-mkdir: cannot create directory `/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32/': File exists
-
-
-/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/..//utils//minimap2 --cs=short -w5 -m0 /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32//pre_consensus.fa /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32//POOL.fastq > /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32//pre_consensus.fa.filtered.paf
-[M::mm_idx_gen::0.006*0.69] collected minimizers
-[M::mm_idx_gen::0.009*1.28] sorted minimizers
-[M::main::0.009*1.28] loaded/built the index for 1 target sequence(s)
-[M::mm_mapopt_update::0.011*1.28] mid_occ = 3
-[M::mm_idx_stat] kmer size: 15; skip: 5; is_hpc: 0; #seq: 1
-[M::mm_idx_stat::0.012*1.26] distinct minimizers: 11361 (99.53% are singletons); average occurrences: 1.005; average spacing: 2.935
-[M::worker_pipeline::0.125*2.17] mapped 32 sequences
-[M::main] Version: 2.11-r797
-[M::main] CMD: /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/..//utils//minimap2 --cs=short -w5 -m0 /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32//pre_consensus.fa /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32//POOL.fastq
-[M::main] Real time: 0.129 sec; CPU: 0.275 sec
-
-*** Map read in gap Elapsed time: 0s
-
-sh /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32//racon.fa.sh
-[17:34:32 main] Using PAF for input alignments. (/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/opera_long_read/GAPFILLING/opera_scaffold_32//pre_consensus.fa.filtered.paf)
-[17:34:32 main] Loading reads.
-[17:34:32 main] Hashing qnames.
-[17:34:32 main] Parsing the overlaps file.
-[17:34:32 main] Unique overlaps will be filtered on the fly.
-[17:34:32 main] Overlaps will be fully aligned.
-[17:34:32 ConsensusFromOverlaps] Running consensus.
-[17:34:32 ConsensusFromOverlaps] Separating overlaps to individual contigs.
-[17:34:32 ConsensusFromOverlaps] In total, there are 1 contigs for consensus, each containing:
-[17:34:32 ConsensusFromOverlaps] 	[0] opera_scaffold_32 32 alignments, contig len: 33522
-
-[17:34:32 ConsensusFromOverlaps] Started processing contig 1 / 1 (100.00%): opera_scaffold_32
-[17:34:32 ConsensusFromOverlaps] (thread_id = 0) Aligning overlaps for contig 1 / 1 (100.00%): opera_scaffold_32                       
-[17:34:32 AlignOverlaps] Aligning overlap: 1 / 31 (6.45%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 5 / 31 (19.35%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 10 / 31 (35.48%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 13 / 31 (45.16%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 15 / 31 (51.61%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 19 / 31 (64.52%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 22 / 31 (74.19%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 24 / 31 (80.65%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 27 / 31 (90.32%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 28 / 31 (93.55%), skipped 0 / 31 (0.00%)[17:34:32 AlignOverlaps] Aligning overlap: 30 / 31 (100.00%), skipped 0 / 31 (0.00%)
-[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 0 bp to 499 bp (0.00%), coverage: 1x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 2000 bp to 2499 bp (5.97%), coverage: 1x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 4000 bp to 4499 bp (11.93%), coverage: 1x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 4500 bp to 4999 bp (13.42%), coverage: 1x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 6500 bp to 6999 bp (19.39%), coverage: 1x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 8500 bp to 8999 bp (25.36%), coverage: 1x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 10000 bp to 10499 bp (29.83%), coverage: 1x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 11000 bp to 11499 bp (32.81%), coverage: 1x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 13000 bp to 13499 bp (38.78%), coverage: 2x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 15500 bp to 15999 bp (46.24%), coverage: 3x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 17500 bp to 17999 bp (52.20%), coverage: 4x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 19000 bp to 19499 bp (56.68%), coverage: 7x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 20500 bp to 20999 bp (61.15%), coverage: 5x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 22000 bp to 22499 bp (65.63%), coverage: 9x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 23000 bp to 23499 bp (68.61%), coverage: 10x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 25000 bp to 25499 bp (74.58%), coverage: 13x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 27000 bp to 27499 bp (80.54%), coverage: 10x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 27500 bp to 27999 bp (82.04%), coverage: 11x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 29500 bp to 29999 bp (88.00%), coverage: 9x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 31000 bp to 31499 bp (92.48%), coverage: 6x[17:34:32 CreateConsensusAln] (thread_id = 0) Processing window: 32500 bp to 32999 bp (96.95%), coverage: 5x[17:34:32 CreateConsensusAln] Batch checkpoint: Performed consensus on all windows, joining the windows now.
-[17:34:32 CreateConsensusAln] Batch checkpoint: Processed 20000 windows and exported the consensus.[17:34:32 ConsensusFromOverlaps] Processed 33522 bp of 33522 bp (100.00%)
-
-
-*** Racon consensus assembly construction Elapsed time: 0s

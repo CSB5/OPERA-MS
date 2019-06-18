@@ -1,7 +1,0 @@
-For the mapping file: /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/OPERA_MS_output//intermediate_files/read_mapping/opera.bam
-Mean length of the library is: 38486
-Standard deviation of the library is: 38441
-Orientation of paired-reads is: forward ->...->  1st read...2nd read
-Number of used paired reads for estimating the mean and the standard deviation of the library is: 1494
-Percentage of outliers is: 1.65%
-
