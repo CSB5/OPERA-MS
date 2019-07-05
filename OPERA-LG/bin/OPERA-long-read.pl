@@ -45,7 +45,7 @@ my $short_read_maptool = "bwa";
 my $kmer_size = 100;
 my $flag_help;
 my $skip_opera = 0;
-
+my $skip_short_read_mapping = 0;
 my $help_message = "
 
 Options:
@@ -88,6 +88,7 @@ GetOptions(
     "short-read-tooldir=s" => \$short_read_tooldir,
     "illumina-read1=s"      => \$illum_read1,
     "illumina-read2=s"      => \$illum_read2,
+    "skip-short-read-mapping=i" => \$skip_short_read_mapping,
     "help"       => \$flag_help,
     "skip-opera=i" => \$skip_opera
     ) or die("Error in command line arguments.\n");
@@ -172,12 +173,6 @@ if ( ! -e $readsFile ) {die "\nError: $readsFile - long read file does not exist
 
 if ( ! -e "$blasrDir/blasr" && $blasrDir ne "") {die "\nError: $blasrDir - blasr does not exist in the directory $str_full_path\n"};
 
-#my $blasr_version = "${blasrDir}blasr --version > /dev/null 2>&1";
-#run_exe($blasr_version);
-
-#if ($?){
-#    die "blasr version less than 5.1. Please install the latest version. Exiting. \n";
-#}
 
 #if ( ! -e "$graphmapDir/graphmap" ) {die "$! graphmap does not exist in the directory $str_full_path\n"};
 if ( ! -e "$operaDir/OPERA-LG" && $operaDir ne "") {die "\nError:$operaDir - OPERA-LG does not exist in the directory $str_full_path\n"};
@@ -194,8 +189,11 @@ if(index($illum_read1, ",") == -1){#single sample assembly
     
     $start_time = time;
     print " *** *** Mapping short-reads using  $short_read_maptool...\n";
-    if(! -e "${file_pref}.bam" &&  !($illum_read1 eq "NONE" && $illum_read2 eq "NONE")){
-    	run_exe("$operaDir/../../utils/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam");
+    if( !$skip_short_read_mapping && ! -e "${file_pref}.bam" &&  !($illum_read1 eq "NONE" && $illum_read2 eq "NONE")){
+    	run_exe("$operaDir/../../utils/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam 2> preprocess_reads.err");
+	if($?){
+	    die "Error during read preprocessing. Please see $outputDir/preprocess_reads.err for details.\n";
+	}
     }
 }
 else{
@@ -220,9 +218,9 @@ if(! -e "$file_pref.map.sort"){
     #run_exe( "${blasrDir}blasr --nproc $nproc -m 1 $readsFile $contigFile  | cut -d ' ' -f1-4,7-13 | sed 's/ /\\t/g' > $file_pref.map");
     if($mapper eq "blasr"){
 	print "Mapping long-reads using blasr...\n";
-	run_exe( "${blasrDir}blasr  -nproc $nproc -m 1 -minMatch 5 -bestn 10 -noSplitSubreads -advanceExactMatches 1 -nCandidates 1 -maxAnchorsPerPosition 1 -sdpTupleSize 7 $readsFile $contigFile | cut -d ' ' -f1-12 | sed 's/ /\\t/g' > $file_pref.map");
+	run_exe( "${blasrDir}blasr  -nproc $nproc -m 1 -minMatch 5 -bestn 10 -noSplitSubreads -advanceExactMatches 1 -nCandidates 1 -maxAnchorsPerPosition 1 -sdpTupleSize 7 $readsFile $contigFile | cut -d ' ' -f1-12 | sed 's/ /\\t/g' > $file_pref.map 2> blasr.err");
 	if($?){
-	    die "Error in the blasr mapping. Please see log for details.\n";
+	    die "Error in the blasr mapping. Please see $outputDir/blasr.err for details.\n";
 	}
 	$end_time = time;print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
 	# sort mapping
@@ -241,17 +239,20 @@ if(! -e "$file_pref.map.sort"){
 
     if($mapper eq "minimap2"){
 	print "Mapping long-reads using minimap2...\n";
-	run_exe("$minimap2Dir/minimap2 -w5 -m0 --cs=short $contigFile $readsFile > $file_pref.map");
+	#
+	#run_exe("$minimap2Dir/minimap2 -w5 -m0 --cs=short $contigFile $readsFile > $file_pref.map 2> minimap2.err");
+	#
 	if($?){
-	    die "Error in the minimap2 mapping. Please see log for details.\n";
+	    die "Error in the minimap2 mapping. Please see $outputDir/minimap2.err for details.\n";
 	}
 	$end_time = time;print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
-	#run_exe("$minimap2Dir/minimap2 -x ava-ont --cs=short $contigFile $readsFile > $file_pref.map");
+
 	print "Sorting mapping results...\n";
 	run_exe("sort -k1,1 -k3,3g  $file_pref.map > $file_pref.map.sort");
     }
     
 }
+
 
 #Read the contig file to get an array contig ID -> contig_name as the map file contain only read and contig identifier based on thei line number
 if($mapper eq "graphmap"){
@@ -270,6 +271,12 @@ print "Analyzing sorted results...\n";
 my $all_edge_file = "pairedEdges";
 &checkMapping( "$file_pref.map.sort", $all_edge_file);
 
+#Get the coverage information in no illumina reads provided
+if($illum_read1 eq "NONE" && $illum_read2 eq "NONE"){
+    long_read_coverage_estimate("$file_pref.map.sort.status", "$file_pref.map.cov");
+    #print "Mapping long-reads using minimap2...\n";<STDIN>;
+}
+
 # extract edges
 print "Extracting linking information...\n";
 #extract_edge("pairedEdges");
@@ -280,73 +287,6 @@ my @allEdgeFiles = ();
 for (my $i = 0; $i <= 5; $i++){
     $edge_file = $all_edge_file."_i$i";
     push(@allEdgeFiles, $edge_file);
-}
-
-if(0){
-    @allEdgeFiles = ();
-    #Detect repeat and confiltint edges that are filtered out
-    print "Repeat detection...\n";
-
-    open(OUT, ">contig_length.dat");
-    foreach $c (keys %contig_length){
-	print OUT $c."\t".$contig_length{$c}."\t"."20"."\n";
-    }
-    close(OUT);
-
-    open(OUT, ">repeat.dat");
-    for (my $i = 0; $i <= 0; $i++){
-	$edge_file = $all_edge_file."_i$i";
-	#run_exe("$operaDir/filter_conflicting_edge.pl results-short-reads/clustersInfo_opera-lr results-short-reads/contigs 100 $short_read_cluster_threshold");
-	run_exe("$operaDir/../../utils/perl $operaDir/filter_conflicting_edge.pl pairedEdges_i0 contig_length.dat 100 $cluster_threshold_tab[0]");
-	
-	#read the anchor_contig_info file and consider all contigs as repeat
-	open(FILE, "anchor_contig_info.dat");
-	while(<FILE>){
-	    @line = split(/\t/, $_);
-	    $contig = $line[0];
-	    #print STDERR " *** edge_ID $edge_ID\n";<STDIN>;
-	    if(! exists $repeat_contig{$contig}){
-		$repeat_contig{$contig} = 1;
-		print OUT $_;
-	        #print STDERR " *** CONTIG $contig\n";
-	    }
-	}
-	close(FILE);
-	close(OUT);
-    }
-    #delete some intermidate file
-    #run_exe("rm anchor_contig_info.dat contig_length.dat filtered_edges.dat filtered_edges_cov.dat *.sai");
-    run_exe("rm anchor_contig_info.dat contig_length.dat filtered_edges.dat filtered_edges_cov.dat *.sai");
-
-    #Filter the bam file to remove repeat contigs
-    #need to change that and add the repeat module in the OPERA-LG code
-    if(! -e "$file_pref-with-repeat.bam"){
-	run_exe("mv $file_pref.bam $file_pref-with-repeat.bam");
-	run_exe("$operaDir/../../utils/perl $operaDir/filter_repeat.pl $file_pref-with-repeat.bam repeat.dat | ${samtools_dir}samtools view - -h -S -b > $file_pref.bam");
-	run_exe("rm $file_pref-with-repeat.bam");
-    }
-
-    #Filter the long read edges
-    for (my $i = 0; $i <= 5; $i++){
-	$edge_file = $all_edge_file."_i$i";
-	$updated_edge_file = $all_edge_file."_no_repeat_i$i";
-	push(@allEdgeFiles, $updated_edge_file);
-	#read the anchor_contig_info file and consider all contigs as repeat
-	open(FILE, "$edge_file");
-	open(OUT, ">$updated_edge_file");
-	while(<FILE>){
-	    @line = split(/\t/, $_);
-	    $contig1 = $line[0];
-	    $contig2 = $line[2];
-	    if(! (exists($repeat_contig{$contig1}) || exists($repeat_contig{$contig2}))){
-		print OUT $_;
-	    }
-	}
-	close(FILE);
-	close(OUT);
-    }
-
-    $end_time = time;print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
 }
 
 # create configure file
@@ -626,6 +566,64 @@ sub printEdges {
 	        #next;
 	}
     }    
+}
+
+
+sub long_read_coverage_estimate{
+    my ($paf_file, $out_file) = @_;
+
+    #print STDERR "long_read_coverage_estimate $paf_file $out_file\n";<STDIN>;
+    
+    #my $sequence_overhang = 100;
+    #my $MINIMUM_READ_SIZE = 200;
+    
+    open(FILE, "grep -v small-alignment $paf_file | ");
+    my $nb_read_process = 0;
+    my %contig_read_map_length = (); my %read_on_contig = ();my %contig_length =();
+    my @line;
+    my ($read_name, $read_length, $map_s, $map_e, $contig, $curr_read);
+    $curr_read = "";
+    while(<FILE>){
+	$nb_read_process++;
+	print STDERR " *** *** $nb_read_process\n" if($nb_read_process % 100000 == 0);#<STDIN>;
+	@line = split(/\t/, $_);
+	$read_name = $line[0];
+	$read_length = $line[9];
+	$map_s = $line[7];
+	$map_e = $line[8];
+	
+	$contig = $line[1];
+	$contig_length = $line[6];
+	
+	$contig_length{$contig} = $contig_length;
+	#
+	#next if($read_length < $MINIMUM_READ_SIZE);
+	#
+	if($curr_read ne $read_name){
+	    %read_on_contig = ();
+	    $curr_read = $read_name;
+	}
+	#
+	
+	#Read are allowed to map to multiple contigs if they map fully
+	if(! exists $read_on_contig{$contig}){
+	    if(! exists $contig_read_map_length{$contig}){
+		$contig_read_map_length{$contig} = 0;
+	    }
+	    $contig_read_map_length{$contig} += ($map_e - $map_s);
+	    $read_on_contig{$contig} = 1;
+	}
+    }
+    close(FILE);
+    
+    open(OUT, ">$out_file");
+    foreach $c (keys %contig_read_map_length){
+	#$contig_thoughput_fraction = "NA";
+	#$contig_thoughput_fraction = $contig_read_map_length{$c} / $throughput if($throughput != 0);
+	$c_l = $contig_length{$c};
+	print OUT $c . "\t" . $c_l . "\t" . ($contig_read_map_length{$c} / $c_l) . "\n";
+    }
+    close(OUT);
 }
 
 sub checkMapping{
@@ -942,11 +940,12 @@ sub CreateConfigFile{
     open( CONF, ">config".$suffix ) or die $!;
 
     print CONF "#\n# Essential Parameters\n#\n\n";
-
+    my $opera_out_folder = "results$suffix";
+    
     print CONF "# Output folder for final results\n";
     #print CONF "output_folder=results\n";
     #print CONF "output_folder=results_no_trans\n";
-    print CONF "output_folder=results".$suffix."\n";
+    print CONF "output_folder=$opera_out_folder\n";
     #print CONF "output_folder=results_no_trans_no_conflict\n";
     #print CONF "output_folder=results_no_conflict\n";
 
@@ -965,6 +964,10 @@ sub CreateConfigFile{
 	print CONF "map_file=${file_pref}.bam\n";
 	print CONF "cluster_threshold=$short_read_cluster_threshold\n";
     }
+    else{
+	run_exe("rm -r $opera_out_folder") if(-d $opera_out_folder);
+	run_exe("mkdir $opera_out_folder;ln -s ../$file_pref.map.cov $opera_out_folder/contigs");#Get the coverage from long reads
+    }
     
     $i = 0;
     @means = (300, 1000, 2000, 5000, 15000, 40000);
@@ -979,6 +982,9 @@ sub CreateConfigFile{
 	print CONF "map_type=opera\n";
 	$i++;
     }
+
+    
+    
     
     close CONF;
 }
@@ -991,16 +997,3 @@ sub run_exe{
     print STDERR $exe."\n";;
     print STDERR `$exe` if($run);
 }
-
-
-#PROBLEM TO FIX: PAIR WITH DIFFERENT DISTANCE STIMATES -_-''
-#!!! CAN LEAD TO WRONG DISTANCE ESTIMATES !!!
-#grep -e 175698 -e 175870 S288C/V6_RAW/pairedEdges_no_repeat_i*
-
-#grep -e 173042 S288C/V6_RAW/edge_read_info.dat | grep 170690
-#170690+173042+channel_339_read_99_47788;channel_474_read_4_1403826200_86695COORD_CONTIG_1:0_6_616;1_11_621COORD_CONTIG_2:0_35_2544;1_1104_2528COORD_CONTIG_1_ON_READ:0_5790_6353;0_6633_7234COORD_CONTIG_2_ON_READ:0_20984_23254;0_2_1385
-#grep -A1 channel_339_read_99_47788 /home/bertrandd/PROJECT_LINK/OPERA_LG/NANOPORE/DATA/W303_ONT_Raw_reads_filter_rename_single_line.fa > weird_read.fa;grep -A1 channel_474_read_4_1403826200_86695 /home/bertrandd/PROJECT_LINK/OPERA_LG/NANOPORE/DATA/W303_ONT_Raw_reads_filter_rename_single_line.fa >> weird_read.fa
-
-
-#/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-beta/OPERA-LG/bin/OPERA-long-read.pl --contig-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-1.1/sample_files/sample_contigs.fasta --kmer 60 --long-read-file /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-1.1/sample_files/sample_long_read.fastq --output-prefix opera --output-directory /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/MINIMAP_TEST///intermediate_files/long-read-mapping --num-of-processors 10 --opera /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-beta/OPERA-LG/bin/ --illumina-read1 /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-1.1/sample_files/sample_R1.fastq.gz --illumina-read2 /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-1.1/sample_files/sample_R2.fastq.gz --samtools-dir /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-beta//utils/ --minimap2 /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-beta//utils/ --short-read-tooldir /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/OPERA-MS-beta//utils/
-

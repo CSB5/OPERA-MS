@@ -30,11 +30,6 @@ $main_direct .= "\/";
 
 my $bin_dir = dirname(rel2abs($0)) . "/";
 
-my $bundler_path = $bin_dir . "bundler"; 
-my $opera_path = $bin_dir . "opera";
-my $sigma_path = $bin_dir . "sigma";
-
-
 ############################## PARSING CONFIG FILE ##############################
 
 my($opera_ms_config_file) = @ARGV;
@@ -72,12 +67,13 @@ while(<$opera_ms_cf>) {
 		my $mapping_file;
 		for $mapping_file (@split_mapping_files) {
 		    if (! -e $mapping_file) {
-			die "Library file for computing coverage:"
-			    .$mapping_file." not found";  
+			#die "Library file for computing coverage:"
+			#    .$mapping_file." not found";  
 		    } 					
 		}
 	    }
 
+	    
 	    case "LIB" {
 		my $lib_file_name = $split_line[1]; #filename
 		$num_LIB++; 
@@ -91,8 +87,10 @@ while(<$opera_ms_cf>) {
 		}
 
 		$LIB{$int_lib_name} = $lib_file_name;
+		print STDERR " *** Add lib $lib_file_name\n";
+		
 		if (! -e $LIB{$int_lib_name}) {
-		    die "Library (BAM) file: ".$LIB{$int_lib_name}." not found\n";  
+		    #die "Library (BAM) file: ".$LIB{$int_lib_name}." not found\n";  
 		}
 	    }
 
@@ -110,37 +108,13 @@ while(<$opera_ms_cf>) {
 		    die "Samtools not found at: ".$samtools_path."\n";
 		}
 	    }
-	    case "LONG_READ_MAPPER"{
-	    }
 	    
-	    case "BLASR_DIR"{
-		$blasr_dir = $split_line[1];
-	    }
 
 	    case "SHORT_READ_TOOL"{
 	    }
-	    case "STRAIN_CLUSTERING"{
-	    }
+	    
 	    case "BWA_DIR"{
 		$short_read_tool_dir = $split_line[1];
-	    }
-
-	    
-	    case "GRAPHMAP_DIR"{
-	    }
-	    case "RACON_DIR"{
-	    }
-	    
-	    case "MUMMER_DIR"{
-	    }
-	    
-	    case "MINIMAP2_DIR" {
-	    }
-	    
-	    case "MEGAHIT_DIR" {
-	    }
-	    
-	    case "MASH_DIR"{
 	    }
 	    
 	    case "SIGMA_CONTIGS_FILE" {
@@ -178,35 +152,19 @@ while(<$opera_ms_cf>) {
 		$pdist_type = $split_line[1];
 	    }
 	    
-	    case "LONG_READ"{
-	    }
-	    
 	    case "ILLUMINA_READ_1"{
+		 $illum_read1 = $split_line[1];
 	    }
 	    
 	    case "ILLUMINA_READ_2"{
+		$illum_read2 = $split_line[1];
 	    }
 	    
 	    case "NUM_PROCESSOR"{
+		$nproc = $split_line[1];
 	    }
 
 	    case "OPERA_LR_OUTDIR"{
-	    }
-	    
-	    case "GENOME_DB"{
-	    }
-	    
-	    case "REF_CLUSTERING_OUTDIR"{
-	    }
-
-	    case "REF_REPEAT_DETECTION"{
-	    }
-
-	    case "DB_KRAKEN"{
-	    }
-	    case "KRAKEN_DIR" {
-	    }
-	    case "FILLED_SCAFF_LENGTH" {
 	    }
 	    
 	    else {
@@ -216,14 +174,6 @@ while(<$opera_ms_cf>) {
     }
 }
 close($opera_ms_cf);
-
-
-# If coverage has already been computed, it is stored in a sigma_contigs_files, 
-# else, mapping_files needs to be provided
-if(!(defined $mapping_files || defined $sigma_contigs_file)) {
-	die "Calculating coverage information needs a sigma contigs file or
-			mapping files.\n"; 
-}
 
 
 if(!(defined contigs_file && defined contigs_file_type)) {
@@ -250,23 +200,9 @@ unless (-d $output_dir) {
 my $results_folder = $output_dir."/"."intermediate_files";
 $output_dir = $results_folder;
 
-#foreach $k (sort keys %LIB) {
-#	my $lib_size_starting_index;
-#	my $lib_size_ending_index;
-#	my $lib_size;
-#	$lib_size_starting_index = rindex($LIB{$k}, "/") + 1;
-#	$lib_size_ending_index = rindex($LIB{$k}, "_");
-#	$lib_size = substr($LIB{$k}, $lib_size_starting_index, $lib_size_ending_index - $lib_size_starting_index);
-
-#	$results_folder .= $lib_size."_";
-#}
-#chop($results_folder);
-
 unless (-d $results_folder) {
        mkdir $results_folder or die $!;        
 }
-
-
 
 
 ############################## BUNDLING ##############################
@@ -297,49 +233,42 @@ foreach $k (keys %LIB) {
 chop($edges_files); # remove last comma
 
 
-print STDERR "\nConstructing edge bundles ... \n"; 
+#print STDERR "\nConstructing edge bundles ... \n"; 
 # Check which files are not yet computed and compute only those
-if (scalar(@edges_files_not_computed) == 0) {
-	print STDERR "All edges files previously computed\n"; 
-}
-else {
-	my $key_lib;
-	my %LIB_NOT_COMPUTED;
-	print STDERR "\nSome edges files need to be computed:\n"; 
-	for $key_lib (@edges_files_not_computed) {
-		print STDERR "\nComputing ".$LIB{$key_lib}."\n"; 
-		# call bundling with only those libs that have not yet been computed
-      	$LIB_NOT_COMPUTED{$key_lib} = $LIB{$key_lib}
-  	}
-  	&bundleBAMs($contigs_file, \%LIB_NOT_COMPUTED, $bundle_size_thresh); 
-}
-print STDERR "Done!\n"; 
+my $key_lib = "lib_1";
+my %LIB_NOT_COMPUTED;
+#print STDERR "\nSome edges files need to be computed:\n"; 
+#print STDERR "\nComputing ".$LIB{$key_lib}."\n"; 
+# call bundling with only those libs that have not yet been computed
+$LIB_NOT_COMPUTED{$key_lib} = $LIB{$key_lib};
+my $lib_bundles_dir = $output_dir."/".$key_lib."_bundles";
+my $lib_bundles_config = $key_lib.".ebconfig"; 
+generate__bundler_config_file($contigs_file, \%LIB_NOT_COMPUTED, $bundle_size_thresh, $lib_bundles_dir, $lib_bundles_config); 
 
 
 
 
 ############################# SIGMA ##############################
 
-print STDERR "\nRunning Sigma ... \n"; 
+#print STDERR "\nRunning Sigma ... \n"; 
 my $sigma_dir = "$results_folder/coverage_estimation"; 
 unless (-d $sigma_dir) {
     mkdir $sigma_dir or die $!; 
 }
 
 my $sigma_output = "NodePartitions.sigma"; 
-construct_sigma_config_file($sigma_dir, $contigs_file_type, $contigs_file, 
+generate_sigma_config_file($sigma_dir, $contigs_file_type, $contigs_file, 
 	$edges_files, $sigma_contigs_file, $contig_len_thr, 
 	$contig_edge_len, $contig_window_len, $pdist_type, $bundle_size_thresh);
 
-run_exe("$sigma_path $sigma_dir/sigma.config 2> $sigma_dir/sigma.err");
 
-# CHECK IF COVERAGE NEEDS TO BE COMPUTED
-#if (0 && !defined $sigma_contigs_file) {			#coverage not computed
-#	run_exe("$samtools_path view $mapping_files | $sigma_path $sigma_dir/sigma.config");
-#
-#} else { 									#coverage computed
-#	run_exe("$sigma_path $sigma_dir/sigma.config");
-#}
+my $preprocess_read_path = $bin_dir . "../OPERA-LG/bin/preprocess_reads.pl";
+my $short_analysis_path = $bin_dir . "short-read-analysis";
+my $utils_dir  = $bin_dir . "../utils";
+run_exe("$utils_dir/perl $preprocess_read_path --out $sigma_dir/short_read_analysis --tool-dir $utils_dir --nproc $nproc --contig $contigs_file --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --sigma-conf $sigma_dir/sigma.config --bundler-conf $lib_bundles_dir/$lib_bundles_config 2> $sigma_dir/preprocess_reads.err");
+if($? || ! -e "$sigma_dir/assembly_size.dat" || ! -e "$lib_bundles_dir/lib.txt"){
+    die "Error during short read pre-preocessing. Please see $sigma_dir/preprocess_reads.err $sigma_dir/short_read_analysis.out $sigma_dir/short_read_analysis.err for details.\n";
+}	
 
 
 ############################## OPERA ##############################
@@ -380,44 +309,14 @@ foreach $k (keys %LIB) {
 	$opera_filtered_files{$k} = \@lib_stats;
 }
 
-
-#print STDERR "\nRunning Opera on partitions ... \n"; 
-#my $opera_output_folder = "$results_folder/scaffolds";
-#unless (-d $opera_output_folder){
-#    mkdir $opera_output_folder  or die $!;  
-#}
-#my $opera_config_file = "opera.config"; 
-#&construct_opera_config_file($contigs_file, $opera_output_folder, \%opera_filtered_files, $opera_output_folder."/".$opera_config_file);
-
-#Uncomment if you want to run OPERA.
-#run_exe("$opera_path $opera_output_folder/opera.config > $results_folder/log.txt");
-#
-##$res_file = "$results_folder/scaffoldSeq.fasta";
-#$res_file = "$output_dir/scaffoldSeq.fasta";
-#run_exe("rm -f $res_file"); #if(-e $res_file);
-#run_exe("ln -s $opera_output_folder/scaffoldSeq.fasta $res_file");
-#
-#print STDERR "Done!\n"; 
-#
-##chdir $curDir or die $!; 
-#print STDERR "\nALL done.\n"; 
-#print STDERR "Result file: $res_file\n\n"; 
-#
-## COMPUTE N50
-#print STDERR "\nComputing N50...\n";
-#run_exe("perl $compute_n50_path $res_file > ".$res_file.".stats");
-#print STDERR "\nDone!\n";
-
 ############################## HELPERS ##############################
 
 #Constructs config files and runs bundling for all libraries in lib_ref
-sub bundleBAMs {
-    my ($contigs_file, $lib_ref, $bundle_size_thresh) = @_;
+sub generate__bundler_config_file {
+    my ($contigs_file, $lib_ref, $bundle_size_thresh, $lib_bundles_dir, $lib_bundles_config) = @_;
     my %libH = %{$lib_ref};
     foreach $k (keys %libH) {
-    	my $lib_bundles_dir = $output_dir."/".$k."_bundles";
-		my $lib_bundles_config = $k.".ebconfig"; 
-        run_exe("mkdir $lib_bundles_dir");
+	run_exe("mkdir $lib_bundles_dir");
         open(my $config, ">", "$lib_bundles_dir/$lib_bundles_config"); #edge bundler config
 	print $config "\nsamtools_dir=$samtools_path\n";
         print $config "\noutput_folder=$lib_bundles_dir\n";
@@ -429,7 +328,6 @@ sub bundleBAMs {
         print $config "\ncluster_increased_step=5\n"; 
         print $config "\nkmer=$kmer_size\n";
 	close($config); 
-        run_exe("$bundler_path $lib_bundles_dir/$lib_bundles_config 2> $lib_bundles_dir/bundler_log.err");
     }
 }
 
@@ -473,7 +371,7 @@ sub run_exe {
 
 
 # Constructs sigma config file
-sub construct_sigma_config_file {
+sub generate_sigma_config_file {
     my ($output_dir, $contigs_file_type, $contigs_file, $edges_files, $sigma_contigs_file,
 	$contig_len_thr, $contig_edge_len, $contig_window_len, $pdist_type, 
 	$bundle_size_thresh) = @_; 

@@ -8,7 +8,7 @@ my $contigs_windows_file = $ARGV[1];
 
 my %contig_cov = ();
 
-open (FILE, $contigs_windows_file) or die;
+open (FILE, $contigs_windows_file) or die "The file $contigs_windows_file does not exists\n";
 my $header = <FILE>;chop $header;
 my @line = split (/ /, $header);
 my $window_size = $line[3];

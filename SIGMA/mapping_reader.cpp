@@ -53,27 +53,16 @@ void SAMReader::readInputStream(FILE* mapping_fp, int sample_index, ContigMap* c
 		
 		// if (fscanf(mapping_fp, "%*[^\t]\t%*[^\t]\t%[^\t]\t%d\t%*[^\n]\n", contig_id, &read_pos) == 2) {
 		if (fscanf(mapping_fp, "%[^\t]\t%d\t%[^\t]\t%d\t%*[^\t]\t%*[^\t]\t%*[^\t]\t%*[^\t]\t%*[^\t]\t%[^\t]\t%*[^\n]\n", qname, &flag, contig_id, &read_pos, rdsequence) == 5) {
-			auto it = contigs->find(contig_id);
+			//CHECK only 1st read to get fragment count
+			if(qname[strlen(qname) -1] == '2' ) continue;
 			
+			auto it = contigs->find(contig_id);
 			//Unmapped read or contig is too small
 			if (it == contigs->end()) continue;
 
-			//CHECK only 1st read to get fragment count
-			////float nearest = roundf(qname * 10); 	// / 10;
-			//std::ostringstream ss;
-			//ss << std::setprecision( 1 ) << std::fixed << nearest;
-			//std::string rd = ss.str();
-			//std::string rd2 = ".2";
-			//fprintf(stderr, "qname %s\n", qname);
-			if(qname[strlen(qname) -1] == '2' ) continue;
-			//if(strstr(rd.c_str(),rd2.c_str())) continue;
-			//if(qnamenum == 2) continue;
-			//fprintf(stderr, "passed qname %s\n", qname);cin.get();
-			
-			//if FLAG=16 (reverse), add rdsequence to read_pos to obtain right end of read 1
+			//Read in reverse complement
 			if(flag == 16) {
 				read_pos = read_pos + static_cast<int>(strlen(rdsequence)) - 1;
-				//read_pos = read_pos - 1;
 			}
 
 			Contig* contig = (*it).second;

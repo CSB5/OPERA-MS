@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 use warnings; 
 use Cwd; 
 
@@ -20,9 +18,8 @@ run_exe("rm -r $split_query_dir $split_ref_dir");
 if(! -d $split_ref_dir){
     run_exe("mkdir $split_ref_dir");
     split_fasta_file($ref_file, $split_ref_dir, $max_split_ref_size);
-    #print STDERR " *** Splitting completed !!!\n";<STDIN>;
 }
-#print STDERR " *** finish !!!\n";<STDIN>;
+
 if(! -d $split_query_dir){
     run_exe("mkdir $split_query_dir");
     split_fasta_file($query_file, $split_query_dir, $max_split_query_size);
@@ -58,9 +55,6 @@ foreach $ref (@split_ref){
 		#Filtet on identity to avoid alignement comming from contig of other species or repeat
 		print $OUT_delta_filter "$mummer_path/delta-filter -i95 -r $split_mummer_dir/$ref\_$query.delta > $split_mummer_dir/$ref\_$query.delta.filter\n";
 		print $OUT_coord "$mummer_path/show-coords -T -l  $split_mummer_dir/$ref\_$query.delta.filter > $split_mummer_dir/$ref\_$query.coord\n";
-		#
-		#print $OUT_coord "$mummer_path/show-coords -I 95 -r -l -c -T $split_mummer_dir/$ref\_$query.delta > $split_mummer_dir/$ref\_$query.coord 2> /dev/null \n";
-		#print $OUT_coord "$mummer_path/show-coords -r -l -c -T $split_mummer_dir/$ref\_$query.delta > $split_mummer_dir/$ref\_$query.coord 2> /dev/null \n";
 	    }
 	}
     }
@@ -72,12 +66,21 @@ close $OUT_coord;
 #run the stuff
 $cmd = "cat $split_mummer_dir/cmd_delta.txt | xargs -I cmd --max-procs=$max_proc bash -c cmd > /dev/null \n";
 run_exe($cmd);
+if($?){
+    die "Error in during nucmer.\n";
+}
 
 $cmd = "cat $split_mummer_dir/cmd_delta_filter.txt | xargs -I cmd --max-procs=$max_proc bash -c cmd > /dev/null \n";
 run_exe($cmd);
+if($?){
+    die "Error in during delta-filter.\n";
+}
 
 $cmd = "cat $split_mummer_dir/cmd_coord.txt | xargs -I cmd --max-procs=$max_proc bash -c cmd > /dev/null \n";
 run_exe($cmd);
+if($?){
+    die "Error in during show-coords.\n";
+}
 
 
 #merging the cood file
@@ -103,13 +106,8 @@ foreach $coord (@split_coord){
 	    #to remove the 4 header line
 	    run_exe ("sed \'1,4 d\' $c_f >> $final_res_file");
 	}
-	
-	#run_exe ("rm $c_f");
     }
 }
-
-#$cmd = "cat $split_mummer_dir/*.coords > $dir_res/contig.coords";
-#run_exe($cmd);
 
 
 sub split_fasta_file{
@@ -162,4 +160,3 @@ sub run_exe{
     print STDERR `$exe` if($run);
 }
 
-#/mnt/software/unstowable/mummer-3.23/nucmer --nosimplify --maxmatch -p /mnt/ScratchPool/bertrandd/OPERA_MS/cow_rumen//ASSEMBLY//SOAP_SCAFFOLD/././200_300_3k_5k/mummer/split_17.fa_split_46.fa GENOME_REF/all_bacterial_genome_split/split_17.fa /mnt/ScratchPool/bertrandd/OPERA_MS/cow_rumen//ASSEMBLY//SOAP_SCAFFOLD/././200_300_3k_5k/split_contig/split_46.fa

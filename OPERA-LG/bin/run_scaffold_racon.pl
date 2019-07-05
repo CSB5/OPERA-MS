@@ -28,11 +28,7 @@ my $read_file = "$assembly_dir/POOL.fastq";
 my $racon_consensus = "$assembly_dir/racon.fa";
 
 if(-e $read_file){
-    #run_exe("mkdir $assembly_dir/../CORR/;touch $assembly_dir/../CORR/single_read.map");
     get_read_mapping($read_file, $initial_assembly, $mapping_file);
-    #$end_time = time;
-    #print STDERR "*** Get read sequence Elapsed time: " . ($end_time - $start_time) . "s\n";
-    #$start_time = time;
     
     run_racon($initial_assembly, $read_file, $mapping_file, $racon_consensus, 500, 5, -4, -8, -6, "CONSENSUS");
     #
@@ -60,7 +56,10 @@ sub run_racon{
     print OUT " $racon_dir/racon --winlen $window_size --match $match --mismatch $mismatch --gapopen $gap_open --gapext $gap_extend --reads $read_file --alnpath $mapping --raw $assembly_file --out $out_file\n";
     #print OUT "source deactivate\n";
     close(OUT);
-    run_exe("sh $out_file.sh");
+    run_exe("sh $out_file.sh > $out_file.out 2> $out_file.err");
+    if($?){
+	die "Error during racon. Please see $out_file.out and $out_file.err for details.\n";
+    }
 }
 
 
@@ -68,7 +67,10 @@ sub run_racon{
 sub get_read_mapping{
     my ($long_read, $assembly, $mapping_file) = @_;
     
-    run_exe("$minimap2_dir/minimap2 --cs=short -w5 -m0 $assembly $long_read > $mapping_file");
+    run_exe("$minimap2_dir/minimap2 --cs=short -w5 -m0 $assembly $long_read > $mapping_file 2> $mapping_file.err");
+    if($?){
+	die "Error during minimap2. Please see $mapping_file.err for details.\n";
+    }
     $end_time = time;
     print STDERR "*** Map read in gap Elapsed time: " . ($end_time - $start_time) . "s\n";
     $start_time = time;

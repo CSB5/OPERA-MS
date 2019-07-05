@@ -5,6 +5,7 @@ OPERA-LG/bin/OPERA-LG
 SIGMA/sigma.config
 bin/bundler
 bin/sigma
+bin/short_read_analysis
 complete_ref_genomes/
 database_updated
 genomeDB_Sketch.msh
@@ -20,3 +21,7 @@ database_updated.bk
 utils/perl
 test_files/OPERA_MS*/
 test_files/sample_output/
+
+
+utils/metabat
+utils/run_MaxBin.pl

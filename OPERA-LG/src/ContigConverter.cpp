@@ -1,3 +1,5 @@
+
+
 #include "ContigConverter.h"
 
 ContigConverter::ContigConverter(void)
@@ -94,12 +96,12 @@ int ContigConverter::ConvertContigFile( string fileName, Graph *graph, list<PetL
 		if( CalculateCovUsingMapping( libs ) == -1 )
 			return -1;
 	}
-	//else{//Compute the coverage based on a precomputed graph
-	//if( ReadCoverageFile(Configure::OUTPUT_FOLDER + "contigs") == -1)//THIS is a harcoded path
-	//return -1;
-		//}
+	else{//Compute the coverage based on a precomputed graph
+		if( ReadCoverageFile(Configure::OUTPUT_FOLDER + "contigs") == -1)//THIS is a harcoded path
+			return -1;
+	}
 	//Read conticoverage from pre-computed contig coverage file
-	
+	ReadCoverageFile(Configure::OUTPUT_FOLDER + "contigs");
 	
 	//}
 
@@ -148,19 +150,23 @@ int ContigConverter::ReadCoverageFile(string fileName){
 	vector<string> *column = new vector<string>;
 	string line, contigName;
 	double cov;
-	std::ifstream infile( fileName.c_str() );
+	ifstream infile( fileName.c_str() );
 	while( getline( infile, line ) ){
 		Split( line, "\t", column );
 		contigName = column->at( 0 );
-		cov = stod(column->at( 1 ));
+		cov = atoi(column->at( 2 ).c_str());
 		//
 		unordered_map<string, int>::iterator pos = m_contigNameHashMap->find( contigName );
 		if( pos != m_contigNameHashMap->end() ){
 			// add 1 to the number of reads in this contig
 			Contig *currentContig = myContigs->at(  pos->second );
 			currentContig->SetCov( cov );
+
+			cerr << contigName << "\n";
 		}
+		//cerr << contigName << "\n";
 	}
+	infile.close();
 	delete column;
 	return 1;
 }
@@ -259,8 +265,8 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 				if( preLine.substr( 0, 1 ) != "@" )
 					break;
 			}
-		
-			while( getline( mapReader, nextLine ) ){
+			
+						while( getline( mapReader, nextLine ) ){
 				try{     
 					if( nextLine == "" )
 						continue;
@@ -485,6 +491,7 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 					cerr<<"nextLine is: "<<nextLine<<endl;
 				}
 			}
+			
 		
 			if( Configure::MULTI_LIB_INFO->at( libID )->GetFileName().substr( Configure::MULTI_LIB_INFO->at( libID )->GetFileName().length() - 4, 4 ) == ".bam" ){
 				// it is a bam formattempFileName = Configure::OUTPUT_FOLDER + "temporary.sam";

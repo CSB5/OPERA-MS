@@ -2,16 +2,20 @@
 #use strict;
 use warnings;
 
-my ($working_dir, $contig_file, $read_file, $nb_process, $opera_bin_dir, $racon_dir,  $minimap2_dir, $mummer_dir) = @ARGV;
+my ($working_dir, $contig_file, $read_file, $read_mapping_dir, $nb_process, $scaffold_length_threshold, $opera_bin_dir, $racon_dir,  $minimap2_dir, $mummer_dir) = @ARGV;
 
+require "$opera_bin_dir/../../test_time.pl";
 
 run_exe("mkdir $working_dir") if(! -d $working_dir);
 
+my $perl_path = "$opera_bin_dir/../../utils/perl";
 my $start_time = time;
 my $start_time_begin = time;
 my $end_time;
 #split the scaffold
-my $assembly_scaffold_file = "$working_dir/../scaffolds.scaf";
+my $opera_lr_dir = "$working_dir/../";
+my $assembly_scaffold_file = "$opera_lr_dir/scaffolds.scaf";
+my $assembly_scaffold_seq_file = "$opera_lr_dir/scaffoldSeq.fasta";
 
 #print STDERR " *** $assembly_scaffold_file\n";
 my %scaff_info = ();
@@ -19,7 +23,8 @@ my %singleton_contig = ();
 my @scaffold_order = ();
 split_scaffold_file($working_dir, $assembly_scaffold_file);
 $end_time = time;
-print STDERR "***  Construt scaffold dir Elapsed time: " . ($end_time - $start_time) . "s\n";
+#print STDERR "***  Construt scaffold dir Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_dir_constriction", ($end_time - $start_time));
 $start_time = time;
 
 ################oNLY FOR TESTIN PURPOSE
@@ -28,17 +33,21 @@ $start_time = time;
 ######################################3
 
 #Get the reads that map to a single contig
-my $edge_read_info_file = "$working_dir/../../long-read-mapping/edge_read_info.dat";
-my $long_read_mapping = "$working_dir/../../long-read-mapping/opera.map.sort.status";
+my $edge_read_info_file = "$read_mapping_dir/edge_read_info.dat";
+my $long_read_mapping = "$read_mapping_dir/opera.map.sort.status";
 
 #Actulally never used
 #get_read_on_single_contig($working_dir, $long_read_mapping);
 #
 
-run_exe("perl $opera_bin_dir/extract_read_sequence_xargs.pl --edge-file $edge_read_info_file --contig-file $contig_file --scaffold-file $assembly_scaffold_file --read-file $read_file --output-directory $working_dir");
+run_exe("$perl_path $opera_bin_dir/extract_read_sequence.pl --edge-file $edge_read_info_file --contig-file $contig_file --opera-lr-dir $opera_lr_dir --read-file $read_file --output-directory $working_dir 2> $working_dir/extract_read.err");
+if($?){
+    die "Error in during read sequence extraction. Please see $working_dir/extract_read.err for details.\n";
+}
 
 $end_time = time;
-print STDERR "***  Identify read in gap and construt pre_consensus assembly Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_extract_read", ($end_time - $start_time));
+#print STDERR "***  Identify read in gap and construt pre_consensus assembly Elapsed time: " . ($end_time - $start_time) . "s\n";
 $start_time = time;
 
 
@@ -51,32 +60,36 @@ opendir(DIR, $working_dir);
 @all_dir = readdir(DIR);
 close(DIR);
 my $nb_tiling_run = 0;
-my $g_cmd = "$working_dir/consensus_cmd.sh";
-open(OUT, ">$g_cmd");
+my $consensus_cmd = "$working_dir/consensus_cmd.sh";
+open(OUT, ">$consensus_cmd");
 foreach $scaff_dir (@all_dir){
     #next if($scaff_dir ne "opera_scaffold_1");
     next if($scaff_dir eq ".." || ! -e "$working_dir/$scaff_dir/scaffolds.scaf");
     
-    print OUT "perl $opera_bin_dir/run_scaffold_racon.pl $working_dir/$scaff_dir/ $racon_dir $minimap2_dir 2> $working_dir/$scaff_dir/consensus.err\n";
+    print OUT "$perl_path $opera_bin_dir/run_scaffold_racon.pl $working_dir/$scaff_dir/ $racon_dir $minimap2_dir 2> $working_dir/$scaff_dir/consensus.err\n";
     
     #last if($nb_tiling_run == 10);
     #$nb_tiling_run++;
     #last;
 }
 close(OUT);
-$g_log = "$g_cmd.log";
-run_exe("cat $g_cmd | xargs -L 1 -P $nb_process -I COMMAND sh -c \"COMMAND\" 2> $g_log");
+$consensus_log = "$consensus_cmd.log";
+run_exe("cat $consensus_cmd | xargs -L 1 -P $nb_process -I COMMAND sh -c \"COMMAND\" 2> $consensus_log");
+if($?){
+    die "Error during consensus sequence generation. Please see $consensus_log for details.\n";
+}
 #Combine all the consensus into a single file
 my $tilling_dir = "$working_dir/TILLING";
 run_exe("mkdir $tilling_dir");
 my $consensus_file = "$tilling_dir/consensus.fa";
 run_exe("cat $working_dir/*opera_scaffold_*/racon.fa | sed 's/Consensus_//' > $consensus_file");
 #
-run_exe("rm -r $working_dir/*opera_scaffold_*");
+#run_exe("rm -r $working_dir/*opera_scaffold_*");
 #
 #
 $end_time = time;
-print STDERR "***  Consensus sequence creation Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_racon", ($end_time - $start_time));
+#print STDERR "***  Consensus sequence creation Elapsed time: " . ($end_time - $start_time) . "s\n";
 $start_time = time;
 
 #Perform the scaffold tilling to add back the high bp quality illumina contigs
@@ -86,21 +99,28 @@ $start_time = time;
 my $first_filling =  "$tilling_dir/first_tilling";
 if(1 || ! -e $first_filling){
     $start_time = time;
-    run_exe("/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/run_mummer_large_ref.pl $consensus_file $tilling_dir/REF $contig_file $tilling_dir/QUERY $working_dir $first_filling.coords $nb_process");
-    $end_time = time;
-    print STDERR "***  Mapping (1) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
+    run_exe("$perl_path $opera_bin_dir/run_mummer_large_ref.pl $consensus_file $tilling_dir/REF $contig_file $tilling_dir/QUERY $working_dir $first_filling.coords $nb_process $mummer_dir > $tilling_dir/tilling_1.out 2> $tilling_dir/tilling_1.err");
+    if($?){
+	die "Error during tilling generation. Please see $tilling_dir/tilling_1.out and $tilling_dir/tilling_1.err for details.\n";
+    }
+    #$end_time = time;
+    #print STDERR "***  Mapping (1) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
 }
 
-$start_time = time;
+#$start_time = time;
 get_paf_file($assembly_scaffold_file, "$first_filling.coords", "$first_filling.paf", "ONLY_SCAFF_CONTIG");
-$end_time = time;
-print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s\n";
+#$end_time = time;
+#print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s\n";
 
 get_contig_in_gap("$first_filling.paf", $contig_file, "$first_filling\_contig.fa");
 
-run_exe("/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/OPERA-LG/bin/Remap.py $first_filling.paf $consensus_file $first_filling\_contig.fa > $tilling_dir/first_remap.log");
+run_exe("$opera_bin_dir/Remap.py $first_filling.paf $consensus_file $first_filling\_contig.fa > $tilling_dir/tilling_1_remap.out");
+if($?){
+    die "Error during contig remapping. Please see $tilling_dir/tilling_1_remap.out for details.\n";
+}
 $end_time = time;
-print STDERR "***  Get first tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_tilling_1", ($end_time - $start_time));
+#print STDERR "***  Get first tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
 
 #[minor change with previous version]
 #Potential rescue of pre-consensus files if the tilling failed => no contigs mapped to the scaffold may only happen to very short scaffolds
@@ -118,21 +138,23 @@ close(FILE);
 my $second_tilling =  "$tilling_dir/second_tilling";
 if(1 || ! -e $second_tilling){
     $start_time = time;
-    run_exe("/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process");
-    $end_time = time;
-    print STDERR "***  Mapping (2) completed Elapsed time: " . ($end_time - $start_time) . "s\n";
+    run_exe("$perl_path $opera_bin_dir/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process $mummer_dir  > $tilling_dir/tilling_1.out 2> $tilling_dir/tilling_1.err");
+    if($?){
+	die "Error during tilling generation. Please see $tilling_dir/tilling_2.out and $tilling_dir/tilling_2.err for details.\n";
+    }
 }
 
-$start_time = time;
 get_paf_file($assembly_scaffold_file, "$second_tilling.coords", "$second_tilling.paf",  "ALL");
-$end_time = time;
-print STDERR "***  Get paf file Elapsed time: " . ($end_time - $start_time) . "s\n";
 
 get_contig_in_gap("$second_tilling.paf", $contig_file, "$second_tilling\_contig.fa");
     
-run_exe("/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/OPERA-LG/bin/Remap.py $second_tilling.paf $tilling_dir/consensus_remapped.fasta $second_tilling\_contig.fa > $tilling_dir/second_remap.log");
+run_exe("$opera_bin_dir/Remap.py $second_tilling.paf $tilling_dir/consensus_remapped.fasta $second_tilling\_contig.fa >  $tilling_dir/tilling_2_remap.out");
+if($?){
+    die "Error during contig remapping. Please see $tilling_dir/tilling_2_remap.out for details.\n";
+}
 $end_time = time;
-print STDERR "***  Get second tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
+#print STDERR "***  Get second tilling Elapsed time: " . ($end_time - $start_time) . "s\n";
+write_time("$working_dir/../../", "g_tilling_2", ($end_time - $start_time));
 
 #Rescue pre-consensus contigs if there is no valid tilling available for a given scaffold.
 #This can only happen if mummer does not remap the contigs mapped at the previous stage
@@ -148,65 +170,54 @@ close(FILE);
 ##########################################merge the contigs into the gapfilled file
 #
 $start_time = time;
-merge_contig_from_scaf("$tilling_dir/consensus_remapped_remapped.fasta", $contig_file, "$working_dir/../scaffoldSeq.fasta.filled");
+merge_contig_from_scaf("$tilling_dir/consensus_remapped_remapped.fasta", $assembly_scaffold_seq_file, "$working_dir/../scaffoldSeq.fasta.filled");
 $end_time = time;
 print STDERR "*** Contig merging Elapsed time: " . ($end_time - $start_time) . "s\n";
 
 print STDERR "***  Get final assembly Elapsed time : " . ($end_time - $start_time_begin) . "s\n";
     
 sub merge_contig_from_scaf{
-    my ($filled_scaff_file, $contig_file, $out_file) = @_;
-
-    my %singleton_contig_seq = ();
-    open(FILE, $contig_file);
+    my ($filled_scaff_file, $scaffold_seq_file, $out_file) = @_;
+    
+    my %final_scaff_seq = ();
+    open(FILE, $scaffold_seq_file);
     while(<FILE>){
 	if($_ =~ /^>(.+)/){
-	    $contig_full_name = $1;
-	    @tmp = split(/\s+/, $contig_full_name);
-	    $contig_name = $tmp[0];
+	    $scaffold_full_name = $1;
+	    @tmp = split(/\s+/, $scaffold_full_name);
+	    $scaff_name = $tmp[0];
 	    #print STDERR $contig_name . "\n";# <STDIN>;
-	    if(exists $singleton_contig{$contig_name}){
+	    if($scaff_info{$scaff_name} ne "MULTI"){#This scaffold was not filled
 		$seq = <FILE>;
-		$singleton_contig_seq{$contig_name} = $seq;
+		$final_scaff_seq{$scaff_name} = $seq;
 		#print STDERR " *** Print singleton contig " . $contig_name . "\n"; #<STDIN>;
 	    }
 	    else{
-		<FILE>;#This contig is in a scaffold
+		<FILE>;#Scaffold was filled
 	    }
 	}
 	
     }
-    close(FILE);
-
-    my %filled_scaff_seq = ();
+    close(FILE);    
+	
     open(FILE, $filled_scaff_file);
     while(<FILE>){
 	if($_ =~ /^>(.+)/){
 	    $scaff_name = $1;
 	    $seq = <FILE>;
 	    print STDERR $scaff_name . "\n";
-	    $filled_scaff_seq{$scaff_name} = $seq;
+	    $final_scaff_seq{$scaff_name} = $seq;
 	}
     }
     close(FILE);
     
     open(OUT, ">$out_file");
     foreach $scaff_name (@scaffold_order){
-	#print STDERR " *** Print scaff_name\n";
-	if($scaff_info{$scaff_name} eq "MULTI"){
-	    print STDERR $scaff_name . "\n";
-	    $seq = $filled_scaff_seq{$scaff_name};
-	    $l = length($seq) -1;
-	    print OUT ">$scaff_name length: $l cov: 0.0\n";
-	    print OUT $seq;
-	}
-	else{
-	    #print STDERR " *** Print singleton contig " . $scaff_name . "\t" . $scaff_info{$scaff_name} . "\n";<STDIN>;
-	    $seq = $singleton_contig_seq{$scaff_info{$scaff_name}};
-	    $l = length($seq) -1;
-	    print OUT ">$scaff_name length: $l cov: 0.0\n";
-	    print OUT $singleton_contig_seq{$scaff_info{$scaff_name}};
-	}
+	print STDERR $scaff_name . "\n";
+	$seq = $final_scaff_seq{$scaff_name};
+	$l = length($seq) -1;
+	print OUT ">$scaff_name length: $l cov: 0.0\n";
+	print OUT $seq;
     }
     close(OUT);
 }
@@ -215,12 +226,12 @@ sub split_scaffold_file{
     my ($working_dir, $assembly_scaffold_file) = @_;
     open(FILE, "$assembly_scaffold_file");
     my $nb_contig = 0;
-    my $str_scaff = "";
     my $scaff_name = "";
+    my $scaff_length = 0;
     while(<FILE>){
 	if($_ =~ /^>(.+)/){
 	    if($nb_contig > 0){
-		if($nb_contig > 1){
+		if($nb_contig > 1 && $scaff_length > $scaffold_length_threshold){
 		    $scaff_dir = "$working_dir/$scaff_name";
 		    `mkdir $scaff_dir` if(! -d $scaff_dir);
 		    open(OUT, ">$scaff_dir/scaffolds.scaf");
@@ -229,17 +240,14 @@ sub split_scaffold_file{
 		    $scaff_info{$scaff_name} = "MULTI";
 		}
 		else{
-		    @tmp = split(/\n/, $str_scaff);
-		    @c_info = split(/\s+/, $tmp[1]);
-		    $contig_name = $c_info[0];
-		    #print STDERR $scaff_name . "\t" . $contig_name . "\n";<STDIN>;
-		    $singleton_contig{$contig_name} = 1;
-		    $scaff_info{$scaff_name} = $contig_name;
+		    $scaff_info{$scaff_name} = "NO_FILL";
 		}
 	    }
 	    $str_scaff = $_;
 	    @tmp = split(/\s+/, $1);
 	    $scaff_name = $tmp[0];
+	    $scaff_length = $tmp[2];
+	    #print STDERR $scaff_name . "\t" .   $scaff_length . "\n";<STDIN>;
 	    push(@scaffold_order, $scaff_name);
 	    $nb_contig = 0;
 	    #print STDERR " *** $scaff_name\n";#<STDIN>;
@@ -252,7 +260,8 @@ sub split_scaffold_file{
     close(FILE);
 
     ####################get the last scaffold !!!
-    if($nb_contig > 1){
+    if($nb_contig > 1 && $scaff_length > $scaffold_length_threshold){
+	$scaff_dir = "$working_dir/$scaff_name";
 	run_exe("mkdir $scaff_dir") if(! -d $scaff_dir);
 	open(OUT, ">$scaff_dir/scaffolds.scaf");
 	print OUT $str_scaff;
@@ -260,12 +269,7 @@ sub split_scaffold_file{
 	$scaff_info{$scaff_name} = "MULTI";
     }
     else{
-	@tmp = split(/\n/, $str_scaff);
-	@c_info = split(/\s+/, $tmp[1]);
-	$contig_name = $c_info[0];
-	#print STDERR $scaff_name . "\t" . $contig_name . "\n";<STDIN>;
-	$singleton_contig{$contig_name} = 1;
-	$scaff_info{$scaff_name} = $contig_name;
+	$scaff_info{$scaff_name} = "NO_FILL";
     }
 }
 
@@ -432,15 +436,15 @@ sub get_paf_file{
 
     #Add the contigs for the same species
     if($flag_set_type eq "ALL"){
-	#get_contig_in_species(\%contig_set_to_keep, $scaffold_dir);
+	#get_contig_in_species($scaffold_dir, \%contig_set_to_keep);
     }
     
     open(OUT, ">$paf_file");
-    open(FILE, "sort -k10,10 -k1,1n $coord_file |");
+    open(FILE, "sort -k10,10 -k1,1n $coord_file | grep -v '\\[' | ");### NEED TO FIX
     my $gap_length = 0;
     #my $IDENTITY_THRESHOLD = 0.97;
     #
-    my $IDENTITY_THRESHOLD = 0.85;#Low identy threshold to allows mapping of repeat contigs on gaps covered by low number of reads thereshold can be scaffold specific and dependent of the coverage => high threshold due to improve sequence quality
+    my $IDENTITY_THRESHOLD = 0.95;#Low identy threshold to allows mapping of repeat contigs on gaps covered by low number of reads thereshold can be scaffold specific and dependent of the coverage => high threshold due to improve sequence quality
     #
     my $COVERAGE_THRESHOLD = 0.90;
     my $previous_contig_name = "";
@@ -448,7 +452,7 @@ sub get_paf_file{
     my ($contig_name, $scaffold_name, $scaffold_length, $mapping_length, $contig_end, $contig_start, $scaffold_start, $scaffold_end, $tiling_length);
     $scaffold_name = "";
     open(OUT_G, ">S1_gap_size.dat");
-    <FILE>;<FILE>;<FILE>;<FILE>;#skip the header lines
+    <FILE>;<FILE>;<FILE>;#<FILE>;#skip the header lines
     while(<FILE>){
 	chop $_;
 	@line = split(/\t/, $_);
@@ -569,7 +573,7 @@ sub get_contig_in_species{
     my $cluster_file = "$scaffold_dir/../../../reference_mapping/clusters_seq_similarity";
     my @cluster_list = ();
     #Get the species of the scaffold
-    my $genome_path = `grep -w $scaffold_id $scaffold_info | cut -f 6`;chop $genome_path;
+    #my $genome_path = `grep -w $scaffold_id $scaffold_info | cut -f 6`;chop $genome_path;
     
     #No psecies identified for that cluster
     if($genome_path ne "NA"){

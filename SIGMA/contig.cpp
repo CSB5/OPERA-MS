@@ -175,6 +175,10 @@ double compute_R(ContigMap* contigs) {
 	
 	std::vector<double*>* contig_info = new std::vector<double*>();
 	int sample_index;
+
+	std::string r_estimation_dist_file = Sigma::output_dir + "/r_estimate_distribution.dat";   
+	FILE* r_estimate = fopen(r_estimation_dist_file.c_str(), "w");
+	
 	for (auto it = contigs->begin(); it != contigs->end(); ++it) {
 		Contig* contig = (*it).second;
 
@@ -202,7 +206,7 @@ double compute_R(ContigMap* contigs) {
 		}
 		variance /= contig->num_windows();
 
-		if(variance - mean > 0 && variance != mean){
+		if(variance - mean > 0){//Check for the division by zero
 			c_info[0] = mean;
 			c_info[1] = variance;
 			//fprintf(stderr, "%f\t%f\n", mean, variance);
@@ -210,48 +214,61 @@ double compute_R(ContigMap* contigs) {
 			current_R = pow(mean, 2) / ( variance - mean);
 			c_info[2] = current_R;
 			contig_info->push_back(c_info);
+			fprintf(r_estimate, "%s\t%f\t%f\t%f\n", contig->id().c_str(), mean, variance, current_R);
 		}
 	       
 	}
+	fclose(r_estimate);
 	//fprintf(stderr, "*** Size:\n");
 	//fprintf(stderr, "*** Size: %i\n", (int)contig_info->size());
+	double least_square_R;
+	if(contig_info->size() != 0){
+		
+		//Sort the contig info vector
+		std::sort (contig_info->begin(), contig_info->end(), sort_contig_R);
 	
-	//Sort the contig info vector
-	std::sort (contig_info->begin(), contig_info->end(), sort_contig_R);
 	
+		//Exclude the top/last 10% of the contig R values
+		int excluded_contig = (int) (contig_info->size() / 10);
+		std::vector<double*>::iterator it_start = contig_info->begin() + excluded_contig;
+		std::vector<double*>::iterator it_last = contig_info->end() - excluded_contig;
+		min_R = (*it_start)[2];
 	
-	//Exclude the top/last 10% of the contig R values
-	int exluded_contig = (int) (contig_info->size() / 10);
-	std::vector<double*>::iterator it_start = contig_info->begin() + exluded_contig;
-	std::vector<double*>::iterator it_last = contig_info->end() - exluded_contig;
-	min_R = (*it_start)[2];
+		double mean,variance;
+		for (std::vector<double*>::iterator it = it_start; it != it_last; ++it){
+			mean = (*it)[0];
+			variance = (*it)[1];
+			numerator += pow(mean, 4);
+			denominator += pow(mean, 2) * variance - pow(mean, 3);
+		}
+
 	
-	double mean,variance;
-	for (std::vector<double*>::iterator it = it_start; it != it_last; ++it){
-		mean = (*it)[0];
-		variance = (*it)[1];
-		numerator += pow(mean, 4);
-		denominator += pow(mean, 2) * variance - pow(mean, 3);
+		least_square_R = numerator / denominator;
+	
 	}
-
 	
-	double least_square_R = numerator / denominator;
-	
-
+	else{
+		fprintf(stderr, " *** WARNING no contigs larger than 10kb for r estimation");
+		min_R = 20;
+		least_square_R = 50;
+		max_R = 150;
+		fprintf(stderr, " *** Use predefined R values: min_R %f least square %f  max_R %f\n", min_R, least_square_R, max_R);
+	}
 	double res = -1;
 	res = min_R;
 	
 	std::string r_estimation_file = Sigma::output_dir + "/r_estimate_value.dat";   
-	FILE* r_estimate = fopen(r_estimation_file.c_str(), "w");
+	r_estimate = fopen(r_estimation_file.c_str(), "w");
 	fprintf(r_estimate, "%f\t%f\n", min_R, least_square_R);
 	fclose(r_estimate);
 	
 	fprintf(stderr, " *** Global R: min_R %f least square %f  max_R %f\n *** RES: %f\n", min_R, least_square_R, max_R, res);
-
+	
 	//delete the vector
 	for (std::vector<double*>::iterator it = contig_info->begin(); it != contig_info->end(); ++it){
 		delete[] (*it);
 	}
+	
 	delete contig_info;
 		
 	return res;

@@ -557,7 +557,7 @@ sub write_filled_gap_scaffold{
     #The last contig of the last scaffold
     #if($contig_2 ne ""){
     if(! exists $scaff_not_filled{$scaff_name} && $contig_2 ne ""){
-	open(OUT, ">$ana_dir/$scaff_name/scaffolds.scaf");
+	open(OUT, ">$ana_dir/$scaff_name/pre_consensus.fa");
 	print OUT ">$scaff_name\n";
 	print OUT $scaff_seq.(get_contig_seq($contig_2, $contig_2_ori, \%all_contig_seq))."\n";
 	close(OUT);

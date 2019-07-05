@@ -7,8 +7,8 @@ use Getopt::Long;
 # preprocess of reads and map them using bowtie
 
 my $help_message = "
-
-	Options:
+    
+  Options:
     --nproc             Number of processor used during the analysis 
     --contig		Multi-fasta contig file
     --illumina-read1	Fasta/Fastq file of read 1 of the paired-end reads
@@ -22,9 +22,13 @@ my $help_message = "
 
 my $path = "";
 my $samtoolsDir = "";
+my $sigma_conf = "";
+my $bundler_conf = "";
 
 GetOptions(
     "nproc=i"    => \$nproc,
+    "sigma-conf=s" => \$sigma_conf,
+    "bundler-conf=s" => \$bundler_conf,
     "contig=s"    => \$contigFile,
     "illumina-read1=s"    => \$readFile1,
     "illumina-read2=s" => \$readFile2,
@@ -54,7 +58,7 @@ if ( !(defined($readFile2)) ){
         print "Fasta/Fastq file of read 2 of the paired-end reads missing.\n";
         exit 0;
 }
-if ( !(defined($outputFile)) ){
+if ( !(defined($outputFile)) && ($sigma_conf eq "" && $bundler_conf eq "")){
         print "Name of the output file missing.\n";
         exit 0;
 }
@@ -113,7 +117,12 @@ elsif( $mapTool eq "bwa" )
     #&readAndMap;
 
     # generate alignment
-    &generateAlignmentUsingBwamem;
+    if($bundler_conf ne "" && $sigma_conf ne ""){
+	&generateAlignmentUsingBwamemCov;
+    }
+    else{
+	&generateAlignmentUsingBwamem;
+    }
     &readAndMap;
 
     # remove the intermediate file
@@ -350,6 +359,19 @@ sub generateAlignmentUsingBwamem
     print $command."\n";
     #if($?){
     #die "Error during bwa mem. Please see log for details.\n";
+    #}
+}
+
+
+sub generateAlignmentUsingBwamemCov
+{
+    $time = localtime;
+    print "[$time]\t";
+    print "Generate alignments of reads using bwa mem...\n";
+    $command = "${path}bwa mem -t 20 $folder$contigName[ -1 ] - | ${samtoolsDir}samtools view -S -h -F 0x4 -  | ${path}../bin/short_read_analysis $bundler_conf $sigma_conf > $folder$outputFile.out 2> $folder$outputFile.err";
+    print $command."\n";
+    #if($?){
+    #die "Error during bwa mappnig and processing. Please see $folder$outputFile.out $folder$outputFile.err for details.\n";
     #}
 }
 

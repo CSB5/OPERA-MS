@@ -313,9 +313,6 @@ int main(int argc, char** argv) {
 			fprintf(stderr, " *** EXEC %s\n", cmd.c_str());
 			if( system (cmd.c_str()) );
 			
-			//run samtools to get the fake sam
-			//cmd = "samtools view " + Sigma::mapping_files[sample_index] + " | head -n 100000 " + " > " + fake_sam + "&";
-			
 			cmd = Sigma::SAMDIR + "/samtools view " + Sigma::mapping_files[sample_index] + " > " + fake_sam + "&";
 			fprintf(stderr, " *** EXEC %s\n", cmd.c_str());
 			if( system (cmd.c_str()) );
@@ -447,6 +444,4 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
-
-///mnt/pnsg10_projects/bertrandd/sigma/script/run_mummer_large_ref.pl /mnt/pnsg10_projects/bertrandd/sigma/HMP/DATA/HMREFG/all_seqs_bact.fa /mnt/pnsg10_projects/bertrandd/sigma/HMP/DATA/HMREFG/MUMMER_SPLIT/ OPERA_MS/output_dir/debug_output/backup/scaffoldSeq_500k.fasta OPERA_MS/output_dir/debug_output/backup/MMUMMER_SPLIT_500000 OPERA_MS/output_dir/debug_output/backup/MAPPING OPERA_MS/output_dir/debug_output/backup/MAPPING/HMP.coords 15
 

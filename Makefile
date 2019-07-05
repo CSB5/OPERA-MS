@@ -1,5 +1,5 @@
 
-install: sigma opera mummer perlmodule 
+install: sigma opera short_read_analysis mummer perlmodule 
 
 clean : sigmaclean operaclean
 
@@ -8,6 +8,9 @@ sigma:
 
 opera: 
 	cd OPERA-LG&&make install;
+
+short_read_analysis:
+	cd SHORT_READ_ANALYSIS/src/&&make;
 
 mummer:
 	cd utils&&sh install_mummer3.23.sh

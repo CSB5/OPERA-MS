@@ -33,12 +33,14 @@ write_assembly_stats(\%filled_scaffold_length, \%cluster_to_species, \%clusters_
 sub write_assembly_stats{
     my ($filled_scaffold_length, $cluster_to_species, $clusters_to_contigs, $contig_cov, $scaffold_file,  $strain_directory, $outfile) = @_;
     my @cov_list = [];
-    my $no_species_info_line = "NA\tNA\tNA";
     my $species_info_line = "";
     my ($ref_genome, $species_name);
     my %nb_species_strain = ();
-    my $scaf_name = "";
+    my $scaff_name = "";
     my $cluster_for_scaffold = undef;
+    my @scaff_delim;
+    my ($scaff_id, $median_cov, $length, $str_scaff);
+
     open (OUTFILE, '>', $outfile) or die;
     print OUTFILE "SEQ_ID\tLENGTH\tARRIVAL_RATE\tSPECIES\tNB_STRAIN\tREFERENCE_GENOME\n";
     open (SCAFFOLDS, $scaffold_file) or die;
@@ -50,71 +52,18 @@ sub write_assembly_stats{
 	my $next_scaffold = $_;
 
 	if ($_ =~ />/){
-	    if ($scaf_name ne ""){
-		#$scaf_name =~ /length:\s(\d*)\s/;
-		my @scaff_delim = split(/\t/, $scaf_name);
-		my $scaff_id = $scaff_delim[0];
-		my $scaffold_name = substr($scaff_id,1);
-		my $median_cov = median(@cov_list);
+	    if ($scaff_name ne ""){
+		$median_cov = median(@cov_list);
 		#print STDERR " *** $scaffold_name\n";<STDIN>;# @cov_list . "\n";
-		$length= $filled_scaffold_length{$scaffold_name};
-		my $is_plasmid = 0;
-
-		if (defined($cluster_for_scaffold)){
-		    print OUTFILE $scaff_id . "\t$length\t$median_cov\t";
-		}
-		else{
-		    print OUTFILE $scaff_id . "\t$length\tNA\t";
-		}
-		#print STDERR " **** $scaf_name $length\n";
-		if (1 || $length > 999){
-		    
-		    if (defined $cluster_for_scaffold && exists $cluster_to_species->{$cluster_for_scaffold}){
-			$species_info_line = "";
-			
-			#open (REF_GENOME, "$opera_ms_dir/$cluster_to_species{$cluster_for_scaffold}") or die;
-			#my $firstline = <REF_GENOME>;
-			#if ($firstline =~ /plasmid/){
-			#$species_name = "Potential_plasmid";
-			#}
-			#else{
-			#Get the species name
-			$ref_genome = $cluster_to_species->{$cluster_for_scaffold};
-			@tmp = split(/\//, $ref_genome);
-			@tmp_2 = split(/\_/,$tmp[@tmp-2]);
-			$species_name = $tmp_2[0] . "_" . $tmp_2[1];
-			if(! exists $nb_species_strain{$species_name}){
-			    $nb_s = 1;
-			    $s_s_dir = "$strain_directory/$species_name";
-			    if(-d $s_s_dir){
-				#print STDERR "ll $s_s_dir/STRAIN_*/contigs.fa/n";
-				$nb_s = `ls -l $s_s_dir/STRAIN_*/contigs.fa | wc -l`;chop $nb_s;
-			    }
-			    $nb_species_strain{$species_name} = $nb_s;
-			}
-			#}
-			#print OUTFILE $cluster_to_species{$cluster_for_scaffold} . "\t";
-			
-			#my @scaff_line = split(/\t/, $scaf_name);
-			#$n_info = get_nucmer_info($length,$scaffold_name);
-			#print OUTFILE $species_name . "\t" . $nb_species_strain{$species_name} . "\t" . "$opera_ms_dir/$ref_genome" . "\t" . $n_info . "\t";
-			print OUTFILE $species_name . "\t" . $nb_species_strain{$species_name} . "\t" . "$opera_ms_dir/$ref_genome";
-		    }
-
-		    else{
-			print OUTFILE $no_species_info_line;
-		    }
-		}
+		$length= $filled_scaffold_length{$scaff_name};
 		
-		else{
-		    print OUTFILE $no_species_info_line;
-		}
-		print OUTFILE "\n";
-		
+		$str_scaff = get_scaffold_info($scaff_name, $cluster_for_scaffold, $median_cov, $length, $cluster_to_species, \%nb_species_strain, $strain_directory);
+		print OUTFILE $str_scaff;
+		#$scaf_name =~ /length:\s(\d*)\s/;
 	    }
 
 	    $numb_contigs_in_scaffold = 0; 
-	    $scaf_name = $next_scaffold;
+	    $scaff_name = $next_scaffold;
 	    $cluster_for_scaffold = undef;
 	    undef(@cov_list);
 	}
@@ -129,9 +78,68 @@ sub write_assembly_stats{
 
     }
 
+    #For the lats scaffold
+    $median_cov = median(@cov_list);
+    $length= $filled_scaffold_length{$scaff_name};
+    $str_scaff = get_scaffold_info($scaff_name, $cluster_for_scaffold, $median_cov, $length, $cluster_to_species, \%nb_species_strain, $strain_directory);
+    print OUTFILE $str_scaff;
+    
     close(SCAFFOLDS);
+    close(OUTFILE);
 }
 
+
+sub get_scaffold_info{
+    my ($scaff_name, $cluster_for_scaffold, $median_cov, $length, $cluster_to_species, $nb_species_strain, $strain_directory) = @_;
+    @scaff_delim = split(/\t/, $scaff_name);
+    $scaff_id = $scaff_delim[0];
+    my $scaffold_name = substr($scaff_id,1);
+    
+    #print STDERR " *** $scaffold_name\n";<STDIN>;# @cov_list . "\n";
+    $length= $filled_scaffold_length{$scaffold_name};
+    my $no_species_info_line = "NA\tNA\tNA";
+    my $str_res = "";
+    my $species_info_line;
+    if (defined($cluster_for_scaffold)){
+	$str_res = $scaff_id . "\t$length\t$median_cov\t";
+    }
+    else{
+	$str_res = $scaff_id . "\t$length\tNA\t";
+    }
+    #print STDERR " **** $scaf_name $length\n";
+    if (1 || $length > 999){
+	
+	if (defined $cluster_for_scaffold && exists $cluster_to_species->{$cluster_for_scaffold}){
+	    $species_info_line = "";
+	    
+	    #Get the species name
+	    $ref_genome = $cluster_to_species->{$cluster_for_scaffold};
+	    @tmp = split(/\//, $ref_genome);
+	    @tmp_2 = split(/\_/,$tmp[@tmp-2]);
+	    $species_name = $tmp_2[0] . "_" . $tmp_2[1];
+	    if(! exists $nb_species_strain->{$species_name}){
+		$nb_s = 1;
+		$s_s_dir = "$strain_directory/$species_name";
+		if(-d $s_s_dir){
+		    #print STDERR "ll $s_s_dir/STRAIN_*/contigs.fa/n";
+		    $nb_s = `ls -l $s_s_dir/STRAIN_*/contigs.fa | wc -l`;chop $nb_s;
+		}
+		$nb_species_strain->{$species_name} = $nb_s;
+	    }
+	    
+	    $str_res .= $species_name . "\t" . $nb_species_strain->{$species_name} . "\t" . "$opera_ms_dir/$ref_genome";
+	}
+
+	else{
+	    $str_res .= $no_species_info_line;
+	}
+    }
+    
+    else{
+	$str_res .= $no_species_info_line;
+    }
+    $str_res .= "\n";
+}
 
 sub analyse_scaff_seq{
     my ($filled_scaffold_length, $clusters_to_contigs, $cluster_to_species, $scaffold_file, $scaffold_seq_file, $use_nucmer) = @_;

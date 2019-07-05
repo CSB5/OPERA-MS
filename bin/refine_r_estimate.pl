@@ -32,12 +32,14 @@ if(! evaluate_cluster($coverage_contig_file, $cluster_file, "$sigma_dir/r_estima
 	run_exe("mkdir  $new_dir") if(! -d $new_dir);
 	run_exe("grep -v R_VALUE $sigma_config_file | grep -v output_dir  > $new_config_file;  echo \"output_dir=$new_dir\" >> $new_config_file; echo \"R_VALUE=$r_value\" >> $new_config_file");
 	#run_exe("mv $tmp_config_file $sigma_config_file");
-	print OUT "$opera_ms_dir/bin/sigma $new_config_file\n";
+	print OUT "$opera_ms_dir/bin/sigma $new_config_file 2> $sigma_cmd.$nb_step.err\n";
     }
     close(OUT);
     #exit(0);
-    run_exe("cat $sigma_cmd | xargs -L 1 -P $num_processor -I COMMAND sh -c \"COMMAND\" 2> $sigma_cmd.log");
-
+    run_exe("cat $sigma_cmd | xargs -L 1 -P $num_processor -I COMMAND sh -c \"COMMAND\"");
+    if($?){
+	die "Error in during sigma. Please see $sigma_cmd_*.err for details.\n";
+    }
 
     my $r_index = 1;
     for ($r_index = 1; $r_index <= $NB_STEP; $r_index++){
@@ -57,6 +59,9 @@ sub evaluate_cluster{
     $res = 0;
     
     run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_evaluation.pl $coverage_contig_file $cluster_file 2> $out_file");
+    if($?){
+	die "Error in during bin/cluster_evaluation.pl. Please see $out_file for details.\n";
+    }
     
     #get the fraction of the assembly with outlier contigs
     $tmp = `tail -n1 $out_file`; chop $tmp;

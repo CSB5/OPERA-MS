@@ -51,8 +51,8 @@ my $nucmer_dir = "$ref_map_folder/NUCMER_OUT/";
 
 ######################################START########################3
 
-my $command = "mkdir -p $ref_map_folder"; 
-run_exe($command) if (!(-d $ref_map_folder));
+my $command;
+run_exe("mkdir -p $ref_map_folder") if (!(-d $ref_map_folder));
 
 my ($start_time, $end_time);
 get_cluster_contigs_info(\%contig_info_, \%cluster_info_);
@@ -858,7 +858,10 @@ sub run_mash_on_clusters{
 			if ($count == $max_genome_for_sketch){
 			    $count = 0;
 			    # generate partial sketeches
-			    run_exe("$mash_exe_dir/mash sketch -k 21 -s 1000 -o $partial_sketch_dir/partial_Sketch$partial_count $inter_fa_dir/*");
+			    run_exe("$mash_exe_dir/mash sketch -k 21 -s 1000 -o $partial_sketch_dir/partial_Sketch$partial_count $inter_fa_dir/* > $mash_dir/mash_sketch.out 2> $mash_dir/mash_sketch.err");
+			    if($?){
+				die "Error in during bin/mash sketch. Please see $mash_dir/mash_sketch.out $mash_dir/mash_sketch.err for details.\n";
+			    }
 			    
 			    # remove intermediate .fa files
 			    run_exe("rm $inter_fa_dir/*");
@@ -875,23 +878,33 @@ sub run_mash_on_clusters{
 		#print STDERR "\n".$contig_seq;
             }
             else{
-		$contig_seq = $contig_seq . $_ . "\n";
+		$contig_seq .= $_ . "\n";
 	    }
         }
     }
     close(FILE);
     #Write the last contig in its cluster
     $contig_info->{$contig_name}->{"SEQ"} .= $contig_seq;
-    
+    $cluster_info->{$contig_cluster}->{"CLUSTER_SEQ"} .= $contig_seq ;
     if(defined($contig_name) && defined($contig_cluster)){
 	open($out,'>',"$inter_fa_dir/$contig_cluster.fa");
 	print $out $cluster_info->{$contig_cluster}->{"CLUSTER_SEQ"};
 	close($out);
-	run_exe("$mash_exe_dir/mash sketch -k 21 -s 1000 -o $partial_sketch_dir/partial_Sketch$partial_count $inter_fa_dir/*");
+	$count++;
+    }
+    if($count != 0){
+	run_exe("$mash_exe_dir/mash sketch -k 21 -s 1000 -o $partial_sketch_dir/partial_Sketch$partial_count $inter_fa_dir/* > $mash_dir/mash_sketch.out 2> $mash_dir/mash_sketch.err");
+	if($?){
+	    die "Error in during bin/mash sketch. Please see $mash_dir/mash_sketch.out $mash_dir/mash_sketch.err for details.\n";
+	}
 	run_exe("rm -r $inter_fa_dir");
     }
+    
     run_exe("$mash_exe_dir/mash paste $mash_dir/cluster.msh $partial_sketch_dir/partial_Sketch*");
-    run_exe("$mash_exe_dir/mash dist -p $nb_process -d 0.90  $mash_ref $mash_dir/cluster.msh  > $mash_dir/mash_dist.dat");
+    run_exe("$mash_exe_dir/mash dist -p $nb_process -d 0.90  $mash_ref $mash_dir/cluster.msh  > $mash_dir/mash_dist.dat 2> $mash_dir/mash_dist.err");
+    if($?){
+	die "Error in during bin/mash dist. Please see $mash_dir/mash_dist.err for details.\n";
+    }
     #<STDIN>;
 }
 

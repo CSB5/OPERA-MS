@@ -254,11 +254,15 @@ foreach $strain_id (@strain_list){
     #next if($strain_id == 2);
     $start_time = time;
     $strain_dir = "$species_dir/STRAIN_$strain_id";
-    #run_exe("$opera_ms_dir/OPERA-LG/bin/OPERA-LG $strain_dir/opera.config  > $strain_dir/log.txt");
     run_exe("timeout 5m $opera_ms_dir/OPERA-LG/bin/OPERA-LG $strain_dir/opera.config  > $strain_dir/log.txt");
     if(! -e "$strain_dir/scaffoldSeq.fasta"){#NEED TO IN THE MAKE FILE THE COMMAND TO GET THE FASTS OPERA-MS
 	run_exe("$opera_ms_dir/OPERA-LG/bin/OPERA-LG-fast $strain_dir/opera.config  > $strain_dir/log_fast.txt");
     }
+
+    if( ! -e "$strain_dir/scaffoldSeq.fasta"){
+	die " Error in OPERA-LG. Please see $strain_dir/log.txt and $strain_dir/log_fast.txt for details.\n";
+    }
+    
     $end_time = time;
     my @tmp = split(/\//,$species_dir);
     my $species_name = $tmp[-1];
@@ -572,8 +576,7 @@ sub get_contig_sequence{
 	    #print STDERR "---> $nb_contig\n" if($nb_contig % 500000 == 0);$nb_contig++;
 	    @line = split(/\s+/, $1);
 	    $ID = $line[0];
-	    
-	    
+	    	    
 	    if(exists $contig_info->{$ID}->{"STRAIN_ID"} && ($contig_info->{$ID}->{"STRAIN_ID"} eq "NA" || $contig_info->{$ID}->{"STRAIN_ID"} == 0 )){
 		$print_flag = 1;
 		print OUT ">" . $ID . "\n";
