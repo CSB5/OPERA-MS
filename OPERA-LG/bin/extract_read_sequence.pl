@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 use warnings;
 use Switch;
 use Getopt::Long;
@@ -78,7 +77,7 @@ my $cmp_multi_edge = 1;my $str_multi = "";
 
 #open(FILE, "head -n5 $scaffold_file |");
 my $contig_len_file = "$opera_lr_dir/contigs";
-my $scaffold_file = "$opera_lr_dir/scaffolds.scaf";
+$scaffold_file = "$opera_lr_dir/scaffolds.scaf";
 read_scaffold_file($scaffold_file);
 
 print STDERR " *** Number of edges selected for gapfilling $nb_selected_edges\n";#<STDIN>;

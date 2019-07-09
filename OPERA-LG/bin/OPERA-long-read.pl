@@ -240,7 +240,7 @@ if(! -e "$file_pref.map.sort"){
     if($mapper eq "minimap2"){
 	print "Mapping long-reads using minimap2...\n";
 	#
-	#run_exe("$minimap2Dir/minimap2 -w5 -m0 --cs=short $contigFile $readsFile > $file_pref.map 2> minimap2.err");
+	run_exe("$minimap2Dir/minimap2 -w5 -m0 --cs=short $contigFile $readsFile | cut -f1-21 > $file_pref.map 2> minimap2.err");
 	#
 	if($?){
 	    die "Error in the minimap2 mapping. Please see $outputDir/minimap2.err for details.\n";

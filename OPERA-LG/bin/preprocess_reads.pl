@@ -368,7 +368,7 @@ sub generateAlignmentUsingBwamemCov
     $time = localtime;
     print "[$time]\t";
     print "Generate alignments of reads using bwa mem...\n";
-    $command = "${path}bwa mem -t 20 $folder$contigName[ -1 ] - | ${samtoolsDir}samtools view -S -h -F 0x4 -  | ${path}../bin/short_read_analysis $bundler_conf $sigma_conf > $folder$outputFile.out 2> $folder$outputFile.err";
+    $command = "${path}bwa mem -t 20 $folder$contigName[ -1 ] - | ${path}samtools view -S -h -F 0x4 -  | ${path}../bin/short_read_analysis $bundler_conf $sigma_conf > $folder$outputFile.out 2> $folder$outputFile.err";
     print $command."\n";
     #if($?){
     #die "Error during bwa mappnig and processing. Please see $folder$outputFile.out $folder$outputFile.err for details.\n";
