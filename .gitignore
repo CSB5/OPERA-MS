@@ -21,6 +21,8 @@ database_updated.bk
 utils/perl
 test_files/OPERA_MS*/
 test_files/sample_output/
+test_files/OUT/
+test_files/log.err
 
 
 utils/metabat

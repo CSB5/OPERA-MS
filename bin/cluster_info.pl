@@ -150,7 +150,7 @@ sub analyze_mash{
 
 	    next if(index($species, "multispecies") != -1);
 	    $bin_info->{$bin_id}->{"SPECIES"} = $species;
-	    $bin_info->{$bin_id}->{"SIMILARITY"} = $similarity;
+	    $bin_info->{$bin_id}->{"SIMILARITY"} = sprintf("%.6f", 1-$similarity) if($similarity ne "NA");
 	}
     }
     close(FILE);

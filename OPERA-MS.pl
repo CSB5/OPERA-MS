@@ -1367,10 +1367,10 @@ Usage:
 
 Required arguments:
     
-      --illumina-read1       STR   fasta file of illumina read1 <pe1>
-      --illumina-read2       STR   fasta file of illumina read2 <pe2>
+      --short-read1       STR   fasta file of illumina read1 <pe1>
+      --short-read2       STR   fasta file of illumina read2 <pe2>
       --long-read            STR   fasta file of long reads <lr>
-      --output-directory     STR   output directory for scaffolding results <out_dir>
+      --out-dir     STR   output directory for scaffolding results <out_dir>
 
 Optional arguments:
    
@@ -1393,8 +1393,8 @@ Optional arguments:
     #$p = Getopt::Long::Parser->new;
     GetOptionsFromArray(
 	$read_option,
-	"illumina-read1=s"    => \$opera_ms_option{"ILLUMINA_READ_1"},
-	"illumina-read2=s"    => \$opera_ms_option{"ILLUMINA_READ_2"},
+	"short-read1=s"    => \$opera_ms_option{"ILLUMINA_READ_1"},
+	"short-read2=s"    => \$opera_ms_option{"ILLUMINA_READ_2"},
 	"long-read=s"    => \$opera_ms_option{"LONG_READ"},
 	"out-dir=s"  => \$opera_ms_option{"OUTPUT_DIR"},
 	#
