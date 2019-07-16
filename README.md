@@ -22,7 +22,12 @@ If you encounter any problems during the installation, or if some third party so
 A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands (please note that the test script runs with 2 cores which is also the minimum.): 
 ```
 cd OPERA-MS/test_files
-perl ../OPERA-MS.pl  --contig_file contigs.fasta  --illumina-read1 R1.fastq.gz --illumina-read2 R2.fastq.gz --long-read long_read.fastq --output-directory OPERA_MS_output 2> log.err
+perl ../OPERA-MS.pl\
+    --contig_file contigs.fasta\  
+    --short-read1 R1.fastq.gz\
+    --short-read2 R2.fastq.gz\
+    --long-read long_read.fastq\
+    --out-dir RESULTS 2> log.err
 ```
 This will assemble a low diversity mock community in the folder **OPERA_MS_output**.
 Notice that in case of an interruption during an OPERA-MS run, using the same command line will re-start the execution after the last completed checkpoint.
@@ -31,13 +36,13 @@ Notice that in case of an interruption during an OPERA-MS run, using the same co
 
 ### Essential arguments
 
-- **--illumina-read1** : `illum_read1.fq.gz` - Path to the first read for Illumina paired-end read data
+- **--short-read1** : `R1.fq.gz` - path to the first read for Illumina paired-end read data
 
-- **--illumina-read2** : `illum_read2.fq.gz` - Path to the second read for Illumina paired-end read data
+- **--short-read2** : `R2.fq.gz` - path to the second read for Illumina paired-end read data
 
-- **--long-read** : `long-read.fq` - Path to the long-read fastq file obtained from either Oxford Nanopore, PacBio or Illumina Synthetic Long Read sequencing
+- **--long-read** : `long-read.fq` - path to the long-read fastq file obtained from either Oxford Nanopore, PacBio or Illumina Synthetic Long Read sequencing
 
-- **--output-directory** : `results` - Directory where OPERA-MS results will be outputted
+- **--out-dir** : `RESULTS` - directory where OPERA-MS results will be outputted
 
 ### Optional arguments 
 
@@ -47,25 +52,25 @@ Notice that in case of an interruption during an OPERA-MS run, using the same co
 
 - **--polishing** : - enable assembly polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contig.polished.fasta
 
-- **--long-read-mapper** : `default: blasr` - Software used for long-read mapping i.e. blasr or minimap2
+- **--long-read-mapper** : `default: blasr` - software used for long-read mapping i.e. blasr or minimap2
 
-- **--kmer-size** : `default: 60` - Kmer value used to assemble contigs
+- **--kmer-size** : `default: 60` - kmer value used to assemble contigs
 
-- **--contig-len-thr** : `default: 500` - Contig length threshold for clustering; contigs smaller than CONTIG_LEN_THR will be filtered out
+- **--contig-len-thr** : `default: 500` - contig length threshold for clustering; contigs smaller than CONTIG_LEN_THR will be filtered out
 
-- **--contig-edge-len** : `default: 80` - During contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency
+- **--contig-edge-len** : `default: 80` - during contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency
 
-- **--contig-window-len** : `default: 340` - Window length in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value
+- **--contig-window-len** : `default: 340` - window length in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value
 
-- **--contig-file** : `contigs.fa` - Path to the contig file, if the short-reads have been assembled previously
+- **--contig-file** : `contigs.fa` - path to the contig file, if the short-reads have been assembled previously
 
-- **--num-processor** : `default : 2` - Number of processors to use (note that 2 is the minimum)
+- **--num-processor** : `default : 2` - number of processors to use (note that 2 is the minimum)
 
 Alternatively, OPERA-MS parameters can be set using a [configuration file](https://github.com/CSB5/OPERA-MS/wiki/Configuration-file).
 
 ### Output
 
-The following output files can be found in the specified output directory i.e. OUTPUT_DIR.
+The following output files can be found in the specified output directory i.e. **RESULTS**.
 The file **contig.fasta** (and **contig.polished.fasta** if the assembly have been polished) contains the assembled contigs, and **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest contig etc.).
 **contig_info.txt** provides a detailed overview of the assembled contigs with the following information:
 - **CONTIG_ID** : contig identifier
@@ -73,18 +78,17 @@ The file **contig.fasta** (and **contig.polished.fasta** if the assembly have be
 - **SHORT_READ_COV** : contig average short-read coverage
 - **LONG_READ_COV** : contig average long-read coverage
 - **CLUSTER** : the OPERA-MS cluster that the contig belong to
-- **SPECIES** : closest reference species in the OPERA-MS database for the assembled contig
-- **NB_STRAIN** : number of strain genomes in the metagenome that were detected by OPERA-MS for this species
-- **REFERENCE_GENOME** : ID of the reference sequence present in the OPERA-MS database
+- **SPECIES** : closest reference species in the OPERA-MS database for the assembled contig  (identified using [Mash](https://github.com/marbl/Mash))
+- **NB_STRAIN** : number of strain detected by OPERA-MS for this species
+- **REFERENCE_GENOME** : species reference sequence ID
 
-Finally, the OPERA-MS strain level clusters can be found in the following directory: **OUT_DIR/opera_ms_clusters/**.
-Notice that those clusters have been obtained using the OPERA-MS conservative clustering that provide low contamination. More sentitive binning can be obtained using alertnative approach such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/)
+Finally, the OPERA-MS strain level clusters can be found in the following directory: **RESULTS/opera_ms_clusters/**.
 **cluster_info.txt** provides a detailed overview of the OPERA-MS clusters with the following information:
 - **CLUSTER_ID** : cluster identifier
 - **SHORT_READ_COV** : cluster average short-read coverage
 - **LONG_READ_COV** :  cluster average long-read coverage
 - **SPECIES** : closest reference species in the OPERA-MS database (identified using [Mash](https://github.com/marbl/Mash))
-- **SIMILARITY** : similarity with the closest reference species
+- **SIMILARITY** : similarity with the closest reference species (identified using [Mash](https://github.com/marbl/Mash))
 - **CLUSTER_SIZE** : cluster assembly size
 - **NB_CONTIG** : number of contigs in the cluster
 - **LONGEST_CONTIG** : longest contig in the cluster
@@ -97,17 +101,20 @@ Notice that those clusters have been obtained using the OPERA-MS conservative cl
 - **SHORT_READ_N50** : N50 obtained using the short-read only cluster assembly
 - **SHORT_READ_L50** : L50 obtained using the short-read only cluster assembly
 
+Notice that those clusters have been obtained using the OPERA-MS conservative clustering that may not cluster a significant number of contigs. More sentitive binning may be obtained using alternative approaches such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
+
 # Performance
 
 The OPERA-MS running time is dependent of the microbiome complexity and of the short/long-read data coverage.
-We ran OPERA-MS with default parameters using 16 threads on a server with Intel Xeon platinium with 32Gb of RAM and SSD hard drive, on three different dataset:
-| Data set  | Illumina data (Gbp) | Long-read data (Gbp) | Running time (hours)  | 
+We ran OPERA-MS with default parameters using 16 threads on a server with Intel Xeon platinium with 32Gb of RAM and a SSD hard drive, on three different dataset:
+
+| Data set  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | 
 |---                 |---|---   |---   |
 | low complexity     | 3.9  | 2    | 1.4  |
 | medium complexity  | 24.4  | 1.6  | 2.7  |
 | high complexity    | 9.9  | 4.8  | 5.2    |
 
-To obtain the best assembly performance (cluster contig N50 > 500kbp), OPERA-MS requires a minimum of 30x short-read coverage and 10x long-read coverage. To assemble a typical bacterial genomes (3Mbp) at 1% abundance, 9Gb of Illumina datata and 3Gb of long-read data are required.
+To obtain the best assembly performance (cluster contig N50 > 500kbp), OPERA-MS requires a minimum of 30x short-read coverage and 10x long-read coverage. To assemble a typical bacterial genome (3Mbp) at 1% abundance, 9Gb of short-read data and 3Gb of long-read data are recommended.
 
 # Dependencies
 
