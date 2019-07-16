@@ -25,3 +25,4 @@ test_files/sample_output/
 
 utils/metabat
 utils/run_MaxBin.pl
+utils/jgi_summarize_bam_contig_depths

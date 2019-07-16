@@ -187,13 +187,15 @@ if(index($illum_read1, ",") == -1){#single sample assembly
     if ( ! -e $illum_read1 && $illum_read1 ne "NONE") {die "\nError: $illum_read1 - illumina read 1 file does not exist $str_full_path\n"};
     if ( ! -e $illum_read2 && $illum_read2 ne "NONE") {die "\nError: $illum_read2 - illumina read 2 file does not exist $str_full_path\n"};
     
-    $start_time = time;
-    print " *** *** Mapping short-reads using  $short_read_maptool...\n";
     if( !$skip_short_read_mapping && ! -e "${file_pref}.bam" &&  !($illum_read1 eq "NONE" && $illum_read2 eq "NONE")){
+	$start_time = time;
+	print " *** *** Mapping short-reads using  $short_read_maptool...\n";
     	run_exe("$operaDir/../../utils/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam 2> preprocess_reads.err");
 	if($?){
 	    die "Error during read preprocessing. Please see $outputDir/preprocess_reads.err for details.\n";
 	}
+	$end_time = time;
+	print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
     }
 }
 else{
@@ -208,8 +210,7 @@ else{
 if($?){
     die "Error in the short read mapping. Please see log for details.\n";
 }
-$end_time = time;
-print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "\n";
+
 
 
 if(! -e "$file_pref.map.sort"){
@@ -240,7 +241,7 @@ if(! -e "$file_pref.map.sort"){
     if($mapper eq "minimap2"){
 	print "Mapping long-reads using minimap2...\n";
 	#
-	run_exe("$minimap2Dir/minimap2 -w5 -m0 --cs=short $contigFile $readsFile | cut -f1-21 > $file_pref.map 2> minimap2.err");
+	run_exe("$minimap2Dir/minimap2 -t $nproc -w5 -m0 --cs=short $contigFile $readsFile | cut -f1-21 > $file_pref.map 2> minimap2.err");
 	#
 	if($?){
 	    die "Error in the minimap2 mapping. Please see $outputDir/minimap2.err for details.\n";
@@ -271,11 +272,11 @@ print "Analyzing sorted results...\n";
 my $all_edge_file = "pairedEdges";
 &checkMapping( "$file_pref.map.sort", $all_edge_file);
 
-#Get the coverage information in no illumina reads provided
-if($illum_read1 eq "NONE" && $illum_read2 eq "NONE"){
+#Get the long read coverage information
+#if($illum_read1 eq "NONE" && $illum_read2 eq "NONE"){
     long_read_coverage_estimate("$file_pref.map.sort.status", "$file_pref.map.cov");
     #print "Mapping long-reads using minimap2...\n";<STDIN>;
-}
+#}
 
 # extract edges
 print "Extracting linking information...\n";
@@ -898,9 +899,9 @@ sub checkMapping{
 	    "CONTIG_FOR_GAPFILLING:".join(";", @{$edge_read_info{$key}->{"CONTIG_GAPFILLING"}}).
 	    "\n";
 	
-	if($nb_edge_distance > 1){
-	    print STDERR " *** ".$nb_edge_distance." number of distance or that edge\n";#<STDIN>;
-	}
+	#if($nb_edge_distance > 1){
+	#    print STDERR " *** ".$nb_edge_distance." number of distance or that edge\n";#<STDIN>;
+	#}
 
     }
     #close EDATA;
@@ -982,9 +983,6 @@ sub CreateConfigFile{
 	print CONF "map_type=opera\n";
 	$i++;
     }
-
-    
-    
     
     close CONF;
 }

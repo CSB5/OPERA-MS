@@ -1,13 +1,19 @@
 #use strict;
 use warnings;
 use Cwd;
-use File::Spec;
 use Switch;
-use Getopt::Std;
+use File::Which;
+use File::Spec;
 use File::Spec::Functions qw(rel2abs);
 use File::Basename;
-use File::Which;
-
+#
+use Statistics::Basic;
+use Statistics::R;
+#
+use Getopt::Std;
+use Getopt::Long;
+use Getopt::Long qw(GetOptionsFromArray);
+#use Getopt::long::Parser;
 
 my %opera_ms_option = ();
 my $opera_ms_full_path = dirname(rel2abs($0)) . "/";
@@ -15,7 +21,7 @@ $opera_ms_option{"OPERA_MS_DIR"} = $opera_ms_full_path;
 
 my %opera_ms_dependency = ();
 
-require "$opera_ms_full_path/test_time.pl";
+require "$opera_ms_full_path/bin/test_time.pl";
 
 #Error message
 my $help_line = "To configure OPERA-MS, please look at the example config file inside the OPERA-MS folder.\nUsage: \n\npath/OPERA-MS/OPERA-MS.pl <config_file>\n\n";
@@ -28,11 +34,13 @@ if ( @ARGV == 0 ){
 check_dependency(\%opera_ms_option, \%opera_ms_dependency, "CHECK_DEPENDENCY") if($ARGV[0] eq "CHECK_DEPENDENCY");
 
 #read from config file
-if ( @ARGV <= 2){
+if ( $ARGV[0] ne "--help" && @ARGV <= 2){
     read_config_file(\%opera_ms_option, @ARGV);
 }
 else{
-    die $incorrect_arguments;
+    read_argument(\%opera_ms_option,\@ARGV);#Write config file
+    #read_config_file(\%opera_ms_option, $opera_ms_option{"CONFIG_PATH"});
+    #die $incorrect_arguments;
 }
 #Make paths absolute if they are not already.
 setup_directory_path(\%opera_ms_option);
@@ -60,14 +68,16 @@ reference_clustering(\%opera_ms_option, \%opera_ms_dependency);#Add check for re
 strain_clustering_and_assembly(\%opera_ms_option, \%opera_ms_dependency);
 
 gap_filling(\%opera_ms_option, \%opera_ms_dependency);
-
+#
+generate_assembly_stats(\%opera_ms_option, \%opera_ms_dependency);
+write_final_assembly(\%opera_ms_option, \%opera_ms_dependency);
+#
 #
 polishing(\%opera_ms_option, \%opera_ms_dependency);
-#
 
-generate_assembly_stats(\%opera_ms_option, \%opera_ms_dependency);
-
-print STDERR "\n --- OPERA-MS completed\n";# if($STAGE_TO_RUN eq "ALL");
+    
+$time = localtime;
+print "\n[$time]\tOPERA-MS completed\n";# if($STAGE_TO_RUN eq "ALL");
 
 sub generate_sigma_config_file{
     my ($dir_cov_estimate, $dir_mapping, $dir_sigma) = @_;
@@ -195,10 +205,9 @@ sub set_default_value{
     my ($opera_ms_option) = @_;
     #GIVE DEFAULT VALUES
     
-    my $kmer_size = 60;
-
     #OPERA-MS option
-    $opera_ms_option->{"NUM_PROCESSOR"} = 1;
+    $opera_ms_option->{"KMER_SIZE"} = 60;
+    $opera_ms_option->{"NUM_PROCESSOR"} = 2;
     $opera_ms_option->{"STAGE_FOLLOW"} = 0;
     $opera_ms_option->{"CONTIG_EDGE_LEN"} = 80;
     $opera_ms_option->{"CONTIG_WINDOW_LEN"} = 340;
@@ -210,6 +219,8 @@ sub set_default_value{
     $opera_ms_option->{"MULTI_SAMPLE"} = 0;
     $opera_ms_option->{"REF_REPEAT_DETECTION"} = 0;
     $opera_ms_option->{"POLISHING"} = 0;
+    $opera_ms_option->{"GAP_FILLING"} = 1;
+    $opera_ms_option->{"LONG_READ_MAPPER"} = "blasr";
     #my $genomeDB_kraken = "NULL";
     #my $kraken_exe_dir = "";
     $opera_ms_option->{"FILLED_SCAFF_LENGTH"} = 499;
@@ -223,7 +234,7 @@ sub read_config_file{
     my ($opera_ms_option, $config_file, $stage_info) = @_;
     
     $opera_ms_option->{"CONFIG_PATH"} = $config_file;
-	
+    
     #get the stage
     my $run_following = 0;
     if(defined $stage_info){
@@ -240,7 +251,9 @@ sub read_config_file{
     
         
     set_default_value($opera_ms_option);
-    print STDOUT "\n *** Reading config file: ".$config_file."\n";
+    
+    $time = localtime;
+    print STDOUT "\n[$time]\tReading config file: ".$config_file."\n";
     die"Config file does not exist. Exiting.\n" if(!(-e $config_file)); 
     
     open($opera_ms_cf, "<", $config_file); 
@@ -267,9 +280,6 @@ sub read_config_file{
 		
 		case "KMER_SIZE" {
 		    $opera_ms_option->{$config_option} = $split_line[1];
-		    #if (!defined $kmer_size) {
-		    #die "KMER_SIZE not provided.\n";
-		    #}
 		}
 		
 		case "CONTIG_LEN_THR" {
@@ -284,7 +294,6 @@ sub read_config_file{
 		    $opera_ms_option->{$config_option} = $split_line[1];
 		}
 		
-
 		#Use kraken during sequence similarity clustering in addation to mash and mummer
 		case "KRAKEN_DB"{
 		    $opera_ms_option->{$config_option} = $split_line[1];
@@ -343,7 +352,11 @@ sub read_config_file{
 		    #$REF_REPEAT_DETECTION = 1;
 		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
 		}
-		
+		case "GAP_FILLING"{
+		    $opera_ms_option->{$config_option} = 1;
+		    #$REF_REPEAT_DETECTION = 1;
+		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
+		}
 		else {
 		    die "Config option: ".$config_option." unknown, please check the config file. \nExiting. \n";
 		}
@@ -527,15 +540,16 @@ sub short_read_assembly{
 	#Check if the contig file is given in the config file
 	if(exists $opera_ms_option->{"CONTIGS_FILE"}){
 	    $opera_ms_option->{"ASSEMBLED_CONTIG_FILE"} = 0;
-	    print STDOUT "\n *** Short read assembly using MEGAHIT [1/" . $opera_ms_option->{"NB_TOTAL_STAGE"} ."]\n";
-	    print STDOUT " --- Skip [contig file provided as input]\n";
+	    $time = localtime;
+	    print STDOUT "\n[$time]\tShort read assembly [1/" . $opera_ms_option->{"NB_TOTAL_STAGE"} ."]\n";
+	    print STDOUT "[$time]\tSkip [contig file provided as input]\n";
 	}
 	else{
 	    $opera_ms_option->{"ASSEMBLED_CONTIG_FILE"} = 1;
 	    $opera_ms_option->{"CONTIGS_FILE"} = "$megahit_out_dir/final.contigs.fa";
 	    $start_time = time();
 	    #Stage 0: short assembly using megahit if the contig file is not provided in the config file
-	    if(! check_completed($opera_ms_option->{"CONTIGS_FILE"}, "Short read assembly using MEGAHIT", 1)){
+	    if(! check_completed($opera_ms_option->{"CONTIGS_FILE"}, "Short read assembly [default MEGAHIT]", 1)){
 		run_exe("rm -r $megahit_out_dir") if(-d $megahit_out_dir);
 		run_exe($opera_ms_dependency->{"megahit"}."/megahit " . 
 			"--num-cpu-threads " . $opera_ms_option->{"NUM_PROCESSOR"} . " " .
@@ -899,6 +913,8 @@ sub gap_filling{
     my $opera_lr_dir = $opera_ms_option->{"OPERA_LR_DIR"};
     my $gap_filling_dir = "$opera_lr_dir/GAPFILLING";
     $opera_ms_option->{"GAPFILLING_DIR"} = $gap_filling_dir;
+
+    
     
     if($opera_ms_option->{"STAGE"} eq "ALL" || $opera_ms_option->{"STAGE"} eq "GAP_FILLING"){
 	$opera_ms_option->{"STAGE"} = "ALL" if($opera_ms_option->{"STAGE_FOLLOW"} == 1);
@@ -977,36 +993,38 @@ sub gap_filling{
 		    die "Error in during bin/match_scaffolds_clusters.pl. Please see $opera_lr_dir/s_info.err for details.\n";
 		}
 	    }
-	    
-	    run_exe("${opera_ms_dir}utils/perl $opera_lg_dir/gapfilling.pl " .
-		    $gap_filling_dir . " " .
-		    $opera_ms_option->{"CONTIGS_FILE"} . " " .
-		    $opera_ms_option->{"LONG_READ"} . " " .
-		    $opera_ms_option->{"MAPPING_DIR"} . " " .
-		    $opera_ms_option->{"NUM_PROCESSOR"} . " " .
-		    $opera_ms_option->{"FILLED_SCAFF_LENGTH"} . " " .
-		    "$opera_lg_dir" . " " .
-		    $opera_ms_dependency->{"racon"} . " " .
-		    $opera_ms_dependency->{"minimap2"} . " " .
-		    $opera_ms_dependency->{"mummer"} . " " . 
-		    "2> $gap_filling_dir/gap_filling.err"
-		);
-	    if($?){
-		die "Error in during gap_filling. Please see $gap_filling_dir/gap_filling.err for details.\n";
+	    if($opera_ms_dependency->{"OPERA-LG"}->{"GAP_FILLING"}){
+		
+		run_exe("${opera_ms_dir}utils/perl $opera_lg_dir/gapfilling.pl " .
+			$gap_filling_dir . " " .
+			$opera_ms_option->{"CONTIGS_FILE"} . " " .
+			$opera_ms_option->{"LONG_READ"} . " " .
+			$opera_ms_option->{"MAPPING_DIR"} . " " .
+			$opera_ms_option->{"NUM_PROCESSOR"} . " " .
+			$opera_ms_option->{"FILLED_SCAFF_LENGTH"} . " " .
+			"$opera_lg_dir" . " " .
+			$opera_ms_dependency->{"racon"} . " " .
+			$opera_ms_dependency->{"minimap2"} . " " .
+			$opera_ms_dependency->{"mummer"} . " " . 
+			"2> $gap_filling_dir/gap_filling.err"
+		    );
+		if($?){
+		    die "Error in during gap_filling. Please see $gap_filling_dir/gap_filling.err for details.\n";
+		}
+	    }
+	    else{
+		run_exe("ln -s $opera_lr_dir/scaffoldSeq.fasta $opera_lr_dir/scaffoldSeq.fasta.filled");
 	    }
 	    
 	    $end_time = time;
-	    #print STDOUT "***  Elapsed time: " . ($end_time - $start_time) . "s\n";
 	    write_time($inter_dir, "gap_filling", ($end_time - $start_time));
 
+	    #NEED TO TEST ON THAT
 	    #Remove the contigs that have been used during gapfiling in the .fa file
 	    #$command = "perl $opera_ms_dir/bin/clean_scaffolds_repeats.pl $output_dir/$inter";
 	    #run_exe($command);
 	    #$command = "mv $output_dir/lib_* $output_dir/$inter; rm -r $output_dir/$inter/scaffolds; mv $output_dir/runOperaMS.config $output_dir/$inter/";
 	    #run_exe($command);
-	    #Rename the scaffold sequence into contig after gap filling
-	    run_exe("sed 's/_scaffold_/_contig_/' $opera_lr_dir/scaffoldSeq.fasta.filled > $final_output_dir/contig.fasta");
-	    #run_exe("cp $final_output_dir/scaffold_info.txt $opera_lr_dir");
 	    
 	}
     }
@@ -1065,7 +1083,10 @@ sub polishing{
 	    run_exe("sed 's/_pilon//'  $polishing_dir/pilon.fasta > $polished_contig");
 	    run_exe("rm $polishing_dir/pilon.fasta");
 	}
+	#Generate the assembly stats and write the final assembly after polishing
+	write_cluster_assembly(\%opera_ms_option, \%opera_ms_dependency);
     }
+   
 }
 
 sub generate_assembly_stats{
@@ -1078,7 +1099,10 @@ sub generate_assembly_stats{
     
     my $cluster_file =  $opera_ms_option->{"SIGMA_DIR"}."/clusters";
     my $species_file = "NULL";
-    my $coverage_file = $opera_ms_option->{"COV_DIR"}."/" . $opera_ms_option{"CONTIGS_COV_FILE"};
+    my $cov_dir = $opera_ms_option->{"COV_DIR"};
+    my $coverage_file = "$cov_dir/" . $opera_ms_option{"CONTIGS_COV_FILE"};
+    my $read_size = `cat $cov_dir/read_size.dat`;chop $read_size;
+    my $long_read_coverage_file = $opera_ms_option->{"MAPPING_DIR"}."/opera.map.cov";
     my $strain_dir = "NULL";
     if($opera_ms_option->{"REF_CLUSTERING"}){
 	my $ref_clustering_dir = $opera_ms_option->{"REF_CLUSTERING_DIR"};
@@ -1088,24 +1112,25 @@ sub generate_assembly_stats{
     }
     
     $start_time = time;
+    $opera_ms_option->{"CONTIG_INFO"} = "$final_output_dir/contig_info.txt";
     
     run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/generate_assembly_stats.pl " .
 	    "$opera_lr_dir/scaffolds.scaf" . " " .
 	    $cluster_file . " " .
+	    $read_size . " " .
 	    $coverage_file . " " .
+	    $long_read_coverage_file . " " .
 	    $species_file . " " .
 	    $strain_dir . " " .
 	    "$opera_lr_dir/scaffoldSeq.fasta.filled" . " " .
-	    "$final_output_dir/scaffold_info.txt" . " " . 
+	    $opera_ms_option->{"CONTIG_INFO"} . " " . 
 	    $opera_ms_dir . " " .
 	    $opera_ms_option->{"NUM_PROCESSOR"} . " " . 
 	    $opera_ms_dependency->{"mummer"} . " 2> $opera_lr_dir/g_assembly_stats.err");
     if($?){
-	die "Error in during assembly statistices generation. Please see $ref_clustering_dir/s_info.err for details.\n";
+	die "Error in during assembly statistics generation. Please see $ref_clustering_dir/s_info.err for details.\n";
     }
-    run_exe("sed 's/_scaffold_/_contig_/' $final_output_dir/scaffold_info.txt > $final_output_dir/contig_info.txt");
-    run_exe("rm $final_output_dir/scaffold_info.txt");
-        
+    
     #Get the stats
     my @all_size = ();
     open(FILE, "$final_output_dir/contig_info.txt");
@@ -1128,58 +1153,108 @@ sub generate_assembly_stats{
     my @sort_tab = sort {$b <=> $a} @all_size;
     my $nb_contig = @all_size+0;
     my $nb_seq = compute_Nx(50, $assembly_size, \@sort_tab);$n50 = $sort_tab[$nb_seq];
-    my $str_stats =  "\n *** Assembly stats:\n" . 
-	" *** *** " . "Number of contigs: " . $nb_contig . " \n". 
-	" *** *** " . "Assembly size: $assembly_size bp\n". 
+    $time = localtime;
+    my $str_stats =  "\n[$time]\tAssembly stats\n" . 
+	"Number of contigs: " . $nb_contig . " \n". 
+	"Assembly size: $assembly_size bp\n". 
 	#"\t" . "min contig size $sort_tab[$nb_contig-1] bp, ".
-	" *** *** " . "Max contig size: $sort_tab[0] bp\n".
-	" *** *** " . "Contig(s) longer than 1Mbp: $contig_1mb \n".
-	" *** *** " . "Contig(s) longer than 500kbp: $contig_500kb\n".
-	" *** *** " . "Contig(s) longer than 100kbp: $contig_100kb\n".
-	" *** *** " . "Contig N50: $n50 bp\n";
+	"Max contig size: $sort_tab[0] bp\n".
+	"Contig(s) longer than 1Mbp: $contig_1mb \n".
+	"Contig(s) longer than 500kbp: $contig_500kb\n".
+	"Contig(s) longer than 100kbp: $contig_100kb\n".
+	"Contig N50: $n50 bp\n";
     
     print STDOUT $str_stats . "\n";
     open(OUT, ">$final_output_dir/assembly.stats");
     print OUT $str_stats . "\n";
     close(OUT);
-
-    if($opera_ms_option->{"REF_CLUSTERING"}){
-	my $strain_assembly_dir = "$final_output_dir/strain_assembly";
-	init_dir($strain_assembly_dir);
-	$final_contig = "$final_output_dir/contig.polished.fasta";
-	$final_contig = "$final_output_dir/contig.fasta" if(! -e $final_contig);
-	get_contig_sequence("$final_output_dir/contig_info.txt", $strain_assembly_dir, $final_contig);
-    }
-
+    
     $end_time = time;
     write_time($opera_ms_option->{"INTER_DIR"}, "stats_generation", ($end_time - $start_time));
 }
 
+sub write_final_assembly{
+    my ($opera_ms_option, $opera_ms_dependency) = @_;
 
-sub get_contig_sequence{
-    my ($info_file, $strain_dir, $contig_file) = @_;
-    my %strain_file = ();
-    my %contig_strain = ();
+    my $final_output_dir = $opera_ms_option->{"OUTPUT_DIR"};
+    my $opera_lr_dir = $opera_ms_option->{"OPERA_LR_DIR"};
+    
+    #Write the final contig assembly
+    #Get the info from each contig
+    my %contig_info = ();
+    open(FILE, $opera_ms_option->{"CONTIG_INFO"});
+    my ($name, $length, $cov_short, $cov_long, $cluster, $species, $nb_strain, $ref);
+    while(<FILE>){
+	($name, $length, $cov_short, $cov_long, $cluster, $species, $nb_strain, $ref) = split(/\t/, $_);
+	$contig_info{$name} = 
+	    "length: $length " .
+	    "cov_short: $cov_short " .
+	    "cov_long: $cov_long " .
+	    "cluster: $cluster ";
+    }
+    close(FILE);
+
+    #Get the scaff to contig name id
+    my %scaff_to_contig = ();
+    open(FILE, "$opera_lr_dir/scaffolds.scaf.cname");
+    my ($contig_name, $scaff_name);
+    while(<FILE>){
+	chop $_;
+	($scaff_name, $contig_name) = split(/\t/, $_);
+	$scaff_to_contig{$scaff_name} = $contig_name;
+    }
+
+    #Write the final contig sequence
+    open(FILE, "$opera_lr_dir/scaffoldSeq.fasta.filled");
+    open(OUT, ">$final_output_dir/contig.fasta");
+    while(<FILE>){
+	@line = split(/\s+/, $_);
+	$scaff_name = substr($line[0], 1);
+	$contig_name = $scaff_to_contig{$scaff_name};
+	print OUT ">$contig_name " . $contig_info{$contig_name} . "\n";
+	$seq = <FILE>;
+	print OUT $seq;
+    }
+    close(FILE);
+    close(OUT);
+    
+    #Write the cluster assembly
+    write_cluster_assembly($opera_ms_option, $opera_ms_dependency);
+    
+}
+
+sub write_cluster_assembly{
+    my ($opera_ms_option, $opera_ms_dependency) = @_;
+    
+    my $final_output_dir = $opera_ms_option->{"OUTPUT_DIR"};
+    
+    if($opera_ms_option->{"REF_CLUSTERING"}){
+	my $cluster_assembly_dir = "$final_output_dir/opera_ms_clusters";
+	init_dir($cluster_assembly_dir);
+	$final_contig = "$final_output_dir/contig.polished.fasta";
+	$final_contig = "$final_output_dir/contig.fasta" if(! -e $final_contig);
+	get_cluster_sequence($opera_ms_option->{"CONTIG_INFO"}, $cluster_assembly_dir, $final_contig);
+	generate_cluster_stats($opera_ms_option, $opera_ms_dependency, $cluster_assembly_dir);
+    }
+}
+
+sub get_cluster_sequence{
+    my ($info_file, $cluster_dir, $contig_file) = @_;
+    
+    my %cluster_file = ();
+    my %contig_cluster = ();
     open(FILE, $info_file);
-    my $strain_counter = 0;
-    my $current_species = "";
-    my @line;
+    <FILE>;
     while(<FILE>){
 	@line = split(/\t/, $_);
 	$contig_id = $line[0];
-	if ($contig_id =~ /strain(.+)_opera_contig_(.+)/){
-	    $strain_id = "strain".$1;
-	    $species = $line[3];
-	    if($species ne "NA" && ! exists $strain_file{$strain_id}){
-		$strain_counter = 0 if($species ne $current_species);
-		$strain_counter++;
-		$current_species = $species;
-		print STDERR " *** Writing $strain_dir/$species\_strain\_$strain_counter.fa => $strain_id\n";
-		open($strain_file{$strain_id}, ">$strain_dir/$species\_strain\_$strain_counter.fa");
-		
-	    }
-	    $contig_strain{$contig_id} = $strain_id;
+	$cluster_id = $line[4];
+	
+	if( ! exists $cluster_file{$cluster_id}){
+	    #print STDERR " *** Writing $strain_dir/$species\_strain\_$strain_counter.fa => $strain_id\n";
+	    open($cluster_file{$cluster_id}, ">$cluster_dir/$cluster_id.fasta");
 	}
+	$contig_cluster{">".$contig_id} = $cluster_id;
     }
     close(FILE);
     #exit(0);
@@ -1196,9 +1271,9 @@ sub get_contig_sequence{
 	    $ID = $line[0];
 	    
 	    #print STDERR $ID."\n"; <STDIN>;
-	    if(exists $contig_strain{$ID}){
+	    if(exists $contig_cluster{$ID}){
 		$print_flag = 1;
-		$OUT_FILE = $strain_file{$contig_strain{$ID}};
+		$OUT_FILE = $cluster_file{$contig_cluster{$ID}};
 		if(! defined $OUT_FILE){
 		    $print_flag = 0;
 		}
@@ -1211,7 +1286,6 @@ sub get_contig_sequence{
 	    }
 	    else{
 		$print_flag = 0;
-		
 	    }
 	}
 	else{
@@ -1223,22 +1297,34 @@ sub get_contig_sequence{
     foreach $s (keys %strain_file){
 	close($strain_file{$s});
     }
-    
+    run_exe("mv $cluster_dir/NA.fasta $cluster_dir/unclustered.fasta");
 }
 
+sub generate_cluster_stats{
+    my ($opera_ms_option, $opera_ms_dependency, $cluster_dir) = @_;
+
+    #Run mash if not runned
+    my $mash_dist_file = "$cluster_dir/mash.dist";
+    run_exe($opera_ms_dependency->{"mash"} ."/mash". " dist -p 1 -d 0.2 " . $opera_ms_option{"MASH_DB"} . " " .  "$cluster_dir/*fa* > $mash_dist_file") if(! -e $mash_dist_file);
+    
+    #Get the statistics
+    my $opera_ms_dir = $opera_ms_option->{"OPERA_MS_DIR"};
+    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_info.pl " . $opera_ms_option{"OUTPUT_DIR"} . " $cluster_dir > $cluster_dir/../cluster_info.dat");
+}
 
 sub check_completed{
     my ($file, $message, $stage_number, $skip) = @_;
     my $nb_total_stage = $opera_ms_option{"NB_TOTAL_STAGE"};
     $res = 0;
-    print STDOUT "\n *** $message [$stage_number/$nb_total_stage]\n";
+    $time = localtime;
+    print STDOUT "\n[$time]\t$message [$stage_number/$nb_total_stage]\n";
     if(defined $skip && $skip){
-	print STDOUT " --- Skip \n";
+	print STDOUT "[$time]\tSkip \n";
 	$res = 1;
     }
     else{
 	if(!$opera_ms_option{"RESTART"} && -e $file){
-	    print STDOUT " --- Stage previously completed\n";# [$file detected]\n";
+	    print STDOUT "[$time]\tStage previously completed\n";# [$file detected]\n";
 	    $res = 1;
 	}
 	else{
@@ -1263,8 +1349,124 @@ sub run_exe{
     return $return;
 }
 
-  
 
+sub read_argument{
+
+    my ($opera_ms_option, $read_option) = @_;
+    my ( $illum_read1, $illum_read2, $long_read, $output_dir, $contig_file,  $strain_cluster, $reference_cluster, $contig_len, $contig_edge_len, $contig_win_len, $kmer_size, $nproc, $long_read_mapping, $flag_help);
+
+    set_default_value($opera_ms_option);
+    
+    my $help_message = "
+OPERA-MS.pl: OPERA-MS v0.8.0-beta
+contacts: Denis Bertrand <bertrandd\@gis.a-star.edu.sg>
+	  Chengxuan Tong <Tong_Chengxuan\@gis.a-star.edu.sg>
+
+Usage:
+  perl OPERA-MS.pl [options] --illumina-read1 <pe1> --illumina-read2 <pe2> --long-read-file <lr> --output-directory <out_dir>
+
+Required arguments:
+    
+      --illumina-read1       STR   fasta file of illumina read1 <pe1>
+      --illumina-read2       STR   fasta file of illumina read2 <pe2>
+      --long-read            STR   fasta file of long reads <lr>
+      --output-directory     STR   output directory for scaffolding results <out_dir>
+
+Optional arguments:
+   
+    Algorithm options:
+      --no-ref-clustering          disable reference level clustering
+      --no-strain-clustering       disable strain level clustering
+      --polishing                  enable assembly polishing (currently using Pilon)
+      --long-read-mapper     STR   software used for long-read mapping i.e. blasr or minimap2 [blasr]
+      --kmer-size            INT   kmer value used to assemble contigs [60]
+      --contig-len-thr       INT   contig length threshold for clustering; contigs smaller than the threshold will be filtered out [500]
+      --contig-edge-len      INT   during contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency [80]
+      --contig-window-len    INT   window length in which the coverage estimation is performed. We recommend using contig-len-thr - 2 * contig-edge-len as the value [340]
+		
+   Other arguments:
+      --contig-file          STR   path to the contig file, if the short-reads have been assembled previously [default assembly using MEGAHIT]
+      --num-processor        INT   number of processors to use (note that 2 is the minimum) [2]
+
+";
+    
+    #$p = Getopt::Long::Parser->new;
+    GetOptionsFromArray(
+	$read_option,
+	"illumina-read1=s"    => \$opera_ms_option{"ILLUMINA_READ_1"},
+	"illumina-read2=s"    => \$opera_ms_option{"ILLUMINA_READ_2"},
+	"long-read=s"    => \$opera_ms_option{"LONG_READ"},
+	"out-dir=s"  => \$opera_ms_option{"OUTPUT_DIR"},
+	#
+	#
+	"no-strain-clustering!"            => \$opera_ms_option{"STRAIN_CLUSTERING"},
+	"no-ref-clustering!"         => \$opera_ms_option{"REF_CLUSTERING"},
+	"no-gap-filling!"         => \$opera_ms_option{"GAP_FILLING"},
+	"polishing!"             => \$opera_ms_option{"POLISHING"},
+	#
+	"contig-len-thr=i"    => \$opera_ms_option{"CONTIG_LEN_THR"},
+	"contig-edge-len=i"   => \$opera_ms_option{"CONTIG_EDGE_LEN"},	
+	"contig-window-len=i" => \$opera_ms_option{"CONTIG_WINDOW_LEN"},
+	"kmer=i"              => \$opera_ms_option{"KMER_SIZE"},	
+	#
+	#
+	"contig-file=s"       => \$opera_ms_option{"CONTIGS_FILE"},
+	"long-read-mapper=s" => \$opera_ms_option{"LONG_READ_MAPPER"},
+	"num-processors=i" => \$opera_ms_option{"NUM_PROCESSOR"},
+	#	
+	"help"                => \$flag_help,
+	) or die("Error in command line arguments.\n$help_message");
+
+    if($flag_help){
+	print STDERR $help_message;exit(0);
+    }
+    
+    else{
+	#Write config file
+	$output_dir = $opera_ms_option{"OUTPUT_DIR"};
+	my $config_file = "$output_dir/opera-ms.config";
+	run_exe("mkdir -p $output_dir");
+	
+	$opera_ms_option->{"CONFIG_PATH"} = $config_file;
+	open(OUT, ">$config_file");
+
+	my @option_order = (
+	    "ILLUMINA_READ_1",
+	    "ILLUMINA_READ_2",
+	    "LONG_READ",
+	    "OUTPUT_DIR",
+	    
+	    #"POLISHING",
+	    #"REF_CLUSTERING",
+	    #"STRAIN_CLUSTERING",
+	    
+	    "CONTIG_EDGE_LEN",
+	    "CONTIG_WINDOW_LEN",
+	    "CONTIG_LEN_THR",
+	    "KMER_SIZE",
+	    
+	    "CONTIGS_FILE",
+	    "LONG_READ_MAPPER",
+	    "NUM_PROCESSOR",
+	    );
+	
+	
+	foreach $option (@option_order){
+	    print OUT $option . " " . $opera_ms_option->{$option} . "\n";
+	}
+
+	#print STDERR "REF_CLUSTERING" . " " . $opera_ms_option->{"REF_CLUSTERING"} ."\n" . "STRAIN_CLUSTERING" . " "  .$opera_ms_option->{"STRAIN_CLUSTERING"} . "\n POLISHING " . $opera_ms_option{"POLISHING"} . "\n";exit(0);
+	
+	$opera_ms_option->{"CONTIGS_COV_FILE"} = "contigs_" . $opera_ms_option->{"CONTIG_WINDOW_LEN"} . "_" . $opera_ms_option->{"CONTIG_EDGE_LEN"};
+	$opera_ms_option->{"RESTART"} = 0;
+	$opera_ms_option->{"STAGE"} = "ALL";
+	#To compute the total number of stage
+	$opera_ms_option->{"NB_TOTAL_STAGE"} = 8;
+	$opera_ms_option->{"NB_TOTAL_STAGE"}++ if($opera_ms_option->{"POLISHING"});
+	
+	close(OUT);
+    }
+}
 
 
 

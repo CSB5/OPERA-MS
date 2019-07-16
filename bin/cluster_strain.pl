@@ -419,7 +419,7 @@ sub compute_mode{
     
     $a = $R->run(
 	## adpated from EDDA
-	q `print(sessionInfo())`,	
+	#q `print(sessionInfo())`,	
 	q `length(values)`,
 	q `dens <- density(values)`,
 	q `series <-dens$y`,

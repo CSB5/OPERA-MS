@@ -12,10 +12,10 @@ if ($?){
 
 #List of perl modules to install
 check_module("Switch");
-check_module("Statistics::Basic");
-check_module("Statistics::R");
 check_module("File::Which");
 check_module("File::Spec::Functions");
+check_module("Statistics::Basic");
+check_module("Statistics::R");
 check_module("Getopt::Long");
 
 

@@ -109,10 +109,6 @@ while(<$opera_ms_cf>) {
 		}
 	    }
 	    
-
-	    case "SHORT_READ_TOOL"{
-	    }
-	    
 	    case "BWA_DIR"{
 		$short_read_tool_dir = $split_line[1];
 	    }
@@ -153,7 +149,7 @@ while(<$opera_ms_cf>) {
 	    }
 	    
 	    case "ILLUMINA_READ_1"{
-		 $illum_read1 = $split_line[1];
+		$illum_read1 = $split_line[1];
 	    }
 	    
 	    case "ILLUMINA_READ_2"{
@@ -162,9 +158,6 @@ while(<$opera_ms_cf>) {
 	    
 	    case "NUM_PROCESSOR"{
 		$nproc = $split_line[1];
-	    }
-
-	    case "OPERA_LR_OUTDIR"{
 	    }
 	    
 	    else {
@@ -246,8 +239,6 @@ my $lib_bundles_config = $key_lib.".ebconfig";
 generate__bundler_config_file($contigs_file, \%LIB_NOT_COMPUTED, $bundle_size_thresh, $lib_bundles_dir, $lib_bundles_config); 
 
 
-
-
 ############################# SIGMA ##############################
 
 #print STDERR "\nRunning Sigma ... \n"; 
@@ -261,6 +252,7 @@ generate_sigma_config_file($sigma_dir, $contigs_file_type, $contigs_file,
 	$edges_files, $sigma_contigs_file, $contig_len_thr, 
 	$contig_edge_len, $contig_window_len, $pdist_type, $bundle_size_thresh);
 
+get_read_size($illum_read1, "$sigma_dir/read_size.dat");
 
 my $preprocess_read_path = $bin_dir . "../OPERA-LG/bin/preprocess_reads.pl";
 my $short_analysis_path = $bin_dir . "short-read-analysis";
@@ -310,6 +302,32 @@ foreach $k (keys %LIB) {
 }
 
 ############################## HELPERS ##############################
+
+
+sub get_read_size{
+    my ($illum_read1, $out_file) = @_;
+
+    my $read_size = 0;
+    my $nb_read_read = 1000;
+    my $nb_read = 0;
+    $cmd_open = $illum_read1;
+    $cmd_open = "zcat $illum_read1 |" if(index($illum_read1, ".gz") != -1);
+    $read_size = 0;
+    open(FILE, $cmd_open);
+    while(<FILE>){
+	last if($nb_read == $nb_read_read);
+	$seq = <FILE>;
+	$size = length($seq);
+	$read_size = $size if($read_size < $size);
+	<FILE>;<FILE>;
+	$nb_read++;
+    }
+    close(FILE);
+
+    open(OUT, ">$out_file");
+    print OUT $read_size . "\n";;
+    close(OUT);
+}
 
 #Constructs config files and runs bundling for all libraries in lib_ref
 sub generate__bundler_config_file {
