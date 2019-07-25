@@ -486,9 +486,11 @@ int ContigConverter::CalculateCovUsingMapping( list<PetLibrary*> *libs ){
 					}
 				}
 				catch( const std::out_of_range& oor) {
+					//std::cerr << "testing";
 					std::cerr << "Out of Range error: " << oor.what() << '\n';
 					std::cerr<<"preline is: "<<preLine<<endl;
 					cerr<<"nextLine is: "<<nextLine<<endl;
+					
 				}
 			}
 			

@@ -82,7 +82,8 @@ if($?){
 my $tilling_dir = "$working_dir/TILLING";
 run_exe("mkdir $tilling_dir");
 my $consensus_file = "$tilling_dir/consensus.fa";
-run_exe("cat $working_dir/*opera_scaffold_*/racon.fa | sed 's/Consensus_//' > $consensus_file");
+#run_exe("cat $working_dir/*opera_scaffold_*/racon.fa | sed 's/Consensus_//' > $consensus_file");
+run_exe("rm $consensus_file; for f in $working_dir/*opera_scaffold_*/racon.fa; do sed 's/Consensus_//' \$f >> $consensus_file; done");
 #
 #run_exe("rm -r $working_dir/*opera_scaffold_*");
 #

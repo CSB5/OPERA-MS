@@ -27,7 +27,7 @@ require "$opera_ms_full_path/bin/test_time.pl";
 my $help_line = "To configure OPERA-MS, please look at the example config file inside the OPERA-MS folder.\nUsage: \n\npath/OPERA-MS/OPERA-MS.pl <config_file>\n\n";
 my $incorrect_arguments="Please input the correct arguments. Refer to the documentation for more information or use:\n\n path/OPERA-MS/OPERA-MS.pl -h. \n\n";
 if ( @ARGV == 0 ){
-    die $incorrect_arguments; 
+    print "\n" . print_help();exit(0);
 }
 
 #To setup and check if the depndency are functionning
@@ -538,7 +538,7 @@ sub short_read_assembly{
 	$opera_ms_option->{"STAGE"} = "ALL" if($opera_ms_option->{"STAGE_FOLLOW"} == 1);
 
 	#Check if the contig file is given in the config file
-	if(exists $opera_ms_option->{"CONTIGS_FILE"}){
+	if(defined $opera_ms_option->{"CONTIGS_FILE"}){
 	    $opera_ms_option->{"ASSEMBLED_CONTIG_FILE"} = 0;
 	    $time = localtime;
 	    print STDOUT "\n[$time]\tShort read assembly [1/" . $opera_ms_option->{"NB_TOTAL_STAGE"} ."]\n";
@@ -993,7 +993,9 @@ sub gap_filling{
 		    die "Error in during bin/match_scaffolds_clusters.pl. Please see $opera_lr_dir/s_info.err for details.\n";
 		}
 	    }
-	    if($opera_ms_dependency->{"OPERA-LG"}->{"GAP_FILLING"}){
+
+	    #print STDERR " ------ " . $opera_ms_option->{"GAP_FILLING"} . "\n";
+	    if($opera_ms_option->{"GAP_FILLING"}){
 		
 		run_exe("${opera_ms_dir}utils/perl $opera_lg_dir/gapfilling.pl " .
 			$gap_filling_dir . " " .
@@ -1357,51 +1359,22 @@ sub read_argument{
 
     set_default_value($opera_ms_option);
     
-    my $help_message = "
-OPERA-MS.pl: OPERA-MS v0.8.0-beta
-contacts: Denis Bertrand <bertrandd\@gis.a-star.edu.sg>
-	  Chengxuan Tong <Tong_Chengxuan\@gis.a-star.edu.sg>
+    my $help_message = print_help();
 
-Usage:
-  perl OPERA-MS.pl [options] --illumina-read1 <pe1> --illumina-read2 <pe2> --long-read-file <lr> --output-directory <out_dir>
-
-Required arguments:
-    
-      --short-read1       STR   fasta file of illumina read1 <pe1>
-      --short-read2       STR   fasta file of illumina read2 <pe2>
-      --long-read            STR   fasta file of long reads <lr>
-      --out-dir     STR   output directory for scaffolding results <out_dir>
-
-Optional arguments:
-   
-    Algorithm options:
-      --no-ref-clustering          disable reference level clustering
-      --no-strain-clustering       disable strain level clustering
-      --polishing                  enable assembly polishing (currently using Pilon)
-      --long-read-mapper     STR   software used for long-read mapping i.e. blasr or minimap2 [blasr]
-      --kmer-size            INT   kmer value used to assemble contigs [60]
-      --contig-len-thr       INT   contig length threshold for clustering; contigs smaller than the threshold will be filtered out [500]
-      --contig-edge-len      INT   during contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency [80]
-      --contig-window-len    INT   window length in which the coverage estimation is performed. We recommend using contig-len-thr - 2 * contig-edge-len as the value [340]
-		
-   Other arguments:
-      --contig-file          STR   path to the contig file, if the short-reads have been assembled previously [default assembly using MEGAHIT]
-      --num-processor        INT   number of processors to use (note that 2 is the minimum) [2]
-
-";
     
     #$p = Getopt::Long::Parser->new;
     GetOptionsFromArray(
 	$read_option,
+	"contig-file=s"       => \$opera_ms_option{"CONTIGS_FILE"},
 	"short-read1=s"    => \$opera_ms_option{"ILLUMINA_READ_1"},
 	"short-read2=s"    => \$opera_ms_option{"ILLUMINA_READ_2"},
 	"long-read=s"    => \$opera_ms_option{"LONG_READ"},
 	"out-dir=s"  => \$opera_ms_option{"OUTPUT_DIR"},
 	#
 	#
-	"no-strain-clustering!"            => \$opera_ms_option{"STRAIN_CLUSTERING"},
-	"no-ref-clustering!"         => \$opera_ms_option{"REF_CLUSTERING"},
-	"no-gap-filling!"         => \$opera_ms_option{"GAP_FILLING"},
+	"strain-clustering!"            => \$opera_ms_option{"STRAIN_CLUSTERING"},
+	"ref-clustering!"         => \$opera_ms_option{"REF_CLUSTERING"},
+	"gap-filling!"         => \$opera_ms_option{"GAP_FILLING"},
 	"polishing!"             => \$opera_ms_option{"POLISHING"},
 	#
 	"contig-len-thr=i"    => \$opera_ms_option{"CONTIG_LEN_THR"},
@@ -1410,13 +1383,14 @@ Optional arguments:
 	"kmer=i"              => \$opera_ms_option{"KMER_SIZE"},	
 	#
 	#
-	"contig-file=s"       => \$opera_ms_option{"CONTIGS_FILE"},
+	
 	"long-read-mapper=s" => \$opera_ms_option{"LONG_READ_MAPPER"},
 	"num-processors=i" => \$opera_ms_option{"NUM_PROCESSOR"},
 	#	
 	"help"                => \$flag_help,
 	) or die("Error in command line arguments.\n$help_message");
-
+    
+    
     if($flag_help){
 	print STDERR $help_message;exit(0);
     }
@@ -1452,7 +1426,7 @@ Optional arguments:
 	
 	
 	foreach $option (@option_order){
-	    print OUT $option . " " . $opera_ms_option->{$option} . "\n";
+	    print OUT $option . " " . $opera_ms_option->{$option} . "\n" if(defined $opera_ms_option->{$option});
 	}
 
 	#print STDERR "REF_CLUSTERING" . " " . $opera_ms_option->{"REF_CLUSTERING"} ."\n" . "STRAIN_CLUSTERING" . " "  .$opera_ms_option->{"STRAIN_CLUSTERING"} . "\n POLISHING " . $opera_ms_option{"POLISHING"} . "\n";exit(0);
@@ -1468,7 +1442,39 @@ Optional arguments:
     }
 }
 
+sub print_help{
+    "OPERA-MS.pl: OPERA-MS v0.8.0-beta
+contacts: Denis Bertrand <bertrandd\@gis.a-star.edu.sg>
+          Chengxuan Tong <Tong_Chengxuan\@gis.a-star.edu.sg>
 
+Usage:
+  perl OPERA-MS.pl [options] --illumina-read1 <pe1> --illumina-read2 <pe2> --long-read-file <lr> --output-directory <out_dir>
+
+Required arguments:
+    
+      --short-read1          STR   fasta file of illumina read1 <pe1>
+      --short-read2          STR   fasta file of illumina read2 <pe2>
+      --long-read            STR   fasta file of long reads <lr>
+      --out-dir              STR   output directory for scaffolding results <out_dir>
+
+Optional arguments:
+   
+    Algorithm options:
+      --no-ref-clustering          disable reference level clustering
+      --no-strain-clustering       disable strain level clustering
+      --polishing                  enable assembly polishing (currently using Pilon)
+      --long-read-mapper     STR   software used for long-read mapping i.e. blasr or minimap2 [blasr]
+      --kmer-size            INT   kmer value used to assemble contigs [60]
+      --contig-len-thr       INT   contig length threshold for clustering; contigs smaller than the threshold will be filtered out [500]
+      --contig-edge-len      INT   during contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency [80]
+      --contig-window-len    INT   window length in which the coverage estimation is performed. We recommend using contig-len-thr - 2 * contig-edge-len as the value [340]
+		
+   Other arguments:
+      --contig-file          STR   path to the contig file, if the short-reads have been assembled previously [default assembly using MEGAHIT]
+      --num-processor        INT   number of processors to use (note that 2 is the minimum) [2]
+
+";
+}
 
 
 

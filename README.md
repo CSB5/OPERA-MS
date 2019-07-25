@@ -17,16 +17,16 @@ cd /path/to/OPERA-MS
 make
 perl OPERA-MS.pl CHECK_DEPENDENCY
 ```
-If you encounter any problems during the installation, or if some third party sofware binaries are not functional on your system, please see the [**Dependencies**](#dependencies) section. 
+If you encounter any problems during the installation, or if some third party software binaries are not functional on your system, please see the [**Dependencies**](#dependencies) section. 
 
 A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands (please note that the test script runs with 2 cores which is also the minimum.): 
 ```
 cd OPERA-MS/test_files
-perl ../OPERA-MS.pl\
-    --contig_file contigs.fasta\  
-    --short-read1 R1.fastq.gz\
-    --short-read2 R2.fastq.gz\
-    --long-read long_read.fastq\
+perl ../OPERA-MS.pl \
+    --contig-file contigs.fasta \
+    --short-read1 R1.fastq.gz \
+    --short-read2 R2.fastq.gz \
+    --long-read long_read.fastq \
     --out-dir RESULTS 2> log.err
 ```
 This will assemble a low diversity mock community in the folder **OPERA_MS_output**.
@@ -60,7 +60,7 @@ Notice that in case of an interruption during an OPERA-MS run, using the same co
 
 - **--contig-edge-len** : `default: 80` - during contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency
 
-- **--contig-window-len** : `default: 340` - window length in which the coverage estimation is performed. We recommend using CONTIG_LEN_THR - 2 * CONTIG_EDGE_LEN as the value
+- **--contig-window-len** : `default: 340` - window length in which the coverage estimation is performed. We recommend using contig_len_thr - 2 * contig_edge_len as the value
 
 - **--contig-file** : `contigs.fa` - path to the contig file, if the short-reads have been assembled previously
 
@@ -101,25 +101,24 @@ Finally, the OPERA-MS strain level clusters can be found in the following direct
 - **SHORT_READ_N50** : N50 obtained using the short-read only cluster assembly
 - **SHORT_READ_L50** : L50 obtained using the short-read only cluster assembly
 
-Notice that those clusters have been obtained using the OPERA-MS conservative clustering that may not cluster a significant number of contigs. More sentitive binning may be obtained using alternative approaches such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
+Notice that clusters have been obtained using the OPERA-MS conservative clustering that may not cluster a significant number of contigs. More sensitive binning may be obtained using alternative approaches such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
 
 # Performance
 
-The OPERA-MS running time is dependent of the microbiome complexity and of the short/long-read data coverage.
-We ran OPERA-MS with default parameters using 16 threads on a server with Intel Xeon platinium with 32Gb of RAM and a SSD hard drive, on three different dataset:
+The OPERA-MS running time is dependent of the microbiome complexity and of the short/long-read data amount.
+We ran OPERA-MS with default parameters using 16 threads on a server with Intel Xeon platinium with a SSD hard drive, on three different dataset:
 
-| Data set  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | 
-|---                 |---|---   |---   |
-| low complexity     | 3.9  | 2    | 1.4  |
-| medium complexity  | 24.4  | 1.6  | 2.7  |
-| high complexity    | 9.9  | 4.8  | 5.2    |
+| Dataset  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | Peak RAM usage (Gb) |
+|---                 |---|---   |---   |--- |
+| low complexity     | 3.9  | 2    | 1.4  | 5.5| 
+| medium complexity  | 24.4  | 1.6  | 2.7  | 10.2| 
+| high complexity    | 9.9  | 4.8  | 4.5    | 12.8|
 
-To obtain the best assembly performance (cluster contig N50 > 500kbp), OPERA-MS requires a minimum of 30x short-read coverage and 10x long-read coverage. To assemble a typical bacterial genome (3Mbp) at 1% abundance, 9Gb of short-read data and 3Gb of long-read data are recommended.
+To obtain the best assembly performance, OPERA-MS requires a minimum of 30x short-read coverage and 10x long-read coverage. Hence, to assemble a typical bacterial genome (3Mbp) at 1% abundance, 9Gb of short-read data and 3Gb of long-read data are recommended.
 
 # Dependencies
 
-The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required software comes either pre-compiled with OPERA-MS or is built during the installation process. Binaries are placed inside the __utils__
-folder:
+The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required software comes either pre-compiled with OPERA-MS or is built during the installation process. Binaries are placed inside the __utils__ folder:
 
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tested with version 1.0.4-beta)
 2) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below)
@@ -178,4 +177,5 @@ For additional information, help and bug reports please send an email to:
 - Denis Bertrand <bertrandd@gis.a-star.edu.sg>
 - Chengxuan Tong <Tong_Chengxuan@gis.a-star.edu.sg>
 - Lorenz Gerber (docker related topics): <lorenzottogerber@gmail.com>
+
 

@@ -11,7 +11,7 @@ opera::opera(void)
 	m_unassignedNodes = new list< pair<Contig*, int> >;
 	m_unhappyEdgeString = new list<string>;
 	m_visitedTree = new Tree();
-
+	
 	m_conflictingEdges = new list<string>;
 
 	// for multi libraries
@@ -88,7 +88,7 @@ void opera::Clear(){
 // return false if not
 bool opera::CheckNameConfliction(){
 	ifstream contigReader( Configure::CONTIG_FILE.c_str() );
-
+	
 	if( contigReader.fail() )
 	{
 		cout<<"ERROR: Cannot open "<<Configure::CONTIG_FILE<<" file"<<endl;
@@ -99,7 +99,7 @@ bool opera::CheckNameConfliction(){
 			
 	getline( contigReader, line );
 	contigReader.close();
-	
+
 	// check the contig name
 	if( line.substr( 1, Configure::SCAFFOLD_PREFEX.length() ) == Configure::SCAFFOLD_PREFEX )
 		return true;
@@ -5603,6 +5603,7 @@ int main(int argc, char *argv[] )
 		gettimeofday( &t_startTemp, NULL );
 #endif
 		cout<<"Step 1: Reading configuration file ..."<<endl;
+		
 		flush(cout);
 		configureReader myConfig;
 		if( myConfig.ReadConfigFile( configFileName ) == -1 ){
@@ -5612,7 +5613,9 @@ int main(int argc, char *argv[] )
 		//cerr<<"Samtools path "<<Configure::SAMDIR<<endl;
 #ifdef TIME
 		gettimeofday( &t_endTemp, NULL );
+		
 		cout<<"Time Taken: "<<(t_endTemp.tv_sec - t_startTemp.tv_sec) + (t_endTemp.tv_usec - t_startTemp.tv_usec)/1000000.0<<" seconds"<<endl;
+		
 		flush(cout);
 #endif
 	}
@@ -5658,28 +5661,30 @@ int main(int argc, char *argv[] )
 		flush(cout);
 #endif
 	}
-
+	
 	opera *m_opera = new opera();
-
+	
 	// check if all files exist
 	if( !m_opera->CheckFileExist() ){
 		return -1;
 	}
-
+	
 	// step 0.5: check if the scaffold name will have conflicts
 	m_opera->OpenLogFile();
+	
 	if( m_opera->CheckNameConfliction() ){
 		// there is confliction
+		
 		cout<<"ERROR: There might be conflictions of scaffold name. Please specify another name using parameter: scaffold_name in configuraton file"<<endl;
 		return -1;
 	}
-
+	
 	// check contig file format
 	//cerr<<"checking contig format\n";
 	if( m_opera->CheckContigFormat() == -1 ){
 		return -1;
 	}
-
+	
 	// check the kmer size
 	if( !Configure::USER_SPECIFY_KMER ){
 		if( Configure::FILE_TYPE == VELVET ){
@@ -5706,7 +5711,7 @@ int main(int argc, char *argv[] )
 	if( m_opera->PrintParameter( Configure::OUTPUT_FOLDER + "parameters" ) == -1 ){
 		return -1;
 	}
-
+	
 	// step 1: convert contig file
 #ifdef TIME
 	gettimeofday( &t_startTemp, NULL );

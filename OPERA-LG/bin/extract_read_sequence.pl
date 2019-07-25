@@ -261,7 +261,18 @@ my %wrote_on_scaff = ();
 open(ERR_F, ">$ana_dir/edge_err");
 #open(ERR_F2, ">$ana_dir/edge_err_nf");
 my $wrote_on_scaff = ();
-my %scaff_not_filled = ();
+
+#Identify the scaffold to fill
+my %scaff_to_fill = ();
+#Only used in the case of gap size threshold
+#TO_DO CHECK a single time which scacffold have to be filled
+open(DIR, "$ana_dir/");
+my @all_scaff_dir = readdir(DIR);
+foreach $s_dir (@all_scaff_dir){ 
+    $scaff_to_fill{$s_dir} = 1;
+}
+################
+
 while(<READ_FILE>){
     
     chop $_;
@@ -276,7 +287,7 @@ while(<READ_FILE>){
 		#print STDERR "$read_name NOT DEFINED POST 10000\n" if ($nb_read > 10000);
 	    }
 
-	    if(defined $edge_list){
+	    else{
 		#$read_seq = <FILE>;
 		#
 		#next if(! exists $edge_info{$edge_ID}->{"SCAFF"});
@@ -287,13 +298,11 @@ while(<READ_FILE>){
 		    
 		    #Write read file on the scaffold directory
 		    $scaff_name = $edge_info{$edge_ID}->{"SCAFF"};
-		    next if(exists $scaff_not_filled{$scaff_name});
-		    if(! -d "$ana_dir/$scaff_name/"){
-			$scaff_not_filled{$scaff_name} = 1;
-			next;
-		    }
-		    
-		    
+
+		    #Only used in the case of gap size threshold
+		    #TO_DO CHECK a single time which scacffold have to be filled
+		    next if(! exists $scaff_to_fill{$scaff_name});
+		    		    
 		    #print STDERR " *** Process edge $edge_ID $scaff_name\n";
 		    
 		    if(! exists $wrote_on_scaff{$scaff_name}){

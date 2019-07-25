@@ -296,7 +296,7 @@ sub select_mode_contigs{
     foreach $contig (sort {$contig_info{$b}->{"MEAN_READ_COUNT"} <=> $contig_info{$a}->{"MEAN_READ_COUNT"}} keys %contig_info){
 	$contig_mean_cov = $contig_info{$contig}->{"MEAN_READ_COUNT"};
 	#$probability = compute_probability( $strain_mean_cov, $dispersion_value, $contig_mean_cov);
-	
+
 	if($contig_info{$contig}->{"STRAIN_ID"} == 0 && #Not selected in another strain
 	   $confidance_interval[0] < $contig_mean_cov && $contig_mean_cov < $confidance_interval[1]){
 	    $contig_info{$contig}->{"STRAIN_ID"} = $strain_id;

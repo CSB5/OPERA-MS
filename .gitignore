@@ -22,9 +22,12 @@ utils/perl
 test_files/OPERA_MS*/
 test_files/sample_output/
 test_files/OUT/
+test_files/RESULTS/
 test_files/log.err
 
 
 utils/metabat
 utils/run_MaxBin.pl
 utils/jgi_summarize_bam_contig_depths
+
+OPERA-LG/bin/.#OPERA-long-read.pl
