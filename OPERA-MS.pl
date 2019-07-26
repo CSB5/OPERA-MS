@@ -461,7 +461,9 @@ sub check_dependency{
     
     #Check for racon.
     check_software($utils_dir, "racon", "racon 2>&1 | grep options", $opera_ms_dependency, $stage);
-    
+
+    #Check for pilon.
+    check_software($utils_dir, "pilon", "java -jar $utils_dir/pilon.jar --version", $opera_ms_dependency, $stage);
     #
     #
     $opera_ms_dependency->{"kraken"} = "NULL";
@@ -477,14 +479,16 @@ sub check_software{
     my ($software_dir, $software_name, $test_command, $opera_ms_dependency, $stage) = @_;
     
     if($stage eq "CHECK_DEPENDENCY"){
-
 	$exe_check = "${software_dir}$test_command";
+	$exe_check = "$test_command" if(index($test_command, "java") != -1);
+	#print STDOUT "\n" . $exe_check . "\n";
 	`$exe_check 2> /dev/null > /dev/null`;
 	
 	if($?){
 	    print STDERR "\n$software_name found in $software_dir is not functional. Checking path for $software_name.\n";
 	    my $valid_path = which("$software_name"); 
 	    die "$software_name not found in path. Exiting.\n" if (!$valid_path);
+	    print STDERR "\n$software_name found in path.\n";
 	    $valid_path = `which $software_name`;chop $valid_path;
 	    run_exe("mv ${software_dir}/$software_name ${software_dir}/$software_name.bk");
 	    run_exe("ln -s $valid_path $software_dir");
@@ -1077,7 +1081,8 @@ sub polishing{
 	    }
 	    
 	    #run pilon [in multi thread]
-	    run_exe("java -jar /home/bertrandd/PROJECT_LINK/OPERA_LG/SOFTWARE/PILON/pilon-1.22.jar --fix bases --threads $num_processor --genome $temp_contig --bam $temp_contig.bam --outdir $polishing_dir > $polishing_dir/pilon.out 2> $polishing_dir/pilon.err");
+	    $pilon_path = $opera_ms_dependency->{"pilon"}."/pilon.jar";
+	    run_exe("java -jar $pilon_path --fix bases --threads $num_processor --genome $temp_contig --bam $temp_contig.bam --outdir $polishing_dir > $polishing_dir/pilon.out 2> $polishing_dir/pilon.err");
 	    if($?){
 		die "Error in during pilon. Please see $polishing_dir/pilon.out and $polishing_dir/pilon.err for details.\n";
 	    }

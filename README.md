@@ -103,6 +103,12 @@ Finally, the OPERA-MS strain level clusters can be found in the following direct
 
 Notice that clusters have been obtained using the OPERA-MS conservative clustering that may not cluster a significant number of contigs. More sensitive binning may be obtained using alternative approaches such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
 
+# OPERA-MS-utils (coming soon ...)
+
+The assembly of a metagenome dataset is only the beginning of long journey, and substential downstrean analysis had to be performed on the assembly to reveal its biology.
+To facilitate this process, we are planning to release a utility tool box to allows a streamline analysis of OPERA-MS assemblies. We are planning to include in our first releases methods for: assembly binning, bin assessment, identification of circular contigs and novel species, etc ...
+This is a work in progress, and we will be happy to hear your comments and suggestions.
+
 # Performance
 
 The OPERA-MS running time is dependent of the microbiome complexity and of the short/long-read data amount.
@@ -128,7 +134,7 @@ The only true dependency is `cpanm`, which is used to automatically install Perl
 6) [Racon](https://github.com/isovic/racon) - (version 0.5.0)
 7) [Mash](https://github.com/marbl/Mash) - (tested with version 1.1.1)
 8) [MUMmer](http://mummer.sourceforge.net/) (tested with version 3.23)
-9) [Pilon](https://github.com/broadinstitute/pilon/wiki) (tested with version 3.23)
+9) [Pilon](https://github.com/broadinstitute/pilon/wiki) (tested with version 1.22)
 
 If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the __utils__ folder.
 
