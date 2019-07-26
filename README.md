@@ -72,15 +72,7 @@ Alternatively, OPERA-MS parameters can be set using a [configuration file](https
 
 The following output files can be found in the specified output directory i.e. **RESULTS**.
 The file **contig.fasta** (and **contig.polished.fasta** if the assembly have been polished) contains the assembled contigs, and **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest contig etc.).
-**contig_info.txt** provides a detailed overview of the assembled contigs with the following information:
-- **CONTIG_ID** : contig identifier
-- **LENGTH** : contig length
-- **SHORT_READ_COV** : contig average short-read coverage
-- **LONG_READ_COV** : contig average long-read coverage
-- **CLUSTER** : the OPERA-MS cluster that the contig belong to
-- **SPECIES** : closest reference species in the OPERA-MS database for the assembled contig  (identified using [Mash](https://github.com/marbl/Mash))
-- **NB_STRAIN** : number of strain detected by OPERA-MS for this species
-- **REFERENCE_GENOME** : species reference sequence ID
+[**contig_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Contig-info-file-description) provides a detailed overview of the assembled contigs.
 
 Finally, the OPERA-MS strain level clusters can be found in the following directory: **RESULTS/opera_ms_clusters/**.
 [**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of the OPERA-MS clusters. Notice that clusters have been obtained using the OPERA-MS conservative clustering that may not cluster a significant number of contigs. More sensitive binning may be obtained using alternative approaches such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
