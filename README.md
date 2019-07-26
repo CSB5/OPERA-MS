@@ -83,25 +83,7 @@ The file **contig.fasta** (and **contig.polished.fasta** if the assembly have be
 - **REFERENCE_GENOME** : species reference sequence ID
 
 Finally, the OPERA-MS strain level clusters can be found in the following directory: **RESULTS/opera_ms_clusters/**.
-**cluster_info.txt** provides a detailed overview of the OPERA-MS clusters with the following information:
-- **CLUSTER_ID** : cluster identifier
-- **SHORT_READ_COV** : cluster average short-read coverage
-- **LONG_READ_COV** :  cluster average long-read coverage
-- **SPECIES** : closest reference species in the OPERA-MS database (identified using [Mash](https://github.com/marbl/Mash))
-- **SIMILARITY** : similarity with the closest reference species (identified using [Mash](https://github.com/marbl/Mash))
-- **CLUSTER_SIZE** : cluster assembly size
-- **NB_CONTIG** : number of contigs in the cluster
-- **LONGEST_CONTIG** : longest contig in the cluster
-- **N50** : cluster assembly N50 
-- **L50** : number of contigs whose summed length is N50
-- **N90** : cluster assembly N90 
-- **L90** : number of contigs whose summed length is N90
-- **SHORT_READ_NB_CONTIG** : number of contigs in the short-read only cluster assembly
-- **SHORT_READ_LONGEST_CONTIG** : longest contig in the short-read only cluster assembly
-- **SHORT_READ_N50** : N50 obtained using the short-read only cluster assembly
-- **SHORT_READ_L50** : L50 obtained using the short-read only cluster assembly
-
-Notice that clusters have been obtained using the OPERA-MS conservative clustering that may not cluster a significant number of contigs. More sensitive binning may be obtained using alternative approaches such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
+[**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of the OPERA-MS clusters. Notice that clusters have been obtained using the OPERA-MS conservative clustering that may not cluster a significant number of contigs. More sensitive binning may be obtained using alternative approaches such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
 
 # OPERA-MS-utils (coming soon ...)
 
