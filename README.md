@@ -13,7 +13,7 @@ To install OPERA-MS on a typical Linux/Unix system run the following commands:
 
 ```
 git clone https://github.com/CSB5/OPERA-MS.git
-cd /path/to/OPERA-MS
+cd OPERA-MS
 make
 perl OPERA-MS.pl CHECK_DEPENDENCY
 ```
@@ -21,7 +21,7 @@ If you encounter any problems during the installation, or if some third party so
 
 A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands (please note that the test script runs with 2 cores which is also the minimum.): 
 ```
-cd OPERA-MS/test_files
+cd test_files
 perl ../OPERA-MS.pl \
     --contig-file contigs.fasta \
     --short-read1 R1.fastq.gz \
@@ -29,7 +29,7 @@ perl ../OPERA-MS.pl \
     --long-read long_read.fastq \
     --out-dir RESULTS 2> log.err
 ```
-This will assemble a low diversity mock community in the folder **OPERA_MS_output**.
+This will assemble a low diversity mock community in the folder **RESULTS**.
 Notice that in case of an interruption during an OPERA-MS run, using the same command line will re-start the execution after the last completed checkpoint.
 
 # Usage
@@ -80,7 +80,7 @@ Finally, the OPERA-MS strain level clusters can be found in the following direct
 # OPERA-MS-utils (coming soon ...)
 
 The assembly of a metagenome dataset is only the beginning of long journey, and substential downstrean analysis had to be performed on the assembly to reveal its biology.
-To facilitate this process, we are planning to release a utility tool box to allows a streamline analysis of OPERA-MS assemblies. We are planning to include in our first releases methods for: assembly binning, bin assessment, identification of circular contigs and novel species, etc ...
+To facilitate this process, we are planning to release a utility tool box to allow a streamline analysis of OPERA-MS assemblies. We are planning to include in our first releases methods for: assembly binning, bin assessment, identification of circular contigs and novel species, etc ...
 This is a work in progress, and we will be happy to hear your comments and suggestions.
 
 # Performance

@@ -607,4 +607,5 @@ sub run_exe{
 
 #add plot for each species representing the histogram of the window size, the density of the estimated neg-binom and the interval used for the window selection
 #perhaps can also add the assembly size
+#gg=read.table("ANALYSIS/ASSEMBLY/TLL11/intermediate_files/strain_analysis/Faecalibacterium_prausnitzii/window_distibution.dat");hist(gg[,1], breaks=1000)
 #m=10;N <- rnbinom(n = 1000, size = 5, mu = m);g=density(N);plot(g);abline(v=m)
