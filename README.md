@@ -89,7 +89,7 @@ OPERA-MS's running time depends on the complexity of the metagenome and the amou
 We typically run OPERA-MS with default parameters using 16 threads on an Intel Xeon platinium server with SSD hard drive. With this hardware specification, we obtain the following running time and memommy usage characteristics.
 
 | Dataset  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | Peak RAM usage (Gb) |
-|---                 |---|---   |---   |--- |
+|:---:                 |:---: |:---:   |:---:   |:---: |
 | CAMI mock community (low complexity)  | 3.9  | 2    | 1.4  | 5.5| 
 | Human gut microbiome (medium complexity) | 24.4  | 1.6  | 2.7  | 10.2| 
 | CAMI mock environmental community (high complexity)    | 9.9  | 4.8  | 4.5    | 12.8|
