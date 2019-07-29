@@ -150,8 +150,9 @@ To process data with the dockerized OPERA-MS, directories for in- and outdata sh
 docker run \ 
     -v /home/myuser/git/OPERA-MS/test_files:/test_files \
     -v /home/myuser/git/OPERA-MS/RESULTS:/RESULTS \
-     operams test_files/test.config -->
+     operams test_files/test.config 
 ```
+-->
 
 # Contact information
 For additional information, help and bug reports please send an email to: 
