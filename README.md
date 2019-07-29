@@ -132,29 +132,29 @@ If the perl libraries cannot be installed under root, the following line should 
 export PERL5LIB="/home/$USER/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}";
 ```
 
-[comment]:# Docker
-[comment]:A simple Dockerfile is provided in the root of the repository. To build the image:
+<!---# Docker
+A simple Dockerfile is provided in the root of the repository. To build the image:
 ```
 [comment]:docker build -t operams .
 ```
-[comment]:The generic command to run a OPERA-MS docker container after building:
+The generic command to run a OPERA-MS docker container after building:
 ```
 [comment]:docker run \
     -v /host/path/to/indata/:/indata/ \
     -v /host/path/to/outdata/:/outdata/ \
     operams config.file
 ```
-[comment]:To process data with the dockerized OPERA-MS, directories for in- and outdata should be mounted into the container. An example is shown below for running the test dataset. In the below example the repo was cloned to /home/myuser/git/OPERA-MS/). The repo is needed only for the `sample_files` directory and the `sample_config.config` file. If Docker is running in a VM, as is the case for Windows or OSX, but also when deployed on a cloud platform such as AWS or Azure, a minimum of 2 available cores is required.  
+To process data with the dockerized OPERA-MS, directories for in- and outdata should be mounted into the container. An example is shown below for running the test dataset. In the below example the repo was cloned to /home/myuser/git/OPERA-MS/). The repo is needed only for the `sample_files` directory and the `sample_config.config` file. If Docker is running in a VM, as is the case for Windows or OSX, but also when deployed on a cloud platform such as AWS or Azure, a minimum of 2 available cores is required.  
 
 ```
-[comment]:docker run \ 
+docker run \ 
     -v /home/myuser/git/OPERA-MS/test_files:/test_files \
     -v /home/myuser/git/OPERA-MS/RESULTS:/RESULTS \
-     operams test_files/test.config
+     operams test_files/test.config -->
 ```
 
-[comment]:# Contact information
-[comment]:For additional information, help and bug reports please send an email to: 
+# Contact information
+For additional information, help and bug reports please send an email to: 
 
 - Denis Bertrand <bertrandd@gis.a-star.edu.sg>
 - Chengxuan Tong <Tong_Chengxuan@gis.a-star.edu.sg>
