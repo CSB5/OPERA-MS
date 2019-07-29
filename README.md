@@ -132,7 +132,7 @@ If the perl libraries cannot be installed under root, the following line should 
 export PERL5LIB="/home/$USER/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}";
 ```
 
-# Docker
+[comment]:# Docker
 A simple Dockerfile is provided in the root of the repository. To build the image:
 ```
 docker build -t operams .
