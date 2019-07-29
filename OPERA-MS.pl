@@ -1043,8 +1043,8 @@ sub polishing{
     my $final_output_dir = $opera_ms_option->{"OUTPUT_DIR"};
     my $inter_dir = $opera_ms_option->{"INTER_DIR"};
     my $polishing_dir = "$inter_dir/polished_assembly";
-    my $contig = "$final_output_dir/contig.fasta";
-    my $polished_contig = "$final_output_dir/contig.polished.fasta";
+    my $contig = "$final_output_dir/contigs.fasta";
+    my $polished_contig = "$final_output_dir/contigs.polished.fasta";
     my $num_processor = $opera_ms_option->{"NUM_PROCESSOR"};
     
     if($opera_ms_option->{"POLISHING"} || $opera_ms_option->{"STAGE"} eq "POLISHING"){
@@ -1056,7 +1056,7 @@ sub polishing{
 	    #get the bwa mapping
 	    my $read_1 = $opera_ms_option->{"ILLUMINA_READ_1"};
 	    my $read_2 = $opera_ms_option->{"ILLUMINA_READ_2"};
-	    my $temp_contig = "$polishing_dir/contig.fa";
+	    my $temp_contig = "$polishing_dir/contigs.fa";
 	    run_exe("ln -s $contig $temp_contig");
 	    my $bwa_err = "$polishing_dir/bwa_index.err";
 	    my $bwa_out = "$polishing_dir/bwa_index.out";
@@ -1213,7 +1213,7 @@ sub write_final_assembly{
 
     #Write the final contig sequence
     open(FILE, "$opera_lr_dir/scaffoldSeq.fasta.filled");
-    open(OUT, ">$final_output_dir/contig.fasta");
+    open(OUT, ">$final_output_dir/contigs.fasta");
     while(<FILE>){
 	@line = split(/\s+/, $_);
 	$scaff_name = substr($line[0], 1);
@@ -1238,8 +1238,8 @@ sub write_cluster_assembly{
     if($opera_ms_option->{"REF_CLUSTERING"}){
 	my $cluster_assembly_dir = "$final_output_dir/opera_ms_clusters";
 	init_dir($cluster_assembly_dir);
-	$final_contig = "$final_output_dir/contig.polished.fasta";
-	$final_contig = "$final_output_dir/contig.fasta" if(! -e $final_contig);
+	$final_contig = "$final_output_dir/contigs.polished.fasta";
+	$final_contig = "$final_output_dir/contigs.fasta" if(! -e $final_contig);
 	get_cluster_sequence($opera_ms_option->{"CONTIG_INFO"}, $cluster_assembly_dir, $final_contig);
 	generate_cluster_stats($opera_ms_option, $opera_ms_dependency, $cluster_assembly_dir);
     }

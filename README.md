@@ -107,12 +107,12 @@ The only true dependency is `cpanm`, which is used to automatically install Perl
 5) [minimap2]( https://github.com/lh3/minimap2) (tested with version 2.11-r797)
 6) [Racon](https://github.com/isovic/racon) - (version 0.5.0)
 7) [Mash](https://github.com/marbl/Mash) - (tested with version 1.1.1)
-8) [MUMmer](http://mummer.sourceforge.net/) (tested with version 3.23)
-9) [Pilon](https://github.com/broadinstitute/pilon/wiki) (tested with version 1.22)
+8) [MUMmer](http://mummer.sourceforge.net/) - (tested with version 3.23)
+9) [Pilon](https://github.com/broadinstitute/pilon/wiki) - (tested with version 1.22)
 
 If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the __utils__ folder.
 
-OPERA-MS is written in C++, Python, R and Perl, and makes use of the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
+OPERA-MS and its dependencies required C++, Java, Python, R and Perl, and use the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
 
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
 - [File::Which](https://metacpan.org/pod/File::Which)
