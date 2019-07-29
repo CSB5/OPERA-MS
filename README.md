@@ -19,7 +19,7 @@ perl OPERA-MS.pl CHECK_DEPENDENCY
 ```
 If you encounter any problems during the installation, or if some third party software binaries are not functional on your system, please see the [**Dependencies**](#dependencies) section. 
 
-A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands (please note that the test script runs with 2 cores which is also the minimum): 
+A set of test files is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test dataset, simply use the following commands (please note that the test run requires 2 cores which is also the minimum): 
 ```
 cd test_files
 perl ../OPERA-MS.pl \
@@ -56,13 +56,13 @@ Note that in the case of an interruption during an OPERA-MS run, using the same 
 
 - **--kmer-size** : `default: 60` - kmer value used to assemble contigs
 
-- **--contig-len-thr** : `default: 500` - contig length threshold for clustering; contigs smaller than CONTIG_LEN_THR will be filtered out
+- **--contig-len-thr** : `default: 500` - contig length threshold for clustering; contigs smaller than contig-len-thr will be filtered out
 
 - **--contig-edge-len** : `default: 80` - during contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency
 
 - **--contig-window-len** : `default: 340` - window length in which the coverage estimation is performed. We recommend using contig_len_thr - 2 * contig_edge_len as the value
 
-- **--contig-file** : `contigs.fa` - path to the contig file, if the short-reads have been assembled previously
+- **--contig-file** : path to the contigs file, if the short-reads have been assembled previously
 
 - **--num-processor** : `default : 2` - number of processors to use (note that 2 is the minimum)
 
@@ -80,19 +80,19 @@ These clusters can be further binned using approaches such as [MaxBin2](https://
 
 ### OPERA-MS-utils (coming soon ...)
 
-Script to post-process assembly including binning, bin assessment, identification of circular contigs and novel species, as described on the paper, will be available as part of the next release.
+Scripts to post-process assembly including binning, bin assessment, identification of circular contigs and novel species, as described on the paper, will be available as part of the next release.
 Please contact us, if you would like to use a pre-release version.
 
 # Requirements
 
-OPERA-MS's running time depends on the complexity of the metagenome and the amount of short/long-read available.
-We typically run OPERA-MS with default parameters using 16 threads on an Intel Xeon platinium server with SSD hard drive. With this hardware specification, we obtain the following running time and memommy usage characteristics.
+OPERA-MS's running time depends on the complexity of the metagenome and the amount of short/long-read data available.
+We typically run OPERA-MS with default parameters using 16 threads on an Intel Xeon platinium server with SSD hard drive. With this hardware specification, we obtain the following running time and memory usage characteristics.
 
 | Dataset  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | Peak RAM usage (Gb) |
 |:---:                 |:---: |:---:   |:---:   |:---: |
-| CAMI mock community (low complexity)  | 3.9  | 2    | 1.4  | 5.5| 
+| CAMI multi-strain mock community (low complexity)  | 3.9  | 2    | 1.4  | 5.5| 
 | Human gut microbiome (medium complexity) | 24.4  | 1.6  | 2.7  | 10.2| 
-| CAMI mock environmental community (high complexity)    | 9.9  | 4.8  | 4.5    | 12.8|
+| CAMI environmental mock community (high complexity)  | 9.9  | 4.8  | 4.5    | 12.8|
 
 OPERA-MS is designed to work with deep short-read sequencing, but can work with lower coverage in term of long-read sequencing.
 In practice, short-read coverage >15x is recommended, in contrast OPERA-MS can use long-read coverage as low as 9x to boost the assembly contiguity.
