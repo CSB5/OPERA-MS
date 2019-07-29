@@ -452,7 +452,7 @@ sub get_paf_file{
     my $prev_scaffold_end = -1;
     my ($contig_name, $scaffold_name, $scaffold_length, $mapping_length, $contig_end, $contig_start, $scaffold_start, $scaffold_end, $tiling_length);
     $scaffold_name = "";
-    open(OUT_G, ">S1_gap_size.dat");
+    open(OUT_G, ">$working_dir/S1_gap_size.dat");
     <FILE>;<FILE>;<FILE>;#<FILE>;#skip the header lines
     while(<FILE>){
 	chop $_;
