@@ -19,7 +19,7 @@ perl OPERA-MS.pl CHECK_DEPENDENCY
 ```
 If you encounter any problems during the installation, or if some third party software binaries are not functional on your system, please see the [**Dependencies**](#dependencies) section. 
 
-A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands (please note that the test script runs with 2 cores which is also the minimum.): 
+A set of test files and a sample configuration file is provided to test out the OPERA-MS pipeline. To run OPERA-MS on the test data-set, simply use the following commands (please note that the test script runs with 2 cores which is also the minimum): 
 ```
 cd test_files
 perl ../OPERA-MS.pl \
@@ -30,27 +30,27 @@ perl ../OPERA-MS.pl \
     --out-dir RESULTS 2> log.err
 ```
 This will assemble a low diversity mock community in the folder **RESULTS**.
-Notice that in case of an interruption during an OPERA-MS run, using the same command line will re-start the execution after the last completed checkpoint.
+Note that in the case of an interruption during an OPERA-MS run, using the same command line will re-start the execution after the last completed checkpoint.
 
 # Usage
 
 ### Essential arguments
 
-- **--short-read1** : `R1.fq.gz` - path to the first read for Illumina paired-end read data
+- **--short-read1** : path to the first read for Illumina paired-end read data
 
-- **--short-read2** : `R2.fq.gz` - path to the second read for Illumina paired-end read data
+- **--short-read2** : path to the second read for Illumina paired-end read data
 
-- **--long-read** : `long-read.fq` - path to the long-read fastq file obtained from either Oxford Nanopore, PacBio or Illumina Synthetic Long Read sequencing
+- **--long-read** : path to the long-read fastq file obtained from either Oxford Nanopore, PacBio or Illumina Synthetic Long Read sequencing
 
-- **--out-dir** : `RESULTS` - directory where OPERA-MS results will be outputted
+- **--out-dir** : directory where OPERA-MS results will be outputted
 
 ### Optional arguments 
 
-- **--no-ref-clustering**  : - disable reference level clustering
+- **--no-ref-clustering**  : disable reference based clustering
 
-- **--no-strain-clustering** :  - disable strain level clustering
+- **--no-strain-clustering** : disable strain level clustering
 
-- **--polishing** : - enable assembly polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contig.polished.fasta
+- **--polishing** : enable short-read polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contigs.polished.fasta
 
 - **--long-read-mapper** : `default: blasr` - software used for long-read mapping i.e. blasr or minimap2
 
@@ -71,34 +71,36 @@ Alternatively, OPERA-MS parameters can be set using a [configuration file](https
 ### Output
 
 The following output files can be found in the specified output directory i.e. **RESULTS**.
-The file **contig.fasta** (and **contig.polished.fasta** if the assembly have been polished) contains the assembled contigs, and **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest contig etc.).
+The file **contigs.fasta** (and **contigs.polished.fasta** if the assembly has been polished) contains the assembled contigs, **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest contig etc.), and
 [**contig_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Contig-info-file-description) provides a detailed overview of the assembled contigs.
 
-Finally, the OPERA-MS strain level clusters can be found in the following directory: **RESULTS/opera_ms_clusters/**.
-[**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of the OPERA-MS clusters. Notice that clusters have been obtained using the OPERA-MS conservative clustering that may not cluster a significant number of contigs. More sensitive binning may be obtained using alternative approaches such that [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
+Finally, OPERA-MS strain level clusters can be found in the directory **RESULTS/opera_ms_clusters/** and [**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of the cluster assembly statistics.
+Note that those clusters have been constructed using the contig graph data, and are by definition conservative.
+These clusters can be further binned using approaches such as [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
 
-# OPERA-MS-utils (coming soon ...)
+### OPERA-MS-utils (coming soon ...)
 
-The assembly of a metagenome dataset is only the beginning of long journey, and substential downstrean analysis had to be performed on the assembly to reveal its biology.
-To facilitate this process, we are planning to release a utility tool box to allow a streamline analysis of OPERA-MS assemblies. We are planning to include in our first releases methods for: assembly binning, bin assessment, identification of circular contigs and novel species, etc ...
-This is a work in progress, and we will be happy to hear your comments and suggestions.
+Script to post-process assembly including binning, bin assessment, identification of circular contigs and novel species, as described on the paper, will be available as part of the next release.
+Please contact us, if you would like to use a pre-release version.
 
-# Performance
+# Requirements
 
-The OPERA-MS running time is dependent of the microbiome complexity and of the short/long-read data amount.
-We ran OPERA-MS with default parameters using 16 threads on a server with Intel Xeon platinium with a SSD hard drive, on three different dataset:
+OPERA-MS's running time depends on the complexity of the metagenome and the amount of short/long-read available.
+We typically run OPERA-MS with default parameters using 16 threads on an Intel Xeon platinium server with SSD hard drive. With this hardware specification, we obtain the following running time and memommy usage characteristics.
 
 | Dataset  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | Peak RAM usage (Gb) |
 |---                 |---|---   |---   |--- |
-| low complexity     | 3.9  | 2    | 1.4  | 5.5| 
-| medium complexity  | 24.4  | 1.6  | 2.7  | 10.2| 
-| high complexity    | 9.9  | 4.8  | 4.5    | 12.8|
+| CAMI mock community (low complexity)  | 3.9  | 2    | 1.4  | 5.5| 
+| Human gut microbiome (medium complexity) | 24.4  | 1.6  | 2.7  | 10.2| 
+| CAMI mock environmental community (high complexity)    | 9.9  | 4.8  | 4.5    | 12.8|
 
-To obtain the best assembly performance, OPERA-MS requires a minimum of 30x short-read coverage and 10x long-read coverage. Hence, to assemble a typical bacterial genome (3Mbp) at 1% abundance, 9Gb of short-read data and 3Gb of long-read data are recommended.
+OPERA-MS is designed to work with deep short-read sequencing, but can work with lower coverage in term of long-read sequencing.
+In practice, short-read coverage >15x is recommended, in contrast OPERA-MS can use long-read coverage as low as 9x to boost the assembly contiguity.
+Base on this, we recommend at least 9Gb of short-read data and 3Gb of long-read data to assemble a bacterial genome at 1% relative abundance in the metagenome.
 
 # Dependencies
 
-The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required software comes either pre-compiled with OPERA-MS or is built during the installation process. Binaries are placed inside the __utils__ folder:
+The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required programs come either pre-compiled with OPERA-MS or are built during the installation process. Binaries are placed inside the __utils__ folder:
 
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tested with version 1.0.4-beta)
 2) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below)
@@ -110,7 +112,7 @@ The only true dependency is `cpanm`, which is used to automatically install Perl
 8) [MUMmer](http://mummer.sourceforge.net/) - (tested with version 3.23)
 9) [Pilon](https://github.com/broadinstitute/pilon/wiki) - (tested with version 1.22)
 
-If a pre-built software does not work on the user's machine, OPERA-MS will check if the tool is present in the user's PATH. However, the version of the software may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the software may be placed in the __utils__ folder.
+If a pre-built program does not work on the user's machine, OPERA-MS will check if the program is present in the user's PATH. However, the version of the program may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the program may be placed in the __utils__ folder.
 
 OPERA-MS and its dependencies required C++, Java, Python, R and Perl, and use the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
 
@@ -125,7 +127,7 @@ Once cpanm is installed, simply run the following command to install all the per
 ```
 perl utils/install_perl_module.pl
 ```
-If the perl libraries cannot be installed under root, the following line should be added to the `.bashrc`:
+If the perl libraries cannot be installed under root, the following line should be added to `.bashrc`:
 ```
 export PERL5LIB="/home/$USER/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}";
 ```
