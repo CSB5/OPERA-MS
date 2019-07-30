@@ -137,14 +137,18 @@ The generic command to run a OPERA-MS docker container after building:
 [comment]:docker run \
     -v /host/path/to/indata/:/indata/ \
     -v /host/path/to/outdata/:/outdata/ \
-    operams config.file
+     operams
+    --short-read1 /indata/R1.fastq.gz \
+    --short-read2 /indata/R2.fastq.gz \
+    --long-read /indata/long_read.fastq \
+    --out-dir /outdata 
 ```
 To process data with the dockerized OPERA-MS, directories for in- and outdata should be mounted into the container. An example is shown below for running the test dataset. In the below example the repo was cloned to /home/myuser/git/OPERA-MS/). The repo is needed only for the `sample_files` directory and the `sample_config.config` file. If Docker is running in a VM, as is the case for Windows or OSX, but also when deployed on a cloud platform such as AWS or Azure, a minimum of 2 available cores is required.  
 
 ```
 docker run \
     -v OPERA-MS/test_files/:/sample_files \
-    -v outdir/:/sample_out \
+    -v OPERA-MS/test_files/RESULTS/:/sample_out \
      operams --contig-file /sample_files/contigs.fasta \
     --short-read1 /sample_files/R1.fastq.gz \
     --short-read2 /sample_files/R2.fastq.gz \
