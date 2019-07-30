@@ -64,7 +64,7 @@ Note that in the case of interruption during an OPERA-MS run, using the same com
 
 - **--contig-file** : path to the contig file, if the short-reads have been assembled previously
 
-- **--num-processor** : number of processors to use (default=2; note that 2 is the minimum)
+- **--num-processors** : number of processors to use (default=2; note that 2 is the minimum)
 
 Alternatively, OPERA-MS parameters can be set using a [configuration file](https://github.com/CSB5/OPERA-MS/wiki/Configuration-file).
 
