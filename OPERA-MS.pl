@@ -471,7 +471,7 @@ sub check_dependency{
     if($stage eq "CHECK_DEPENDENCY"){
 	print STDOUT "\n *** All compiled software are functional.\n";
 	print STDOUT " *** Please try to run OPERA-MS on the test dataset.\n\n";
-	exit(1);
+	exit(0);
     }
 }
 
