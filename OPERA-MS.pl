@@ -1448,7 +1448,7 @@ sub read_argument{
 }
 
 sub print_help{
-    "OPERA-MS.pl: OPERA-MS v0.8.0-beta
+    "OPERA-MS.pl: OPERA-MS v0.8.0
 contacts: Denis Bertrand <bertrandd\@gis.a-star.edu.sg>
           Chengxuan Tong <Tong_Chengxuan\@gis.a-star.edu.sg>
 
@@ -1476,7 +1476,7 @@ Optional arguments:
 		
    Other arguments:
       --contig-file          STR   path to the contig file, if the short-reads have been assembled previously [default assembly using MEGAHIT]
-      --num-processor        INT   number of processors to use (note that 2 is the minimum) [2]
+      --num-processors        INT   number of processors to use (note that 2 is the minimum) [2]
 
 ";
 }
