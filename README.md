@@ -3,9 +3,9 @@
 # Introduction 
 OPERA-MS is a hybrid metagenomic assembler which combines the advantages of short and long-read technologies to provide high quality assemblies, addressing issues of low contiguity for short-read only assemblies, and low base-pair quality for long-read only assemblies. OPERA-MS has been extensively tested on mock and real communities sequenced using different long-read technologies, including Oxford Nanopore, PacBio and Illumina Synthetic Long Read, and is particularly robust to noise in the read data.
 
-OPERA-MS employs a staged assembly strategy that is designed to exploit even low coverage long read data to improve genome assembly. It begins by constructing a short-read metagenomic assembly (default: [MEGAHIT](https://github.com/voutcn/megahit)) that provides a good representation of the underlying sequence in the metagenome but may be fragmented. Long and short reads are then mapped to the assembly to identify connectivity between the contigs and to compute read coverage information. This serves as the basis for the core of the OPERA-MS algorithm which is to exploit coverage as well as connectivity information to accurately cluster contigs into genomes using a Bayesian model based approach. Another important feature of OPERA-MS is that it can use information from reference genomes to deconvolute strains in the metagenome. After clustering, individual genomes are further scaffolded and gap-filled using the lightweight and robust scaffolder [OPERA-LG](https://sourceforge.net/p/operasf/wiki/The%20OPERA%20wiki/).
+OPERA-MS employs a staged assembly strategy that is designed to exploit even low coverage long read data to improve genome assembly. It begins by constructing a short-read metagenomic assembly (default: [MEGAHIT](https://github.com/voutcn/megahit)) that provides a good representation of the underlying sequence in the metagenome but may be fragmented. Long and short reads are then mapped to the assembly to identify connectivity between the contigs and to compute read coverage information. This serves as the basis for the core of the OPERA-MS algorithm which is to exploit coverage as well as connectivity information to accurately cluster contigs into genomes using a Bayesian model based approach. Another important advantage of OPERA-MS is that it can deconvolute strains in the metagenome, optionally using information from reference genomes to support this. After clustering, individual genomes are further scaffolded and gap-filled using the lightweight and robust scaffolder [OPERA-LG](https://sourceforge.net/p/operasf/wiki/The%20OPERA%20wiki/).
 
-OPERA-MS can assemble near complete genomes from a metagenomic dataset with as little as 9x long-read coverage. Applied to human gut microbiome data it provides hundreds of high quality draft genomes, a majority of which have  N50 >100kbp. We observed the assembly of complete plasmids, many of which were novel and contain previously unseen resistance gene combinations. In addition, OPERA-MS can very accurately assemble genomes even in the presence of multiple strains of a species in a complex metagenome, allowing us to associate plasmids and host genomes using longitudinal data. For further details about these and other results using nanopore sequencing on stool samples from clinical studies see our [Nature Biotechnology](https://www.nature.com/articles/s41587-019-0191-2) and [bioRxiv](https://www.biorxiv.org/content/early/2018/10/30/456905) papers. 
+OPERA-MS can assemble near complete genomes from a metagenomic dataset with as little as 9x long-read coverage. Applied to human gut microbiome data it provides hundreds of high quality draft genomes, a majority of which have  N50 >100kbp. We observed the assembly of complete plasmids, many of which were novel and contain previously unseen resistance gene combinations. In addition, OPERA-MS can very accurately assemble genomes even in the presence of multiple strains of a species in a complex metagenome, allowing us to associate plasmids and host genomes using longitudinal data. For further details about these and other results using nanopore sequencing on stool samples from clinical studies see our [manuscript](https://www.nature.com/articles/s41587-019-0191-2) or [preprint](https://www.biorxiv.org/content/early/2018/10/30/456905). 
 
 # Installation
 
@@ -30,17 +30,17 @@ perl ../OPERA-MS.pl \
     --out-dir RESULTS 2> log.err
 ```
 This will assemble a low diversity mock community in the folder **RESULTS**.
-Note that in the case of an interruption during an OPERA-MS run, using the same command line will re-start the execution after the last completed checkpoint.
+Note that in the case of interruption during an OPERA-MS run, using the same command-line will re-start the execution after the last completed checkpoint.
 
 # Usage
 
 ### Essential arguments
 
-- **--short-read1** : path to the first read for Illumina paired-end read data
+- **--short-read1** : path to the first read for Illumina paired-end read data (fasta/fastq/fasta.gz/fastq.gz)
 
-- **--short-read2** : path to the second read for Illumina paired-end read data
+- **--short-read2** : path to the second read for Illumina paired-end read data (fasta/fastq/fasta.gz/fastq.gz)
 
-- **--long-read** : path to the long-read fastq file obtained from either Oxford Nanopore, PacBio or Illumina Synthetic Long Read sequencing
+- **--long-read** : path to the long-read file obtained from either Oxford Nanopore, PacBio or Illumina Synthetic Long Read sequencing (fasta/fastq)
 
 - **--out-dir** : directory where OPERA-MS results will be outputted
 
@@ -52,19 +52,19 @@ Note that in the case of an interruption during an OPERA-MS run, using the same 
 
 - **--polishing** : enable short-read polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contigs.polished.fasta
 
-- **--long-read-mapper** : `default: blasr` - software used for long-read mapping i.e. blasr or minimap2
+- **--long-read-mapper** : software used for long-read mapping i.e. blasr (default) or minimap2
 
-- **--kmer-size** : `default: 60` - kmer value used to assemble contigs
+- **--kmer-size** : kmer value (default=60) used to assemble contigs
 
-- **--contig-len-thr** : `default: 500` - contig length threshold for clustering; contigs smaller than contig-len-thr will be filtered out
+- **--contig-len-thr** : contig length threshold (default=500) for clustering; contigs smaller than contig-len-thr will be filtered out
 
-- **--contig-edge-len** : `default: 80` - during contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency
+- **--contig-edge-len** : during contig coverage calculation, number of bases filtered out from each contig end (default=80), to avoid biases due to lower mapping efficiency
 
-- **--contig-window-len** : `default: 340` - window length in which the coverage estimation is performed. We recommend using contig_len_thr - 2 * contig_edge_len as the value
+- **--contig-window-len** : window length (default=340) in which the coverage estimation is performed. We recommend using contig_len_thr - 2 * contig_edge_len as the value
 
-- **--contig-file** : path to the contigs file, if the short-reads have been assembled previously
+- **--contig-file** : path to the contig file, if the short-reads have been assembled previously
 
-- **--num-processor** : `default : 2` - number of processors to use (note that 2 is the minimum)
+- **--num-processor** : number of processors to use (default=2; note that 2 is the minimum)
 
 Alternatively, OPERA-MS parameters can be set using a [configuration file](https://github.com/CSB5/OPERA-MS/wiki/Configuration-file).
 
@@ -72,31 +72,26 @@ Alternatively, OPERA-MS parameters can be set using a [configuration file](https
 
 The following output files can be found in the specified output directory i.e. **RESULTS**.
 The file **contigs.fasta** (and **contigs.polished.fasta** if the assembly has been polished) contains the assembled contigs, **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest contig etc.), and
-[**contig_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Contig-info-file-description) provides a detailed overview of the assembled contigs.
+[**contig_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Contig-info-file-description) provides detailed overview of the assembled contigs.
 
-Finally, OPERA-MS strain level clusters can be found in the directory **RESULTS/opera_ms_clusters/** and [**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of the cluster assembly statistics.
-Note that those clusters have been constructed using the contig graph data, and are by definition conservative.
-These clusters can be further binned using approaches such as [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
+Finally, OPERA-MS strain-level clusters (one fasta file per strain) can be found in the directory **RESULTS/opera_ms_clusters/** and [**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of assembly statistics for these clusters. Note that these clusters are constructed for producing high-quality assemblies and are therefore conservative. They can be binned further using approaches such as [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
 
 ### OPERA-MS-utils (coming soon ...)
 
-Scripts to post-process assembly including binning, bin assessment, identification of circular contigs and novel species, as described on the paper, will be available as part of the next release.
-Please contact us, if you would like to use a pre-release version.
+Scripts to post-process the assemblies including binning, bin assessment, identification of circular contigs and annotation of novel species (as described in the paper), will be available as part of the next release. Please contact us if you would like to use a pre-release version.
 
-# Requirements
+# Resource Requirements
 
-OPERA-MS's running time depends on the complexity of the metagenome and the amount of short/long-read data available.
+OPERA-MS's runtime depends on the complexity of the metagenome and the amount of short/long-read data available.
 We typically run OPERA-MS with default parameters using 16 threads on an Intel Xeon platinum server with SSD hard drive. With this hardware specification, we obtain the following running time and memory usage characteristics.
 
-| Dataset  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | Peak RAM usage (Gb) |
+| Dataset  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | Peak RAM usage (GB) |
 |:---:                 |:---: |:---:   |:---:   |:---: |
 | CAMI multi-strain mock community (low complexity)  | 3.9  | 2    | 1.4  | 5.5| 
 | Human gut microbiome (medium complexity) | 24.4  | 1.6  | 2.7  | 10.2| 
 | CAMI environmental mock community (high complexity)  | 9.9  | 4.8  | 4.5    | 12.8|
 
-OPERA-MS is designed to work with deep short-read sequencing, but can work with lower coverage in term of long-read sequencing.
-In practice, short-read coverage >15x is recommended, in contrast OPERA-MS can use long-read coverage as low as 9x to boost the assembly contiguity.
-Based on this, we recommend at least 9Gb of short-read data and 3Gb of long-read data to assemble a bacterial genome at 1% relative abundance in the metagenome.
+OPERA-MS is designed to work with deep short-read sequencing, but can work with lower coverage in terms of long-read sequencing. In practice, short-read coverage >15x is recommended, while OPERA-MS can use long-read coverage as low as 9x to boost assembly contiguity. Based on this, we recommend at least 9Gbp of short-read data and 3Gbp of long-read data to allow for assembly of bacterial genomes at 1% relative abundance in the metagenome.
 
 # Dependencies
 
