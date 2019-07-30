@@ -127,7 +127,7 @@ If the perl libraries cannot be installed under root, the following line should 
 export PERL5LIB="/home/$USER/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}";
 ```
 
-<!---# Docker
+# Docker
 A simple Dockerfile is provided in the root of the repository. To build the image:
 ```
 [comment]:docker build -t operams .
@@ -142,12 +142,16 @@ The generic command to run a OPERA-MS docker container after building:
 To process data with the dockerized OPERA-MS, directories for in- and outdata should be mounted into the container. An example is shown below for running the test dataset. In the below example the repo was cloned to /home/myuser/git/OPERA-MS/). The repo is needed only for the `sample_files` directory and the `sample_config.config` file. If Docker is running in a VM, as is the case for Windows or OSX, but also when deployed on a cloud platform such as AWS or Azure, a minimum of 2 available cores is required.  
 
 ```
-docker run \ 
-    -v /home/myuser/git/OPERA-MS/test_files:/test_files \
-    -v /home/myuser/git/OPERA-MS/RESULTS:/RESULTS \
-     operams test_files/test.config 
+docker run \
+    -v OPERA-MS/test_files/:/sample_files \
+    -v outdir/:/sample_out \
+     operams --contig-file /sample_files/contigs.fasta \
+    --short-read1 /sample_files/R1.fastq.gz \
+    --short-read2 /sample_files/R2.fastq.gz \
+    --long-read /sample_files/long_read.fastq \
+    --out-dir /sample_out
 ```
--->
+
 
 # Contact information
 For additional information, help and bug reports please send an email to: 
