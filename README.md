@@ -86,7 +86,7 @@ Please contact us, if you would like to use a pre-release version.
 # Requirements
 
 OPERA-MS's running time depends on the complexity of the metagenome and the amount of short/long-read data available.
-We typically run OPERA-MS with default parameters using 16 threads on an Intel Xeon platinium server with SSD hard drive. With this hardware specification, we obtain the following running time and memory usage characteristics.
+We typically run OPERA-MS with default parameters using 16 threads on an Intel Xeon platinum server with SSD hard drive. With this hardware specification, we obtain the following running time and memory usage characteristics.
 
 | Dataset  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | Peak RAM usage (Gb) |
 |:---:                 |:---: |:---:   |:---:   |:---: |
@@ -96,7 +96,7 @@ We typically run OPERA-MS with default parameters using 16 threads on an Intel X
 
 OPERA-MS is designed to work with deep short-read sequencing, but can work with lower coverage in term of long-read sequencing.
 In practice, short-read coverage >15x is recommended, in contrast OPERA-MS can use long-read coverage as low as 9x to boost the assembly contiguity.
-Base on this, we recommend at least 9Gb of short-read data and 3Gb of long-read data to assemble a bacterial genome at 1% relative abundance in the metagenome.
+Based on this, we recommend at least 9Gb of short-read data and 3Gb of long-read data to assemble a bacterial genome at 1% relative abundance in the metagenome.
 
 # Dependencies
 
