@@ -128,6 +128,7 @@ sub split_fasta_file{
 	if(index($_, ">") != -1){
 	    if($genome_size != 0){
 		$file_size += $genome_size;
+		print $OUT $genome;
 		if($file_size > $max_split_size || 
 		   $genome_number > $max_genome_number){
 		    #print " *** $file_size $split_file_num\n";<STDIN>;
@@ -137,7 +138,6 @@ sub split_fasta_file{
 		    close($OUT);
 		    open($OUT, ">$split_dir/split_$split_file_num.fa");
 		}
-		print $OUT $genome;
 	    }
 	    $genome = $_;
 	    $genome_size = 0;

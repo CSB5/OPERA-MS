@@ -32,13 +32,13 @@ if(! evaluate_cluster($coverage_contig_file, $cluster_file, "$sigma_dir/r_estima
 	run_exe("mkdir  $new_dir") if(! -d $new_dir);
 	run_exe("grep -v R_VALUE $sigma_config_file | grep -v output_dir  > $new_config_file;  echo \"output_dir=$new_dir\" >> $new_config_file; echo \"R_VALUE=$r_value\" >> $new_config_file");
 	#run_exe("mv $tmp_config_file $sigma_config_file");
-	print OUT "$opera_ms_dir/bin/sigma $new_config_file 2> $sigma_cmd.$nb_step.err\n";
+	print OUT "$opera_ms_dir/bin/sigma $new_config_file 2> $sigma_cmd.$i.err\n";
     }
     close(OUT);
     #exit(0);
     run_exe("cat $sigma_cmd | xargs -L 1 -P $num_processor -I COMMAND sh -c \"COMMAND\"");
     if($?){
-	die "Error in during sigma. Please see $sigma_cmd_*.err for details.\n";
+	die "Error in during sigma. Please see $sigma_cmd\_*.err for details.\n";
     }
 
     my $r_index = 1;

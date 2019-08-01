@@ -406,7 +406,7 @@ sub compute_mode{
 
     #Resolve weird problem
     my @temp = @{$window_distrib}[0..@{$window_distrib}-2];#NEED TO FIX uninitiallized value push in the array
-    print STDERR $window_distrib[@{$window_distrib}-1];
+    #print STDERR $window_distrib[@{$window_distrib}-1];
     #@temp = @{$window_distrib};
     
     #foreach $f (@temp){
