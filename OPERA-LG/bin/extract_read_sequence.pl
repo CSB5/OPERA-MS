@@ -266,7 +266,7 @@ my $wrote_on_scaff = ();
 my %scaff_to_fill = ();
 #Only used in the case of gap size threshold
 #TO_DO CHECK a single time which scacffold have to be filled
-open(DIR, "$ana_dir/");
+opendir(DIR, "$ana_dir/");
 my @all_scaff_dir = readdir(DIR);
 foreach $s_dir (@all_scaff_dir){ 
     $scaff_to_fill{$s_dir} = 1;

@@ -137,6 +137,8 @@ close(WRONG);
 
 my $prev_scaf;
 my $seq = "";
+my @line;
+my $contigs;
 open(FILE, $contigs_file) or die;
 while (<FILE>){
     chomp $_;
@@ -159,6 +161,15 @@ while (<FILE>){
         $seq .= $_;
     }
 }
+
+#To get the last contig
+@line = split(/\s/, $prev_scaf);
+$contigs = substr $line[0], 1;
+if(exists $species_contigs{$contigs}){
+    print CONTIGS $prev_scaf . "\n";
+    print CONTIGS $seq . "\n";
+}
+
 close(FILE);
 
 #perl /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS//bin/get_edges_from_matrix.pl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_508_3//intermediate_files /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_508_3//intermediate_files/strain_analysis/Klebsiella_pneumoniae/matrix /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_508_3//intermediate_files/strain_analysis/Klebsiella_pneumoniae /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA_MS_VERSION_TEST/V1.1/CRE_508_3//intermediate_files/megahit_assembly/final.contigs.fa 0 1000
