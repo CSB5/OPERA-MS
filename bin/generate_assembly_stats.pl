@@ -140,6 +140,7 @@ sub get_scaffold_info{
     my $str_res = $contig_name;
     my $species_info_line;
     if (defined($cluster_for_scaffold)){
+	#$cov_short = 0;$cov_long;
 	$cov_short = sprintf("%.2f", $cov_short/$scaffold_length);
 	$cov_long = sprintf("%.2f", $cov_long/$scaffold_length);
 	$str_res .= "\t$length\t$cov_short\t$cov_long\t";
@@ -189,7 +190,7 @@ sub analyse_scaff_seq{
     my ($filled_scaffold_length, $clusters_to_contigs, $cluster_to_species, $op_scaffold_to_op_contig, $scaffold_file, $scaffold_seq_file) = @_;
     
     open (SCAFFOLDS, $scaffold_file) or die;
-    open (SCAFFOLDSEQ, $scaffold_seq_file) or die;
+    open (SCAFFOLDSEQ, $scaffold_seq_file) or die "File $scaffold_seq_file not found\n";
     open(OUT, ">$scaffold_file.cname");
     my $scaffold_seq;
     
