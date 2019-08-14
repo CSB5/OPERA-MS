@@ -133,8 +133,6 @@ while(<FILE>){
 }
 close(FILE);
 
-run_exe("rm -r $working_dir/*opera_scaffold_*");
-
 #########################################Second tilling
 #
 my $second_tilling =  "$tilling_dir/second_tilling";
@@ -168,6 +166,7 @@ while(<FILE>){
 }
 close(FILE);
 
+run_exe("rm -r $working_dir/*opera_scaffold_*");
 
 ##########################################merge the contigs into the gapfilled file
 #
