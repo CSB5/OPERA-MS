@@ -124,7 +124,6 @@ while($mode_accepted == -1){
 
 	print STDERR "MEAN ESTIMATION BASED " . $strain_mean_value . "ON MODE " . $curr_mode . " AND DISPERTION ". $dispersion_value . "\n";
 	print STDERR "ESTIMATED CONFIDANCE INTERVAL FOR  " . $curr_mode. " -> [@confidance_interval]" . "\n";#<STDIN>;
-	
 	#
 	@{$window_count_in_h_mode_distribution} = ();
 	$nb_window_in_dist = 0;$coverage_sum_in_dist = 0;
