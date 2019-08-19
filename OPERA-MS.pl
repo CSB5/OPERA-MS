@@ -312,6 +312,9 @@ sub read_config_file{
 		
 		case "LONG_READ"{
 		    $opera_ms_option->{$config_option} = $split_line[1];
+		    #if(index($opera_ms_option->{$config_option}, ".gz") != -1){
+		    #die "Compressed long-reads are not supported " . $opera_ms_option->{$config_option} . "\n";
+		    #}
 		}
 
 		case "ILLUMINA_READ_1"{
@@ -404,7 +407,7 @@ sub check_data{
     data_exists($opera_ms_option->{"LONG_READ"});
     #
     if ($opera_ms_option->{"LONG_READ"} =~ /\.gz$/){
-	die $opera_ms_option->{"LONG_READ"} . " appears to be in gzipped format. Blasr does not accept gzipped files, please unzip.\n";
+	die $opera_ms_option->{"LONG_READ"} . " appears to be in gzipped format. The current version of OPERA-MS does not accept compressed long read file, please unzip.\n";
     }
 }
 
@@ -507,15 +510,15 @@ sub setup_opera_ms_database{
     if(! -e "$opera_ms_dir/database_updated"){
 	print STDOUT " *** First utilization: set-up of reference genome databases. Please wait ...\n";
 	#
-	print STDOUT " *** (1/3) Download of genomeDB_Sketch.msh\n";
-	run_exe("wget --no-check-certificate -O $opera_ms_dir/genomeDB_Sketch.msh https://www.dropbox.com/s/kot086vh26nds6j/genomeDB_Sketch.msh?dl=0");
+	print STDOUT " *** (1/3) Download of genomeDB_Sketch.msh\n";	
+	run_exe("wget --no-check-certificate -O $opera_ms_dir/genomeDB_Sketch.msh https://ndownloader.figshare.com/files/17290511");
 	if($?){
-	    die"\nUnfortunately the automated download of the genome data base failed.\nYou can complete the installation process manually by:\n\t(1) Downloading the data base files at: https://www.dropbox.com/sh/uawdmrh7d6d03nu/AADFlMD1_g4OihTqzb-xgXBMa?dl=0 or at https://share.weiyun.com/5dBj6T6\n\t(2) Moving the files in $opera_ms_dir\n\t(3) Running the command: tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz;touch $opera_ms_dir/database_updated\n\n";
+	    die"\nUnfortunately the automated download of the genome data base failed.\nYou can complete the installation process manually by:\n\t(1) Downloading the data base files at: https://figshare.com/articles/genomeDB_Sketch_msh/8425280 and https://figshare.com/articles/complete_ref_genomes_tar_gz/9638207\t(2) Moving the files in $opera_ms_dir\n\t(3) Running the command: tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz;touch $opera_ms_dir/database_updated\n\n";
 	}
 	else{
 	    #
-	    print STDOUT " *** (2/3) Download of complete_ref_genomes.tar.gz\n";
-	    run_exe("wget --no-check-certificate -O $opera_ms_dir/complete_ref_genomes.tar.gz https://www.dropbox.com/s/wcxvy2u0yhp3pw0/complete_ref_genomes.tar.gz?dl=0");
+	    print STDOUT " *** (2/3) Download of complete_ref_genomes.tar.gz\n";	
+	    run_exe("wget --no-check-certificate -O $opera_ms_dir/complete_ref_genomes.tar.gz https://ndownloader.figshare.com/files/17290589");
 	    #
 	}
 	print STDOUT " *** (3/3) Extraction of complete_ref_genomes.tar.gz\n";
@@ -1316,7 +1319,7 @@ sub generate_cluster_stats{
     
     #Get the statistics
     my $opera_ms_dir = $opera_ms_option->{"OPERA_MS_DIR"};
-    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_info.pl " . $opera_ms_option{"OUTPUT_DIR"} . " $cluster_dir > $cluster_dir/../cluster_info.dat");
+    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_info.pl " . $opera_ms_option{"OUTPUT_DIR"} . " $cluster_dir > $cluster_dir/../cluster_info.txt");
 }
 
 sub check_completed{

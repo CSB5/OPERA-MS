@@ -509,7 +509,10 @@ sub write_filled_gap_scaffold{
 	    #Trim the contig in case of contig overlap (always trim on the left side)
 	    if($contig_trimming_length != 0){
 		#print STDERR " ***** Trimming $contig_1 $contig_trimming_length\n";
-		$contig_1_seq = substr $contig_1_seq, $contig_trimming_length;
+		#CHECK WHY $contig_trimming_length > $contig_1_seq
+		if($contig_trimming_length < length($contig_1_seq)){
+		    $contig_1_seq = substr $contig_1_seq, $contig_trimming_length;
+		}
 	    }
 	    $scaff_seq .= $contig_1_seq;
 	    
@@ -537,7 +540,7 @@ sub write_filled_gap_scaffold{
 		}
 		else{
 		    #This a gap sequence
-		    #$gap_filled_stats = length($gap_seq);
+		    $gap_filled_stats = length($gap_seq);
 		    $contig_trimming_length = 0;
 		    
 		    #print STDERR " *** Fill gap seq\n$gap_seq\n";#<STDIN>;
@@ -591,7 +594,8 @@ sub extract_gap_seq{
 	#print STDERR $edge_ID . "\t".$reference_reads{$edge_ID}."\t".$pure_gap_seq{$edge_ID}->{$reference_reads{$edge_ID}}."\n";
 	
     	if(! (defined $out) ) {
-	    print STDERR "*************WEIRD STUFF : Size entry absent for overlap*************".$edge_ID."\t".$reference_reads{$edge_ID}."\n";
+	    print STDERR "Size entry absent from long-read overlap " . $edge_ID . "\t" . $reference_reads{$edge_ID}."\n";
+	    $out = "";
     	}
     	return $out;
     }

@@ -60,6 +60,12 @@ sub run_racon{
     if($?){
 	die "Error during racon. Please see $out_file.out and $out_file.err for details.\n";
     }
+
+    if(-z $out_file){
+	print STDERR " *** WARNING EMPTY RACON FILE REPLACED BY PRE_CONSENSUS SCAFFOLD\n";
+	run_exe("cp $assembly_file $out_file");
+    }
+    
 }
 
 
