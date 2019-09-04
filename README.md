@@ -109,7 +109,7 @@ The only true dependency is `cpanm`, which is used to automatically install Perl
 
 If a pre-built program does not work on the user's machine, OPERA-MS will check if the program is present in the user's PATH. However, the version of the program may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the program may be placed in the __utils__ folder.
 
-OPERA-MS and its dependencies required C++, Java, Python 2, R and Perl, and use the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
+OPERA-MS and its dependencies required C++, Java, Python, R and Perl, and use the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
 
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
 - [File::Which](https://metacpan.org/pod/File::Which)
