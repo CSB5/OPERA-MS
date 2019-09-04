@@ -223,7 +223,7 @@ def main(args) :
 						final_assembly_file.write(">" + scaff_name + "\n")
 						final_assembly_file.write(final_assembly + "\n")
 					else :
-						scaff_to_rescue_file.write(scaff_name)
+						scaff_to_rescue_file.write(scaff_name + "\n")
 						
 				
 				#print >> final_assembly_file, line.rstrip()
@@ -242,10 +242,10 @@ def main(args) :
 			contig_start_sites = get_start_sites(valid_contig_map_scaff, flag_extend_contig)
 			#
 			final_assembly = get_final_assembly(initial_assembly, valid_contig_map_scaff, contig_seq, contig_start_sites, flag_extend_contig)
-			final_assembly_file.write(">" + scaff_name)
-			final_assembly_file.write(final_assembly)
+			final_assembly_file.write(">" + scaff_name + "\n")
+			final_assembly_file.write(final_assembly + "\n")
 		else :
-			scaff_to_rescue_file.write(scaff_name)
+			scaff_to_rescue_file.write(scaff_name + "\n")
 			
 
 
