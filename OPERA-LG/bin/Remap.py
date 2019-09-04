@@ -1,5 +1,3 @@
-#! /usr/bin/python
-
 # Script for remapping the contigs to the assembly
 # Need to supply paf mapping file along with the assembly and the contig file
 
@@ -240,12 +238,15 @@ def main(args) :
                 #For the last scaffold
                 #if initial_assembly != "" :
                 print " *** Process last " + scaff_name + "\n"
-                valid_contig_map_scaff = valid_contig_map[scaff_name]
-                contig_start_sites = get_start_sites(valid_contig_map_scaff, flag_extend_contig)
-                #
-                final_assembly = get_final_assembly(initial_assembly, valid_contig_map_scaff, contig_seq, contig_start_sites, flag_extend_contig)
-                print >> final_assembly_file, ">" + scaff_name
-		print >> final_assembly_file, final_assembly
+                if scaff_name in valid_contig_map :
+                        valid_contig_map_scaff = valid_contig_map[scaff_name]
+                        contig_start_sites = get_start_sites(valid_contig_map_scaff, flag_extend_contig)
+                        #
+                        final_assembly = get_final_assembly(initial_assembly, valid_contig_map_scaff, contig_seq, contig_start_sites, flag_extend_contig)
+                        print >> final_assembly_file, ">" + scaff_name
+		        print >> final_assembly_file, final_assembly
+                else :
+                        print >> scaff_to_rescue_file, scaff_name;
 		#if initial_assembly != "" :
 		#	final_assembly = get_final_assembly(initial_assembly, valid_contig_map, contig_seq,contig_start_sites, flag_extend_contig)
 		#	print >> final_assembly_file, final_assembly

@@ -114,7 +114,7 @@ get_paf_file($assembly_scaffold_file, "$first_filling.coords", "$first_filling.p
 
 get_contig_in_gap("$first_filling.paf", $contig_file, "$first_filling\_contig.fa");
 
-run_exe("$opera_bin_dir/Remap.py $first_filling.paf $consensus_file $first_filling\_contig.fa > $tilling_dir/tilling_1_remap.out");
+run_exe("python $opera_bin_dir/Remap.py $first_filling.paf $consensus_file $first_filling\_contig.fa > $tilling_dir/tilling_1_remap.out");
 if($?){
     die "Error during contig remapping. Please see $tilling_dir/tilling_1_remap.out for details.\n";
 }
@@ -148,7 +148,7 @@ get_paf_file($assembly_scaffold_file, "$second_tilling.coords", "$second_tilling
 
 get_contig_in_gap("$second_tilling.paf", $contig_file, "$second_tilling\_contig.fa");
     
-run_exe("$opera_bin_dir/Remap.py $second_tilling.paf $tilling_dir/consensus_remapped.fasta $second_tilling\_contig.fa >  $tilling_dir/tilling_2_remap.out");
+run_exe("python $opera_bin_dir/Remap.py $second_tilling.paf $tilling_dir/consensus_remapped.fasta $second_tilling\_contig.fa >  $tilling_dir/tilling_2_remap.out");
 if($?){
     die "Error during contig remapping. Please see $tilling_dir/tilling_2_remap.out for details.\n";
 }

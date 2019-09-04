@@ -477,7 +477,7 @@ sub write_filled_gap_scaffold{
 	if($line[0] =~ m />(.+)/){
 	    
 	    #Write the sequence of the last contig, sngleton scaffolds for which only contig_1 is not empty are skipted
-	    if(! exists $scaff_not_filled{$scaff_name} && $contig_2 ne ""){
+	    if( exists $scaff_to_fill{$scaff_name} && $contig_2 ne ""){
 		open(OUT, ">$ana_dir/$scaff_name/pre_consensus.fa");
 		print OUT ">$scaff_name\n";
 		print OUT $scaff_seq."".(get_contig_seq($contig_2, $contig_2_ori, \%all_contig_seq))."\n";
@@ -499,7 +499,7 @@ sub write_filled_gap_scaffold{
 	    $contig_2 = "";
 	}
 	else{
-	    next if(exists $scaff_not_filled{$scaff_name});
+	    next if(! exists $scaff_to_fill{$scaff_name});
 	    $contig_2 = $line[0];
 	    $contig_2_ori = "+"; $contig_2_ori = "-" if($line[1] eq "EB");
 	    @contig_order = sort($contig_1, $contig_2);
@@ -567,7 +567,7 @@ sub write_filled_gap_scaffold{
     }
     #The last contig of the last scaffold
     #if($contig_2 ne ""){
-    if(! exists $scaff_not_filled{$scaff_name} && $contig_2 ne ""){
+    if(exists $scaff_to_fill{$scaff_name} && $contig_2 ne ""){
 	open(OUT, ">$ana_dir/$scaff_name/pre_consensus.fa");
 	print OUT ">$scaff_name\n";
 	print OUT $scaff_seq.(get_contig_seq($contig_2, $contig_2_ori, \%all_contig_seq))."\n";

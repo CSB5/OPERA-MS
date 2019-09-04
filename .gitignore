@@ -19,11 +19,6 @@ SIGMA/debug
 bin/OPERA-LG-fast
 database_updated.bk
 utils/perl
-test_files/OPERA_MS*/
-test_files/sample_output/
-test_files/OUT/
-test_files/RESULTS/
-test_files/log.err
 
 
 utils/metabat
@@ -34,4 +29,10 @@ utils/novel_analysis.py
 
 OPERA-LG/bin/.#OPERA-long-read.pl
 
+test_files/OPERA_MS*/
+test_files/sample_output/
+test_files/OUT/
+test_files/RESULTS/
+test_files/log.err
 test_files/OPERA-MS-LOG.tar.gz
+test_files/fna_output/

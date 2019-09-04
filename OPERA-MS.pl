@@ -18,6 +18,7 @@ use Getopt::Long qw(GetOptionsFromArray);
 my %opera_ms_option = ();
 my $opera_ms_full_path = dirname(rel2abs($0)) . "/";
 $opera_ms_option{"OPERA_MS_DIR"} = $opera_ms_full_path;
+$opera_ms_option{"VERSION"} = "v0.8.2";
 
 my %opera_ms_dependency = ();
 
@@ -56,6 +57,8 @@ setup_opera_ms_database(\%opera_ms_option);
 
 #Starting OPERA-MS pipeline
 my ($start_time, $end_time);
+
+print STDERR "version\t" . $opera_ms_option{"VERSION"} . "\n";
 
 short_read_assembly(\%opera_ms_option, \%opera_ms_dependency);
 
@@ -1451,7 +1454,7 @@ sub read_argument{
 }
 
 sub print_help{
-    "OPERA-MS.pl: OPERA-MS v0.8.0
+    "OPERA-MS.pl: OPERA-MS " .	$opera_ms_option{"VERSION"} . "
 contacts: Denis Bertrand <bertrandd\@gis.a-star.edu.sg>
           Chengxuan Tong <Tong_Chengxuan\@gis.a-star.edu.sg>
 
@@ -1479,7 +1482,7 @@ Optional arguments:
 		
    Other arguments:
       --contig-file          STR   path to the contig file, if the short-reads have been assembled previously [default assembly using MEGAHIT]
-      --num-processors        INT   number of processors to use (note that 2 is the minimum) [2]
+      --num-processors       INT   number of processors to use (note that 2 is the minimum) [2]
 
 ";
 }
