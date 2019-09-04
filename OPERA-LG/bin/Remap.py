@@ -55,9 +55,9 @@ def check_valid_map(line, valid_contig_map, invalid_contig_set, contig_mapping_I
 			if scaff_name not in valid_contig_map:
 				#print " **** Add " + scaff_name + "\n"
 				valid_contig_map[scaff_name] = {}
-				valid_contig_map[scaff_name][contig_ID] = {"contig_start":contig_start,"contig_end":contig_end,"contig_len":contig_len,"contig_orientation":contig_orientation,"scaffold_start":scaffold_start,"scaffold_end":scaffold_end, "scaf":scaff_name}
-				#ss = valid_contig_map[scaff_name]
-				#print " *** " + scaff_name + " " + contig_ID + " " + (ss[contig_ID]["contig_orientation"]) + "\n"
+			valid_contig_map[scaff_name][contig_ID] = {"contig_start":contig_start,"contig_end":contig_end,"contig_len":contig_len,"contig_orientation":contig_orientation,"scaffold_start":scaffold_start,"scaffold_end":scaffold_end, "scaf":scaff_name}
+			#ss = valid_contig_map[scaff_name]
+			#print " *** " + scaff_name + " " + contig_ID + " " + (ss[contig_ID]["contig_orientation"]) + "\n"
 			return True
 
 	else :
@@ -89,10 +89,8 @@ def get_sequences(contig_path, valid_contig_map, contig_mapping_ID) :
 						if(c_seq_rev == ""):
 							#print "Rev complemnt end|" + contig_name + "| \n"
 							c_seq_rev = reverse_complement(seq)
-							c_seq = c_seq_rev
-							#contig_seq[contig_name] = seq
-							#print >> sys.stderr, " Contig ID for seq "  + contig_m_id
-							#print "Copy|" + contig_name + "| \n"
+						c_seq = c_seq_rev
+
 					else:
 						c_seq = seq
 						#print " *** " + contig_name + "|" + contig_m_id[1:] + " |" + c_seq + "|     |" + seq + "|\n"
@@ -105,7 +103,7 @@ def get_sequences(contig_path, valid_contig_map, contig_mapping_ID) :
 				if line[1:].rstrip() in contig_mapping_ID : #valid_contig_map :
 					contig_name = line[1:].rstrip()
 					extract_flag = 1
-					#print >> sys.stderr, " *** End gett sequence "		
+					
 	return contig_seq
 
 # Function to populate and return a sorted list of tuples(scaffold_start,contig_name) of the start sites of the valid contigs in the scaffold
@@ -118,7 +116,7 @@ def get_start_sites(valid_contig_map, flag_extend_contig) :
 			contig_start_pos = valid_contig_map[contig_name]["scaffold_start"] - valid_contig_map[contig_name]["contig_start"]
 		else :
 			contig_start_pos = valid_contig_map[contig_name]["scaffold_start"]
-			start_sites_map[contig_start_pos] = contig_name
+		start_sites_map[contig_start_pos] = contig_name
 
 	return sorted(start_sites_map.items())
 
@@ -157,7 +155,7 @@ def get_final_assembly(initial_assembly_seq, valid_contig_map, contig_seq, conti
 			contig_cut = pos - int(next_contig_start)
 		else :
 			contig_cut = pos - int(next_contig_start) + valid_contig_map[next_contig_name]["contig_start"]
-			# Adjust coords for unmapped end segments
+			
 			
 		# Get the sequence of the contig which is to be inserted
 		insert_seq = contig_seq[next_contig_name]
@@ -248,12 +246,7 @@ def main(args) :
 			final_assembly_file.write(final_assembly)
 		else :
 			scaff_to_rescue_file.write(scaff_name)
-			#if initial_assembly != "" :
-			#	final_assembly = get_final_assembly(initial_assembly, valid_contig_map, contig_seq,contig_start_sites, flag_extend_contig)
-			#	print >> final_assembly_file, final_assembly
-
-
-
+			
 
 
 if __name__ == "__main__" :
