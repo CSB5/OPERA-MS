@@ -27,7 +27,7 @@ def check_valid_map(line, valid_contig_map, invalid_contig_set, contig_mapping_I
 	map_fraction = float(map_len) / float(contig_len)
 	
 	#if map_fraction > 0.99 :
-        if map_fraction > 0 :
+        if map_fraction > 0:
 		if contig_name in valid_contig_map :
 			del valid_contig_map[contig_name]
 			invalid_contig_set.add(contig_name)
