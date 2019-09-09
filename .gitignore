@@ -36,3 +36,7 @@ test_files/RESULTS/
 test_files/log.err
 test_files/OPERA-MS-LOG.tar.gz
 test_files/fna_output/
+test_files/OUTFILE.fa
+test_files/fasta_log.err
+test_files/fasta_results/
+test_files/run.log

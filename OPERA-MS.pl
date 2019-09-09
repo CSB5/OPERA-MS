@@ -580,6 +580,9 @@ sub short_read_assembly{
 }
 
 
+
+#/mnt/software/stow/SPAdes-3.7.1/bin/spades.py --meta --threads 8 -1 ../r1.fastq -2 ../r2.fastq --memory 10 -k 21,33,55,81 -o .
+
 sub assembly_graph_creation{
     my ($opera_ms_option, $opera_ms_dependency) = @_;
     #

@@ -376,6 +376,8 @@ while(<READ_FILE>){
 
         if($keep_read){
             $read_seq .= $_;
+	    #$quality_seq .= "I" x length($read_seq);
+	    #ADD the quality value
         }
 
     }
