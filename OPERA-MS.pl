@@ -18,7 +18,7 @@ use Getopt::Long qw(GetOptionsFromArray);
 my %opera_ms_option = ();
 my $opera_ms_full_path = dirname(rel2abs($0)) . "/";
 $opera_ms_option{"OPERA_MS_DIR"} = $opera_ms_full_path;
-$opera_ms_option{"VERSION"} = "v0.8.2";
+$opera_ms_option{"VERSION"} = "v0.8.3";
 
 my %opera_ms_dependency = ();
 
@@ -224,6 +224,7 @@ sub set_default_value{
     $opera_ms_option->{"POLISHING"} = 0;
     $opera_ms_option->{"GAP_FILLING"} = 1;
     $opera_ms_option->{"LONG_READ_MAPPER"} = "blasr";
+    $opera_ms_option->{"SHORT_READ_ASSEMBLER"} = "megahit";
     #my $genomeDB_kraken = "NULL";
     #my $kraken_exe_dir = "";
     $opera_ms_option->{"FILLED_SCAFF_LENGTH"} = 499;
@@ -310,6 +311,13 @@ sub read_config_file{
 		    $opera_ms_option->{$config_option} = $split_line[1];
 		    if($opera_ms_option->{"LONG_READ_MAPPER"} ne "blasr" && $opera_ms_option->{"LONG_READ_MAPPER"} ne "minimap2"){
 			die "Unkown LONG_READ_MAPPER " . $opera_ms_option->{"LONG_READ_MAPPER"} . ", please use  blasr/minimap2.\n"
+		    }
+		}
+
+		case "SHORT_READ_ASSEMBLER"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		    if($opera_ms_option->{"SHORT_READ_ASSEMBLER"} ne "megahit" && $opera_ms_option->{"SHORT_READ_ASSEMBLER"} ne "spades"){
+			die "Unkown SHORT_READ_ASSEMBLER " . $opera_ms_option->{"SHORT_READ_ASSEMBLER"} . ", please use  megahit/spades.\n"
 		    }
 		}
 		
@@ -464,6 +472,9 @@ sub check_dependency{
 
     #megahit
     check_software("$utils_dir/megahit_v1.0.4-beta_LINUX_CPUONLY_x86_64-bin/", "megahit", "megahit --version", $opera_ms_dependency, $stage);
+
+    #spades
+    check_software("$utils_dir/SPAdes-3.13.0-Linux/bin/", "spades", "spades.py --version", $opera_ms_dependency, $stage);
     
     #Check for racon.
     check_software($utils_dir, "racon", "racon 2>&1 | grep options", $opera_ms_dependency, $stage);
@@ -541,9 +552,6 @@ sub short_read_assembly{
     my ($opera_ms_option, $opera_ms_dependency) = @_;
     #
     #
-    my $inter_dir = $opera_ms_option->{"INTER_DIR"};
-    my $megahit_out_dir = "$inter_dir/megahit_assembly";
-    
     if($opera_ms_option->{"STAGE"} eq "ALL" || $opera_ms_option->{"STAGE"} eq "SHORT_READ_ASSEMBLY"){
 	$opera_ms_option->{"STAGE"} = "ALL" if($opera_ms_option->{"STAGE_FOLLOW"} == 1);
 
@@ -556,33 +564,88 @@ sub short_read_assembly{
 	}
 	else{
 	    $opera_ms_option->{"ASSEMBLED_CONTIG_FILE"} = 1;
-	    $opera_ms_option->{"CONTIGS_FILE"} = "$megahit_out_dir/final.contigs.fa";
 	    $start_time = time();
-	    #Stage 0: short assembly using megahit if the contig file is not provided in the config file
-	    if(! check_completed($opera_ms_option->{"CONTIGS_FILE"}, "Short read assembly [default MEGAHIT]", 1)){
-		run_exe("rm -r $megahit_out_dir") if(-d $megahit_out_dir);
-		run_exe($opera_ms_dependency->{"megahit"}."/megahit " . 
-			"--num-cpu-threads " . $opera_ms_option->{"NUM_PROCESSOR"} . " " .
-			"-1 " . $opera_ms_option->{"ILLUMINA_READ_1"} . " " .
-			"-2 " . $opera_ms_option->{"ILLUMINA_READ_2"} . " " .
-			"-o " . $megahit_out_dir . "> $inter_dir/megahit.out 2> $inter_dir/megahit.err");
-		if($?){
-		    die "Error during megahit assembly. Please see $inter_dir/megahit.out and $inter_dir/megahit.err for details.\n";
-		}
-		
-		$end_time = time();
-		write_time($inter_dir, "megahit_assembly", ($end_time - $start_time));
-		#Delete all the meggahit intermidate files
-		run_exe("rm -r $megahit_out_dir/intermediate_contigs");
+	    if($opera_ms_option->{"SHORT_READ_ASSEMBLER"} eq "megahit"){
+		run_megahit($opera_ms_option, $opera_ms_dependency);
 	    }
+	    if($opera_ms_option->{"SHORT_READ_ASSEMBLER"} eq "spades"){
+		run_spades($opera_ms_option, $opera_ms_dependency);
+	    }
+	    $end_time = time();
+	    write_time($opera_ms_option->{"INTER_DIR"}, "short_read_assembly", ($end_time - $start_time));
 	}
     }
 }
 
 
+sub run_megahit{
+    my ($opera_ms_option, $opera_ms_dependency) = @_;
+    my $inter_dir = $opera_ms_option->{"INTER_DIR"};
+    my $megahit_out_dir = "$inter_dir/megahit_assembly";
+    $opera_ms_option->{"CONTIGS_FILE"} = "$megahit_out_dir/final.contigs.fa";
+    #Stage 0: short assembly using megahit if the contig file is not provided in the config file
+    if(! check_completed($opera_ms_option->{"CONTIGS_FILE"}, "Short read assembly [MEGAHIT]", 1)){
+	run_exe("rm -r $megahit_out_dir") if(-d $megahit_out_dir);
+	run_exe($opera_ms_dependency->{"megahit"}."/megahit " . 
+		"--num-cpu-threads " . $opera_ms_option->{"NUM_PROCESSOR"} . " " .
+		"-1 " . $opera_ms_option->{"ILLUMINA_READ_1"} . " " .
+		"-2 " . $opera_ms_option->{"ILLUMINA_READ_2"} . " " .
+		"-o " . $megahit_out_dir . "> $inter_dir/megahit.out 2> $inter_dir/megahit.err");
+	if($?){
+	    die "Error during MEGAHIT assembly. Please see $inter_dir/megahit.out and $inter_dir/megahit.err for details.\n";
+	}
+	#Delete all the meggahit intermidate files
+	run_exe("rm -r $megahit_out_dir/intermediate_contigs");
+    }
+}
 
-#/mnt/software/stow/SPAdes-3.7.1/bin/spades.py --meta --threads 8 -1 ../r1.fastq -2 ../r2.fastq --memory 10 -k 21,33,55,81 -o .
+sub run_spades{
+    my ($opera_ms_option, $opera_ms_dependency) = @_;
+    my $inter_dir = $opera_ms_option->{"INTER_DIR"};
+    my $assembly_out_dir = "$inter_dir/spades_assembly";
+    $opera_ms_option->{"CONTIGS_FILE"} = "$assembly_out_dir/contigs.fasta";
+    #Stage 0: short assembly using megahit if the contig file is not provided in the config file
+    if(! check_completed($opera_ms_option->{"CONTIGS_FILE"}, "Short read assembly [SPAdes]", 1)){
+	run_exe("rm -r $assembly_out_dir") if(-d $assembly_out_dir);
+	run_exe($opera_ms_dependency->{"spades"}."/spades.py " .
+		"--meta " .
+		"--threads " . $opera_ms_option->{"NUM_PROCESSOR"} . " " .
+		"-1 " . $opera_ms_option->{"ILLUMINA_READ_1"} . " " .
+		"-2 " . $opera_ms_option->{"ILLUMINA_READ_2"} . " " .
+		"-k 21,33,55,81 " .
+		"-o " . $assembly_out_dir . "> $inter_dir/spades.out 2> $inter_dir/spades.err");
+	if($?){
+	    die "Error during SPAdes assembly. Please see $inter_dir/spades.out and $inter_dir/spades.err for details.\n";
+	}
+	
+	#Delete all the meggahit intermidate files
+	run_exe("rm -r $assembly_out_dir/K* $assembly_out_dir/corrected* $assembly_out_dir/misc");
+	my $contig_file = $opera_ms_option->{"CONTIGS_FILE"};
+	multi_to_linear_fa($contig_file, "$contig_file.single");
+	run_exe("mv $contig_file.single $contig_file");
+    }
+}
 
+sub multi_to_linear_fa{
+    my ($multi_file, $single_file) = @_;
+    open(FILE, $multi_file);
+    open(OUT, ">$single_file");
+    my $first = 1;
+    while (<FILE>)
+    {
+	$line = $_;
+	chomp $line;
+	if ($line =~ />(.*)/) {
+	    print OUT "\n" if(! $first);
+	    print OUT $line . "\n";
+	    $first = 0
+	}
+	else { print OUT $line; }
+    }
+    close(OUT);
+    close(FILE);
+}
+    
 sub assembly_graph_creation{
     my ($opera_ms_option, $opera_ms_dependency) = @_;
     #
@@ -1399,6 +1462,7 @@ sub read_argument{
 	#
 	
 	"long-read-mapper=s" => \$opera_ms_option{"LONG_READ_MAPPER"},
+	"short-read-assembler=s" => \$opera_ms_option{"SHORT_READ_ASSEMBLER"},
 	"num-processors=i" => \$opera_ms_option{"NUM_PROCESSOR"},
 	#	
 	"help"                => \$flag_help,
@@ -1435,6 +1499,7 @@ sub read_argument{
 	    
 	    "CONTIGS_FILE",
 	    "LONG_READ_MAPPER",
+	    "SHORT_READ_ASSEMBLER",
 	    "NUM_PROCESSOR",
 	    );
 	
@@ -1478,6 +1543,7 @@ Optional arguments:
       --no-strain-clustering       disable strain level clustering
       --polishing                  enable assembly polishing (currently using Pilon)
       --long-read-mapper     STR   software used for long-read mapping i.e. blasr or minimap2 [blasr]
+      --short-read-assembler STR   software used for short-read assembly i.e. megahit or spades [megahit]
       --kmer-size            INT   kmer value used to assemble contigs [60]
       --contig-len-thr       INT   contig length threshold for clustering; contigs smaller than the threshold will be filtered out [500]
       --contig-edge-len      INT   during contig coverage calculation, number of bases filtered out from each contig end, to avoid biases due to lower mapping efficiency [80]

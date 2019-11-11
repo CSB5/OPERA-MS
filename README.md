@@ -54,6 +54,8 @@ Note that in the case of interruption during an OPERA-MS run, using the same com
 
 - **--long-read-mapper** : software used for long-read mapping i.e. blasr (default) or minimap2
 
+- **--short-read-assembler** : software used for short read assembly i.e. megahit (default) or spades
+
 - **--kmer-size** : kmer value (default=60) used to assemble contigs
 
 - **--contig-len-thr** : contig length threshold (default=500) for clustering; contigs smaller than contig-len-thr will be filtered out
@@ -98,6 +100,7 @@ OPERA-MS is designed to work with deep short-read sequencing, but can work with 
 The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required programs come either pre-compiled with OPERA-MS or are built during the installation process. Binaries are placed inside the __utils__ folder:
 
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tested with version 1.0.4-beta)
+1) [SPAdes](https://github.com/ablab/spades) - (tested with version 3.13.0)
 2) [samtools](https://github.com/samtools/samtools) - (version 0.1.19 or below)
 3) [bwa](https://github.com/lh3/bwa) - (tested with version 0.7.10-r789)
 4) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above which uses '-' options)

@@ -246,7 +246,6 @@ close(OUT_EXTRA);
 #exit(0);
 
 #Extract the sequences requires to fill the gaps in the reads
-open(OUT_STATS, ">$ana_dir/gap_stats.dat") or die;
 print STDERR " *** Extract gap sequences from read file $read_file\n";
 open(READ_FILE, $read_file) or die;
 my $seq;
@@ -260,10 +259,10 @@ my %wrote_on_scaff = ();
 ##?## Debug purposes only
 open(ERR_F, ">$ana_dir/edge_err");
 #open(ERR_F2, ">$ana_dir/edge_err_nf");
-my $wrote_on_scaff = ();
 
 #Identify the scaffold to fill
 my %scaff_to_fill = ();
+
 #Only used in the case of gap size threshold
 #TO_DO CHECK a single time which scacffold have to be filled
 opendir(DIR, "$ana_dir/");
@@ -362,9 +361,10 @@ while(<READ_FILE>){
 	    my @line = split(/\s/, $1);
 	    $read_name = $line[0]; 
 	    $read_seq = "";
+	    $quality_seq = "";
 	}
     }
-
+    
     else{
         if(/^[ATCG]/){
             $keep_read = 1;
@@ -376,15 +376,13 @@ while(<READ_FILE>){
 
         if($keep_read){
             $read_seq .= $_;
-	    #$quality_seq .= "I" x length($read_seq);
 	    #ADD the quality value
-        }
-
+	    $quality_seq .= "I" x length($read_seq);
+	}
     }
 }
 close(ERR_F);
 close(READ_FILE);
-close(OUT_STATS);
 
 
 #to produce the filled gap scaffolds

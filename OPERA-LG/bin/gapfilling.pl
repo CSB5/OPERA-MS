@@ -24,7 +24,7 @@ my @scaffold_order = ();
 split_scaffold_file($working_dir, $assembly_scaffold_file);
 $end_time = time;
 #print STDERR "***  Construt scaffold dir Elapsed time: " . ($end_time - $start_time) . "s\n";
-write_time("$working_dir/../../", "g_dir_constriction", ($end_time - $start_time));
+write_time("$working_dir/../../", "g_dir_construction", ($end_time - $start_time));
 $start_time = time;
 
 ################oNLY FOR TESTIN PURPOSE
@@ -138,7 +138,7 @@ close(FILE);
 my $second_tilling =  "$tilling_dir/second_tilling";
 if(1 || ! -e $second_tilling){
     $start_time = time;
-    run_exe("$perl_path $opera_bin_dir/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process $mummer_dir  > $tilling_dir/tilling_1.out 2> $tilling_dir/tilling_1.err");
+    run_exe("$perl_path $opera_bin_dir/run_mummer_large_ref.pl $tilling_dir/consensus_remapped.fasta $tilling_dir/REF $contig_file $tilling_dir/QUERY $tilling_dir/ $second_tilling.coords $nb_process $mummer_dir  > $tilling_dir/tilling_1.out 2> $tilling_dir/tilling_2.err");
     if($?){
 	die "Error during tilling generation. Please see $tilling_dir/tilling_2.out and $tilling_dir/tilling_2.err for details.\n";
     }
@@ -166,7 +166,7 @@ while(<FILE>){
 }
 close(FILE);
 
-run_exe("rm -r $working_dir/*opera_scaffold_*");
+#run_exe("rm -r $working_dir/*opera_scaffold_*");
 
 ##########################################merge the contigs into the gapfilled file
 #
