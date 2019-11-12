@@ -56,6 +56,8 @@ Note that in the case of interruption during an OPERA-MS run, using the same com
 
 - **--short-read-assembler** : software used for short read assembly i.e. megahit (default) or spades
 
+- **--no-gap-filling** : disable gap-filling stage
+
 - **--kmer-size** : kmer value (default=60) used to assemble contigs
 
 - **--contig-len-thr** : contig length threshold (default=500) for clustering; contigs smaller than contig-len-thr will be filtered out

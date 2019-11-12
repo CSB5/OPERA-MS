@@ -1541,6 +1541,7 @@ Optional arguments:
     Algorithm options:
       --no-ref-clustering          disable reference level clustering
       --no-strain-clustering       disable strain level clustering
+      --no-gap-filling             disable gap-filling stage
       --polishing                  enable assembly polishing (currently using Pilon)
       --long-read-mapper     STR   software used for long-read mapping i.e. blasr or minimap2 [blasr]
       --short-read-assembler STR   software used for short-read assembly i.e. megahit or spades [megahit]
