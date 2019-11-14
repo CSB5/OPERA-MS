@@ -18,7 +18,7 @@ use Getopt::Long qw(GetOptionsFromArray);
 my %opera_ms_option = ();
 my $opera_ms_full_path = dirname(rel2abs($0)) . "/";
 $opera_ms_option{"OPERA_MS_DIR"} = $opera_ms_full_path;
-$opera_ms_option{"VERSION"} = "v0.8.3";
+$opera_ms_option{"VERSION"} = "v0.9.0";
 
 my %opera_ms_dependency = ();
 
@@ -935,7 +935,7 @@ sub strain_clustering_and_assembly{
 	    #Assembly of all the other contigs were no multiple strain of the same species have inferred
 	    #Filter that remove contigs with a coverage 1.5 times higher than the mean and contig that are defined as repeat based on the reference mapping
 	    #remove the contigs that belong to clusters that are associated to species with multiple strains
-	    my $contig_mapping_to_reference = "NULL";
+	    my $contig_mapping_to_reference = "NULL";#No repeat detection based on the reference genome due to high computational time ADD AN OPTION TO TOGGLE IT ON/OFF
 	    my $clustering_edge_dir =  $opera_ms_option->{"SIGMA_DIR"};
 	    my $reference_cluster_file  = "$clustering_edge_dir/clusters";
 	    my $contig_file = $opera_ms_option->{"CONTIGS_FILE"};

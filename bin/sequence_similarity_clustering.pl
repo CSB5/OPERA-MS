@@ -599,9 +599,7 @@ sub run_nucmer{
     foreach my $cluster (keys %{$cluster_species_set}){
         if (@{$cluster_species_set->{$cluster}} != 0){
             my $top_species = @{$cluster_species_set->{$cluster}}[0];
-            #my $command = "${mummer_dir}nucmer --maxmatch -c 400 --banded $mash_dir/$cluster.fa $opera_ms_dir/$top_species -p $nucmer_dir/$cluster-repeat_detection"; 
-            #print $CMD $command . "\n";
-        }
+	}
     }
 
     open (EDGES, $edges_between_clusters_file) or die;
@@ -958,9 +956,6 @@ sub compare_cluster{
             $reference_mappings->{"$cluster_1-vs-$cluster_2"}->{"NUMB_SPECIES"} = 0;
         }
 	$reference_mappings->{"$cluster_1-vs-$cluster_2"}->{"NUMB_SPECIES"}++;
-        #else{
-        #    $reference_mappings->{"$cluster_1-vs-$cluster_2"}->{"NUMB_SPECIES"} = 1;
-        #}
     }
 }
 

@@ -90,50 +90,6 @@ foreach $cluster (keys %cluster_info){
     }
 }
 
-#Reference genome repeat detection
-#NEED A FLAG TO AVOID REPEAT DETECTION USING REFERENCE
-if($nucmer_dir ne "NULL"){
-    opendir(my $nuc_dir, $nucmer_dir) or die "NUCMER directory $nucmer_dir not found.\n";
-    #A contig is defined as repeat is is mapping length over a genome is higher than 150%
-    while (my $mapped_file = readdir($nuc_dir)){
-	if ($mapped_file =~ /(\d+)-repeat_detection.delta/){
-	    my $cluster = $1;
-	    `$mummer_exe_dir/show-coords -lrcT $nucmer_dir/$mapped_file > $nucmer_dir/$1.txt`;
-	    open (NUC_MAPPING,"$nucmer_dir/$1.txt") or die;
-	    my %contig_mapped = ();
-	    <NUC_MAPPING>;
-	    <NUC_MAPPING>;
-	    <NUC_MAPPING>;
-	    <NUC_MAPPING>;
-	    while(<NUC_MAPPING>){
-		if ($_ eq ""){
-		    next;
-		}
-		#print STDERR $_;
-		my @line = split(/\t/, $_);
-		my $contig = $line[11];
-		my $percent_mapped = $line[9];
-
-		if(exists $contig_mapped{$contig}){
-		    $contig_mapped{$contig} += $percent_mapped;
-		}
-
-		else{
-		    $contig_mapped{$contig} = $percent_mapped;
-		}
-	    }
-
-	    foreach my $contig( keys %contig_mapped){
-		if ($contig_mapped{$contig} > 150){
-		    $repeat{$contig} = $1;
-		    $cluster_info{$cluster}->{"NB_REPEAT"}++;
-		    $contig_info{$contig} -> {"REF_REPEAT"} = 1;
-		}
-	    }
-	}
-    }
-}
-
 print STDERR " *** ".(keys(%repeat) +0)." repeats filtered\n"; 
 
 my %lib_to_filter = (

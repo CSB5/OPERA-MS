@@ -20,12 +20,17 @@ bin/OPERA-LG-fast
 database_updated.bk
 utils/perl
 
-
+#Some software that are not ready to be added
 utils/metabat
 utils/run_MaxBin.pl
 utils/jgi_summarize_bam_contig_depths
 utils/clustering.r
 utils/novel_analysis.py
+bin/novel_analysis.py
+utils_db
+utils_db/*
+utils/checkm
+utils/kraken2
 
 OPERA-LG/bin/.#OPERA-long-read.pl
 
