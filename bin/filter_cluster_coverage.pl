@@ -3,7 +3,7 @@ use warnings;
 use Statistics::Basic qw(:all);
 #$use Math::NumberCruncher;
 
-my ($covfile, $cluster_file, $edge_file_dir, $diff_cov_threshold, $dir_res, $nucmer_dir, $mummer_exe_dir) = @ARGV;
+my ($covfile, $cluster_file, $edge_file_dir, $diff_cov_threshold, $dir_res) = @ARGV;
 my $command;
 my %contig_info = ();
 

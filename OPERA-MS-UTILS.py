@@ -1,8 +1,10 @@
+import gzip
 import sys
 import os
 import argparse
 import subprocess
 import config_parser
+import re
 
 util_dir = "/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/utils"
 """
@@ -37,7 +39,8 @@ def run_binner(binner, sample_name, assembly_dir, short_read1, short_read2, nb_t
 
     if binner == "maxbin2":
         create_dir("assembly_dir/maxbin2")
-        run_exe("perl {}/run_MaxBin.pl -min_contig_length 500 -contig {} -reads {} -out {}/maxbin2/{}_bin -thread {}".format(util_dir, contig_file, short_read1, assembly_dir, sample_name, nb_thread))
+        create_dir("assembly_dir/maxbin2/all")
+        run_exe("perl {}/run_MaxBin.pl -min_contig_length 500 -contig {} -reads {} -out {}/maxbin2/all/{}_bin -thread {}".format(util_dir, contig_file, short_read1, assembly_dir, sample_name, nb_thread))
         
     if binner == "metabat2":
         run_metabat2(contig_file, short_read1, short_read2, assembly_dir, sample_name, nb_thread)
@@ -64,6 +67,8 @@ def run_metabat2(contig_file, short_read1, short_read2, assembly_dir, sample_nam
 
     #Create the output directory
     create_dir(out_dir)
+    out_dir = assembly_dir + "/metabat2/all"
+    create_dir(out_dir)
     
     # metabat depth file
     run_exe("{}/jgi_summarize_bam_contig_depths --outputDepth {}/output_depth {}".format(util_dir, out_dir, bam_file))
@@ -72,22 +77,81 @@ def run_metabat2(contig_file, short_read1, short_read2, assembly_dir, sample_nam
     run_exe("{}/metabat --unbinned -i {} -a {}/output_depth -o {}/{}_bin -t {}".format(util_dir, contig_file, out_dir, out_dir, sample_name, nb_thread))
 
 
-def run_checkm(assembly_dir, binner, nb_thread):
-    
-    suffix = "fa"
-    if binner == "maxbin2":
-        suffix="fasta"
-        
-    bin_dir = assembly_dir + "/" + binner
-    checkm_dir = bin_dir + "/checkm"
-    create_dir(checkm_dir)
-
-    eval_file = bin_dir + "/eval.dat"
+def run_checkm(bin_dir, checkm_dir, suffix, nb_thread, eval_file):
+    #Run the checkm analysis
     if not os.path.exists(eval_file):
         run_exe("{}/checkm lineage_wf -t {}  -x {} {}/ {}".format(util_dir, nb_thread, suffix, bin_dir, checkm_dir))
         run_exe("{}/checkm qa -o 2 {}/lineage.ms {} > {}".format(util_dir, checkm_dir, checkm_dir, eval_file))
+    else:
+        print("CheckM result detected skip analysis")
 
+def identify_high_medium_bin(binner_dir, eval_file, high_qual_mags, medium_qual_mags):
+    high_qual_threshold = [float(item) for item in high_qual_mags.split(',')]
+    medium_qual_threshold = [float(item) for item in medium_qual_mags.split(',')]
+    #
+    high_dir = binner_dir + "/high_quality"
+    medium_dir = binner_dir + "/medium_quality"
+    run_exe("rm -r " + high_dir + " " + medium_dir)
+    create_dir(high_dir)
+    create_dir(medium_dir)
+    #
+    print(high_qual_threshold)
+    FILE = open(eval_file, "r")
+    OUT = open(binner_dir + "/bin_info.txt", "w")
+    bin_id = bin_status = bin_out_dir = ""
+    bin_size, bin_nb_contig, bin_longest_contig, bin_n50, bin_contamination, bin_completness = 0, 0, 0, 0, 0, 0
+    OUT.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("ID", "Status", "Completness", "Contamination",  "Size", "#_contigs", "Contig_N50", "Longuest_contig"))
+    for line in FILE:
+        #print line
+        line_list = re.split(" \s+", line)
+        if len(line_list) != 1 and line_list[1] != "Bin Id":
+            bin_id = line_list[1]
+            bin_status = "LOW"
+            bin_completness = float(line_list[6])
+            bin_contamination = float(line_list[7])
 
+            if bin_completness >= high_qual_threshold[0] and bin_contamination <= high_qual_threshold[1]:
+                bin_status = "HIGH"
+                bin_out_dir = high_dir
+            elif bin_completness >= medium_qual_threshold[0] and bin_contamination <= medium_qual_threshold[1]:
+                bin_status = "MEDIUM"
+                bin_out_dir = medium_dir
+            #
+            bin_size = line_list[9]
+            bin_nb_contig = line_list[11]
+            bin_n50 = line_list[14]
+            bin_longest_contig = line_list[18]
+            #Get the stats
+            OUT.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(bin_id, bin_status, bin_completness, bin_contamination,  bin_size, bin_nb_contig, bin_n50, bin_longest_contig))
+
+            if bin_status == "HIGH" or bin_status == "MEDIUM":
+                run_exe("ln -s {}/all/{}.fa {}/{}.fa".format(binner_dir, bin_id, bin_out_dir, bin_id))
+            
+    FILE.close()
+    OUT.close()
+    
+def checkm_analysis(assembly_dir, binner, nb_thread, high_qual_mags, medium_qual_mags):
+
+    #Identify the correct suffix for check analysis
+    suffix = "fa"
+    if binner == "maxbin2":
+        suffix="fasta"
+
+    #Create the required directories
+    binner_dir = assembly_dir + "/" + binner
+    bin_dir = binner_dir + "/all"
+    checkm_dir = binner_dir + "/checkm"
+    create_dir(checkm_dir)
+
+    #Run the checkm analysis
+    eval_file = binner_dir + "/eval.dat"
+    run_checkm(bin_dir, checkm_dir, suffix, nb_thread, eval_file)
+    
+    #Get the high and medium quality mags directories and file description
+    identify_high_medium_bin(binner_dir, eval_file, high_qual_mags, medium_qual_mags)
+    
+    
+    
 def run_kraken2(assembly_dir, read1, read2, long_read, nb_thread, abundance_threshold):
     kraken_db = util_dir + "/../utils_db/minikraken2_v2_8GB"
     
@@ -120,7 +184,8 @@ def compare_abundance_profile(out_dir, short_read_profile, long_read_profile, ta
     OUT.write("Tax_name\tShort_read_abundance\tLong_read_abundance\n")
     for tax in tax_abundance_comparison:
         OUT.write("{}\t{}\t{}\n".format(tax, tax_abundance_comparison[tax][0], tax_abundance_comparison[tax][1]))
-
+    OUT.close()
+        
 def read_profile(profile, tax_level, abundance_threshold, abundance_comparison, col):
     FILE = open(profile, "r")
     for line in FILE:
@@ -134,6 +199,7 @@ def read_profile(profile, tax_level, abundance_threshold, abundance_comparison, 
             if tax_name not in abundance_comparison:
                 abundance_comparison[tax_name] = {0:0, 1:0}
             abundance_comparison[tax_name][col] = abundance
+    FILE.close()
     
 def run_mash(all_binning_method, assembly_dir):
     mash_db = "/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/genomeDB_Sketch.msh";
@@ -149,57 +215,124 @@ def download_utils_db():
     kraken_db = "/mnt/genomeDB/misc/softwareDB/kraken2/standard-20190108";
 
 
+def read_taxonomy_file(genomes_dir, taxonomy, db_genome_dir, genome_list, genome_length):
+    OUT_LIST = open(genome_list, "w")
+    OUT_LENGTH = open(genome_length, "w")
+    FILE = open(taxonomy, "r")
+    line_list = {}
+    tax_info = {}
+    genome = ""
+    species_name = ""
+    for line in FILE:
+        #print line
+        line_list = (line.rstrip('\n')).split("\t")
+        genome = line_list[0]
+        tax_info = line_list[1].split(";")
+        species_name = ""
+        for t in tax_info:
+            current_tax = t.split("__")
+            if current_tax[0] == "s":
+                species_name = current_tax[1].replace(" ", "_")
+                
+        if species_name == "":
+            exit("Malformed taxonomy file: " + taxonomy + "\n" + line)
+        else:
+            #copy the file in the opera-ms-db directory
+            novel_genome_name = db_genome_dir + "/" + species_name + "__" + genome  #Need to fix this !!!
+            #Check for gzip file
+            run_exe("cp {}/{} {}".format(genomes_dir, genome, novel_genome_name))
+            OUT_LIST.write(novel_genome_name + "\n")
+            #Write the length
+            OUT_LENGTH.write("{}\t{}\n".format(novel_genome_name, "\t".join([str(x) for x in compute_genome_length(novel_genome_name)])))
+    OUT_LENGTH.close()
+    OUT_LIST.close()
+    FILE.close()
+
+def compute_genome_length(genome):
+    res = [0, 0]
+    with gzip.open(genome, "r") as FILE:
+        for line in FILE:
+            if not (line[0] == ">"):
+                res[1] += (len(line)-1)
+            else:
+                res[0] += 1
+    return res
+        
+def create_mash_sketch(genome_list, out_file, nb_thread):
+    run_exe("{}/mash sketch -o {} -p {} -l {}".format(util_dir, out_file, nb_thread, genome_list)) #other potential parameters -k -s
+    
+def opera_ms_db(genomes_dir, taxonomy, db_name, nb_thread):
+    #Create the output database directory
+    create_dir(db_name)
+    genome_db = db_name + "/genomes"
+    create_dir(genome_db)
+    
+    #Read the taxonomy file
+    #The genome name will be renamed according to the taxonomy file: SPECIES_NAME__GENOME_NAME
+    genome_list = db_name + "/genomes_list.txt"
+    genome_size = db_name + "/genomes_length.txt"
+    read_taxonomy_file(genomes_dir, taxonomy, genome_db, genome_list, genome_size)
+            
+    #Create mash sketch
+    create_mash_sketch(genome_list, db_name+"/genomes.msh", nb_thread)
+            
+    #Create 8Gb kraken db
     
 def main(args):
-
-    config_file = args.config
+    
     command = args.command
-
-    #Parse the config file
-    config_dict = {}
-    with open(config_file, "r") as fp:
-        for line in fp:
-            line = line.split("#")[0]
-            line = line.split()
-            # if empty line
-            if not line:
-                continue
-            config_dict[line[0]] = " ".join(line[1:])
-
-    #Set the number of thread
-    nb_thread = config_dict["NUM_PROCESSOR"]
-    if args.thread != None:
-        nb_thread = args.thread
-            
-    if command == "maxbin2" or command == "metabat2":
-        sample_name = args.sample_name
-        if sample_name == None:
-            sample_name = config_dict["OUTPUT_DIR"].split("/")[-1]
-        run_binner(command, sample_name, config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], nb_thread)
-
-    elif command == "checkm":
-        run_checkm(config_dict["OUTPUT_DIR"], args.binner, nb_thread)
-
-    elif command == "kraken2":
-        abundance_threshold = 0.1
-        if args.abundance_threshold != None:
-            abundance_threshold = args.abundance_threshold
-        run_kraken2(config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], config_dict["LONG_READ"], nb_thread, float(abundance_threshold))
-
-    elif command == "mash":
-        run_mash(mash, config_dict["OUTPUT_DIR"])
-
-    elif command == "novel-species":
-        print("TO DO")
-
-    elif command == "opera-ms-db":
-        print("TO DO")
+    nb_thread = 0
+    if command == "maxbin2" or command == "metabat2" or command == "checkm" or command == "mash" or command == "novel-species":
+    
+        #Parse the config file
+        config_dict = {}
+        config_file = args.config
+        with open(config_file, "r") as fp:
+            for line in fp:
+                line = line.split("#")[0]
+                line = line.split()
+                # if empty line
+                if not line:
+                    continue
+                config_dict[line[0]] = " ".join(line[1:])
+                
+        #Set the number of thread
+        nb_thread = config_dict["NUM_PROCESSOR"]
         
-    elif command == "utils-db":
-        print("TO DO")
+        if args.thread != None:
+            nb_thread = args.thread
+        
+        if command == "maxbin2" or command == "metabat2":
+            sample_name = args.sample_name
+            if sample_name == None:
+                sample_name = config_dict["OUTPUT_DIR"].split("/")[-1]
+                run_binner(command, sample_name, config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], nb_thread)
 
-    elif command == "check-install":
-        print("TO DO")
+        elif command == "checkm":
+            checkm_analysis(config_dict["OUTPUT_DIR"], args.binner, nb_thread, args.high_qual_mags, args.medium_qual_mags)
+
+        elif command == "kraken2":
+            abundance_threshold = 0.1
+            if args.abundance_threshold != None:
+                abundance_threshold = args.abundance_threshold
+                run_kraken2(config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], config_dict["LONG_READ"], nb_thread, float(abundance_threshold))
+
+        elif command == "mash":
+            run_mash(mash, config_dict["OUTPUT_DIR"])
+
+        elif command == "novel-species":
+            print("TO DO")
+    #Command without config file
+    else:
+        if command == "opera-ms-db":
+            nb_thread = args.thread
+            opera_ms_db(args.genomes_dir, args.taxonomy, args.db_name, nb_thread)
+        
+        elif command == "utils-db":
+            print("TO DO")
+
+        elif command == "check-install":
+            print("TO DO")
         
 if __name__ == "__main__":   
 
@@ -217,13 +350,15 @@ if __name__ == "__main__":
     metabat_parser.add_argument("-s", "--sample-name", help="Sample name [default output directory]")
     
     #kraken
-    kraken_parser = subparsers.add_parser('kraken2', parents=[config_parser.parser], help='Run Kraken2 on the illumina reads and nanopore reads and compare the abundance profiles')
+    kraken_parser = subparsers.add_parser('kraken2', parents=[config_parser.parser], help='Run Kraken2 on the short and long reads and compare the abundance profiles')
     kraken_parser.add_argument("-a", "--abundance-threshold", help="Lower percentage abundance threshold [default 0.1]")
     
     #chechm
     checkm_parser = subparsers.add_parser('checkm', parents=[config_parser.parser], help='Run CheckM on a set of bins')
     checkm_parser._action_groups[-1].add_argument("-b", "--binner",  required=True, choices=["maxbin2", "metabat2", "opera_ms_cluster"])
-        
+    checkm_parser.add_argument("-H", "--high-qual-mags",  default="95,5", help = 'Completness and contamination values for high quality genomes (default: 95,5)', type=str)
+    checkm_parser.add_argument("-M", "--medium-qual-mags",  default="50,5", help = 'Completness and contamination values for medium quality genomes (default: 50,5)', type=str)
+    
     #mash
     mash_parser = subparsers.add_parser('mash', parents=[config_parser.parser], help='Run Mash')
     
@@ -232,7 +367,11 @@ if __name__ == "__main__":
     
     #opera-db
     opera_db_parser = subparsers.add_parser('opera-ms-db', help='Create a OPERA-MS genome database')
-    
+    opera_db_parser._action_groups[-1].add_argument("-g", "--genomes-dir",  required=True, help='Directory that contains genome files')
+    opera_db_parser._action_groups[-1].add_argument("-x", "--taxonomy",  required=True, help='Species name of each genomes')
+    opera_db_parser._action_groups[-1].add_argument("-d", "--db-name",  required=True, help='Database name')
+    opera_db_parser.add_argument("-t", "--thread", help='Number of threads [Default 2]')
+        
     #utils-db
     utils_db_parser = subparsers.add_parser('utils_db', help='Download all the data base required by the utils software')
 

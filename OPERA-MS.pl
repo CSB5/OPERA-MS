@@ -228,7 +228,8 @@ sub set_default_value{
     #my $genomeDB_kraken = "NULL";
     #my $kraken_exe_dir = "";
     $opera_ms_option->{"FILLED_SCAFF_LENGTH"} = 499;
-    $opera_ms_option->{"MASH_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_Sketch.msh";
+    #$opera_ms_option->{"MASH_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_Sketch.msh";
+    $opera_ms_option->{"OPERA_MS_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/OPERA_MS_DB";
     #
     $opera_ms_option->{"KRAKEN_DB"} = "NULL";#$opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_krakenh.msh";
 }
@@ -839,8 +840,7 @@ sub reference_clustering{
 		    $opera_ms_option->{"SIGMA_DIR"} . " " .
 		    $opera_ms_option->{"CONTIGS_FILE"} . " " .
 		    $opera_ms_option->{"NUM_PROCESSOR"} . " " .
-		    $opera_ms_option->{"MASH_DB"} . " " .
-		    $opera_ms_option->{"KRAKEN_DB"} . " " .
+		    $opera_ms_option->{"OPERA_MS_DB"} . " " .
 		    $opera_ms_dir . " " . 
 		    $opera_ms_dependency->{"mash"} . " " .
 		    $opera_ms_dependency->{"mummer"} . " " . 
@@ -885,6 +885,7 @@ sub strain_clustering_and_assembly{
 		    $strain_dir . " " .
 		    $opera_ms_option->{"CONTIGS_FILE"} . " " .
 		    $ref_clustering_dir . " "  .
+		    $opera_ms_option->{"OPERA_MS_DB"} . " " .
 		    $opera_ms_dir . " " .
 		    "1  " . "2>  $strain_dir/coverage_clustering.err");
 	    if($?){
@@ -933,15 +934,13 @@ sub strain_clustering_and_assembly{
 	    }
 		
 	    #Assembly of all the other contigs were no multiple strain of the same species have inferred
-	    #Filter that remove contigs with a coverage 1.5 times higher than the mean and contig that are defined as repeat based on the reference mapping
+	    #Filter that remove contigs with a coverage 1.5 times higher than the mean 
 	    #remove the contigs that belong to clusters that are associated to species with multiple strains
-	    my $contig_mapping_to_reference = "NULL";#No repeat detection based on the reference genome due to high computational time ADD AN OPTION TO TOGGLE IT ON/OFF
 	    my $clustering_edge_dir =  $opera_ms_option->{"SIGMA_DIR"};
 	    my $reference_cluster_file  = "$clustering_edge_dir/clusters";
 	    my $contig_file = $opera_ms_option->{"CONTIGS_FILE"};
 	    #
 	    if($opera_ms_option->{"REF_CLUSTERING"}){
-		$contig_mapping_to_reference = "$ref_clustering_dir/NUCMER_OUT/";#
 		$clustering_edge_dir = $ref_clustering_dir;
 		$reference_cluster_file = "$ref_clustering_dir/clusters_seq_similarity";
 		if($opera_ms_option->{"STRAIN_CLUSTERING"}){
@@ -952,7 +951,7 @@ sub strain_clustering_and_assembly{
 	    
 	    $contig_coverage_file = $opera_ms_option->{"COV_DIR"} . "/" . $opera_ms_option->{"CONTIGS_COV_FILE"};
 	    
-	    run_exe("${opera_ms_dir}utils/perl ${opera_ms_dir}bin/filter_cluster_coverage.pl $contig_coverage_file $reference_cluster_file $clustering_edge_dir 1.5 $clustering_edge_dir/NO_REPEAT $contig_mapping_to_reference " . $opera_ms_dependency->{"mummer"} . "2> $clustering_edge_dir/filter_cluster_coverage.err");
+	    run_exe("${opera_ms_dir}utils/perl ${opera_ms_dir}bin/filter_cluster_coverage.pl $contig_coverage_file $reference_cluster_file $clustering_edge_dir 1.5 $clustering_edge_dir/NO_REPEAT 2> $clustering_edge_dir/filter_cluster_coverage.err");
 	    if($?){
 		die "Error in during filter_cluster_coverage. Please see $clustering_edge_dir/filter_cluster_coverage.err for details.\n";
 	    }
@@ -1384,7 +1383,7 @@ sub generate_cluster_stats{
 
     #Run mash if not runned
     my $mash_dist_file = "$cluster_dir/mash.dist";
-    run_exe($opera_ms_dependency->{"mash"} ."/mash". " dist -p 1 -d 0.2 " . $opera_ms_option{"MASH_DB"} . " " .  "$cluster_dir/*fa* > $mash_dist_file") if(! -e $mash_dist_file);
+    run_exe($opera_ms_dependency->{"mash"} ."/mash". " dist -p 1 -d 0.2 " . $opera_ms_option{"OPERA_MS_DB"} ."/genomes.msh" . " " .  "$cluster_dir/*fa* > $mash_dist_file") if(! -e $mash_dist_file);
     
     #Get the statistics
     my $opera_ms_dir = $opera_ms_option->{"OPERA_MS_DIR"};
@@ -1448,6 +1447,7 @@ sub read_argument{
 	"long-read=s"    => \$opera_ms_option{"LONG_READ"},
 	"out-dir=s"  => \$opera_ms_option{"OUTPUT_DIR"},
 	#
+	"genome-db=s" => \$opera_ms_option->{"OPERA_MS_DB"},
 	#
 	"strain-clustering!"            => \$opera_ms_option{"STRAIN_CLUSTERING"},
 	"ref-clustering!"         => \$opera_ms_option{"REF_CLUSTERING"},
@@ -1551,6 +1551,7 @@ Optional arguments:
       --contig-window-len    INT   window length in which the coverage estimation is performed. We recommend using contig-len-thr - 2 * contig-edge-len as the value [340]
 		
    Other arguments:
+      --genome-db            STR   path to a custom OPERA-MS genome database use during reference level clustering
       --contig-file          STR   path to the contig file, if the short-reads have been assembled previously [default assembly using MEGAHIT]
       --num-processors       INT   number of processors to use (note that 2 is the minimum) [2]
 

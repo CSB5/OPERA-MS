@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 
-my ($inter_dir, $out_dir, $contigs_file, $reference_mapping_dir, $opera_ms_dir, $FLAG_USE_REF) = @ARGV;
+my ($inter_dir, $out_dir, $contigs_file, $reference_mapping_dir, $opera_ms_db, $opera_ms_dir, $FLAG_USE_REF) = @ARGV;
 #my $out_dir = $ARGV[1];
 #my $contigs_file = $ARGV[2];
 
@@ -15,6 +15,10 @@ my %species_to_contigs_length = ();
 my %species_to_clusters = ();
 my %species_to_analyze = ();
 my %contig_info = ();
+#
+my %ref_genome_length = ();
+read_ref_genome_length("$opera_ms_db/genomes_length.txt", \%ref_genome_length);
+
 
 my @windows_file = glob("$inter_dir/coverage_estimation/contigs_*");
 my $windows_file = $windows_file[0];
@@ -72,6 +76,7 @@ if($FLAG_USE_REF){
     # * weight based on cluster length
     # * MASH the cluster again
     #Collect the vote and summup the cluster length that belong to the same species
+    my ($strain, $strain_path);
     while (<STRAINS>){
 	chomp $_;
 	if($_ =~ />(.*)/){
@@ -79,15 +84,15 @@ if($FLAG_USE_REF){
 	    chomp $cluster;
 	    #operate at a species level
 	    my $strain = <STRAINS>;
-	    $strain = "$opera_ms_dir/$strain";
 	    chomp $strain;
+	    $strain_path = "$opera_ms_db/../$strain";
 	    while($strain =~ />(.*)/){
 		$cluster = $1;
 		chomp $cluster;
 		$strain = <STRAINS>;
 		if(defined $strain){
 		    chomp $strain;
-		    $strain = "$opera_ms_dir/$strain";
+		    $strain_path = "$opera_ms_db/../$strain";
 		    #print STDERR " *** *** $strain\n";
 		}
 		else{
@@ -98,11 +103,8 @@ if($FLAG_USE_REF){
 	    if($strain eq ""){
 		next;
 	    }
-
-	    my @full_path = split(/\//, $strain);
-	    my $strain_name = $full_path[@full_path-2];
-	    my @strain_delim = split(/_/,$strain_name);
-	    my $species = $strain_delim[0] . "_" . $strain_delim[1];
+	    
+	    my $species = get_species_name($strain);
 	    
 	    #print STDERR " *** $strain $species\n";<STDIN>;
 	    
@@ -117,9 +119,8 @@ if($FLAG_USE_REF){
 	    my $is_plasmid = 0;
 	    if(index($strain, "XXX") == -1){
 		print STDERR " *** Open file $strain\n";
-		open(CHECK_REF, $strain) or die;
+		open(CHECK_REF, $strain_path) or die;
 		my $header = <CHECK_REF>;
-		
 		close(CHECK_REF);
 
 		if($header =~ /plasmid/){
@@ -173,22 +174,12 @@ if($FLAG_USE_REF){
 		$best_count = ($species_to_ref_genome{$species}->{$ref_genome});
 	    }
 	}
-	############### NEED TO UPDATE
+	
 	$seq_length = 3500000;
 	if($ref_genome_best ne "NA"){
-	    my $seq;
-	    #print STDERR " *** $opera_ms_dir $ref_genome_best\n";
-	    open (REF_GENOME, "$ref_genome_best") or die;
-	    <REF_GENOME>;
-	    while(<REF_GENOME>){
-		chomp $_;
-		$seq .= $_;
-	    }
-	    close(REF_GENOME);
-	    $seq_length = length($seq);
+	    $seq_length = get_ref_genome_length($ref_genome_best, \%ref_genome_length);
 	}
-	#####################
-	
+		
 	#print STDERR " *** length -> $seq_length -> $species_to_contigs_length{$species}\n";
 	if(#$species_to_contigs_length{$species} > $seq_length + ($seq_length * 0.1) and
 	   $species_to_contigs_length{$species} > 1000000
@@ -307,6 +298,32 @@ if(! exists $strain_contig{$contigs}){
 }
 close(CONTIGS);
 
+
+sub read_ref_genome_length{
+    my ($ref_genome_length_file, $ref_genome_length) = @_;
+    open(FILE, $ref_genome_length_file);
+    my ($genome_name, $nb_contig, $length);
+    while(<FILE>){
+	chop $_;
+	($genome_name, $nb_contig, $length) = split(/\t/, $_);
+	$ref_genome_length->{$genome_name} = $length;
+    }
+    close(FILE);
+}
+
+sub get_ref_genome_length{
+    my ($ref_genome_best, $ref_genome_length) = @_;
+    print STDERR " *** get_ref_genome_length\t" . $ref_genome_best . "\n";
+    return $ref_genome_length->{$ref_genome_best};
+}
+
+sub get_species_name{
+    my ($strain) = @_;
+    my @full_path = split(/\//, $strain);
+    my $strain_name = $full_path[@full_path-1];
+    my @strain_delim = split(/__/,$strain_name);
+    return $strain_delim[0];
+}
 
 sub run_exe{
     my ($exe) = @_;
