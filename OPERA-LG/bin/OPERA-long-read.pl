@@ -28,7 +28,7 @@ my $min_alignment_length = 400;#Allows to have partially mapped short contigs at
 my $overlap = 200;
 
 #my $mapper_extention 
-my $graphmapDir = "/mnt/software/stow/graphmap-0.3.0-1d16f07/bin/";
+my $graphmapDir = "";
 
 
 #Used in case of grapmap mapping
@@ -216,7 +216,6 @@ if($?){
 if(! -e "$file_pref.map.sort"){
     # map using blasr
     $start_time = time;
-    #run_exe( "${blasrDir}blasr --nproc $nproc -m 1 $readsFile $contigFile  | cut -d ' ' -f1-4,7-13 | sed 's/ /\\t/g' > $file_pref.map");
     if($mapper eq "blasr"){
 	print "Mapping long-reads using blasr...\n";
 	run_exe( "${blasrDir}blasr  -nproc $nproc -m 1 -minMatch 5 -bestn 10 -noSplitSubreads -advanceExactMatches 1 -nCandidates 1 -maxAnchorsPerPosition 1 -sdpTupleSize 7 $readsFile $contigFile | cut -d ' ' -f1-12 | sed 's/ /\\t/g' > $file_pref.map 2> blasr.err");
@@ -291,7 +290,7 @@ for (my $i = 0; $i <= 5; $i++){
 }
 
 # create configure file
-&CreateConfigFile( $contigFile, "", @allEdgeFiles );
+&CreateConfigFile( $contigFile, "", $outputDir, @allEdgeFiles );
 
 
 if (!$skip_opera){
@@ -936,7 +935,7 @@ sub remove_standard_deviation{
 
 
 sub CreateConfigFile{
-    my( $contigFile, $suffix, @edgeFiles) = @_;
+    my( $contigFile, $suffix, $outputDir, @edgeFiles) = @_;
     
     open( CONF, ">config".$suffix ) or die $!;
 
@@ -946,7 +945,7 @@ sub CreateConfigFile{
     print CONF "# Output folder for final results\n";
     #print CONF "output_folder=results\n";
     #print CONF "output_folder=results_no_trans\n";
-    print CONF "output_folder=$opera_out_folder\n";
+    print CONF "output_folder=$outputDir/$opera_out_folder\n";
     #print CONF "output_folder=results_no_trans_no_conflict\n";
     #print CONF "output_folder=results_no_conflict\n";
 
@@ -962,7 +961,7 @@ sub CreateConfigFile{
     #Update the config file to add the illumina mapping
     if(-e "${file_pref}.bam"){
 	print CONF "[LIB]\n";
-	print CONF "map_file=${file_pref}.bam\n";
+	print CONF "map_file=$outputDir/${file_pref}.bam\n";
 	print CONF "cluster_threshold=$short_read_cluster_threshold\n";
     }
     else{
@@ -977,7 +976,7 @@ sub CreateConfigFile{
 	print CONF "[LIB]\n";
 	    #print CONF "cluster_threshold=$cluster_threshold\n";
 	print CONF "cluster_threshold=$cluster_threshold_tab[ $i ]\n";
-	print CONF "map_file=$edgeFileName\n";
+	print CONF "map_file=$outputDir/$edgeFileName\n";
 	print CONF "lib_mean=$means[ $i ]\n";
 	print CONF "lib_std=$stds[ $i ]\n";
 	print CONF "map_type=opera\n";

@@ -17,7 +17,9 @@ read_coverage_file(\%contig_cov, $read_size, $coverage_file);
 read_long_read_coverage_file(\%contig_cov, $long_read_coverage_file);
 
 my %clusters_to_contigs = ();
-read_cluster_file(\%clusters_to_contigs, $cluster_file);
+if($cluster_file ne "NULL"){
+    read_cluster_file(\%clusters_to_contigs, $cluster_file);
+}
 
 my %cluster_to_species = ();
 if($species_file ne "NULL"){

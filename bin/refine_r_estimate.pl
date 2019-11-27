@@ -2,12 +2,12 @@
 use warnings "all";
 use Statistics::Basic qw(:all);
 
-my ($coverage_contig_file, $sigma_dir, $num_processor, $opera_ms_dir) = @ARGV;
+my ($coverage_contig_file, $sigma_dir, $num_processor, $cluster_length_threshold, $opera_ms_dir) = @ARGV;
 
 my $NB_STEP = 10;
 my $FRACTION_THRESHOLD = 0.01;
 my $CLUSTER_FRACTION_THRESHOLD = 0.01;
-my $LENGTH_THRESHOLD = 6000000;
+
 
 my $cluster_file = "$sigma_dir/clusters";
 
@@ -74,11 +74,11 @@ sub evaluate_cluster{
     $max_cluster_outlier_fraction_length = $cluster_eval_measure[4];
     print OUT_SUM $r_value . "\t" . 
 	$outlier_fraction . "\t" . $FRACTION_THRESHOLD  . "\t" . 
-	$max_cluster_length . "\t" . $LENGTH_THRESHOLD  . "\t" .
+	$max_cluster_length . "\t" . $cluster_length_threshold  . "\t" .
 	$max_cluster_outlier_fraction . "\t" . $max_cluster_outlier_fraction_length . "\t" .  $CLUSTER_FRACTION_THRESHOLD . "\n";#<STDIN>;
 
     #r value should be higher than 1 as value below does not fit our model
-    $res = 1 if($r_value > 1 && $outlier_fraction < $FRACTION_THRESHOLD && $max_cluster_length < $LENGTH_THRESHOLD && $max_cluster_outlier_fraction < $CLUSTER_FRACTION_THRESHOLD);    
+    $res = 1 if($r_value > 1 && $outlier_fraction < $FRACTION_THRESHOLD && ($cluster_length_threshold == -1 || $max_cluster_length < $cluster_length_threshold) && $max_cluster_outlier_fraction < $CLUSTER_FRACTION_THRESHOLD);    
     
     return $res;
 }
@@ -93,3 +93,4 @@ sub run_exe{
     print STDERR "$return\n" if($run);
     return $return;
 }
+

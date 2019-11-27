@@ -154,7 +154,7 @@ int ContigConverter::ReadCoverageFile(string fileName){
 	while( getline( infile, line ) ){
 		Split( line, "\t", column );
 		contigName = column->at( 0 );
-		cov = atoi(column->at( 2 ).c_str());
+		cov = atoi(column->at( 2 ).c_str());//This should be a float
 		//
 		unordered_map<string, int>::iterator pos = m_contigNameHashMap->find( contigName );
 		if( pos != m_contigNameHashMap->end() ){
@@ -162,7 +162,7 @@ int ContigConverter::ReadCoverageFile(string fileName){
 			Contig *currentContig = myContigs->at(  pos->second );
 			currentContig->SetCov( cov );
 
-			cerr << contigName << "\n";
+			//cerr << contigName << "\n";
 		}
 		//cerr << contigName << "\n";
 	}

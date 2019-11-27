@@ -2,7 +2,8 @@ PROGRAM   := OPERA-LG
 install : $(PROGRAM)
 
 CC = g++
-OPERA-LG: CFLAGS = -std=c++11 -O3 -Wall -Wno-deprecated
+#OPERA-LG: CFLAGS = -std=c++11 -O3 -Wall -Wno-deprecated
+OPERA-LG: CFLAGS = -std=c++0x -O3 -Wall -Wno-deprecated
 debug: CFLAGS = -std=c++0x -g -O0 -Wall -Wconversion -fno-inline
 
 

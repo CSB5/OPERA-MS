@@ -35,6 +35,7 @@ if ( @ARGV == 0 ){
 check_dependency(\%opera_ms_option, \%opera_ms_dependency, "CHECK_DEPENDENCY") if($ARGV[0] eq "CHECK_DEPENDENCY");
 
 #read from config file
+set_default_value(\%opera_ms_option);
 if ( $ARGV[0] ne "--help" && @ARGV <= 2){
     read_config_file(\%opera_ms_option, @ARGV);
 }
@@ -43,8 +44,13 @@ else{
     #read_config_file(\%opera_ms_option, $opera_ms_option{"CONFIG_PATH"});
     #die $incorrect_arguments;
 }
+update_option(\%opera_ms_option);
+
 #Make paths absolute if they are not already.
 setup_directory_path(\%opera_ms_option);
+
+#Write the config file used for OPERA-MS-UTILS
+write_utils_config_file(\%opera_ms_option);
 
 #
 #Check if dependencies are found. Otherwise, die.
@@ -64,11 +70,16 @@ short_read_assembly(\%opera_ms_option, \%opera_ms_dependency);
 
 assembly_graph_creation(\%opera_ms_option, \%opera_ms_dependency);
 
-hierarchical_clustering(\%opera_ms_option, \%opera_ms_dependency);
+if($opera_ms_option{"SINGLE_GENOME"}){#Single genome pipeline
+    single_genome_assembly(\%opera_ms_option, \%opera_ms_dependency);
+}
+else{#Normal metagenome pipeleine
+    hierarchical_clustering(\%opera_ms_option, \%opera_ms_dependency);
 
-reference_clustering(\%opera_ms_option, \%opera_ms_dependency);#Add check for reference clustering
+    reference_clustering(\%opera_ms_option, \%opera_ms_dependency);#Add check for reference clustering
 
-strain_clustering_and_assembly(\%opera_ms_option, \%opera_ms_dependency);
+    strain_clustering_and_assembly(\%opera_ms_option, \%opera_ms_dependency);
+}
 
 gap_filling(\%opera_ms_option, \%opera_ms_dependency);
 #
@@ -204,188 +215,6 @@ sub compute_Nx{
     return $i -1;
 }
 
-sub set_default_value{
-    my ($opera_ms_option) = @_;
-    #GIVE DEFAULT VALUES
-    
-    #OPERA-MS option
-    $opera_ms_option->{"KMER_SIZE"} = 60;
-    $opera_ms_option->{"NUM_PROCESSOR"} = 2;
-    $opera_ms_option->{"STAGE_FOLLOW"} = 0;
-    $opera_ms_option->{"CONTIG_EDGE_LEN"} = 80;
-    $opera_ms_option->{"CONTIG_WINDOW_LEN"} = 340;
-    $opera_ms_option->{"CONTIG_LEN_THR"} = 500;
-    $opera_ms_option->{"REF_CLUSTERING"} = 1;
-    $opera_ms_option->{"STRAIN_CLUSTERING"} = 1;
-    $opera_ms_option->{"RESTART"} = 0;
-    $opera_ms_option->{"STAGE_FOLLOW"} = 0;
-    $opera_ms_option->{"MULTI_SAMPLE"} = 0;
-    $opera_ms_option->{"REF_REPEAT_DETECTION"} = 0;
-    $opera_ms_option->{"POLISHING"} = 0;
-    $opera_ms_option->{"GAP_FILLING"} = 1;
-    $opera_ms_option->{"LONG_READ_MAPPER"} = "blasr";
-    $opera_ms_option->{"SHORT_READ_ASSEMBLER"} = "megahit";
-    #my $genomeDB_kraken = "NULL";
-    #my $kraken_exe_dir = "";
-    $opera_ms_option->{"FILLED_SCAFF_LENGTH"} = 499;
-    #$opera_ms_option->{"MASH_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_Sketch.msh";
-    $opera_ms_option->{"OPERA_MS_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/OPERA_MS_DB";
-    #
-    $opera_ms_option->{"KRAKEN_DB"} = "NULL";#$opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_krakenh.msh";
-}
-
-sub read_config_file{
-
-    my ($opera_ms_option, $config_file, $stage_info) = @_;
-    
-    $opera_ms_option->{"CONFIG_PATH"} = $config_file;
-    
-    #get the stage
-    my $run_following = 0;
-    if(defined $stage_info){
-	if(index($stage_info, "+") != -1){
-	    chop $stage_info;
-	    $run_following = 1;
-	}
-	$opera_ms_option->{"RESTART"} = 1;
-    }
-    else{
-	$stage_info = "ALL";
-    }
-    $opera_ms_option->{"STAGE"} = $stage_info;
-    
-        
-    set_default_value($opera_ms_option);
-    
-    $time = localtime;
-    print STDOUT "\n[$time]\tReading config file: ".$config_file."\n";
-    die"Config file does not exist. Exiting.\n" if(!(-e $config_file)); 
-    
-    open($opera_ms_cf, "<", $config_file); 
-
-    while(<$opera_ms_cf>) {
-        next if (/^#/);  #skip comments
-	chomp($_);  
-	my @split_line = split('\s+', $_);
-	if (@split_line != 0) {
-	    $config_option = $split_line[0];
-	    switch ($config_option) {
-                
-                #Empty cases must be checked so the same config file format
-                #can be used for the runOperaMS generated config file. Empty cases indicate
-                #that runOperaMS.pl uses those options. 
-		
-		case "CONTIGS_FILE" {
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-		
-		case "OUTPUT_DIR" {
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-		
-		case "KMER_SIZE" {
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-		
-		case "CONTIG_LEN_THR" {
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-
-		case "CONTIG_EDGE_LEN" {
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-
-		case "CONTIG_WINDOW_LEN" {
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-		
-		#Use kraken during sequence similarity clustering in addation to mash and mummer
-		case "KRAKEN_DB"{
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-		
-		case "FILLED_SCAFF_LENGTH" {
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-		
-		case "LONG_READ_MAPPER"{
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		    if($opera_ms_option->{"LONG_READ_MAPPER"} ne "blasr" && $opera_ms_option->{"LONG_READ_MAPPER"} ne "minimap2"){
-			die "Unkown LONG_READ_MAPPER " . $opera_ms_option->{"LONG_READ_MAPPER"} . ", please use  blasr/minimap2.\n"
-		    }
-		}
-
-		case "SHORT_READ_ASSEMBLER"{
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		    if($opera_ms_option->{"SHORT_READ_ASSEMBLER"} ne "megahit" && $opera_ms_option->{"SHORT_READ_ASSEMBLER"} ne "spades"){
-			die "Unkown SHORT_READ_ASSEMBLER " . $opera_ms_option->{"SHORT_READ_ASSEMBLER"} . ", please use  megahit/spades.\n"
-		    }
-		}
-		
-		case "LONG_READ"{
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		    #if(index($opera_ms_option->{$config_option}, ".gz") != -1){
-		    #die "Compressed long-reads are not supported " . $opera_ms_option->{$config_option} . "\n";
-		    #}
-		}
-
-		case "ILLUMINA_READ_1"{
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		    if(index($opera_ms_option->{"ILLUMINA_READ_1"}, ",") != -1){#Their is multiple illumina file provided => this is a multiple sample assembly
-			$opera_ms_option->{"MULTI_SAMPLE"} = 1;
-		    }
-		}
-
-		case "ILLUMINA_READ_2"{
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-
-		case "NUM_PROCESSOR"{
-		    $opera_ms_option->{$config_option} = $split_line[1];
-		}
-
-		case "REF_REPEAT_DETECTION"{
-		    $opera_ms_option->{$config_option} = 1;
-		    #$REF_REPEAT_DETECTION = 1;
-		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
-		}
-		
-		case "POLISHING"{
-		    $opera_ms_option->{$config_option} = 1;
-		    #$REF_REPEAT_DETECTION = 1;
-		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
-		}
-		
-		case "REF_CLUSTERING"{
-		    #$genomeDB_msh = $split_line[1];
-		    $opera_ms_option->{$config_option} = 1;
-		    #$REF_REPEAT_DETECTION = 1;
-		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
-		}
-		case "STRAIN_CLUSTERING"{
-		    $opera_ms_option->{$config_option} = 1;
-		    #$REF_REPEAT_DETECTION = 1;
-		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
-		}
-		case "GAP_FILLING"{
-		    $opera_ms_option->{$config_option} = 1;
-		    #$REF_REPEAT_DETECTION = 1;
-		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
-		}
-		else {
-		    die "Config option: ".$config_option." unknown, please check the config file. \nExiting. \n";
-		}
-	    }
-	}
-    }
-
-    $opera_ms_option->{"CONTIGS_COV_FILE"} = "contigs_" . $opera_ms_option->{"CONTIG_WINDOW_LEN"} . "_" . $opera_ms_option->{"CONTIG_EDGE_LEN"};
-    
-    #To compute the total number of stage
-    $opera_ms_option->{"NB_TOTAL_STAGE"} = 8;
-    #$opera_ms_option->{"NB_TOTAL_STAGE"} = 4 if(! $opera_ms_option->{"REF_CLUSTERING"});
-    $opera_ms_option->{"NB_TOTAL_STAGE"}++ if($opera_ms_option->{"POLISHING"});
-}
 
 sub setup_directory_path{
     my ($opera_ms_option) = @_;
@@ -562,6 +391,7 @@ sub short_read_assembly{
 	    $time = localtime;
 	    print STDOUT "\n[$time]\tShort read assembly [1/" . $opera_ms_option->{"NB_TOTAL_STAGE"} ."]\n";
 	    print STDOUT "[$time]\tSkip [contig file provided as input]\n";
+	    process_user_assembly($opera_ms_option->{"CONTIGS_FILE"}, $opera_ms_option);
 	}
 	else{
 	    $opera_ms_option->{"ASSEMBLED_CONTIG_FILE"} = 1;
@@ -578,6 +408,14 @@ sub short_read_assembly{
     }
 }
 
+sub process_user_assembly{
+    my ($user_contig_file, $opera_ms_option) = @_;
+    my $inter_dir = $opera_ms_option->{"INTER_DIR"};
+    my $assembly_out_dir = "$inter_dir/user_assembly";
+    init_dir($assembly_out_dir);
+    $opera_ms_option->{"CONTIGS_FILE"} = "$assembly_out_dir/contigs.fasta";
+    multi_to_linear_fa($user_contig_file, $opera_ms_option->{"CONTIGS_FILE"});
+}
 
 sub run_megahit{
     my ($opera_ms_option, $opera_ms_dependency) = @_;
@@ -751,7 +589,6 @@ sub assembly_graph_creation{
 	    write_time($inter_dir, "cov_estimation", ($end_time_sub - $start_time_sub));
 	    #Remove edge with an outlier edge support/contig coverage ratio => good to remove error due to missmapping
 	    #This step must be skipped in case of multi sample assembly
-	    #GGG
 	    #
 	    if(! $opera_ms_option->{"MULTI_SAMPLE"}){
 		$start_time_sub = time;
@@ -802,6 +639,7 @@ sub hierarchical_clustering{
 		    $cov_dir."/".$opera_ms_option->{"CONTIGS_COV_FILE"} . " " . 
 		    $sigma_dir . " " .
 		    $opera_ms_option->{"NUM_PROCESSOR"} . " " .
+		    $opera_ms_option->{"CLUSTER_LEN_THRESHOLD"} . " " .
 		    $opera_ms_dir . " 2> $sigma_dir/refine_r.err"
 		);
 	    
@@ -961,17 +799,79 @@ sub strain_clustering_and_assembly{
 	    generate_opera_config_file($opera_ms_option->{"MAPPING_DIR"}, $clustering_edge_dir,  $opera_lr_dir, $contig_file);
 	    
 	    #finally, run opera
-	    my $opera_lg_exe_dir = $opera_ms_dependency->{"OPERA-LG"};
-	    run_exe("timeout 5m $opera_lg_exe_dir/OPERA-LG $opera_lr_dir/opera.config > $opera_lr_dir/opera_lg.out 2> $opera_lr_dir/opera_lg.err");
-	    if(! -e "$opera_lr_dir/scaffoldSeq.fasta"){#NEED TO IN THE MAKE FILE THE COMMAND TO GET THE FASTS OPERA-MS
-		run_exe("$opera_lg_exe_dir/OPERA-LG-fast $opera_lr_dir/opera.config > $opera_lr_dir/opera_lg_fast.out 2> $opera_lr_dir/opera_lg_fast.err");
-	    }
-	    if($?){
-		die "Error in during OPERA-LG assembly. Please see $opera_lr_dir/opera_lg*.out and $opera_lr_dir/opera_lg*.err for details.\n";
-	    }
+	    run_opera_lg($opera_lr_dir, "$opera_lr_dir/opera.config", $opera_ms_dependency);
+	    
 	    $end_time = time;
 	    write_time($inter_dir, "other_assembly", ($end_time - $start_time));
 	}
+    }
+}
+
+
+
+sub single_genome_assembly{
+    my ($opera_ms_option, $opera_ms_dependency) = @_;
+    
+    my $inter_dir = $opera_ms_option->{"INTER_DIR"};
+    my $mapping_dir = $opera_ms_option->{"MAPPING_DIR"};
+    my $opera_lr_dir = "$inter_dir/opera_long_read";
+    $opera_ms_option->{"OPERA_LR_DIR"} = $opera_lr_dir;
+    $opera_lr_result_dir = "$opera_lr_dir/results";
+    
+    if($opera_ms_option->{"STAGE"} eq "ALL" || $opera_ms_option->{"STAGE"} eq "SINGLE_GENOME"){
+	$opera_ms_option->{"STAGE"} = "ALL" if($opera_ms_option->{"STAGE_FOLLOW"} == 1);
+	
+	if(! check_completed("$opera_lr_dir/scaffoldSeq.fasta", "Single genome assembly", 4, !$opera_ms_option->{"SINGLE_GENOME"})){
+	    #Create a softlink of the read_mapping directory, this directory contains all the edges and the config files required to run OPERA-LG
+	    
+
+	    $start_time = time;
+	    run_exe("rm $opera_lr_dir") if(-e $opera_lr_dir);
+	    run_exe("ln -s $mapping_dir $opera_lr_dir");
+	    init_dir($opera_lr_result_dir);
+	    
+	    #Create the coverage file
+	    convert_sigma_to_opera_lg_coverage_file($opera_ms_option->{"COV_DIR"}."/".$opera_ms_option->{"CONTIGS_COV_FILE"}, "$opera_lr_result_dir/contigs");
+
+	    #run OPERA-LG
+	    run_opera_lg($opera_lr_dir, "$opera_lr_dir/config", $opera_ms_dependency);
+	    #Move the output files
+	    run_exe("mv $opera_lr_result_dir/scaffolds.scaf  $opera_lr_result_dir/scaffoldSeq.fasta $opera_lr_dir");
+	    $end_time = time;
+	    write_time($inter_dir, "assembly", ($end_time - $start_time));
+	}
+    }
+}
+
+sub convert_sigma_to_opera_lg_coverage_file{
+    my ($sigma_coverage_file, $opera_lg_cov_file) = @_;
+    print STDERR " *** convert_sigma_to_opera_lg_coverage_file " . "\t" . $sigma_coverage_file . "\t" . $opera_lg_cov_file . "\n";
+    $READ_SIZE_FACTOR = 101;
+    open(OUT, ">$opera_lg_cov_file");
+    open(FILE, $sigma_coverage_file);
+    <FILE>;#Skip the header
+    while(<FILE>){
+	@line = split(/\t/, $_);
+	$contig_ID = $line[0];
+	$contig_length = $line[1];
+	$read_count = <FILE>;
+	$coverage = ($READ_SIZE_FACTOR * $read_count) / $contig_length;
+	print OUT $contig_ID . "\t" . $contig_length . "\t" . $coverage . "\n";
+	<FILE>;#Skip the window coverage line
+    }
+    close(FILE);
+    close(OUT);
+}
+
+sub run_opera_lg{
+    my ($opera_lr_dir, $config_file, $opera_ms_dependency) = @_;
+    my $opera_lg_exe_dir = $opera_ms_dependency->{"OPERA-LG"};
+    run_exe("timeout 5m $opera_lg_exe_dir/OPERA-LG $config_file > $opera_lr_dir/opera_lg.out 2> $opera_lr_dir/opera_lg.err");
+    if(! -e "$opera_lr_dir/scaffoldSeq.fasta"){#NEED TO IN THE MAKE FILE THE COMMAND TO GET THE FASTS OPERA-MS
+	run_exe("$opera_lg_exe_dir/OPERA-LG-fast $config_file > $opera_lr_dir/opera_lg_fast.out 2> $opera_lr_dir/opera_lg_fast.err");
+    }
+    if($?){
+	die "Error in during OPERA-LG assembly. Please see $opera_lr_dir/opera_lg*.out and $opera_lr_dir/opera_lg*.err for details.\n";
     }
 }
 
@@ -1174,8 +1074,13 @@ sub generate_assembly_stats{
     my $ref_clustering_dir = $opera_ms_option->{"REF_CLUSTERING_DIR"};
     my $opera_ms_dir = $opera_ms_option{"OPERA_MS_DIR"};
     my $opera_lr_dir = $opera_ms_option->{"OPERA_LR_DIR"};
+
     
-    my $cluster_file =  $opera_ms_option->{"SIGMA_DIR"}."/clusters";
+    my $cluster_file = "NULL";
+    if(! $opera_ms_option->{"SINGLE_GENOME"}){
+	$cluster_file =  $opera_ms_option->{"SIGMA_DIR"}."/clusters";
+    }
+    
     my $species_file = "NULL";
     my $cov_dir = $opera_ms_option->{"COV_DIR"};
     my $coverage_file = "$cov_dir/" . $opera_ms_option{"CONTIGS_COV_FILE"};
@@ -1427,13 +1332,229 @@ sub run_exe{
     return $return;
 }
 
+########################################## OPERA-MS parameter configuration
 
+#Default options
+sub set_default_value{
+    my ($opera_ms_option) = @_;
+    #GIVE DEFAULT VALUES
+    
+    #OPERA-MS option
+    $opera_ms_option->{"KMER_SIZE"} = 60;
+    $opera_ms_option->{"NUM_PROCESSOR"} = 2;
+    $opera_ms_option->{"STAGE_FOLLOW"} = 0;
+    $opera_ms_option->{"CONTIG_EDGE_LEN"} = 80;
+    $opera_ms_option->{"CONTIG_WINDOW_LEN"} = 340;
+    $opera_ms_option->{"CONTIG_LEN_THR"} = 500;
+    $opera_ms_option->{"SINGLE_GENOME"} = 0;
+    $opera_ms_option->{"REF_CLUSTERING"} = 1;
+    $opera_ms_option->{"STRAIN_CLUSTERING"} = 1;
+    $opera_ms_option->{"RESTART"} = 0;
+    $opera_ms_option->{"STAGE_FOLLOW"} = 0;
+    $opera_ms_option->{"MULTI_SAMPLE"} = 0;
+    $opera_ms_option->{"REF_REPEAT_DETECTION"} = 0;
+    $opera_ms_option->{"POLISHING"} = 0;
+    $opera_ms_option->{"GAP_FILLING"} = 1;
+    $opera_ms_option->{"LONG_READ_MAPPER"} = "blasr";
+    $opera_ms_option->{"SHORT_READ_ASSEMBLER"} = "megahit";
+    $opera_ms_option->{"CLUSTER_LEN_THRESHOLD"} = 6000000;#Maximal cluster sequence size produce during hierarchical clustering
+    #my $genomeDB_kraken = "NULL";
+    #my $kraken_exe_dir = "";
+    $opera_ms_option->{"FILLED_SCAFF_LENGTH"} = 499;
+    #$opera_ms_option->{"MASH_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_Sketch.msh";
+    $opera_ms_option->{"OPERA_MS_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/OPERA_MS_DB";
+    #
+    $opera_ms_option->{"KRAKEN_DB"} = "NULL";#$opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_krakenh.msh";
+    #
+    #Update stage values
+    $opera_ms_option->{"RESTART"} = 0;
+    $opera_ms_option->{"STAGE"} = "ALL";
+    #To compute the total number of stage
+    $opera_ms_option->{"NB_TOTAL_STAGE"} = 8;
+}
+
+sub update_option{
+    my ($opera_ms_option) = @_;
+    $opera_ms_option->{"CONTIGS_COV_FILE"} = "contigs_" . $opera_ms_option->{"CONTIG_WINDOW_LEN"} . "_" . $opera_ms_option->{"CONTIG_EDGE_LEN"};
+    #To compute the total number of stage
+    $opera_ms_option->{"NB_TOTAL_STAGE"} = 8;
+    #$opera_ms_option->{"NB_TOTAL_STAGE"} = 4 if(! $opera_ms_option->{"REF_CLUSTERING"});
+    
+    if($opera_ms_option{"SINGLE_GENOME"}){#Force all the clustering option to 0
+	$opera_ms_option->{"REF_CLUSTERING"} = 0;
+	$opera_ms_option->{"STRAIN_CLUSTERING"} = 0;
+	$opera_ms_option->{"NB_TOTAL_STAGE"} = 6;
+    }
+
+    $opera_ms_option->{"NB_TOTAL_STAGE"}++ if($opera_ms_option->{"POLISHING"});
+}
+
+#Form configuration file
+sub read_config_file{
+
+    my ($opera_ms_option, $config_file, $stage_info) = @_;
+    
+    #get the stage
+    my $run_following = 0;
+    if(defined $stage_info){
+	if(index($stage_info, "+") != -1){
+	    chop $stage_info;
+	    $run_following = 1;
+	}
+	$opera_ms_option->{"RESTART"} = 1;
+    }
+    else{
+	$stage_info = "ALL";
+    }
+    $opera_ms_option->{"STAGE"} = $stage_info;
+    
+    
+    $time = localtime;
+    print STDOUT "\n[$time]\tReading config file: ".$config_file."\n";
+    die"Config file does not exist. Exiting.\n" if(!(-e $config_file)); 
+    
+    open($opera_ms_cf, "<", $config_file); 
+
+    while(<$opera_ms_cf>) {
+        next if (/^#/);  #skip comments
+	chomp($_);  
+	my @split_line = split('\s+', $_);
+	if (@split_line != 0) {
+	    $config_option = $split_line[0];
+	    switch ($config_option) {
+                
+                #Empty cases must be checked so the same config file format
+                #can be used for the runOperaMS generated config file. Empty cases indicate
+                #that runOperaMS.pl uses those options. 
+		
+		case "CONTIGS_FILE" {
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+		
+		case "OUTPUT_DIR" {
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+		
+		case "KMER_SIZE" {
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+		
+		case "CONTIG_LEN_THR" {
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+
+		case "CONTIG_EDGE_LEN" {
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+
+		case "CONTIG_WINDOW_LEN" {
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+
+		#Use kraken during sequence similarity clustering in addation to mash and mummer
+		case "KRAKEN_DB"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+		
+		case "FILLED_SCAFF_LENGTH" {
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+		
+		case "LONG_READ_MAPPER"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		    if($opera_ms_option->{"LONG_READ_MAPPER"} ne "blasr" && $opera_ms_option->{"LONG_READ_MAPPER"} ne "minimap2"){
+			die "Unkown LONG_READ_MAPPER " . $opera_ms_option->{"LONG_READ_MAPPER"} . ", please use  blasr/minimap2.\n"
+		    }
+		}
+
+		case "SHORT_READ_ASSEMBLER"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		    if($opera_ms_option->{"SHORT_READ_ASSEMBLER"} ne "megahit" && $opera_ms_option->{"SHORT_READ_ASSEMBLER"} ne "spades"){
+			die "Unkown SHORT_READ_ASSEMBLER " . $opera_ms_option->{"SHORT_READ_ASSEMBLER"} . ", please use  megahit/spades.\n"
+		    }
+		}
+		
+		case "LONG_READ"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		    #if(index($opera_ms_option->{$config_option}, ".gz") != -1){
+		    #die "Compressed long-reads are not supported " . $opera_ms_option->{$config_option} . "\n";
+		    #}
+		}
+
+		case "ILLUMINA_READ_1"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		    if(index($opera_ms_option->{"ILLUMINA_READ_1"}, ",") != -1){#Their is multiple illumina file provided => this is a multiple sample assembly
+			$opera_ms_option->{"MULTI_SAMPLE"} = 1;
+		    }
+		}
+
+		case "ILLUMINA_READ_2"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+
+		case "OPERA_MS_DB"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+		
+		case "NUM_PROCESSOR"{
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+
+		case "REF_REPEAT_DETECTION"{
+		    $opera_ms_option->{$config_option} = 1;
+		    #$REF_REPEAT_DETECTION = 1;
+		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
+		}
+		
+		case "POLISHING"{
+		    $opera_ms_option->{$config_option} = 1;
+		    #$REF_REPEAT_DETECTION = 1;
+		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
+		}
+		
+		case "REF_CLUSTERING"{
+		    #$genomeDB_msh = $split_line[1];
+		    $opera_ms_option->{$config_option} = 1;
+		    #$REF_REPEAT_DETECTION = 1;
+		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
+		}
+		case "STRAIN_CLUSTERING"{
+		    $opera_ms_option->{$config_option} = 1;
+		    #$REF_REPEAT_DETECTION = 1;
+		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
+		}
+		case "GAP_FILLING"{
+		    $opera_ms_option->{$config_option} = 1;
+		    #$REF_REPEAT_DETECTION = 1;
+		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
+		}
+		###################Hiden option for non metagenomics assembly
+		#For single genome assembly
+		case "SINGLE_GENOME"{
+		    #$genomeDB_msh = $split_line[1];
+		    $opera_ms_option->{$config_option} = 1;
+		    #$REF_REPEAT_DETECTION = 1;
+		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
+		}
+		
+		#In case of non-pure non bacteria isolate genomes to change the maximum cluster size used during hierarchical clustering
+		case "CLUSTER_LEN_THRESHOLD"{#In case of non-pure non bacteria isolate genomes
+		    $opera_ms_option->{$config_option} = $split_line[1];
+		}
+		
+		else {
+		    die "Config option: ".$config_option." unknown, please check the config file. \nExiting. \n";
+		}
+	    }
+	}
+    }
+}
+
+#From command line argument
 sub read_argument{
 
     my ($opera_ms_option, $read_option) = @_;
     my ( $illum_read1, $illum_read2, $long_read, $output_dir, $contig_file,  $strain_cluster, $reference_cluster, $contig_len, $contig_edge_len, $contig_win_len, $kmer_size, $nproc, $long_read_mapping, $flag_help);
-
-    set_default_value($opera_ms_option);
     
     my $help_message = print_help();
 
@@ -1449,6 +1570,7 @@ sub read_argument{
 	#
 	"genome-db=s" => \$opera_ms_option->{"OPERA_MS_DB"},
 	#
+	"single-genome!"          => \$opera_ms_option{"SINGLE_GENOME"},      
 	"strain-clustering!"            => \$opera_ms_option{"STRAIN_CLUSTERING"},
 	"ref-clustering!"         => \$opera_ms_option{"REF_CLUSTERING"},
 	"gap-filling!"         => \$opera_ms_option{"GAP_FILLING"},
@@ -1464,62 +1586,19 @@ sub read_argument{
 	"long-read-mapper=s" => \$opera_ms_option{"LONG_READ_MAPPER"},
 	"short-read-assembler=s" => \$opera_ms_option{"SHORT_READ_ASSEMBLER"},
 	"num-processors=i" => \$opera_ms_option{"NUM_PROCESSOR"},
+	
+	#Hiden option
+	"cluster-len=i" => \$opera_ms_option{"CLUSTER_LEN_THRESHOLD"},
+	"single-genome!"          => \$opera_ms_option{"SINGLE_GENOME"},     
 	#	
 	"help"                => \$flag_help,
 	) or die("Error in command line arguments.\n$help_message");
     
-    
     if($flag_help){
 	print STDERR $help_message;exit(0);
     }
-    
-    else{
-	#Write config file
-	$output_dir = $opera_ms_option{"OUTPUT_DIR"};
-	my $config_file = "$output_dir/opera-ms.config";
-	run_exe("mkdir -p $output_dir");
-	
-	$opera_ms_option->{"CONFIG_PATH"} = $config_file;
-	open(OUT, ">$config_file");
-
-	my @option_order = (
-	    "ILLUMINA_READ_1",
-	    "ILLUMINA_READ_2",
-	    "LONG_READ",
-	    "OUTPUT_DIR",
-	    
-	    #"POLISHING",
-	    #"REF_CLUSTERING",
-	    #"STRAIN_CLUSTERING",
-	    
-	    "CONTIG_EDGE_LEN",
-	    "CONTIG_WINDOW_LEN",
-	    "CONTIG_LEN_THR",
-	    "KMER_SIZE",
-	    
-	    "CONTIGS_FILE",
-	    "LONG_READ_MAPPER",
-	    "SHORT_READ_ASSEMBLER",
-	    "NUM_PROCESSOR",
-	    );
-	
-	
-	foreach $option (@option_order){
-	    print OUT $option . " " . $opera_ms_option->{$option} . "\n" if(defined $opera_ms_option->{$option});
-	}
-
-	#print STDERR "REF_CLUSTERING" . " " . $opera_ms_option->{"REF_CLUSTERING"} ."\n" . "STRAIN_CLUSTERING" . " "  .$opera_ms_option->{"STRAIN_CLUSTERING"} . "\n POLISHING " . $opera_ms_option{"POLISHING"} . "\n";exit(0);
-	
-	$opera_ms_option->{"CONTIGS_COV_FILE"} = "contigs_" . $opera_ms_option->{"CONTIG_WINDOW_LEN"} . "_" . $opera_ms_option->{"CONTIG_EDGE_LEN"};
-	$opera_ms_option->{"RESTART"} = 0;
-	$opera_ms_option->{"STAGE"} = "ALL";
-	#To compute the total number of stage
-	$opera_ms_option->{"NB_TOTAL_STAGE"} = 8;
-	$opera_ms_option->{"NB_TOTAL_STAGE"}++ if($opera_ms_option->{"POLISHING"});
-	
-	close(OUT);
-    }
 }
+
 
 sub print_help{
     "OPERA-MS.pl: OPERA-MS " .	$opera_ms_option{"VERSION"} . "
@@ -1556,7 +1635,50 @@ Optional arguments:
       --num-processors       INT   number of processors to use (note that 2 is the minimum) [2]
 
 ";
+    #--single-genome              run the single genome hybrid assembly pipeline
+    #--cluster-len                maximal sequence cluster size allowed during the hierarchical clustering [default 6000000, -1 no size threshold]
 }
 
+#Write config file that will be used by OPERA-MS-UTILS for trouble shooting and downstream analysis
+sub write_utils_config_file{
+    my ($opera_ms_option) = @_;
+
+    #Create the output directory
+    $output_dir = $opera_ms_option{"OUTPUT_DIR"};
+    run_exe("mkdir -p $output_dir");
+
+    #Write the config file
+    my $config_file = "$output_dir/opera-ms-utils.config";
+    $opera_ms_option->{"CONFIG_PATH"} = $config_file;
+    
+    open(OUT, ">$config_file");
+    my @option_order = (
+	"ILLUMINA_READ_1",
+	"ILLUMINA_READ_2",
+	"LONG_READ",
+	"OUTPUT_DIR",
+	
+	#"POLISHING",
+	#"REF_CLUSTERING",
+	#"STRAIN_CLUSTERING",
+	
+	"CONTIG_EDGE_LEN",
+	"CONTIG_WINDOW_LEN",
+	"CONTIG_LEN_THR",
+	"KMER_SIZE",
+	
+	"CONTIGS_FILE",
+	"LONG_READ_MAPPER",
+	"SHORT_READ_ASSEMBLER",
+	"NUM_PROCESSOR",
+	);
+    
+    
+    foreach $option (@option_order){
+	print OUT $option . " " . $opera_ms_option->{$option} . "\n" if(defined $opera_ms_option->{$option});
+    }
+    
+    close(OUT);
+}
 
 

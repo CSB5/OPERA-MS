@@ -93,6 +93,7 @@ my $max_length = -1;
 my $MIN_LENGTH_THRESHOLD = 200000;
 my ($max_cluster_outlier_fraction, $max_cluster_outlier_fraction_length);
 $max_cluster_outlier_fraction = 0;
+$max_cluster_outlier_fraction_length = 0;
 print STDERR "\n\n########## SORTED BY LENGTH\n";
 foreach $c (sort { $cluster_info{$b}->{"LENGTH"} <=> $cluster_info{$a}->{"LENGTH"} } keys %cluster_info){
     $cluster_length = $cluster_info{$c}->{"LENGTH"};
@@ -123,3 +124,8 @@ foreach $c (sort { $cluster_info{$b}->{"OUTLIER_LENGTH"} <=> $cluster_info{$a}->
 }
 
 print STDERR "\n" . $length_sum . "\t" . $outlier_length_sum . "\t" . $max_length . "\t" . $max_cluster_outlier_fraction . "\t" . $max_cluster_outlier_fraction_length . "\n";
+
+
+
+
+#/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/../utils/perl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/..//bin/cluster_evaluation.pl /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/RESULTS///intermediate_files/coverage_estimation/contigs_340_80 /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/test_files/RESULTS///intermediate_files/hierarchical_clustering/sigma_23.9687446/clusters

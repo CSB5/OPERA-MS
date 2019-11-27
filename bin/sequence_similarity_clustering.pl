@@ -834,7 +834,7 @@ sub run_mash_on_clusters{
 			if ($count == $max_genome_for_sketch){
 			    $count = 0;
 			    # generate partial sketeches
-			    run_exe("$mash_exe_dir/mash sketch -k 21 -s 1000 -o $partial_sketch_dir/partial_Sketch$partial_count $inter_fa_dir/* > $mash_dir/mash_sketch.out 2> $mash_dir/mash_sketch.err");
+			    run_exe("$mash_exe_dir/mash sketch -p $nb_process -k 21 -s 1000 -o $partial_sketch_dir/partial_Sketch$partial_count $inter_fa_dir/* > $mash_dir/mash_sketch.out 2> $mash_dir/mash_sketch.err");
 			    if($?){
 				die "Error in during bin/mash sketch. Please see $mash_dir/mash_sketch.out $mash_dir/mash_sketch.err for details.\n";
 			    }
@@ -869,7 +869,7 @@ sub run_mash_on_clusters{
 	$count++;
     }
     if($count != 0){
-	run_exe("$mash_exe_dir/mash sketch -k 21 -s 1000 -o $partial_sketch_dir/partial_Sketch$partial_count $inter_fa_dir/* > $mash_dir/mash_sketch.out 2> $mash_dir/mash_sketch.err");
+	run_exe("$mash_exe_dir/mash sketch -p $nb_process -k 21 -s 1000 -o $partial_sketch_dir/partial_Sketch$partial_count $inter_fa_dir/* > $mash_dir/mash_sketch.out 2> $mash_dir/mash_sketch.err");
 	if($?){
 	    die "Error in during bin/mash sketch. Please see $mash_dir/mash_sketch.out $mash_dir/mash_sketch.err for details.\n";
 	}
