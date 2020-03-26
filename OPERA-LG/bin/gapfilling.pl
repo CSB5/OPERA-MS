@@ -166,7 +166,8 @@ while(<FILE>){
 }
 close(FILE);
 
-#run_exe("rm -r $working_dir/*opera_scaffold_*");
+#Delete all the intermidiate directories
+run_exe("rm -r $working_dir/*opera_scaffold_*");
 
 ##########################################merge the contigs into the gapfilled file
 #

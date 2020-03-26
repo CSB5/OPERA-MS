@@ -135,18 +135,19 @@ sub analyze_mash{
 	$bin = $str_tab[@str_tab-1];
 	@str_tab = split(/\./, $bin);
 	$bin_id = join("\.", @str_tab[0..@str_tab-2]);
-	#print " *** " . "@str_tab" . " " . $bin_id . "\n";<STDIN>;
+	
 
 	if($bin_info->{$bin_id}->{"SPECIES"} eq "NA"){
+	    #print STDERR " *** " . "@str_tab" . " " . $bin_id . "\n";#<STDIN>;
 	    
 	    $similarity = $line[2];
 
 	    #Get the species
 	    $str = $line[0];
 	    @str_tab = split(/\//, $str);
-	    $file = $str_tab[@str_tab-2];
-	    @str_tab = split(/\_/, $file);
-	    $species = $str_tab[0] . "_" . $str_tab[1];
+	    $file = $str_tab[@str_tab-1];
+	    @str_tab = split(/\__/, $file);
+	    $species = $str_tab[0];
 
 	    next if(index($species, "multispecies") != -1);
 	    $bin_info->{$bin_id}->{"SPECIES"} = $species;
@@ -347,4 +348,4 @@ sub sum{
 
 
 
-
+#/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/utils/perl /home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS//bin/cluster_info.pl /mnt/projects/lich/backup/IOMICS/ANALYSIS/ASSEMBLY_9.0/TLL44/ /mnt/projects/lich/backup/IOMICS/ANALYSIS/ASSEMBLY_9.0/TLL44//opera_ms_clusters > /mnt/projects/lich/backup/IOMICS/ANALYSIS/ASSEMBLY_9.0/TLL44//opera_ms_clusters/../cluster_info.txt

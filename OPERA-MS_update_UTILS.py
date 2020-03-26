@@ -28,7 +28,7 @@ def run_exe(cmd):
     print(cmd)
     if run:
         #return subprocess.check_output(cmd, shell=True)
-        subprocess.check_output(cmd, shell=True)
+        return subprocess.check_output(cmd, shell=True)
     
 # default to look for polish contig, if polished contig not exist, use unpolish.
 # if user want to always use unpolish contig, specifiy flag --unploshed SHOULD WE ADD THAT ?
@@ -343,7 +343,9 @@ def get_sample_mags(conf, binner, mag_selected_qual, mag_out, mag_info):
     binner_dir = config_dict["OUTPUT_DIR"] + "/" + binner
 
     try :
+        print(binner_dir + "/bin_info.txt")
         FILE = open(binner_dir + "/bin_info.txt", "r")
+       
         for line in FILE:
             info = (line.rstrip('\n')).split("\t")
             bin_id = info[0]
@@ -362,12 +364,13 @@ def get_sample_mags(conf, binner, mag_selected_qual, mag_out, mag_info):
                                     "NOVEL_SPECIES_ID":"NA"}
                 mag_link = mag_out + "/" + bin_id + ".fasta"
                 if not os.path.exists(mag_link):
+                    
                     run_exe("ln -s " +
                             binner_dir + "/" + bin_status.lower() + "_quality/" + bin_id + "." + get_binner_file_type(binner) +
                             " " +
                             mag_link)
                     
-    except:
+    except Exception as e:
         print("WARNING binning not completed in {}. Sample excluded from analysis\n".format(binner_dir))
         pass
 
@@ -402,6 +405,13 @@ def update_novel_status(mag_info, file_info):
         if mag_info[mag_id]["BEST_HIT_DIST_NOVEL"] > 0.05 and mag_info[mag_id]["BEST_HIT_DIST_TAX"] > 0.05:#Only bin for which both the best hit in the taxonomy file and in the genome file are novel are considered novel
             mag_info[mag_id]["STATUS"] = "NOVEL"
             mag_info[mag_id]["NOVEL_SPECIES_ID"] = "NS_" + cluster_id
+            
+        else:
+            # if either analysis is not present in the db, give NO_REF as its reference
+            if mag_info[mag_id]["BEST_HIT_DIST_NOVEL"] == 1.0:
+                mag_info[mag_id]["BEST_HIT_GENOME_NOVEL"] = "NO_REF"
+            elif mag_info[mag_id]["BEST_HIT_DIST_TAX"] == 1.0:
+                mag_info[mag_id]["BEST_HIT_GENOME_TAX"] = "NO_REF"
 
 def run_novel_species_analysis(ref_known_species, ref_taxonomy_species, nb_thread, configs, binner, mag_qual, out):
     create_dir(out)
@@ -411,13 +421,15 @@ def run_novel_species_analysis(ref_known_species, ref_taxonomy_species, nb_threa
     mag_info = {}
     for conf in configs:
         get_sample_mags(conf, binner, mag_qual, mag_out, mag_info)
-
+    
     #Run the novel species analysis
     out_analysis_novel = out+"/novel_species_analysis"
     if not os.path.exists(out_analysis_novel+"/novel/cluster.tsv"):
         #run_exe("python {}/../bin/novel_species_identification.py -t {} -s 10000 --ref {} --query {} --file_type {} --outdir {}".format(util_dir, nb_thread, ref_known_species, mag_out, "fasta", out_analysis_novel))
         os.system("python {}/../bin/novel_species_identification.py -t {} -s 10000 --ref {} --query {} --file_type {} --outdir {}".format(util_dir, nb_thread, ref_known_species, mag_out, "fasta", out_analysis_novel))
-        
+
+    print("finish first novel analysis")
+    
     out_analysis_taxonomy = out+"/species_taxonomy_analysis"
     if not os.path.exists(out_analysis_taxonomy+"/novel/cluster.tsv"):
         #run_exe("python {}/../bin/novel_species_identification.py -t {} -s 1000 --ref {} --query {} --file_type {} --outdir {}".format(util_dir, nb_thread, ref_taxonomy_species, mag_out, "fasta", out_analysis_taxonomy))
@@ -491,8 +503,8 @@ def main(args):
     
     command = args.command
     nb_thread = 0
-    if command == "kraken2" or command == "circular-sequence" or command == "maxbin2" or command == "metabat2" or command == "checkm" or command == "mash" :
-    
+    if command == "kraken2" or command == "circular-sequence" or command == "binner" or command == "checkm" or command == "mash" :
+        
         #Parse the config file
         config_dict = read_opera_ms_config_file(args.config)
                         
@@ -501,12 +513,17 @@ def main(args):
         
         if args.thread != None:
             nb_thread = args.thread
-        
-        if command == "maxbin2" or command == "metabat2":
-            sample_name = args.sample_name
-            if sample_name == None:
-                sample_name = config_dict["OUTPUT_DIR"].split("/")[-1]
-            run_binner(command, sample_name, config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], nb_thread)
+
+        if command == "binner":
+            bin_method = args.method
+            sample_name = config_dict["OUTPUT_DIR"].split("/")[-1]
+            run_binner(bin_method, sample_name, config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], nb_thread)
+            
+        #if command == "maxbin2" or command == "metabat2":
+        #    sample_name = args.sample_name
+        #    if sample_name == None:
+        #        sample_name = config_dict["OUTPUT_DIR"].split("/")[-1]
+        #    run_binner(command, sample_name, config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], nb_thread)
 
         elif command == "checkm":
             checkm_analysis(config_dict["OUTPUT_DIR"], args.binner, nb_thread, args.high_qual_mags, args.medium_qual_mags)
@@ -545,13 +562,13 @@ if __name__ == "__main__":
 
     #this
     mandatory = parser.add_argument_group("mandatory arguments")
-    #maxbin2
-    maxbin_parser = subparsers.add_parser('maxbin2', parents=[config_parser.parser], help='Run MaxBin2')
-    maxbin_parser.add_argument("-s", "--sample-name", help="Sample name [default OPERA-MS output directory]")
-    
-    #metabat2
-    metabat_parser = subparsers.add_parser('metabat2', parents=[config_parser.parser], help='Run MetaBAT2')
-    metabat_parser.add_argument("-s", "--sample-name", help="Sample name [default OPERA-MS output directory]")
+
+    #binner
+    binner_parser = subparsers.add_parser('binner', parents=[config_parser.parser], help='Run binner')
+    binner_parser.add_argument("-m", "--method",  required=False, default = "metabat2", choices=["maxbin2", "metabat2"], help='binning method (default: MetaBat2)' )
+        
+    #metabat_parser = subparsers.add_parser('metabat2', parents=[config_parser.parser], help='Run MetaBAT2')
+    #metabat_parser.add_argument("-s", "--sample-name", help="Sample name [default OPERA-MS output directory]")
     
     #kraken
     kraken_parser = subparsers.add_parser('kraken2', parents=[config_parser.parser], help='Run Kraken2 on the short and long reads and compare the abundance profiles')
@@ -559,7 +576,7 @@ if __name__ == "__main__":
     
     #checkm
     checkm_parser = subparsers.add_parser('checkm', parents=[config_parser.parser], help='Run CheckM on a set of bins')
-    checkm_parser._action_groups[-1].add_argument("-b", "--binner",  required=True, choices=["maxbin2", "metabat2", "opera_ms_clusters"])
+    checkm_parser.add_argument("-b", "--binner",  required=False, default = "metabat2", choices=["maxbin2", "metabat2", "opera_ms_clusters"])
     checkm_parser.add_argument("-H", "--high-qual-mags",  default="90,5", help = 'Completness and contamination values for high quality genomes (default: 90,5)', type=str)
     checkm_parser.add_argument("-M", "--medium-qual-mags",  default="50,10", help = 'Completness and contamination values for medium quality genomes (default: 50,10)', type=str)
 
@@ -569,11 +586,13 @@ if __name__ == "__main__":
     
     #novel species
     novel_species_parser = subparsers.add_parser('novel-species', help='Run novel species identification')
+    mandatory = novel_species_parser.add_argument_group("mandatory arguments")
+    
     novel_species_parser._action_groups[-1].add_argument("-k", "--known-species",  required=True, help='Mash sketch of known species reference genomes')
-    novel_species_parser._action_groups[-1].add_argument("-x", "--taxonomy-database",  required=True, help='Mash sketch of reference genomes with taxonomy info')
-    novel_species_parser._action_groups[-1].add_argument("-b", "--binner",  required=False, default = "metabat2",  choices=["maxbin2", "metabat2", "opera_ms_clusters"])
+    novel_species_parser._action_groups[-1].add_argument("-x", "--taxonomy-database",  required=True, help='Mash sketch of reference genomes with taxonomy info')    
     novel_species_parser._action_groups[-1].add_argument("-o", "--out",  required=True, help='Output directory')
     #
+    novel_species_parser.add_argument("-b", "--binner",  required=False, default = "metabat2",  choices=["maxbin2", "metabat2", "opera_ms_clusters"], help='bins for novel analysis (default: MetaBat2)')
     novel_species_parser.add_argument('configs', metavar='C', nargs='+', help='Path to OPERA-MS configuration file(s)')
     #
     novel_species_parser.add_argument("-q", "--mags-qual", help='Quality of the MAGS used (default: high)', choices=["high", "medium"], default="high")
@@ -583,6 +602,7 @@ if __name__ == "__main__":
     
     #opera-db
     opera_db_parser = subparsers.add_parser('opera-ms-db', help='Create a OPERA-MS genome database')
+    mandatory = opera_db_parser.add_argument_group("mandatory arguments")
     opera_db_parser._action_groups[-1].add_argument("-g", "--genomes-dir",  required=True, help='Directory that contains genome files')
     opera_db_parser._action_groups[-1].add_argument("-x", "--taxonomy",  required=True, help='Species name of each genomes')
     opera_db_parser._action_groups[-1].add_argument("-d", "--db-name",  required=True, help='Database name')

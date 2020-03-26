@@ -159,10 +159,10 @@ sub get_scaffold_info{
 	#Get the species name
 	$ref_genome = $cluster_to_species->{$cluster_for_scaffold};
 	@tmp = split(/\//, $ref_genome);
-	@tmp_2 = split(/\_/,$tmp[@tmp-2]);
+	@tmp_2 = split(/\__/,$tmp[@tmp-1]);
 	#
-	$species_name = $tmp_2[0] . "_" . $tmp_2[1];
-	$ref_genome = $tmp[@tmp-1];
+	$species_name = $tmp_2[0];
+	$ref_genome = $tmp_2[1];
 	#
 	if(! exists $nb_species_strain->{$species_name}){
 	    $nb_s = "NA";

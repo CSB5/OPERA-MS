@@ -87,7 +87,8 @@ generate_assembly_stats(\%opera_ms_option, \%opera_ms_dependency);
 write_final_assembly(\%opera_ms_option, \%opera_ms_dependency);
 #
 #
-polishing(\%opera_ms_option, \%opera_ms_dependency);
+$opera_ms_option{"POLISHING"} = 0;
+#polishing(\%opera_ms_option, \%opera_ms_dependency);
 
     
 $time = localtime;
@@ -1212,7 +1213,7 @@ sub write_cluster_assembly{
     my $final_output_dir = $opera_ms_option->{"OUTPUT_DIR"};
     
     if($opera_ms_option->{"REF_CLUSTERING"}){
-	my $cluster_assembly_dir = "$final_output_dir/opera_ms_clusters";
+	my $cluster_assembly_dir = "$final_output_dir/opera_ms_clusters/all";
 	init_dir($cluster_assembly_dir);
 	$final_contig = "$final_output_dir/contigs.polished.fasta";
 	$final_contig = "$final_output_dir/contigs.fasta" if(! -e $final_contig);
@@ -1292,7 +1293,7 @@ sub generate_cluster_stats{
     
     #Get the statistics
     my $opera_ms_dir = $opera_ms_option->{"OPERA_MS_DIR"};
-    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_info.pl " . $opera_ms_option{"OUTPUT_DIR"} . " $cluster_dir > $cluster_dir/../cluster_info.txt");
+    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_info.pl " . $opera_ms_option{"OUTPUT_DIR"} . " $cluster_dir > $cluster_dir/../../cluster_info.txt");
 }
 
 sub check_completed{

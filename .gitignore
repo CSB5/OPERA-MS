@@ -19,18 +19,21 @@ SIGMA/debug
 bin/OPERA-LG-fast
 database_updated.bk
 utils/perl
+__pycache__
+utils_db/minikraken2_v2_8GB
+
 
 #Some software that are not ready to be added
-utils/metabat
-utils/jgi_summarize_bam_contig_depths
-utils/clustering.r
-utils/novel_analysis.py
-bin/novel_analysis.py
-utils_db
-utils_db/*
-utils/checkm
-utils/kraken2
-utils/MaxBin-2.2.4
+#utils/metabat
+#utils/jgi_summarize_bam_contig_depths
+#utils/clustering.r
+#utils/novel_analysis.py
+#bin/novel_analysis.py
+#utils_db
+#utils_db/*
+#utils/checkm
+#utils/kraken2
+#utils/MaxBin-2.2.4
 
 OPERA-LG/bin/.#OPERA-long-read.pl
 
@@ -47,3 +50,4 @@ test_files/fasta_log.err
 test_files/fasta_results/
 test_files/run.log
 test_files/SINGLE/
+test_files/log.txt
