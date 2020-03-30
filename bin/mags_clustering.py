@@ -1,33 +1,18 @@
-import sys
 import pandas as pd
-#from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy import cluster
+from sklearn.cluster import AgglomerativeClustering
+import sys
 
 
 dist_mat = sys.argv[1]
-thres = sys.argv[2]
+thres = float(sys.argv[2])
 outfile = sys.argv[3]
 
+dist_dat = pd.read_csv(dist_mat, sep="\t", index_col=0, header = 0)#0.01
+column_names = dist_dat.columns
+dist_dat.dropna(axis=1, how='all', inplace = True)
 
-#with open(dist_mat)
-dist_dat = pd.read_csv(dist_mat, sep="\t")#0.01
-
-cluster_full = cluster.hierarchy.single(dist_dat)
-clusters = cluster.hierarchy.cut_tree(cluster_full, height = thres)
-
-print(clusters)
-
-#linked = linkage(dist_dat, 'single')
-
-#dendrogram(linked,
-#            orientation='top',
-#            labels=labelList,
-#            distance_sort='descending',
-#            show_leaf_counts=True)
-
-
-## clustering
-#cluster.full <- hclust(as.dist(dist.dat), method = 'single' )
-
-#clusters <- cutree(cluster.full, h=thres)
-#write.table(data.frame(clusters), outfile, sep='\t')
+clustering = AgglomerativeClustering(linkage = "single", n_clusters = None, compute_full_tree = True, distance_threshold = thres, affinity = "precomputed").fit(dist_dat)
+with open(outfile, "w") as fp:
+    fp.write("clusters\n")
+    for clust in zip(column_names, clustering.labels_):
+        fp.write("{}\t{}\n".format(clust[0], clust[1]))

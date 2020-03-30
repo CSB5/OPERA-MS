@@ -6,13 +6,7 @@ import subprocess
 import config_parser
 import re
 
-util_dir = "/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/utils"
-"""
-qsub -terse -m a -M \$USER_PRINCIPAL_NAME -cwd -V -l mem_free=10G,h_rt=12:0:0 -pe OpenMP 16 -N CFSAN28_MAXBIN -b y perl /mnt/projects/bertrandd/opera_lg/SOFTWARE/MAXBIN/MaxBin-2.2.4/run_MaxBin.pl -min_contig_length 500 -contig ANALYSIS/ASSEMBLY/28h/contig.fasta -reads Illumina_reads/R1_28h_mergedrep.fastq.gz -out ANALYSIS/ASSEMBLY/24h/MAXBIN2/28h_bin -thread 16
-
-/mnt/software/unstowable/miniconda3-4.6.14/envs/metabat2-v2.12.1/bin/metabat -i ANALYSIS/ASSEMBLY/40h/contig.fasta -o test_meta/40h/metabin
-"""
-
+util_dir = os.path.dirname(os.path.realpath(__file__)) + "/utils/"
 
 def create_dir(new_dir):
     try:
@@ -381,7 +375,7 @@ def get_ref_genome_name(ref_genome_path):
     return ((ref_genome_path.split("/"))[-1]).split("__")
 
 def update_best_hit_status(mag_info, file_info, ana_type):
-    print(file_info + "\t" + ana_type)
+    #print(file_info + "\t" + ana_type)
     FILE = open(file_info, "r")
     for line in FILE:
         (ref_genome_path, mag_path, distance, pvalue, kmer_info) = (line.rstrip('\n')).split('\t')
@@ -401,7 +395,7 @@ def update_novel_status(mag_info, file_info):
     FILE.readline() #skip the header
     for line in FILE:
         (mag_id, cluster_id) = (line.rstrip('\n')).split('\t')
-        mag_id = mag_id[1:-1]
+        mag_id = mag_id
         if mag_info[mag_id]["BEST_HIT_DIST_NOVEL"] > 0.05 and mag_info[mag_id]["BEST_HIT_DIST_TAX"] > 0.05:#Only bin for which both the best hit in the taxonomy file and in the genome file are novel are considered novel
             mag_info[mag_id]["STATUS"] = "NOVEL"
             mag_info[mag_id]["NOVEL_SPECIES_ID"] = "NS_" + cluster_id
@@ -419,32 +413,37 @@ def run_novel_species_analysis(ref_known_species, ref_taxonomy_species, nb_threa
     #Get the required MAGS for each samples creat a soft link in out_mags and collect the MAGs info
     create_dir(mag_out)
     mag_info = {}
+    print("***Parsing all config files\n")
     for conf in configs:
         get_sample_mags(conf, binner, mag_qual, mag_out, mag_info)
     
     #Run the novel species analysis
     out_analysis_novel = out+"/novel_species_analysis"
+
+    print("\n***running novel species analysis...\n")
+    
     if not os.path.exists(out_analysis_novel+"/novel/cluster.tsv"):
-        #run_exe("python {}/../bin/novel_species_identification.py -t {} -s 10000 --ref {} --query {} --file_type {} --outdir {}".format(util_dir, nb_thread, ref_known_species, mag_out, "fasta", out_analysis_novel))
         os.system("python {}/../bin/novel_species_identification.py -t {} -s 10000 --ref {} --query {} --file_type {} --outdir {}".format(util_dir, nb_thread, ref_known_species, mag_out, "fasta", out_analysis_novel))
 
-    print("finish first novel analysis")
-    
     out_analysis_taxonomy = out+"/species_taxonomy_analysis"
+    print("\n***running taxonomy analysis...\n")
+    
     if not os.path.exists(out_analysis_taxonomy+"/novel/cluster.tsv"):
-        #run_exe("python {}/../bin/novel_species_identification.py -t {} -s 1000 --ref {} --query {} --file_type {} --outdir {}".format(util_dir, nb_thread, ref_taxonomy_species, mag_out, "fasta", out_analysis_taxonomy))
         os.system("python {}/../bin/novel_species_identification.py -t {} -s 1000 --ref {} --query {} --file_type {} --outdir {}".format(util_dir, nb_thread, ref_taxonomy_species, mag_out, "fasta", out_analysis_taxonomy))
         
     #Update the statistics about the analysis
+    print("\n***update statistics for taxonomy analysis...\n")
     update_best_hit_status(mag_info, out_analysis_taxonomy+"/query_ref/min_hit.dat", "TAX")
     #
+    print("\n***update statistics for novel analysis...\n")
     update_best_hit_status(mag_info, out_analysis_novel+"/query_ref/min_hit.dat", "NOVEL")
+    print("\n***update novel status...\n")
     update_novel_status(mag_info, out_analysis_novel+"/novel/cluster.tsv")
 
     #Print the final info file
     OUT = open(out+"/MAGs_info.txt", "w")
+    print("\n***writing output file...\n")
     for mag in sorted(mag_info, key=lambda x: float(mag_info[x]["INFO"][2]), reverse=True):
-        print(mag)
         OUT.write(
             "\t".join(mag_info[mag]["INFO"]) + "\t" +
             #
@@ -470,33 +469,33 @@ def run_circular_sequence_identification(assembly_dir):
 def check_installation():
 
     #checkm
-    cmd = "{}/checkm --version".format()
+    cmd = "{}/checkm --version".format(util_dir)
     try:
         run_exe(cmd)
     except Exception as e:
         print(e)
-        install_software()
+        #install_software()
 
-    cmd = "{}/metabat2 --version".format()
+    cmd = "{}/metabat --version".format(util_dir)
     try:
         run_exe(cmd)
     except Exception as e:
         print(e)
-        install_software()
+        #install_software()
 
-    cmd = "{}/maxbin2 --version".format()
+    cmd = "perl {}/util/MaxBin-2.2.4/run_MaxBin.pl --version".format(util_dir)
     try:
         run_exe(cmd)
     except Exception as e:
         print(e)
-        install_software()
+        #install_software()
 
-    cmd = "{}/kraken2 --version".format()
+    cmd = "{}/kraken2 --version".format(util_dir)
     try:
         run_exe(cmd)
     except Exception as e:
         print(e)
-        install_software()
+        #install_software()
         
     
 def main(args):
@@ -548,7 +547,7 @@ def main(args):
         elif command == "utils-db":
             print("TO DO")
 
-        elif command == "check-install":
+        elif command == "check_dependency":
             check_installation()
             print("TO DO")
             
@@ -582,7 +581,6 @@ if __name__ == "__main__":
 
     #circular identification
     circular_sequence_parser = subparsers.add_parser('circular-sequence', parents=[config_parser.parser], help='Identify circular sequences')
-
     
     #novel species
     novel_species_parser = subparsers.add_parser('novel-species', help='Run novel species identification')
@@ -612,10 +610,10 @@ if __name__ == "__main__":
     utils_db_parser = subparsers.add_parser('utils_db', help='Download all the data base required by the utils software')
 
     #check if the utils sofware are functional in the current system
-    check_install_parser = subparsers.add_parser('CHECK_DEPENDENCY', help='Check which OPERA-MS-UTILS software are functional in the current system')
+    check_install_parser = subparsers.add_parser('check_dependency', help='Check which OPERA-MS-UTILS software are functional in the current system')
     
     args=parser.parse_args()
-    print(args)
+    
     
     #print(args.checkm)#print(args.metabat2)
     main(args)

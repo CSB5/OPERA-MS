@@ -13,9 +13,9 @@ def run_exe(cmd):
         
 
 def compute_mash_dist(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file):
-    if not os.path.exists(query_ref_dist_file):
-        run_exe("{}/../utils/mash dist -p {} -d 0.22 {} {} > {}".format(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file))   
-        #run_exe("{}/../utils/mash dist -p {} -d 0.3 {} {} > {}".format(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file))   
+    if not os.path.exists(query_ref_dist_file):        
+        run_exe("{}/../utils/mash dist -p {} -d 0.3 {} {} > {}".format(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file))
+        
 def get_sketch(query_files, thread, sketch_size, kmer_size, outdir, file_type, sketch_name): 
 
     sketch = "{}/{}".format(outdir, sketch_name)
@@ -50,10 +50,10 @@ def get_novel_sequence(mag_dir, dist_file, outdir):
                 fp.write(line)
                 novel_seq_files = novel_seq_files + line.strip() + " "
         # if the mag bin is not presented in distance file after mash, add to novel_sequence
-        print(dict_species)
+        
         for mag_bin in os.listdir(mag_dir):
             if os.path.join(mag_dir, mag_bin) not in dict_species:
-                print("came to here")
+                
                 fp.write(os.path.join(mag_dir, mag_bin) + "\n")
                 novel_seq_files = novel_seq_files + os.path.join(mag_dir, mag_bin)  + " "
                 mh.write("{}\t{}\t{}\t{}\t{}\n".format("UNKOWN", os.path.join(mag_dir, mag_bin), "1", "NA", "NA"))
@@ -67,7 +67,8 @@ def get_cluster(script_dir, hclust_thres, dist_file, outdir, file_type):
         os.remove(cluster_file)
     except:
         pass
-    cmd = "Rscript --vanilla {}/mags_clustering.r {} {} {}".format(script_dir, dist_matrix,  hclust_thres, cluster_file)
+    #cmd = "Rscript --vanilla {}/mags_clustering.r {} {} {}".format(script_dir, dist_matrix,  hclust_thres, cluster_file)
+    cmd = "python {}/mags_clustering.py {} {} {}".format(script_dir, dist_matrix,  hclust_thres, cluster_file)
     run_exe(cmd)
 
 def get_matrix(dist_file, extension_len, outdir):
@@ -105,13 +106,13 @@ def get_matrix(dist_file, extension_len, outdir):
         dist_matrix = outdir + "/dist_matrix.dat"
         with open(dist_matrix, 'w') as f:
             f.write('\t')
-            for key in sorted(matrix.iterkeys()):
+            for key in sorted(iter(matrix.keys())):
                 f.write(key + '\t')
             f.write('\n')        
-            for key in sorted(matrix.iterkeys()):
+            for key in sorted(iter(matrix.keys())):
                 f.write(key + '\t')
                 
-                for key2 in sorted(matrix.iterkeys()):
+                for key2 in sorted(iter(matrix.keys())):
                     dist = matrix[key][key2]
                     f.write(str(dist) + '\t')         
                 f.write('\n')
@@ -135,7 +136,7 @@ def main(args):
     
     #Create the selected MAGs  mash sketch
     cmd = "ls {}/*{}".format(query_dir, file_type)
-    temp_query_files = run_exe(cmd).split("\n")    
+    temp_query_files = run_exe(cmd).decode("utf-8").split("\n")
     all_query_dict = dict.fromkeys(temp_query_files, 1)
     
     query_ref_outdir = outdir + "/query_ref/"
@@ -143,29 +144,37 @@ def main(args):
     query_files = "{}/*{}".format(query_dir, file_type)
     
     #create mash sketch
+    print("\n***creating mash sketch for input\n")
     query_sketch = get_sketch(query_files, thread, sketch_size, kmer_size, query_ref_outdir, file_type, sketch_name)
     
     #Compute the mash distance between the mags and reference genomes
     query_ref_dist_file = query_ref_outdir + "/query_ref_dist.dat"
+    print("\n***calculating mash distance for input files\n")
     compute_mash_dist(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file)
     
     #generate the distance file and identify the novel genome based on distance to know genome < 0.05
     #PROBLEM: genome without distance to known ref genome are excluded
+
+    print("\n***generating novel sequences\n")
     novel_sequence, novel_seq_files = get_novel_sequence(query_dir, query_ref_dist_file, query_ref_outdir)
-    
-    get_cluster(script_dir, 0.05, query_ref_dist_file, query_ref_outdir, file_type)
+
+    print("\n***generating clusters\n")
+    get_cluster(script_dir, hclust_thres, query_ref_dist_file, query_ref_outdir, file_type)
     
     # find novel genome clusters to identify the novel species (a species is a cluster of novel genome)
-    print(novel_sequence)
     novel_sketch_name = "novel_sketch"
     novel_outdir = outdir + "/novel/"
+
+    print("\n***creating mash sketch for novel sequence\n")
     novel_sketch = get_sketch(novel_seq_files, thread, sketch_size, kmer_size, novel_outdir, file_type, novel_sketch_name)
     novel_dist_file = novel_outdir + "/novel_dist.dat"
+    print("\n***calculating mash distance for novel sequence\n")
     compute_mash_dist(script_dir, thread, novel_sketch, novel_sketch,  novel_dist_file)
 
     #generate matrix
     #PROBLEM:  if only 1 genome the clustering crash
-    get_cluster(script_dir, 0.05, novel_dist_file, novel_outdir, file_type)
+    print("\n***generating novel cluster\n")
+    get_cluster(script_dir, hclust_thres, novel_dist_file, novel_outdir, file_type)
 
     
 if __name__ == "__main__":
