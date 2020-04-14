@@ -839,6 +839,12 @@ sub run_mash_on_clusters{
 				die "Error in during bin/mash sketch. Please see $mash_dir/mash_sketch.out $mash_dir/mash_sketch.err for details.\n";
 			    }
 			    
+			    run_exe("$mash_exe_dir/mash dist -p $nb_process -d 0.90  $mash_ref $partial_sketch_dir/partial_Sketch$partial_count.msh  > $mash_dir/mash_dist_$partial_count.dat 2> $mash_dir/mash_dist.err");	    
+			    if($?){
+				die "Error in during bin/mash dist. Please see $mash_dir/mash_dist.err for details.\n";				
+			    }
+
+			    
 			    # remove intermediate .fa files
 			    run_exe("rm $inter_fa_dir/*");
 			    $partial_count++;
@@ -876,11 +882,12 @@ sub run_mash_on_clusters{
 	run_exe("rm -r $inter_fa_dir");
     }
     
-    run_exe("$mash_exe_dir/mash paste $mash_dir/cluster.msh $partial_sketch_dir/partial_Sketch*");
-    run_exe("$mash_exe_dir/mash dist -p $nb_process -d 0.90  $mash_ref $mash_dir/cluster.msh  > $mash_dir/mash_dist.dat 2> $mash_dir/mash_dist.err");
+    run_exe("$mash_exe_dir/mash dist -p $nb_process -d 0.90  $mash_ref $partial_sketch_dir/partial_Sketch$partial_count.msh  > $mash_dir/mash_dist_$partial_count.dat 2> $mash_dir/mash_dist.err");
+    #run_exe("$mash_exe_dir/mash paste $mash_dir/cluster.msh $partial_sketch_dir/partial_Sketch*");
     if($?){
 	die "Error in during bin/mash dist. Please see $mash_dir/mash_dist.err for details.\n";
     }
+    run_exe("cat $mash_dir/mash_dist_*.dat > $mash_dir/mash_dist.dat");
     #<STDIN>;
 }
 
