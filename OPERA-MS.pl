@@ -18,7 +18,7 @@ use Getopt::Long qw(GetOptionsFromArray);
 my %opera_ms_option = ();
 my $opera_ms_full_path = dirname(rel2abs($0)) . "/";
 $opera_ms_option{"OPERA_MS_DIR"} = $opera_ms_full_path;
-$opera_ms_option{"VERSION"} = "v0.9.0";
+$opera_ms_option{"VERSION"} = "v1.0.0";
 
 my %opera_ms_dependency = ();
 
@@ -32,7 +32,11 @@ if ( @ARGV == 0 ){
 }
 
 #To setup and check if the depndency are functionning
-check_dependency(\%opera_ms_option, \%opera_ms_dependency, "CHECK_DEPENDENCY") if($ARGV[0] eq "CHECK_DEPENDENCY");
+check_dependency(\%opera_ms_option, \%opera_ms_dependency, "CHECK_DEPENDENCY") if($ARGV[0] eq "check-dependency");
+
+#To setup the database
+setup_opera_ms_database(\%$opera_ms_option) if($ARGV[0] eq "install-db");
+
 
 #read from config file
 set_default_value(\%opera_ms_option);
@@ -52,14 +56,18 @@ setup_directory_path(\%opera_ms_option);
 #Write the config file used for OPERA-MS-UTILS
 write_utils_config_file(\%opera_ms_option);
 
-#
+
 #Check if dependencies are found. Otherwise, die.
 check_dependency(\%opera_ms_option, \%opera_ms_dependency, $opera_ms_option{"STAGE"});    
 
 #Check data integrity
 check_data(\%opera_ms_option);
 
-setup_opera_ms_database(\%opera_ms_option);
+#Check if the database contains all the information
+if(! check_database(\%opera_ms_option)){
+    die ("OPERA-MS default database not found. You can download the default OPERA-MS-DB using the following command: perl OPERA-MS.pl install-db");
+}
+
 
 #Starting OPERA-MS pipeline
 my ($start_time, $end_time);
@@ -264,7 +272,8 @@ sub check_dependency{
     my ($opera_ms_option, $opera_ms_dependency, $stage) = @_;
     #
     my $opera_ms_dir = $opera_ms_option->{"OPERA_MS_DIR"};
-    my $utils_dir = "$opera_ms_dir/utils/";
+    my $utils_dir = "$opera_ms_dir/tools_opera_ms/";
+    $opera_ms_dependency->{"OPERA_MS_TOOLS"} = $utils_dir;
     #
     
     #bundler
@@ -276,6 +285,7 @@ sub check_dependency{
 	`rm $perl_path` if(-e "$perl_path");
 	`ln -s $^X $perl_path`;
     }
+    $opera_ms_dependency->{"perl"} = $utils_dir;
     
     #OPERA-LG
     check_software("$opera_ms_dir/OPERA-LG/bin/", "OPERA-LG", "OPERA-LG", $opera_ms_dependency, $stage);
@@ -346,34 +356,41 @@ sub check_software{
     $opera_ms_dependency->{$software_name} = $software_dir;
 }
 
+sub check_database{
+    my ($opera_ms_option) = @_;
+    #
+    my $opera_ms_db_dir = $opera_ms_option->{"OPERA_MS_DB"};
+    #print STDERR "$opera_ms_db_dir/genomes_list.txt" . "\n";
+    return (-e "$opera_ms_db_dir/genomes.msh");
+}
 
 sub setup_opera_ms_database{
     my ($opera_ms_option) = @_;
 
+    my %figshare_file = ();
+    my $cmp = 1;
+    my $nb_step = keys(%figshare_file) * 2;
     #Download the genome reference data base for the first utilasation
-    my $opera_ms_dir = $opera_ms_option->{"OPERA_MS_DIR"};
-    if(! -e "$opera_ms_dir/database_updated"){
-	print STDOUT " *** First utilization: set-up of reference genome databases. Please wait ...\n";
+    my $opera_ms_db_dir = $opera_ms_option->{"OPERA_MS_DB_DIR"};
+    if(! -e "$opera_ms_db_dir/database_updated"){
+	print STDOUT " *** Set-up of reference genome databases. Please wait ...\n";
 	#
-	print STDOUT " *** (1/3) Download of genomeDB_Sketch.msh\n";	
-	run_exe("wget --no-check-certificate -O $opera_ms_dir/genomeDB_Sketch.msh https://ndownloader.figshare.com/files/17290511");
-	if($?){
-	    die"\nUnfortunately the automated download of the genome data base failed.\nYou can complete the installation process manually by:\n\t(1) Downloading the data base files at: https://figshare.com/articles/genomeDB_Sketch_msh/8425280 and https://figshare.com/articles/complete_ref_genomes_tar_gz/9638207\t(2) Moving the files in $opera_ms_dir\n\t(3) Running the command: tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz;touch $opera_ms_dir/database_updated\n\n";
-	}
-	else{
+	foreach $file (keys %figshare_file){
+	    $url = $figshare_file{$file};
+	    print STDOUT " *** ($cmp/$nb_step) Download $file\n";	
+	    run_exe("wget --no-check-certificate -O $opera_ms_db_dir/$file $url");
+	    if($?){
+		die"\nUnfortunately the automated download of the genome data base failed.\nYou can complete the installation process manually by:\n\t(1) Downloading the data base files at: https://figshare.com/articles/genomeDB_Sketch_msh/8425280 and https://figshare.com/articles/complete_ref_genomes_tar_gz/9638207\t(2) Moving the files in $opera_ms_dir\n\t(3) Running the command: tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz;touch $opera_ms_dir/database_updated\n\n";	
+	    }
+	    $cmp++;
+	    print STDOUT " *** ($cmp/$nb_step) Extraction of $file [35Gb disk space required]\n";
+	    run_exe("tar -xvzf $file --directory $opera_ms_db_dir");
 	    #
-	    print STDOUT " *** (2/3) Download of complete_ref_genomes.tar.gz\n";	
-	    run_exe("wget --no-check-certificate -O $opera_ms_dir/complete_ref_genomes.tar.gz https://ndownloader.figshare.com/files/17290589");
-	    #
+	    run_exe("rm $opera_ms_db_dir/complete_ref_genomes.tar.gz");
 	}
-	print STDOUT " *** (3/3) Extraction of complete_ref_genomes.tar.gz\n";
-	run_exe("tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz --directory $opera_ms_dir");
 	#
-	run_exe("rm $opera_ms_dir/complete_ref_genomes.tar.gz");
-	#
-	run_exe("touch $opera_ms_dir/database_updated");
+	run_exe("touch $opera_ms_db_dir/database_download_completed");
     }
-    
     #
 }
 
@@ -518,7 +535,7 @@ sub assembly_graph_creation{
 	    $long_read_mapper_option = " --minimap2 " . $opera_ms_dependency->{"minimap2"} if($opera_ms_option->{"LONG_READ_MAPPER"} eq "minimap2");
 	    $long_read_mapper_option = " --blasr " . $opera_ms_dependency->{"blasr"} if($opera_ms_option->{"LONG_READ_MAPPER"} eq "blasr");
 	    
-	    run_exe("${opera_ms_dir}utils/perl " . 
+	    run_exe($opera_ms_dependency->{"perl"}."perl " . 
 		    $opera_ms_dependency->{"OPERA-LG"}."/OPERA-long-read.pl" . 
 		    " --contig-file " . $opera_ms_option->{"CONTIGS_FILE"} . 
 		    " --kmer " . $opera_ms_option->{"KMER_SIZE"} . 
@@ -529,7 +546,8 @@ sub assembly_graph_creation{
 		    " --opera " . $opera_ms_dependency->{"OPERA-LG"} .
 		    " --illumina-read1 " . $opera_ms_option->{"ILLUMINA_READ_1"} . 
 		    " --illumina-read2 " . $opera_ms_option->{"ILLUMINA_READ_2"} . 
-		    " --samtools-dir " . $opera_ms_dependency->{"samtools"} . 
+		    " --samtools-dir " . $opera_ms_dependency->{"samtools"} .
+		    " --perl-dir " . $opera_ms_dependency->{"perl"} .   
 		    $long_read_mapper_option . 
 		    " --short-read-tooldir " . $opera_ms_dependency->{"bwa"} .
 		    " --skip-opera " . "1 " .
@@ -576,13 +594,14 @@ sub assembly_graph_creation{
 	    
 	    #
 	    print CONF "SAMTOOLS_DIR " . $opera_ms_dependency->{"samtools"} . "\n";
+	    print CONF "TOOLS_DIR " . $opera_ms_dependency->{"OPERA_MS_TOOLS"} . "\n";
 	    
 	    close(CONF);
 	    ##
 	    #SIGMA on short reads used to estimate the contig read coverage 
 	    #bundling of short reads (can be use if fix the problem with short reads)
 	    $start_time_sub = time;
-	    run_exe("${opera_ms_dir}utils/perl ${opera_ms_dir}/bin/cov_estimate.pl $cov_estimate_config > $cov_dir/cov_estimate.out 2> $cov_dir/cov_estimate.err");
+	    run_exe($opera_ms_dependency->{"perl"}."perl ${opera_ms_dir}/bin/cov_estimate.pl $cov_estimate_config > $cov_dir/cov_estimate.out 2> $cov_dir/cov_estimate.err");
 	    if($?){
 		die "Error in during cov_estimate.pl. Please see $cov_dir/cov_estimate.out and $cov_dir/cov_estimate.err for details.\n";
 	    }
@@ -593,7 +612,7 @@ sub assembly_graph_creation{
 	    #
 	    if(! $opera_ms_option->{"MULTI_SAMPLE"}){
 		$start_time_sub = time;
-		run_exe("${opera_ms_dir}utils/perl ${opera_ms_dir}bin/filter_edge_coverage_ratio.pl $mapping_dir " . "$cov_dir/".$opera_ms_option{"CONTIGS_COV_FILE"} . " 2> $mapping_dir/filter_edge_coverage_ratio.err");
+		run_exe($opera_ms_dependency->{"perl"}."perl ${opera_ms_dir}bin/filter_edge_coverage_ratio.pl $mapping_dir " . "$cov_dir/".$opera_ms_option{"CONTIGS_COV_FILE"} . " 2> $mapping_dir/filter_edge_coverage_ratio.err");
 		write_time($inter_dir, "cov_filtering", ($end_time_sub - $start_time_sub));
 		$end_time_sub = time;
 		if($?){
@@ -636,9 +655,10 @@ sub hierarchical_clustering{
 	    }
 	    
 	    #Refine the sigma R parameter
-	    run_exe("${opera_ms_dir}utils/perl ${opera_ms_dir}bin/refine_r_estimate.pl " .
+	    run_exe($opera_ms_dependency->{"perl"}."perl ${opera_ms_dir}bin/refine_r_estimate.pl " .
 		    $cov_dir."/".$opera_ms_option->{"CONTIGS_COV_FILE"} . " " . 
 		    $sigma_dir . " " .
+		    $opera_ms_dependency->{"perl"} . " " .
 		    $opera_ms_option->{"NUM_PROCESSOR"} . " " .
 		    $opera_ms_option->{"CLUSTER_LEN_THRESHOLD"} . " " .
 		    $opera_ms_dir . " 2> $sigma_dir/refine_r.err"
@@ -672,7 +692,7 @@ sub reference_clustering{
 	    
 	    
 	    
-	    run_exe("${opera_ms_dir}utils/perl ${opera_ms_dir}bin/sequence_similarity_clustering.pl " . 
+	    run_exe($opera_ms_dependency->{"perl"}."perl ${opera_ms_dir}bin/sequence_similarity_clustering.pl " . 
 		    $inter_dir . " " .
 		    $ref_clustering_dir . " " .
 		    $opera_ms_option->{"MAPPING_DIR"} . " " .
@@ -719,13 +739,14 @@ sub strain_clustering_and_assembly{
 	    #->if a species contains the strain each strain will be assembled independently by opera-lg
 	    #->if a species does not contain the strain they are all pulled together and assembled in a single run by opera-lg
 	    
-	    run_exe("${opera_ms_dir}utils/perl ${opera_ms_dir}bin/coverage_clustering.pl " . 
+	    run_exe($opera_ms_dependency->{"perl"}."perl ${opera_ms_dir}bin/coverage_clustering.pl " . 
 		    $opera_ms_option->{"INTER_DIR"} . " " .
 		    $strain_dir . " " .
 		    $opera_ms_option->{"CONTIGS_FILE"} . " " .
 		    $ref_clustering_dir . " "  .
 		    $opera_ms_option->{"OPERA_MS_DB"} . " " .
 		    $opera_ms_dir . " " .
+		    $opera_ms_dependency->{"perl"} . " " .
 		    "1  " . "2>  $strain_dir/coverage_clustering.err");
 	    if($?){
 		die "Error in during strain clustering. Please see $strain_dir/coverage_clustering.err for details.\n";
@@ -746,7 +767,7 @@ sub strain_clustering_and_assembly{
 		@line = split(/\t/, $_);
 		$species = $line[0];
 		$species_length = $line[1];
-		print CMD_STRAIN "${opera_ms_dir}utils/perl ${opera_ms_dir}bin/cluster_strain.pl $strain_dir/$species $species_length $global_r_value $r_value_step $opera_ms_dir 2> $strain_dir/$species.log" . "\n";
+		print CMD_STRAIN $opera_ms_dependency->{"perl"}."perl ${opera_ms_dir}bin/cluster_strain.pl $strain_dir/$species $species_length $global_r_value $r_value_step $opera_ms_dir 2> $strain_dir/$species.log" . "\n";
 	    }
 	    close(FILE);
 	    close(CMD_STRAIN);
@@ -790,7 +811,7 @@ sub strain_clustering_and_assembly{
 	    
 	    $contig_coverage_file = $opera_ms_option->{"COV_DIR"} . "/" . $opera_ms_option->{"CONTIGS_COV_FILE"};
 	    
-	    run_exe("${opera_ms_dir}utils/perl ${opera_ms_dir}bin/filter_cluster_coverage.pl $contig_coverage_file $reference_cluster_file $clustering_edge_dir 1.5 $clustering_edge_dir/NO_REPEAT 2> $clustering_edge_dir/filter_cluster_coverage.err");
+	    run_exe($opera_ms_dependency->{"perl"}."perl ${opera_ms_dir}bin/filter_cluster_coverage.pl $contig_coverage_file $reference_cluster_file $clustering_edge_dir 1.5 $clustering_edge_dir/NO_REPEAT 2> $clustering_edge_dir/filter_cluster_coverage.err");
 	    if($?){
 		die "Error in during filter_cluster_coverage. Please see $clustering_edge_dir/filter_cluster_coverage.err for details.\n";
 	    }
@@ -973,7 +994,7 @@ sub gap_filling{
 	    #print STDERR " ------ " . $opera_ms_option->{"GAP_FILLING"} . "\n";
 	    if($opera_ms_option->{"GAP_FILLING"}){
 		
-		run_exe("${opera_ms_dir}utils/perl $opera_lg_dir/gapfilling.pl " .
+		run_exe($opera_ms_dependency->{"perl"}."perl $opera_lg_dir/gapfilling.pl " .
 			$gap_filling_dir . " " .
 			$opera_ms_option->{"CONTIGS_FILE"} . " " .
 			$opera_ms_option->{"LONG_READ"} . " " .
@@ -981,6 +1002,7 @@ sub gap_filling{
 			$opera_ms_option->{"NUM_PROCESSOR"} . " " .
 			$opera_ms_option->{"FILLED_SCAFF_LENGTH"} . " " .
 			"$opera_lg_dir" . " " .
+			$opera_ms_dependency->{"perl"} . " " .
 			$opera_ms_dependency->{"racon"} . " " .
 			$opera_ms_dependency->{"minimap2"} . " " .
 			$opera_ms_dependency->{"mummer"} . " " . 
@@ -1098,7 +1120,7 @@ sub generate_assembly_stats{
     $start_time = time;
     $opera_ms_option->{"CONTIG_INFO"} = "$final_output_dir/contig_info.txt";
     
-    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/generate_assembly_stats.pl " .
+    run_exe($opera_ms_dependency->{"perl"}."/perl $opera_ms_dir/bin/generate_assembly_stats.pl " .
 	    "$opera_lr_dir/scaffolds.scaf" . " " .
 	    $cluster_file . " " .
 	    $read_size . " " .
@@ -1293,7 +1315,7 @@ sub generate_cluster_stats{
     
     #Get the statistics
     my $opera_ms_dir = $opera_ms_option->{"OPERA_MS_DIR"};
-    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_info.pl " . $opera_ms_option{"OUTPUT_DIR"} . " $cluster_dir > $cluster_dir/../../cluster_info.txt");
+    run_exe($opera_ms_dependency->{"perl"}."perl $opera_ms_dir/bin/cluster_info.pl " . $opera_ms_option{"OUTPUT_DIR"} . " $cluster_dir > $cluster_dir/../../cluster_info.txt");
 }
 
 sub check_completed{
@@ -1363,7 +1385,8 @@ sub set_default_value{
     #my $kraken_exe_dir = "";
     $opera_ms_option->{"FILLED_SCAFF_LENGTH"} = 499;
     #$opera_ms_option->{"MASH_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_Sketch.msh";
-    $opera_ms_option->{"OPERA_MS_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/OPERA_MS_DB";
+    $opera_ms_option->{"OPERA_MS_DB"} = "NA";
+    $opera_ms_option->{"OPERA_MS_DB_DEFAULT"} = 0;
     #
     $opera_ms_option->{"KRAKEN_DB"} = "NULL";#$opera_ms_option->{"OPERA_MS_DIR"}."/genomeDB_krakenh.msh";
     #
@@ -1388,6 +1411,11 @@ sub update_option{
     }
 
     $opera_ms_option->{"NB_TOTAL_STAGE"}++ if($opera_ms_option->{"POLISHING"});
+
+    if($opera_ms_option->{"OPERA_MS_DB"} eq "NA"){
+	$opera_ms_option->{"OPERA_MS_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/OPERA-MS-DB";
+	$opera_ms_option->{"OPERA_MS_DB_DEFAULT"} = 1;
+    }
 }
 
 #Form configuration file

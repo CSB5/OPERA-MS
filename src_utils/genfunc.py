@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-util_dir = os.path.dirname(os.path.realpath(__file__)) + "/../tools_opera_ms_utils/"
+util_dir = os.path.dirname(os.path.realpath(__file__)) + "/../tools_opera_ms/"
 
 def create_dir(new_dir):
     try:

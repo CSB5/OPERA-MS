@@ -22,7 +22,9 @@ utils/perl
 __pycache__
 utils_db/minikraken2_v2_8GB
 TLL*/
-
+utils
+utils_db
+test_novel
 #Some software that are not ready to be added
 #utils/metabat
 #utils/jgi_summarize_bam_contig_depths
@@ -34,7 +36,10 @@ TLL*/
 #utils/checkm
 #utils/kraken2
 #utils/MaxBin-2.2.4
-
+src_utils_denis/
+OPERA-MS-DB*
+minikraken_8GB*
+OPERA-MS-UTILS.py
 OPERA-LG/bin/.#OPERA-long-read.pl
 
 #For the test files

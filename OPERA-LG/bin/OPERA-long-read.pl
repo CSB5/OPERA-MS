@@ -61,6 +61,7 @@ Options:
     --short-read-tooldir: Directory that contains binaries to the chosen short read mapping tool (default PATH)
     --samtools-dir:Directory that contains samtools binaries (default PATH)
     --opera: Folder which contains opera binary (default PATH)
+    --perl-dir: directory were perl used
     --illumina-read1: fasta file of illumina read1
     --illumina-read2: fasta file of illumina read2
     --help : prints this message
@@ -84,6 +85,7 @@ GetOptions(
     "minimap2=s"      => \$minimap2Dir,
     "opera=s"      => \$operaDir,
     "samtools-dir=s"  => \$samtools_dir,
+    "perl-dir=s" => \$perl_dir,
     "short-read-maptool=s" => \$short_read_maptool,
     "short-read-tooldir=s" => \$short_read_tooldir,
     "illumina-read1=s"      => \$illum_read1,
@@ -190,7 +192,7 @@ if(index($illum_read1, ",") == -1){#single sample assembly
     if( !$skip_short_read_mapping && ! -e "${file_pref}.bam" &&  !($illum_read1 eq "NONE" && $illum_read2 eq "NONE")){
 	$start_time = time;
 	print " *** *** Mapping short-reads using  $short_read_maptool...\n";
-    	run_exe("$operaDir/../../utils/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam 2> preprocess_reads.err");
+    	run_exe("$perl_dir/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --out ${file_pref}.bam 2> preprocess_reads.err");
 	if($?){
 	    die "Error during read preprocessing. Please see $outputDir/preprocess_reads.err for details.\n";
 	}
@@ -203,7 +205,7 @@ else{
     @illum_read2_tab = split(/,/, $illum_read2);
     for(my $i = 0; $i < @illum_read1_tab; $i++){
 	if(! -e "$file_pref\_$i.bam"){
-	    run_exe("$operaDir/../../utils/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1_tab[$i] --illumina-read2 $illum_read2_tab[$i] --out $file_pref\_$i.bam");
+	    run_exe("$perl_dir/perl $operaDir/preprocess_reads.pl $str_path_dir --nproc $nproc --contig $contigFile --illumina-read1 $illum_read1_tab[$i] --illumina-read2 $illum_read2_tab[$i] --out $file_pref\_$i.bam");
 	}
     }
 }

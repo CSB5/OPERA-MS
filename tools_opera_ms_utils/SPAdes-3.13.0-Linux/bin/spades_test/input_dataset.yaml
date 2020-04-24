@@ -1,6 +1,0 @@
-- "left reads":
-  - "/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/share/spades/test_dataset/ecoli_1K_1.fq.gz"
-  "orientation": "fr"
-  "right reads":
-  - "/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/share/spades/test_dataset/ecoli_1K_2.fq.gz"
-  "type": "paired-end"

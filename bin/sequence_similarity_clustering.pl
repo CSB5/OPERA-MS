@@ -252,7 +252,7 @@ sub recover_edges{
     close(GOOD);
 
     #Add edges above the threshold, those edge can only be internal to a cluster identified by sigma
-    open (FILE, "$paired_edges_file_above_thresh") or die;
+    open (FILE, "$paired_edges_file_above_thresh") or die("File $paired_edges_file_above_thresh does not exist\n");
     
     while (<FILE>){
         chomp $_;

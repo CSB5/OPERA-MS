@@ -101,7 +101,7 @@ while(<$opera_ms_cf>) {
 	    case "OUTPUT_DIR" {
 		$output_dir = $split_line[1];
 	    }
-
+	    
 	    case "SAMTOOLS_DIR" {
 		$samtools_path = $split_line[1];
 		if (! -e $samtools_path) {
@@ -111,6 +111,10 @@ while(<$opera_ms_cf>) {
 	    
 	    case "BWA_DIR"{
 		$short_read_tool_dir = $split_line[1];
+	    }
+
+	    case "TOOLS_DIR"{
+		$utils_dir = $split_line[1];
 	    }
 	    
 	    case "SIGMA_CONTIGS_FILE" {
@@ -256,7 +260,7 @@ get_read_size($illum_read1, "$sigma_dir/read_size.dat");
 
 my $preprocess_read_path = $bin_dir . "../OPERA-LG/bin/preprocess_reads.pl";
 my $short_analysis_path = $bin_dir . "short-read-analysis";
-my $utils_dir  = $bin_dir . "../utils";
+
 run_exe("$utils_dir/perl $preprocess_read_path --out $sigma_dir/short_read_analysis --tool-dir $utils_dir --nproc $nproc --contig $contigs_file --illumina-read1 $illum_read1 --illumina-read2 $illum_read2 --sigma-conf $sigma_dir/sigma.config --bundler-conf $lib_bundles_dir/$lib_bundles_config 2> $sigma_dir/preprocess_reads.err");
 if($? || ! -e "$sigma_dir/assembly_size.dat" || ! -e "$lib_bundles_dir/lib.txt"){
     die "Error during short read pre-preocessing. Please see $sigma_dir/preprocess_reads.err $sigma_dir/short_read_analysis.out $sigma_dir/short_read_analysis.err for details.\n";

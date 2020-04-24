@@ -13,15 +13,19 @@ def run_exe(cmd):
         
 
 def compute_mash_dist(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file):
-    if not os.path.exists(query_ref_dist_file):        
-        run_exe("{}/../tools_opera_ms_utils/mash dist -p {} -d 0.3 {} {} > {}".format(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file))
-        
+    if not os.path.exists(query_ref_dist_file):
+        try:
+            run_exe("{}/../tools_opera_ms/mash dist -p {} -d 0.3 {} {} > {}".format(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file))
+        except Exception as e:
+            print(e)
+            run_exe("touch {}".format(query_ref_dist_file))
+            
 def get_sketch(query_files, thread, sketch_size, kmer_size, outdir, file_type, sketch_name): 
 
     sketch = "{}/{}".format(outdir, sketch_name)
     if not os.path.exists(sketch+".msh"):
         run_exe("mkdir -p {}".format(outdir))    
-        run_exe("{}/../tools_opera_ms_utils/mash sketch -p {} -k {} -s {} -o {} {}  > {}/{}.out 2> {}/{}.err ".format(script_dir, thread, kmer_size, sketch_size, sketch, query_files, outdir, sketch_name, outdir, sketch_name))
+        run_exe("{}/../tools_opera_ms/mash sketch -p {} -k {} -s {} -o {} {}  > {}/{}.out 2> {}/{}.err ".format(script_dir, thread, kmer_size, sketch_size, sketch, query_files, outdir, sketch_name, outdir, sketch_name))
     return sketch+".msh"
 
 
@@ -61,16 +65,28 @@ def get_novel_sequence(mag_dir, dist_file, outdir):
 
 
 def get_cluster(script_dir, hclust_thres, dist_file, outdir, file_type):
-    dist_matrix = get_matrix(dist_file, len(file_type), outdir)
+    
+    (dist_matrix, dimension) = get_matrix(dist_file, len(file_type), outdir)
     cluster_file = outdir + "/cluster.tsv"
     try:
         os.remove(cluster_file)
     except:
         pass
-    #cmd = "Rscript --vanilla {}/mags_clustering.r {} {} {}".format(script_dir, dist_matrix,  hclust_thres, cluster_file)
-    cmd = "python {}/mags_clustering.py {} {} {}".format(script_dir, dist_matrix,  hclust_thres, cluster_file)
-    run_exe(cmd)
-
+    
+    if dimension > 1:
+        cmd = "python {}/mags_clustering.py {} {} {}".format(script_dir, dist_matrix,  hclust_thres, cluster_file)
+        run_exe(cmd)
+    else:
+        if dimension == 1:
+            with open(dist_matrix, "r") as fp:
+                for line in fp:
+                    only_bin = line.strip()
+                    break
+            with open(cluster_file, "w") as fw:
+                fw.write("clusters\n{}\t1".format(only_bin))
+        elif dimension == 0:
+            run_exe("touch {}".format(cluster_file))
+        
 def get_matrix(dist_file, extension_len, outdir):
     
     matrix = {}
@@ -116,7 +132,7 @@ def get_matrix(dist_file, extension_len, outdir):
                     dist = matrix[key][key2]
                     f.write(str(dist) + '\t')         
                 f.write('\n')
-    return dist_matrix
+    return dist_matrix, int(dimension)
 
 
 def main(args):
@@ -157,25 +173,20 @@ def main(args):
 
     print("\n***generating novel sequences\n")
     novel_sequence, novel_seq_files = get_novel_sequence(query_dir, query_ref_dist_file, query_ref_outdir)
-
-
-    ## not used anymore
-    #print("\n***generating clusters\n")
-    #get_cluster(script_dir, hclust_thres, query_ref_dist_file, query_ref_outdir, file_type)
     
     # find novel genome clusters to identify the novel species (a species is a cluster of novel genome)
     novel_sketch_name = "novel_sketch"
     novel_outdir = outdir + "/novel/"
 
     print("\n***creating mash sketch for novel sequence\n")
+    novel_dist_file = novel_outdir + "/novel_dist.dat"      
     novel_sketch = get_sketch(novel_seq_files, thread, sketch_size, kmer_size, novel_outdir, file_type, novel_sketch_name)
+    
     # *** merge with the reference genome
-    novel_dist_file = novel_outdir + "/novel_dist.dat"
     print("\n***calculating mash distance for novel sequence\n")
     compute_mash_dist(script_dir, thread, novel_sketch, novel_sketch,  novel_dist_file)
 
     #generate matrix
-    #PROBLEM:  if only 1 genome the clustering crash
     print("\n***generating novel cluster\n")
     get_cluster(script_dir, hclust_thres, novel_dist_file, novel_outdir, file_type)
 

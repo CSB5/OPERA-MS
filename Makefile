@@ -1,4 +1,8 @@
 
+tools_dir = tools_opera_ms
+
+ln -s $(shell pwd)/src_utils/OPERA-MS-UTILS.py $(shell pwd)/
+
 install: sigma opera short_read_analysis mummer perlmodule 
 
 clean : sigmaclean operaclean
@@ -13,10 +17,10 @@ short_read_analysis:
 	cd SHORT_READ_ANALYSIS/src/&&make;
 
 mummer:
-	cd utils&&sh install_mummer3.23.sh
+	cd $(tools_dir)&&sh install_mummer3.23.sh
 
 perlmodule:
-	cd utils&&perl install_perl_module.pl;
+	cd $(tools_dir)&&perl install_perl_module.pl;
 
 sigmaclean:
 	cd SIGMA&&make clean;

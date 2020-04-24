@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 
-my ($inter_dir, $out_dir, $contigs_file, $reference_mapping_dir, $opera_ms_db, $opera_ms_dir, $FLAG_USE_REF) = @ARGV;
+my ($inter_dir, $out_dir, $contigs_file, $reference_mapping_dir, $opera_ms_db, $opera_ms_dir, $perl_dir, $FLAG_USE_REF) = @ARGV;
 #my $out_dir = $ARGV[1];
 #my $contigs_file = $ARGV[2];
 
@@ -236,7 +236,7 @@ foreach my $species (keys %species_to_analyze){
     close(REF_CLUS);
     
     #Extract the edges and contigs from that cluster
-    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/get_edges_from_matrix.pl $inter_dir $out_dir/$species/matrix $out_dir/$species $contigs_file 0 1000 2> $out_dir/$species/get_edge_matrix.log");
+    run_exe("$perl_dir/perl $opera_ms_dir/bin/get_edges_from_matrix.pl $inter_dir $out_dir/$species/matrix $out_dir/$species $contigs_file 0 1000 2> $out_dir/$species/get_edge_matrix.log");
     if($?){
 	die "Error during get_edges_from_matrix.pl. Please see $out_dir/$species/get_edge_matrix.err for details.\n";
     }

@@ -2,13 +2,13 @@
 #use strict;
 use warnings;
 
-my ($working_dir, $contig_file, $read_file, $read_mapping_dir, $nb_process, $scaffold_length_threshold, $opera_bin_dir, $racon_dir,  $minimap2_dir, $mummer_dir) = @ARGV;
+my ($working_dir, $contig_file, $read_file, $read_mapping_dir, $nb_process, $scaffold_length_threshold, $opera_bin_dir, $perl_dir, $racon_dir,  $minimap2_dir, $mummer_dir) = @ARGV;
 
 require "$opera_bin_dir/../../bin/test_time.pl";
 
 run_exe("mkdir $working_dir") if(! -d $working_dir);
 
-my $perl_path = "$opera_bin_dir/../../utils/perl";
+my $perl_path = "$perl_dir/perl";
 my $start_time = time;
 my $start_time_begin = time;
 my $end_time;

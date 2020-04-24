@@ -1,7 +1,6 @@
 from genfunc import *
 import re
 
-
 def checkm_analysis(assembly_dir, binner, nb_thread, high_qual_mags, medium_qual_mags):
 
     #Identify the correct suffix for check analysis

@@ -1,0 +1,36 @@
+Command line: metaspades.py	-o	/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/bin/TTT	--test	
+
+System information:
+  SPAdes version: 3.13.0
+  Python version: 2.7.14
+  OS: Linux-2.6.32-431.el6.x86_64-x86_64-with-centos-6.5-Final
+
+Output dir: /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/bin/spades_test
+Mode: read error correction and assembling
+Debug mode is turned OFF
+
+Dataset parameters:
+  Metagenomic mode
+  Reads:
+    Library number: 1, library type: paired-end
+      orientation: fr
+      left reads: ['/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/share/spades/test_dataset/ecoli_1K_1.fq.gz']
+      right reads: ['/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/share/spades/test_dataset/ecoli_1K_2.fq.gz']
+      interlaced reads: not specified
+      single reads: not specified
+      merged reads: not specified
+Read error correction parameters:
+  Iterations: 1
+  PHRED offset will be auto-detected
+  Corrected reads will be compressed
+Assembly parameters:
+  k: [21, 33, 55]
+  Repeat resolution is enabled
+  Mismatch careful mode is turned OFF
+  MismatchCorrector will be SKIPPED
+  Coverage cutoff is turned OFF
+Other parameters:
+  Dir for temp files: /mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/bin/spades_test/tmp
+  Threads: 16
+  Memory limit (in Gb): 125
+

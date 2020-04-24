@@ -2,7 +2,7 @@
 use warnings "all";
 use Statistics::Basic qw(:all);
 
-my ($coverage_contig_file, $sigma_dir, $num_processor, $cluster_length_threshold, $opera_ms_dir) = @ARGV;
+my ($coverage_contig_file, $sigma_dir, $perl_dir, $num_processor, $cluster_length_threshold, $opera_ms_dir) = @ARGV;
 
 my $NB_STEP = 10;
 my $FRACTION_THRESHOLD = 0.01;
@@ -58,7 +58,7 @@ sub evaluate_cluster{
 
     $res = 0;
     
-    run_exe("${opera_ms_dir}utils/perl $opera_ms_dir/bin/cluster_evaluation.pl $coverage_contig_file $cluster_file 2> $out_file");
+    run_exe("$perl_dir/perl $opera_ms_dir/bin/cluster_evaluation.pl $coverage_contig_file $cluster_file 2> $out_file");
     if($?){
 	die "Error in during bin/cluster_evaluation.pl. Please see $out_file for details.\n";
     }

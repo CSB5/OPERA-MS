@@ -1,8 +1,0 @@
-- "left reads":
-  - "/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/bin/spades_test/corrected/ecoli_1K_1.fq.00.0_0.cor.fastq.gz"
-  "orientation": "fr"
-  "right reads":
-  - "/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/bin/spades_test/corrected/ecoli_1K_2.fq.00.0_0.cor.fastq.gz"
-  "single reads":
-  - "/mnt/projects/bertrandd/opera_lg/META_GENOMIC_HYBRID_ASSEMBLY/SOFWARE/SPAdes-3.13.0-Linux/bin/spades_test/corrected/ecoli_1K__unpaired.00.0_0.cor.fastq.gz"
-  "type": "paired-end"

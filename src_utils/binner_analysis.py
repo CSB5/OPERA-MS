@@ -1,7 +1,7 @@
 import os
-from genfunc import run_exe, create_dir, get_contig_file
+from genfunc import *
 
-util_dir = os.path.dirname(os.path.realpath(__file__)) + "/../tools_opera_ms_utils/"
+#util_dir = os.path.dirname(os.path.realpath(__file__)) + "/../tools_opera_ms/"
 
 def run_maxbin2(contig_file, short_read1, assembly_dir, sample_name, nb_thread):
     out_dir = assembly_dir + "/maxbin2"

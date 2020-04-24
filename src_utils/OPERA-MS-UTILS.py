@@ -25,10 +25,25 @@ def get_long_read_file(read_file):
 
 #def run_hybrid_binning(contig_file, short_read1, short_read2, assembly_dir, sample_name, nb_thread):
             
-def download_utils_db():
-    mash_db = "/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/genomeDB_Sketch.msh";
-    kraken_db = "/mnt/genomeDB/misc/softwareDB/kraken2/standard-20190108";
+def download_utils_db(db_type):
+    try:
+        cmd = "mkdir {}/../utils_db".format(util_dir)
+        run_exe(cmd, True)
+    except:
+        pass
     
+    #mash_db = "/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/genomeDB_Sketch.msh";
+    if db_type == "kraken2":
+        if  not os.path.exists(("{}/../utils_db/minikraken_8GB_20200312/hash.k2d".format(util_dir))):
+        
+            cmd = "wget -nc -P {}/../utils_db/ ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz".format(util_dir)
+            run_exe(cmd, True)
+            cmd = "tar -xvzf {}/../utils_db/minikraken_8GB_202003.tgz -C {}/../utils_db".format(util_dir, util_dir)
+            run_exe(cmd, True)
+            cmd = "rm {}/../utils_db/minikraken_8GB_202003.tgz".format(util_dir)
+            run_exe(cmd, True)
+    if db_type == "novel-species":
+        pass
     
 def read_taxonomy_file(genomes_dir, taxonomy, db_genome_dir, genome_list, genome_length):
     OUT_LIST = open(genome_list, "w")
@@ -38,6 +53,12 @@ def read_taxonomy_file(genomes_dir, taxonomy, db_genome_dir, genome_list, genome
     tax_info = {}
     genome = ""
     species_name = ""
+
+    DIRECTORY_MAX_NB_GENOME = 4000
+    dir_id = 1
+    current_db_genomes_dir = db_genome_dir + "_" + str(dir_id)
+    create_dir(current_db_genomes_dir)
+    nb_genomes_in_dir = 0
     for line in FILE:
         #print line
         line_list = (line.rstrip('\n')).split("\t")
@@ -52,13 +73,20 @@ def read_taxonomy_file(genomes_dir, taxonomy, db_genome_dir, genome_list, genome
         if species_name == "":
             exit("Malformed taxonomy file: " + taxonomy + "\n" + line)
         else:
+            #
+            if nb_genomes_in_dir == DIRECTORY_MAX_NB_GENOME:
+                dir_id += 1
+                current_db_genomes_dir = db_genome_dir + "_" + str(dir_id)
+                nb_genomes_in_dir = 0
+                create_dir(current_db_genomes_dir)
             #copy the file in the opera-ms-db directory
-            novel_genome_name = db_genome_dir + "/" + species_name + "__" + genome  #Need to fix this !!!
+            novel_genome_name = current_db_genomes_dir + "/" + species_name + "__" + genome  #Need to fix this !!!
             #Check for gzip file
             run_exe("cp {}/{} {}".format(genomes_dir, genome, novel_genome_name), True)
             OUT_LIST.write(novel_genome_name + "\n")
             #Write the length
             OUT_LENGTH.write("{}\t{}\n".format(novel_genome_name, "\t".join([str(x) for x in compute_genome_length(novel_genome_name)])))
+            nb_genomes_in_dir += 1
     OUT_LENGTH.close()
     OUT_LIST.close()
     FILE.close()
@@ -80,8 +108,7 @@ def opera_ms_db(genomes_dir, taxonomy, db_name, nb_thread):
     #Create the output database directory
     create_dir(db_name)
     genome_db = db_name + "/genomes"
-    create_dir(genome_db)
-    
+        
     #Read the taxonomy file
     #The genome name will be renamed according to the taxonomy file: SPECIES_NAME__GENOME_NAME
     genome_list = db_name + "/genomes_list.txt"
@@ -165,8 +192,8 @@ def main(args):
         if command == "opera-ms-db":
             opera_ms_db(args.genomes_dir, args.taxonomy, args.db_name, args.thread)
             
-        elif command == "utils-db":
-            print("TO DO")
+        elif command == "utils-db":            
+            download_utils_db(args.dbtype)            
 
         elif command == "check_dependency":
             check_installation()
@@ -211,7 +238,7 @@ if __name__ == "__main__":
     checkm_parser.add_argument("-M", "--medium-qual-mags",  default="50,10", help = 'Completness and contamination values for medium quality genomes (default: 50,10)', type=str)
 
     #circular identification
-    circular_sequence_parser = subparsers.add_parser('circular-sequence', parents=[config_parser.parser], help='Identify circular sequences')
+    #circular_sequence_parser = subparsers.add_parser('circular-sequence', parents=[config_parser.parser], help='Identify circular sequences')
     
     #novel species
     novel_species_parser = subparsers.add_parser('novel-species', help='Run novel species identification')
@@ -235,16 +262,17 @@ if __name__ == "__main__":
     opera_db_parser._action_groups[-1].add_argument("-g", "--genomes-dir",  required=True, help='Directory that contains genome files')
     opera_db_parser._action_groups[-1].add_argument("-x", "--taxonomy",  required=True, help='Species name of each genomes')
     opera_db_parser._action_groups[-1].add_argument("-d", "--db-name",  required=True, help='Database name')
-    opera_db_parser.add_argument("-t", "--thread", help='Number of threads [Default 2]')
+    opera_db_parser.add_argument("-t", "--thread", help='Number of threads [Default 2]',  default=2, type = int)
     
     #utils-db
-    utils_db_parser = subparsers.add_parser('utils_db', help='Download all the data base required by the utils software')
-
+    utils_db_parser = subparsers.add_parser('utils-db', help='Download all the data base required by the utils software')
+    mandatory = utils_db_parser.add_argument_group("mandatory arguments")
+    utils_db_parser._action_groups[-1].add_argument("-db", "--dbtype", choices = ["kraken2", "novel-species"], required=True, help='Kraken2 or novel species analysis database')
+    
     #check if the utils sofware are functional in the current system
-    check_install_parser = subparsers.add_parser('check_dependency', help='Check which OPERA-MS-UTILS software are functional in the current system')
+    check_install_parser = subparsers.add_parser('check_dependency', help='Check which OPERA-MS-UTILS software are functional in the current system')   
     
-    args=parser.parse_args()
-    
+    args=parser.parse_args()    
     
     #print(args.checkm)#print(args.metabat2)
     main(args)
