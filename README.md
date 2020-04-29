@@ -15,7 +15,7 @@ To install OPERA-MS on a typical Linux/Unix system run the following commands:
 git clone https://github.com/CSB5/OPERA-MS.git
 cd OPERA-MS
 make
-perl OPERA-MS.pl CHECK_DEPENDENCY
+perl OPERA-MS.pl check-dependency
 ```
 If you encounter any problems during the installation, or if some third party software binaries are not functional on your system, please see the [**Dependencies**](#dependencies) section. 
 
@@ -27,10 +27,20 @@ perl ../OPERA-MS.pl \
     --short-read1 R1.fastq.gz \
     --short-read2 R2.fastq.gz \
     --long-read long_read.fastq \
+    --no-ref-clustering \
     --out-dir RESULTS 2> log.err
 ```
 This will assemble a low diversity mock community in the folder **RESULTS**.
 Note that in the case of interruption during an OPERA-MS run, using the same command-line will re-start the execution after the last completed checkpoint.
+
+# OPERA-MS genome database
+
+To download the precomputed genome database required for the reference based clustering, simply run the following command:
+```
+perl OPERA-MS.pl install-db
+```
+The database contains a representative genome of the 23,000 bacteria species from [GTDB](https://gtdb.ecogenomic.org/) and requires 35Gb of free disc space.
+Alternativelly a custom database can be generated the using the [**OPERA-MS-UTILS opera-db**](https://github.com/CSB5/OPERA-MS/wiki/Utilities#opera-ms-db) command.
 
 # Usage
 
@@ -45,6 +55,8 @@ Note that in the case of interruption during an OPERA-MS run, using the same com
 - **--out-dir** : directory where OPERA-MS results will be outputted
 
 ### Optional arguments 
+
+ - **--genome-db** : path to a custom OPERA-MS genome database use during reference level clustering (defaut OPERA-MS-DB)
 
 - **--no-ref-clustering**  : disable reference based clustering
 
@@ -78,11 +90,13 @@ The following output files can be found in the specified output directory i.e. *
 The file **contigs.fasta** (and **contigs.polished.fasta** if the assembly has been polished) contains the assembled contigs, **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest contig etc.), and
 [**contig_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Contig-info-file-description) provides detailed overview of the assembled contigs.
 
-Finally, OPERA-MS strain-level clusters (one fasta file per strain) can be found in the directory **RESULTS/opera_ms_clusters/** and [**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of assembly statistics for these clusters. Note that these clusters are constructed for producing high-quality assemblies and are therefore conservative. They can be binned further using approaches such as [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
+Finally, OPERA-MS strain-level clusters (one fasta file per strain) can be found in the directory **RESULTS/opera_ms_clusters/all** and [**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of assembly statistics for these clusters. Note that these clusters are constructed for producing high-quality assemblies and are therefore conservative. They can be binned further using approaches such as [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
 
-### OPERA-MS-utils (coming soon ...)
+### OPERA-MS-UTILS
 
-Scripts to post-process the assemblies including binning, bin assessment, identification of circular contigs and annotation of novel species (as described in the paper), will be available as part of the next release. Please contact us if you would like to use a pre-release version.
+Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/Utilities) command. We are now providing stream line analysis tools to compute the concordance between the short and long read, the contig binning, bin assessment and annotation of novel species (as described in the paper). A complete desctiption of those tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/Utilities).
+
+This is a work in progress and additional tools will be available as part of the next release. Please contact us if you would like to add your favorite metagenomic analysis tool.
 
 # Resource Requirements
 
