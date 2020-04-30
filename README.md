@@ -122,7 +122,7 @@ The only true dependency is `cpanm`, which is used to automatically install Perl
 4) [blasr](https://github.com/PacificBiosciences/blasr) - (version 5.1 and above which uses '-' options)
 5) [minimap2]( https://github.com/lh3/minimap2) (tested with version 2.11-r797)
 6) [Racon](https://github.com/isovic/racon) - (version 0.5.0)
-7) [Mash](https://github.com/marbl/Mash) - (tested with version 1.1.1)
+7) [Mash](https://github.com/marbl/Mash) - (tested with version 2.2)
 8) [MUMmer](http://mummer.sourceforge.net/) - (tested with version 3.23)
 9) [Pilon](https://github.com/broadinstitute/pilon/wiki) - (tested with version 1.22)
 
