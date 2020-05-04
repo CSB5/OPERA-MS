@@ -1,0 +1,67 @@
+.TH "esl-seqrange" 1 "@RELEASEDATE@" "@PACKAGE@ @RELEASE@" "@PACKAGE@ Manual"
+
+.SH NAME
+.TP
+esl-seqrange - determine a range of sequences for one of many parallel processes.
+
+.SH SYNOPSIS
+
+.TP
+.B esl-sfetch
+.I [options]
+.I seqfile
+.I procidx
+.I nproc
+
+.SH DESCRIPTION
+
+.pp
+.B esl-seqrange
+reads an indexed 
+.I seqfile
+and determines the range of sequence indices in that file that process
+number 
+.I procidx
+out of
+.I nproc
+total processes should operate on during a parallel processing of 
+.I seqfile.
+
+.pp
+The 
+.I seqfile 
+must be indexed first using 
+.B esl-sfetch --index <seqfile>.
+This creates an SSI index file
+.I <seqfile>.ssi.
+An SSI file is required in order for
+.B esl-seqrange
+to work.
+
+Sequence index ranges are calculated using a simple rule: the number
+of sequences for each process should be identical, or as close as
+possible to identical, across all processes. The lengths of the sequences
+are not considered (even though they probably should be).
+
+.SH OPTIONS
+
+.TP
+.B -h
+Print brief help; includes version number and summary of
+all options, including expert options.
+
+.TP
+.BI --informat " <s>"
+Specify that the sequence file is in format
+.I <s>,
+where 
+.I <s> 
+may be FASTA, GenBank, EMBL, UniProt, or DDBJ.  This string
+is case-insensitive ("genbank" or "GenBank" both work, for example).
+
+.SH AUTHOR
+
+Easel and its documentation are @EASEL_COPYRIGHT@.
+@EASEL_LICENSE@.
+See COPYING in the source code distribution for more details.
+The Easel home page is: @EASEL_URL@

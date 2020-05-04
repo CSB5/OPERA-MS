@@ -33,9 +33,10 @@ test_novel
 #bin/novel_analysis.py
 #utils_db
 #utils_db/*
-#utils/checkm
+tools_opera_ms/checkm
 #utils/kraken2
-#utils/MaxBin-2.2.4
+tools_opera_ms/MaxBin-2.2.4/*
+tools_opera_ms/MaxBin-2.2.4
 src_utils_denis/
 OPERA-MS-DB*
 minikraken_8GB*

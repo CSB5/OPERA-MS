@@ -20,12 +20,13 @@ def compute_mash_dist(script_dir, thread, ref_sketch, query_sketch,  query_ref_d
             print(e)
             run_exe("touch {}".format(query_ref_dist_file))
             
-def get_sketch(query_files, thread, sketch_size, kmer_size, outdir, file_type, sketch_name): 
-
+def get_sketch(query_list, thread, sketch_size, kmer_size, outdir, file_type, sketch_name): 
+    
     sketch = "{}/{}".format(outdir, sketch_name)
     if not os.path.exists(sketch+".msh"):
         run_exe("mkdir -p {}".format(outdir))    
-        run_exe("{}/../tools_opera_ms/mash sketch -p {} -k {} -s {} -o {} {}  > {}/{}.out 2> {}/{}.err ".format(script_dir, thread, kmer_size, sketch_size, sketch, query_files, outdir, sketch_name, outdir, sketch_name))
+        run_exe("{}/../tools_opera_ms/mash sketch -p {} -k {} -s {} -o {} -l {}  > {}/{}.out 2> {}/{}.err ".format(script_dir, thread, kmer_size, sketch_size, sketch, query_list, outdir, sketch_name, outdir, sketch_name))
+        #run_exe("{}/../tools_opera_ms/mash sketch -p {} -k {} -s {} -o {} {}  > {}/{}.out 2> {}/{}.err ".format(script_dir, thread, kmer_size, sketch_size, sketch, query_files, outdir, sketch_name, outdir, sketch_name))
     return sketch+".msh"
 
 
@@ -60,7 +61,7 @@ def get_novel_sequence(mag_dir, dist_file, outdir):
                 
                 fp.write(os.path.join(mag_dir, mag_bin) + "\n")
                 novel_seq_files = novel_seq_files + os.path.join(mag_dir, mag_bin)  + " "
-                mh.write("{}\t{}\t{}\t{}\t{}\n".format("UNKOWN", os.path.join(mag_dir, mag_bin), "1", "NA", "NA"))
+                mh.write("{}\t{}\t{}\t{}\t{}\n".format("UNKNOWN", os.path.join(mag_dir, mag_bin), "1", "NA", "NA"))
     return (novel_sequence, novel_seq_files)
 
 
@@ -157,11 +158,13 @@ def main(args):
     
     query_ref_outdir = outdir + "/query_ref/"
     sketch_name = "query_sketch"
-    query_files = "{}/*{}".format(query_dir, file_type)
+    query_list = "{}/file_list.dat".format(query_dir)
     
+    run_exe("ls -d {}/*.{} > {}".format(query_dir, file_type, query_list))
     #create mash sketch
     print("\n***creating mash sketch for input\n")
-    query_sketch = get_sketch(query_files, thread, sketch_size, kmer_size, query_ref_outdir, file_type, sketch_name)
+    query_sketch = get_sketch(query_list, thread, sketch_size, kmer_size, query_ref_outdir, file_type, sketch_name)
+    run_exe("rm {}".format(query_list))
     
     #Compute the mash distance between the mags and reference genomes
     query_ref_dist_file = query_ref_outdir + "/query_ref_dist.dat"
@@ -169,7 +172,6 @@ def main(args):
     compute_mash_dist(script_dir, thread, ref_sketch, query_sketch,  query_ref_dist_file)
     
     #generate the distance file and identify the novel genome based on distance to know genome < 0.05
-    #PROBLEM: genome without distance to known ref genome are excluded
 
     print("\n***generating novel sequences\n")
     novel_sequence, novel_seq_files = get_novel_sequence(query_dir, query_ref_dist_file, query_ref_outdir)
@@ -177,11 +179,17 @@ def main(args):
     # find novel genome clusters to identify the novel species (a species is a cluster of novel genome)
     novel_sketch_name = "novel_sketch"
     novel_outdir = outdir + "/novel/"
-
-    print("\n***creating mash sketch for novel sequence\n")
-    novel_dist_file = novel_outdir + "/novel_dist.dat"      
-    novel_sketch = get_sketch(novel_seq_files, thread, sketch_size, kmer_size, novel_outdir, file_type, novel_sketch_name)
+    novel_seq_list = query_dir + "/file_list.dat"
     
+    with open(novel_seq_list, "w") as fp:
+        for line in novel_seq_files.split():
+            fp.write(line + "\n")
+    
+    
+    print("\n***creating mash sketch for novel sequence\n")
+    novel_dist_file = novel_outdir + "/novel_dist.dat"   
+    novel_sketch = get_sketch(novel_seq_list, thread, sketch_size, kmer_size, novel_outdir, file_type, novel_sketch_name)
+    run_exe("rm {}".format(novel_seq_list))
     # *** merge with the reference genome
     print("\n***calculating mash distance for novel sequence\n")
     compute_mash_dist(script_dir, thread, novel_sketch, novel_sketch,  novel_dist_file)

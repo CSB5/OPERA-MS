@@ -1,0 +1,10 @@
+#! /usr/bin/perl
+
+use demotic_blast;
+
+while (&demotic_blast::parse(\*STDIN))
+{
+    &demotic_blast::profmarkout(\*STDOUT);
+}
+
+

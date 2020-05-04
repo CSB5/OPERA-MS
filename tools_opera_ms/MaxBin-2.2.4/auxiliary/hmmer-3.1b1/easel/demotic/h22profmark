@@ -1,0 +1,10 @@
+#! /usr/bin/perl
+
+use demotic_h2;
+
+while (&demotic_h2::parse(\*STDIN))
+{
+    &demotic_h2::profmarkout(\*STDOUT);
+}
+
+

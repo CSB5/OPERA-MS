@@ -1,0 +1,16 @@
+# STOCKHOLM 1.0
+#=GF AU Infernal 0.1
+
+tRNA1         GCGGAUUUAGCUCAGUuGGG.AGAGCGCCAGACUGAAGAUCUGGAGGuCCUGUGUUCGAUCCACAGAAUUCGCA
+#=GR tRNA1 PP ****************9887.*****************************************************
+tRNA2         UCCGAUAUAGUGUAAC.GGCuAUCACAUCACGCUUUCACCGUGGAGA.CCGGGGUUCGACUCCCCGUAUCGGAG
+#=GR tRNA2 PP ****************.8888**************************.**************************
+tRNA3         UCCGUGAUAGUUUAAU.GGUcAGAAUGGGCGCUUGUCGCGUGCCAGA.UCGGGGUUCAAUUCCCCGUCGCGGAG
+#=GR tRNA3 PP ****************.******************************.**************************
+tRNA4         GCUCGUAUGGCGCAGU.GGU.AGCGCAGCAGAUUGCAAAUCUGUUGGuCCUUAGUUCGAUCCUGAGUGCGAGCU
+#=GR tRNA4 PP ****************.***.*****************************************************
+tRNA5         ....ACAUGGCGCAGUuGGU.AGCGCGCUUCCCUUGCAAGGAAGAGGuCAUCGGUUCGAUUCCGGUUGC.....
+#=GR tRNA5 PP ....****************.************************************************.....
+#=GC SS_cons  (((((((,,<<<<___.___._>>>>,<<<<<_______>>>>>,,,.,<<<<<_______>>>>>))))))):
+#=GC RF       gccccugUAGcucAaU.GGU.AgagCauuggaCUuuuAAuccaaagg.ugugGGUUCgAaUCCcaccaggggcA
+//

@@ -1,0 +1,11 @@
+#! /usr/bin/perl
+
+use demotic_fasta;
+
+while (&demotic_fasta::parse(\*STDIN))
+{
+    &demotic_fasta::profmarkout(\*STDOUT);
+}
+
+
+

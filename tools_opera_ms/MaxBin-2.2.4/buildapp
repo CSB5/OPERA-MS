@@ -1,0 +1,209 @@
+#!/usr/bin/perl -w
+use strict;
+use FindBin qw($Bin);
+
+my $cmd;
+my $i;
+
+my $URLBASE = "http://downloads.jbei.org/data/microbial_communities/MaxBin/getfile.php";
+my $TARGET = "$Bin/auxiliary";
+my $setting_f = "$Bin/setting";
+my $idba_f = "idba-1.1.1.tar.gz";
+my $hmmer_f = "hmmer-3.1b1.tar.gz";
+my $frag_f = "FragGeneScan1.30.tar.gz";
+my $bowtie_f = "bowtie2-2.2.3-source.zip";
+my $idba_dir = "idba-1.1.1";
+my $hmmer_dir = "hmmer-3.1b1";
+my $frag_dir = "FragGeneScan1.30";
+my $bowtie_dir = "bowtie2-2.2.3";
+
+if (-d $TARGET)
+{
+	$cmd = "rm -rf $TARGET";
+	system($cmd);
+}
+mkdir($TARGET);
+print "Downloading and building auxiliary software packages from mirror sites...\n";
+
+chdir($TARGET);
+print "Downloading and Building IDBA-UD...\n";
+$cmd = "wget $URLBASE\?$idba_f -O $idba_f  1>/dev/null 2>/dev/null";
+system($cmd);
+if (!(-e $idba_f))
+{
+	print "IDBA-UD was not downloaded successfully. Please make sure that wget works properly.\n";
+	exit;
+}
+$cmd = "tar -zxvf $idba_f 1>/dev/null 2>/dev/null";
+system($cmd);
+if (!(-d $idba_dir))
+{
+	print "Cannot unzip IDBA-UD tar.gz file. Please make sure that [tar] works properly.\n";
+	exit;
+}
+chdir($idba_dir);
+$cmd = "./configure 1>$Bin/autobuild.log.idba.configure.out 2>$Bin/autobuild.log.idba.configure.err";
+system($cmd);
+$cmd = "make 1>$Bin/autobuild.log.idba.make.out 2>$Bin/autobuild.log.idba.make.err";
+system($cmd);
+$cmd = "chmod 0755 bin/idba_ud";
+system($cmd);
+
+if (!(-e "bin/idba_ud"))
+{
+	print "IDBA-UD was not built successfully.\n";
+	print "Error recorded in autobuild.log.idba.configure.out, autobuild.log.idba.configure.err,\n";
+	print "      autobuild.idba.make.out, and autobuild.idba.make.err.\n";
+	print "Most likely error:\n==============\n";
+	$cmd = "head $Bin/autobuild.log.idba.configure.err -n 1";
+	system($cmd);
+	print "--- or ---\n";
+	$cmd = "head $Bin/autobuild.log.idba.make.err -n 1";
+	system($cmd);
+	print "==============\n";
+	printError();
+	exit;
+}
+$cmd = "rm -f $Bin/autobuild.log.idba.*";
+system($cmd);
+
+chdir($TARGET);
+print "Downloading and Building HMMER3...\n";
+$cmd = "wget $URLBASE\?$hmmer_f -O $hmmer_f 1>/dev/null 2>/dev/null";
+system($cmd);
+if (!(-e $hmmer_f))
+{
+	print "HMMER3 was not downloaded successfully. Please make sure that wget works properly.\n";
+	exit;
+}
+$cmd = "tar -zxvf $hmmer_f 1>/dev/null 2>/dev/null";
+system($cmd);
+if (!(-d $hmmer_dir))
+{
+	print "Cannot unzip HMMER3 tar.gz file. Please make sure that [tar] works properly.\n";
+	exit;
+}
+chdir($hmmer_dir);
+$cmd = "./configure 1>$Bin/autobuild.log.hmmer.configure.out 2>autobuild.log.hmmer.configure.err";
+system($cmd);
+$cmd = "make 1>$Bin/autobuild.log.hmmer.make.out 2>$Bin/autobuild.log.hmmer.make.err";
+system($cmd);
+$cmd = "chmod 0755 src/hmmsearch";
+system($cmd);
+
+if (!(-e "src/hmmsearch"))
+{
+	print "HMMER3 was not built successfully.\n";
+	print "Error recorded in autobuild.log.hmmer.configure.out, autobuild.log.hmmer.configure.err,\n";
+	print "      autobuild.hmmer.make.out, and autobuild.hmmer.make.err.\n";
+	print "Most likely error:\n==============\n";
+	$cmd = "head $Bin/autobuild.log.hmmer.configure.err -n 1";
+	system($cmd);
+	print "--- or ---\n";
+	$cmd = "head $Bin/autobuild.log.hmmer.make.err -n 1";
+	system($cmd);
+	print "==============\n";
+	printError();
+	exit;
+}
+$cmd = "rm -f $Bin/autobuild.log.hmmer.*";
+system($cmd);
+
+chdir($TARGET);
+print "Downloading and Building Bowtie2...\n";
+$cmd = "wget $URLBASE\?$bowtie_f -O $bowtie_f 1>/dev/null 2>/dev/null";
+system($cmd);
+if (!(-e $bowtie_f))
+{
+	print "Bowtie2 was not downloaded successfully. Please make sure that wget works properly.\n";
+	exit;
+}
+$cmd = "unzip $bowtie_f 1>/dev/null 2>/dev/null";
+system($cmd);
+if (!(-d $bowtie_dir))
+{
+	print "Cannot unzip bowtie2 zip file. Please make sure that [unzip] works properly.\n";
+	exit;
+}
+chdir($bowtie_dir);
+$cmd = "make 1>$Bin/autobuild.log.bowtie2.make.out 2>$Bin/autobuild.log.bowtie2.make.err";
+system($cmd);
+$cmd = "chmod 0755 bowtie2*";
+system($cmd);
+
+if (!(-e "bowtie2-align-s"))
+{
+	print "Bowtie2 was not built successfully.\n";
+	print "Error recorded in autobuild.log.bowtie2.make.out and autobuild.log.bowtie2.make.err.\n";
+	print "Most likely error:\n==============\n";
+	$cmd = "head $Bin/autobuild.log.bowtie2.make.err -n 1";
+	system($cmd);
+	print "==============\n";
+	printError();
+	exit;
+}
+$cmd = "rm -f $Bin/autobuild.log.bowtie2.*";
+system($cmd);
+
+chdir($TARGET);
+print "Downloading and Building FragGeneScan...\n";
+$cmd = "wget $URLBASE\?$frag_f -O $frag_f 1>/dev/null 2>/dev/null";
+system($cmd);
+if (!(-e $frag_f))
+{
+	print "FragGeneScan was not downloaded successfully. Please make sure that wget works properly.\n";
+	exit;
+}
+$cmd = "tar -zxvf $frag_f 1>/dev/null 2>/dev/null";
+system($cmd);
+if (!(-d $frag_dir))
+{
+	print "Cannot unzip FragGeneScan tar.gz file. Please make sure that [tar] works properly.\n";
+	exit;
+}
+chdir($frag_dir);
+$cmd = "make 1>$Bin/autobuild.log.fraggenescan.make.out 2>$Bin/autobuild.log.fraggenescan.make.err";
+system($cmd);
+$cmd = "make fgs 1>>$Bin/autobuild.log.fraggenescan.make.out 2>>$Bin/autobuild.log.fraggenescan.make.err";
+system($cmd);
+$cmd = "chmod 0755 run_FragGeneScan.pl";
+system($cmd);
+$cmd = "chmod 0755 FragGeneScan";
+system($cmd);
+$cmd = "chmod 0755 train";
+system($cmd);
+$cmd = "chmod 0755 train/*";
+system($cmd);
+
+if (!(-e "FragGeneScan"))
+{
+	print "FragGeneScan was not built successfully. Out of disk space?\n";
+	print "Error recorded in autobuild.log.fraggenescan.make.out and autobuild.log.fraggenescan.make.err.\n";
+	print "Most likely error:\n==============\n";
+	$cmd = "head $Bin/autobuild.log.fraggenescan.make.err -n 1";
+	system($cmd);
+	print "==============\n";
+	printError();
+	exit;
+}
+$cmd = "rm -f $Bin/autobuild.log.fraggenescan.*";
+system($cmd);
+
+# Update setting file
+open(FILE, ">$setting_f");
+print FILE "[FragGeneScan] $TARGET/$frag_dir\n";
+print FILE "[Bowtie2] $TARGET/$bowtie_dir\n";
+print FILE "[HMMER3] $TARGET/$hmmer_dir\/src\n";
+print FILE "[IDBA_UD] $TARGET/$idba_dir\/bin\n";
+close(FILE);
+
+print "All required auxiliary software packages were downloaded and built successfully.\nYou can start using MaxBin now.\n";
+
+sub printError
+{
+	print "\n";
+	print "I am sorry. It looks like I cannot install the auxiliary software automatically for you.\n";
+	print "Please follow the instruction in README to install the auxiliary software packages and set paths in [setting] file.\n";
+	print "Feel free to contact me at ywwei\@lbl.gov if you have questions.\n";
+}
+

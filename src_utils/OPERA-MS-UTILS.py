@@ -174,10 +174,8 @@ def main(args):
         if command == "binner":
             bin_method = args.method
             
-            if args.sample_name == None:
-                print("here")
-                sample_name = os.path.basename(os.path.normpath(config_dict["OUTPUT_DIR"]))
-                print(sample_name)
+            if args.sample_name == None:                
+                sample_name = os.path.basename(os.path.normpath(config_dict["OUTPUT_DIR"]))                
             else:
                 sample_name = args.sample_name
             #sample_name = config_dict["OUTPUT_DIR"].split("/")[-1]

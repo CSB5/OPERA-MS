@@ -1,0 +1,97 @@
+Change Log
+
+2.2.4
+- Add support to gzipped fastq or fasta reads files
+- Remove support for re-assembly as the performances vary significantly
+
+2.2.3
+- Fix the problem of program crash when inappropriate abundance file format is encountered.
+- Although not recommended, the delimiter for abundance files can now be either tab(\t), spaces, colons, or semicolons.
+
+
+2.2.2
+- Use wget instead curl to download the auxiliary software.
+- Bug fixes
+
+2.2.1
+- MaxBin will now resume from major time-consuming processes if the run aborted for some reason--users need to issue exactly the same command and keep the intermediate files to enable this feature. Note that the EM process is still treated as one whole process and cannot resumed if failed during the EM process.
+- Update FragGeneScan version to 1.30--much faster than previous versions.
+
+2.2
+- MaxBin will now collect the marker genes for each bin and make a tarball file consisting of all marker genes predicted using FragGeneScan.
+- Fixed a situation that will prevent auxiliary software from executing correctly if the programs are installed under root.
+
+2.1.1
+- Fixed a bug that will show only 999 bins if the bin number reaches 1000
+- Fixed a bug that will crash MaxBin for certain format of contig header
+
+2.1
+- Change reassembly program from velvet to idba_ud.
+- autobuild_auxiliary script now records all output and error messages for the users.
+- Boost is removed from MaxBin package. MaxBin now has its own Normal and Poisson density function.
+
+2.0.1
+- MaxBin 2.0 main program now support use of multi-thread.
+- The Poisson function is re-written to make the calculation faster
+
+2.0
+- MaxBin 2.0 now support input of a combination of multiple reads/abundance files.
+- Change abundance storage data structure to make it a bit faster
+
+1.4.5 (6/12/2015)
+- Try harder finding marker genes when the number of genomes is very low in target dataset
+- Put reassembled genomes into another directory for easy comparison
+- Users can now change the minimum probability cutoff to whatever values (even 0) if they prefer
+- Fixed a bug that print EM log twice
+
+1.4.4 (3/25/2015)
+- Reassembly function now supports fastq format. Users can now input _interleaved_ fastq file for reassembly purpose.
+
+1.4.3 (3/12/2015)
+- MaxBin will now try even harder to extract at least one bin from very shallow metagenome; however it is still recommended to use deeply-sequenced metagenome as MaxBin input.
+
+1.4.2 (12/4/2014)
+- Fixed a bug that cannot recruit reads for reassembly.
+- Added sections instructing users to download and install auxiliary software packages if autobuild_auxiliary fails.
+
+1.4.1 (11/21/2014)
+- FIxed a bug that crashes MaxBin when sequences with all 'N's are ecountered.
+
+1.4 (10/8/2014)
+- Added -marketset option to choose between 107 marker genes and 40 marker genes sets. 40 marker genes are more suitale for extreme environments that dominated by Archaea while 107 marker genes are suitable for more general cases. Default is 107 marker genes.
+- Added -reassembly parameters for recruiting reads and then reassemble individual bins. This feature is still highly experimental. Feedbacks are more than welcomed.
+- Added Velvet as another mandatory auxiliary software package.
+- Due to the newly-released FragGeneScan 1.19 (which I helped to develop) that supports multi-thread function, MaxBin will now attempt to run FragGeneScan in multi-thread mode.
+
+1.3 (5/12/2014)
+- Fixed bugs relating having 100+ bins.
+- Cleaned up the log file.
+- Added the -max_iteration option to adjust the maximum number of EM runs (default 50).
+- Unclassified sequences and sequences shorter than minimum length threshold are now stored in different files (.tooshort and .noclass).
+
+1.2.1 (3/14/2014)
+- Added support for the FASTQ format when the -reads option is specified.
+
+1.2 (1/27/2014)
+- Stabalized the connection between MaxBin and auxiliary software packages.
+- Added the function to check the output of auxiliary software packages. MaxBin will now output warning messages and stop running when there are errors.
+- Bug fixes.
+
+1.1 (10/15/2013)
+- Fixed the bug that crashes the program when a fasta file with a long single line is encountered.
+- Implemented recursive binning, in which binned fasta files will be checked separately for further binning possibilities.
+- Make the summary file more informative by adding Completeness (i.e. how complete the binned genomes are), Genome sizes and GC content.
+- Sort the bins by descending order of their abundance levels.
+- Add total number of marker genes and the number of unique marker genes into 2nd and 3rd column of the .marker file.
+- Add a function to automatically "switch" to more powerful binning mode once MaxBin finds that it cannot find enough marker genes to determine bin number.
+
+1.0.1 (6/25/2013)
+- Added -min_contig_len parameter for users to decide the minimum contig length acceptable in MaxBin. Default value of minimum contig length is 1000.
+- Added -plotmarker option and integrated it with R (Rscript) to plot the marker gene heatmap as PDF file.
+- Added -verbose option for debug usage.
+- Fix bug when the coverage of certain contig is 0. This should not happen very often, but codes are added to avoid program crash on such circumstance.
+
+1.0  (4/29/2013)
+- Integrated core MaxBin algorithm into perl script to connect with 3rd-party software.
+- Added compile_MaxBin script for users to compile MaxBin core program and all 3rd-party software.
+

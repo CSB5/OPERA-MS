@@ -1,0 +1,43 @@
+#!/bin/bash
+
+m=$(perl -MFindBin -e 1 2>&1)
+rc=$?
+if [[ $rc != 0 ]]
+then
+	echo "Installing Perl module FindBin"
+	perl -MCPAN -e 'install FindBin'
+fi
+
+n=$(perl -MLWP::Simple -e 1 2>&1)
+rc=$?
+if [[ $rc != 0 ]]
+then
+	echo "Installing Perl module LWP::Simple"
+	perl -MCPAN -e 'install LWP::Simple'
+fi
+
+m=$(perl -MFindBin -e 1 2>&1)
+rc1=$?
+n=$(perl -MLWP::Simple -e 1 2>&1)
+rc2=$?
+if [[ $rc1 != 0 ]] || [[ $rc2 != 0 ]]
+then
+	echo ""
+	echo "=========================================="
+	echo "Perl modules not installed successfully. Please make sure that Perl and CPAN are available on your system."
+	echo "---"
+	if [[ $rc1 != 0 ]]
+	then
+		echo "Perl Module FindBin not installed successfully."
+	fi
+	if [[ $rc2 != 0 ]]
+	then
+		echo "Perl Module LWP::Simple not installed successfully."
+	fi
+	echo "---"
+	echo "For Ubuntu and Debian users: you can use 'apt-get install perl' to get newest Perl and CPAN."
+	echo "=========================================="
+else
+	perl buildapp
+fi
+
