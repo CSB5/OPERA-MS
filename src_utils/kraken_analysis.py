@@ -1,4 +1,6 @@
 from genfunc import *
+import pandas as pd
+
 
 def is_zip(in_file):
     res = False
@@ -6,11 +8,23 @@ def is_zip(in_file):
         res = True
     return res
 
+def get_correlation(assembly_dir):
+    
+    species_df = pd.read_csv("{}/read-concordance/S_abundance_comparison.txt".format(assembly_dir), header = 0, sep = "\t")
+    genus_df = pd.read_csv("{}/read-concordance/G_abundance_comparison.txt".format(assembly_dir), header = 0, sep = "\t")
+    species_corr = species_df['Short_read_abundance'].corr(species_df['Long_read_abundance'])
+    genus_corr = genus_df['Short_read_abundance'].corr(genus_df['Long_read_abundance'])
+    out_file = "{}/read-concordance/correlation_value.txt".format(assembly_dir)
+    
+    with open(out_file, "w") as fp:
+        fp.write("genus_level_correlation\t{}\n".format(genus_corr))
+        fp.write("species_level_correlation\t{}\n".format(species_corr))
 
+    
 def run_kraken2(assembly_dir, read1, read2, long_read, nb_thread, abundance_threshold):
     kraken_db = util_dir + "/../utils_db/minikraken_8GB_20200312"
     
-    out_dir = assembly_dir + "/kraken2"
+    out_dir = assembly_dir + "/read-concordance"
     create_dir(out_dir)
     #Short read
     out_file = out_dir + "/short_read.out"
@@ -33,7 +47,8 @@ def run_kraken2(assembly_dir, read1, read2, long_read, nb_thread, abundance_thre
     #Comapare the abundance profile
     compare_abundance_profile(out_dir, out_dir + "/short_read.out.report", out_dir + "/long_read.out.report", "S", abundance_threshold)
     compare_abundance_profile(out_dir, out_dir + "/short_read.out.report", out_dir + "/long_read.out.report", "G", abundance_threshold)
-
+    
+    get_correlation(assembly_dir)
 
 def compare_abundance_profile(out_dir, short_read_profile, long_read_profile, tax_level, abundance_threshold):
     tax_abundance_comparison = {}

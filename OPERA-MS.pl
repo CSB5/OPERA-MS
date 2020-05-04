@@ -35,8 +35,7 @@ if ( @ARGV == 0 ){
 check_dependency(\%opera_ms_option, \%opera_ms_dependency, "CHECK_DEPENDENCY") if($ARGV[0] eq "check-dependency");
 
 #To setup the database
-setup_opera_ms_database(\%$opera_ms_option) if($ARGV[0] eq "install-db");
-
+setup_opera_ms_database(\%opera_ms_option) if($ARGV[0] eq "install-db");
 
 #read from config file
 set_default_value(\%opera_ms_option);
@@ -64,8 +63,8 @@ check_dependency(\%opera_ms_option, \%opera_ms_dependency, $opera_ms_option{"STA
 check_data(\%opera_ms_option);
 
 #Check if the database contains all the information
-if(! check_database(\%opera_ms_option)){
-    die ("OPERA-MS default database not found. You can download the default OPERA-MS-DB using the following command: perl OPERA-MS.pl install-db");
+if(($opera_ms_option{"REF_CLUSTERING"}) && !check_database(\%opera_ms_option)){
+    die "OPERA-MS default database not found. You can download the default OPERA-MS-DB using the following command: perl OPERA-MS.pl install-db";
 }
 
 
@@ -366,32 +365,96 @@ sub check_database{
 
 sub setup_opera_ms_database{
     my ($opera_ms_option) = @_;
-
-    my %figshare_file = ();
-    my $cmp = 1;
-    my $nb_step = keys(%figshare_file) * 2;
-    #Download the genome reference data base for the first utilasation
-    my $opera_ms_db_dir = $opera_ms_option->{"OPERA_MS_DB_DIR"};
-    if(! -e "$opera_ms_db_dir/database_updated"){
-	print STDOUT " *** Set-up of reference genome databases. Please wait ...\n";
-	#
-	foreach $file (keys %figshare_file){
-	    $url = $figshare_file{$file};
-	    print STDOUT " *** ($cmp/$nb_step) Download $file\n";	
-	    run_exe("wget --no-check-certificate -O $opera_ms_db_dir/$file $url");
-	    if($?){
-		die"\nUnfortunately the automated download of the genome data base failed.\nYou can complete the installation process manually by:\n\t(1) Downloading the data base files at: https://figshare.com/articles/genomeDB_Sketch_msh/8425280 and https://figshare.com/articles/complete_ref_genomes_tar_gz/9638207\t(2) Moving the files in $opera_ms_dir\n\t(3) Running the command: tar -xvzf $opera_ms_dir/complete_ref_genomes.tar.gz;touch $opera_ms_dir/database_updated\n\n";	
-	    }
-	    $cmp++;
-	    print STDOUT " *** ($cmp/$nb_step) Extraction of $file [35Gb disk space required]\n";
-	    run_exe("tar -xvzf $file --directory $opera_ms_db_dir");
-	    #
-	    run_exe("rm $opera_ms_db_dir/complete_ref_genomes.tar.gz");
+    my $opera_ms_db_dir =  $opera_ms_option->{"OPERA_MS_DIR"}."/OPERA-MS-DB";
+    $opera_ms_option->{"OPERA_MS_DB_DIR"} = $opera_ms_db_dir;
+    my $tracking_file = "$opera_ms_db_dir/database_download_completed";
+    my %downloaded_file = ();
+    if (-e $tracking_file){
+	open(FILE, $tracking_file);
+	while(<FILE>){
+	    chop $_;
+	    $downloaded_file{$_} = 1;
 	}
-	#
-	run_exe("touch $opera_ms_db_dir/database_download_completed");
+	close(FILE);
+    }
+   
+    my %figshare = (
+	"genome_1.tar.gz", "https://ndownloader.figshare.com/files/22364238",
+	"genome_2.tar.gz", "https://ndownloader.figshare.com/files/22378161",
+	"genome_3.tar.gz", "https://ndownloader.figshare.com/files/22385391",
+	"genome_4.tar.gz", "https://ndownloader.figshare.com/files/22392252",
+	"genome_5.tar.gz", "https://ndownloader.figshare.com/files/22405236",
+	"genome_6.tar.gz", "https://ndownloader.figshare.com/files/22409529",
+	"genome_7.tar.gz", "https://ndownloader.figshare.com/files/22420533",
+	"genomes.msh.tar.gz", "https://ndownloader.figshare.com/files/22423779",
+	"genomes_lists.txt.tar.gz", "https://ndownloader.figshare.com/files/22423785",
+	"genomes_length.txt.tar.gz", "https://ndownloader.figshare.com/files/22423782"
+	);
+
+    my %dropbox = (
+	"genomes.msh.tar.gz", "https://www.dropbox.com/s/0zt2h1zp4p53qgh/genomes.msh.tar.gz?dl=0",
+	"genomes_list.txt.tar.gz", "https://www.dropbox.com/s/e8ozv99fe60w9ny/genomes_list.txt.tar.gz?dl=0",
+	"genomes_length.txt.tar.gz", "https://www.dropbox.com/s/7xr6w3g4pl9u0vn/genomes_length.txt.tar.gz?dl=0",
+	"genome_1.tar.gz", "https://www.dropbox.com/s/91dfti1xzdk3760/genomes_1.tar.gz?dl=0",
+	"genome_2.tar.gz", "https://www.dropbox.com/s/jklrpkvcjm066e6/genomes_2.tar.gz?dl=0",
+	"genome_3.tar.gz", "https://www.dropbox.com/s/2vmaa6ine92w4fh/genomes_3.tar.gz?dl=0",
+	"genome_4.tar.gz", "https://www.dropbox.com/s/jvd9uspg5luh7xi/genomes_4.tar.gz?dl=0",
+	"genome_5.tar.gz", "https://www.dropbox.com/s/tffy3bynnin6rkr/genomes_5.tar.gz?dl=0",
+	"genome_6.tar.gz", "https://www.dropbox.com/s/71x0myfp7asembr/genomes_6.tar.gz?dl=0",
+	"genome_7.tar.gz", "https://www.dropbox.com/s/ja4ju0t6x3pxjtf/genomes_7.tar.gz?dl=0"
+	);
+    
+    if(! download_db(\%dropbox, $opera_ms_option, \%downloaded_file, $tracking_file)){
+	print STDERR "\n *** Automatated database download from dropbox failed. \n *** Using figshare, may take > 15h\n";
+	if(!download_db(\%figshare, $opera_ms_option, \%downloaded_file, $tracking_file)){
+	    die"\nAutomated download of the genome data base failed.\n"
+	}
+    }
+    print STDERR " *** Database download completed\n";
+    exit(1)
+}
+
+
+sub download_db{
+    my($db_url, $opera_ms_option, $downloaded_file, $tracking_file) = @_;
+    my $opera_ms_dir = $opera_ms_option->{"OPERA_MS_DIR"};
+    my $opera_ms_db_dir = $opera_ms_option->{"OPERA_MS_DB_DIR"};
+    my $cmp = 1;
+    my $nb_step = keys(%{$db_url}) * 2;
+    #Download the genome reference data base for the first utilasation
+		       
+    print STDOUT " *** Set-up of reference genome databases [35Gb disk space required]. Please wait ...\n";
+    #
+    foreach $file (keys %{$db_url}){
+	$url = $db_url->{$file};
+	$file_path = "$opera_ms_dir/$file";
+	$skip_flag = "";
+	if(exists $downloaded_file->{$file}){
+	    print STDERR " *** ($cmp/$nb_step) Download $file [File previously downloaded skip]\n";
+	    $cmp++;
+	    print STDOUT " *** ($cmp/$nb_step) Extraction of $file [File extracted skip]\n";
+	    $cmp++;
+	    next;
+	}
+	print STDERR " *** ($cmp/$nb_step) Download $file $skip_flag\n";
+	
+	run_exe("wget --no-check-certificate -O $file_path $url");
+	
+	$cmp++;
+	print STDOUT " *** ($cmp/$nb_step) Extraction of $file\n";
+	print STDERR " ***************************** $file_path\n";
+	if(system ("tar -xvzf $file_path --directory $opera_ms_dir")){
+	    return 0;
+	}
+	else{
+	    `rm $file_path`;
+	    `echo -e \"$file\" >> $tracking_file`;
+	    $cmp++;
+	    $downloaded_file->{$file} = 1;
+	}
     }
     #
+    return 1;
 }
 
 #### OPERA-MS pipeline stage

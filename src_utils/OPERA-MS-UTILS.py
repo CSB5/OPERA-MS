@@ -43,7 +43,10 @@ def download_utils_db(db_type):
             cmd = "rm {}/../utils_db/minikraken_8GB_202003.tgz".format(util_dir)
             run_exe(cmd, True)
     if db_type == "novel-species":
-        pass
+        cmd = "wget --no-check-certificate -nc -P {}/../utils_db/ https://ndownloader.figshare.com/files/22471499".format(util_dir)
+        run_exe(cmd, True)
+        cmd = "wget --no-check-certificate -nc -P {}/../utils_db/ https://ndownloader.figshare.com/files/22471505".format(util_dir)
+        run_exe(cmd, True)
     
 def read_taxonomy_file(genomes_dir, taxonomy, db_genome_dir, genome_list, genome_length):
     OUT_LIST = open(genome_list, "w")
@@ -133,6 +136,7 @@ def run_circular_sequence_identification(assembly_dir):
 def check_software(cmd, tool):
     try:
         run_exe(cmd, False)
+        
         print("{} functioning".format(tool))
     except Exception as e:
         print(e)
@@ -149,14 +153,14 @@ def check_installation():
     cmd = "perl {}/MaxBin-2.2.4/run_MaxBin.pl -h > /dev/null".format(util_dir)
     check_software(cmd, "MaxBin2")
 
-    cmd = "{}/kraken2 -v > /dev/null ".format(util_dir)
+    cmd = "{}/kraken2/kraken2 -v > /dev/null ".format(util_dir)
     check_software(cmd, "Kraken2")
     
 def main(args):
     
     command = args.command
     nb_thread = 0
-    if command == "kraken2" or command == "circular-sequence" or command == "binner" or command == "checkm" or command == "mash" :
+    if command == "read-concordance" or command == "circular-sequence" or command == "binner" or command == "bin-evaluation" or command == "mash" :
         
         #Parse the config file
         config_dict = read_opera_ms_config_file(args.config)
@@ -169,16 +173,23 @@ def main(args):
 
         if command == "binner":
             bin_method = args.method
-            sample_name = config_dict["OUTPUT_DIR"].split("/")[-1]
+            
+            if args.sample_name == None:
+                print("here")
+                sample_name = os.path.basename(os.path.normpath(config_dict["OUTPUT_DIR"]))
+                print(sample_name)
+            else:
+                sample_name = args.sample_name
+            #sample_name = config_dict["OUTPUT_DIR"].split("/")[-1]
             run_binner(bin_method, sample_name, config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], nb_thread)
             
-        elif command == "checkm":
+        elif command == "bin-evaluation":
             checkm_analysis(config_dict["OUTPUT_DIR"], args.binner, nb_thread, args.high_qual_mags, args.medium_qual_mags)
 
-        elif command == "kraken2":
-            abundance_threshold = 0.1
-            if args.abundance_threshold != None:
-                abundance_threshold = args.abundance_threshold
+        elif command == "read-concordance":
+       
+            abundance_threshold = args.abundance_threshold
+            
             run_kraken2(config_dict["OUTPUT_DIR"], config_dict["ILLUMINA_READ_1"], config_dict["ILLUMINA_READ_2"], get_long_read_file(config_dict["LONG_READ"]), nb_thread, float(abundance_threshold))
                 
         elif command == "circular-sequence":
@@ -195,7 +206,7 @@ def main(args):
         elif command == "utils-db":            
             download_utils_db(args.dbtype)            
 
-        elif command == "check_dependency":
+        elif command == "check-dependency":
             check_installation()
 
 def run_binner(binner, sample_name, assembly_dir, short_read1, short_read2, nb_thread):
@@ -226,14 +237,15 @@ if __name__ == "__main__":
     #binner
     binner_parser = subparsers.add_parser('binner', parents=[config_parser.parser], help='Run binner')
     binner_parser.add_argument("-m", "--method",  required=False, default = "metabat2", choices=["maxbin2", "metabat2"], help='binning method (default: MetaBat2)' )
+    binner_parser.add_argument("-s", "--sample-name",  required=False, help='provide this if the name of the output folder is not the name of the sample')
             
     #kraken
-    kraken_parser = subparsers.add_parser('kraken2', parents=[config_parser.parser], help='Run Kraken2 on the short and long reads and compare the abundance profiles')
-    kraken_parser.add_argument("-a", "--abundance-threshold", default=0.1, help="Lower percentage abundance threshold [default 0.1]", type=int)
+    kraken_parser = subparsers.add_parser('read-concordance', parents=[config_parser.parser], help='Run Kraken2 on the short and long reads and compare the abundance profiles')
+    kraken_parser.add_argument("-a", "--abundance-threshold", default=0.1, help="Lower percentage abundance threshold [default 0.1]", type=float)
     
     #checkm
-    checkm_parser = subparsers.add_parser('checkm', parents=[config_parser.parser], help='Run CheckM on a set of bins')
-    checkm_parser.add_argument("-b", "--binner",  required=False, default = "metabat2", choices=["maxbin2", "metabat2", "opera_ms_clusters"])
+    checkm_parser = subparsers.add_parser('bin-evaluation', parents=[config_parser.parser], help='Run CheckM on a set of bins')
+    checkm_parser.add_argument("-b", "--binner",  required=False, default = "metabat2", choices=["maxbin2", "metabat2", "opera_ms_clusters"], help = "Bins for evaluation (default: MetaBat2)")
     checkm_parser.add_argument("-H", "--high-qual-mags",  default="90,5", help = 'Completness and contamination values for high quality genomes (default: 90,5)', type=str)
     checkm_parser.add_argument("-M", "--medium-qual-mags",  default="50,10", help = 'Completness and contamination values for medium quality genomes (default: 50,10)', type=str)
 
@@ -243,11 +255,11 @@ if __name__ == "__main__":
     #novel species
     novel_species_parser = subparsers.add_parser('novel-species', help='Run novel species identification')
     mandatory = novel_species_parser.add_argument_group("mandatory arguments")
-    
-    novel_species_parser._action_groups[-1].add_argument("-k", "--known-species",  required=True, help='Mash sketch of known species reference genomes')
-    novel_species_parser._action_groups[-1].add_argument("-x", "--taxonomy-database",  required=True, help='Mash sketch of reference genomes with taxonomy info')    
     novel_species_parser._action_groups[-1].add_argument("-o", "--out",  required=True, help='Output directory')
+    
     #
+    novel_species_parser.add_argument("-k", "--known-species",  required=False, default = "{}/../utils_db/MAG.msh".format(util_dir), help=argparse.SUPPRESS)#'Mash sketch of known species reference genomes (default utils_db/small_newgut_segata.msh)')
+    novel_species_parser.add_argument("-x", "--taxonomy-database",  required=False, default = "{}/../utils_db/GTDB.msh".format(util_dir), help=argparse.SUPPRESS) #'Mash sketch of reference genomes with taxonomy info (default utils_db/genomes)')    
     novel_species_parser.add_argument("-b", "--binner",  required=False, default = "metabat2",  choices=["maxbin2", "metabat2", "opera_ms_clusters"], help='bins for novel analysis (default: MetaBat2)')
     novel_species_parser.add_argument('configs', metavar='C', nargs='+', help='Path to OPERA-MS configuration file(s)')
     #
@@ -270,7 +282,7 @@ if __name__ == "__main__":
     utils_db_parser._action_groups[-1].add_argument("-db", "--dbtype", choices = ["kraken2", "novel-species"], required=True, help='Kraken2 or novel species analysis database')
     
     #check if the utils sofware are functional in the current system
-    check_install_parser = subparsers.add_parser('check_dependency', help='Check which OPERA-MS-UTILS software are functional in the current system')   
+    check_install_parser = subparsers.add_parser('check-dependency', help='Check which OPERA-MS-UTILS software are functional in the current system')   
     
     args=parser.parse_args()    
     

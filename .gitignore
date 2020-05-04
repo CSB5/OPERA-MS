@@ -41,6 +41,8 @@ OPERA-MS-DB*
 minikraken_8GB*
 OPERA-MS-UTILS.py
 OPERA-LG/bin/.#OPERA-long-read.pl
+genomes_lists.txt.tar.gz
+log.err
 
 #For the test files
 test_files/OPERA_MS*/
@@ -56,3 +58,4 @@ test_files/fasta_results/
 test_files/run.log
 test_files/SINGLE/
 test_files/log.txt
+test_files/RESULTS_NO_REF/
