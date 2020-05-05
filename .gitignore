@@ -35,14 +35,13 @@ test_novel
 #utils_db/*
 
 #utils/kraken2
-tools_opera_ms/MaxBin-2.2.4/*
-tools_opera_ms/MaxBin-2.2.4
+tools_opera_ms/maxbin
 tools_opera_ms/checkm
 
 src_utils_denis/
 OPERA-MS-DB*
 minikraken_8GB*
-OPERA-MS-UTILS.py
+#OPERA-MS-UTILS.py
 OPERA-LG/bin/.#OPERA-long-read.pl
 genomes_lists.txt.tar.gz
 log.err

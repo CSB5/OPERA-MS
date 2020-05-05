@@ -6,7 +6,7 @@ install: sigma opera short_read_analysis mummer perlmodule linking
 clean : sigmaclean operaclean
 
 linking: 
-	ln -s $(shell pwd)/src_utils/OPERA-MS-UTILS.py $(shell pwd)/
+	rm $(shell pwd)/OPERA-MS-UTILS.py; ln -s $(shell pwd)/src_utils/OPERA-MS-UTILS.py $(shell pwd)/
 
 sigma: 
 	cd SIGMA&&make;
