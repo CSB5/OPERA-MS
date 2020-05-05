@@ -37,6 +37,7 @@ test_novel
 #utils/kraken2
 tools_opera_ms/maxbin
 tools_opera_ms/checkm
+tools_opera_ms/MUMmer3.23
 
 src_utils_denis/
 OPERA-MS-DB*
