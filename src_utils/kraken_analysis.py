@@ -49,6 +49,7 @@ def run_kraken2(assembly_dir, read1, read2, long_read, nb_thread, abundance_thre
     compare_abundance_profile(out_dir, out_dir + "/short_read.out.report", out_dir + "/long_read.out.report", "G", abundance_threshold)
     
     get_correlation(assembly_dir)
+    run_exe("rm {}/*.out".format(out_dir))
 
 def compare_abundance_profile(out_dir, short_read_profile, long_read_profile, tax_level, abundance_threshold):
     tax_abundance_comparison = {}

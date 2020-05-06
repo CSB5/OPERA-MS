@@ -43,9 +43,9 @@ def download_utils_db(db_type):
             cmd = "rm {}/../utils_db/minikraken_8GB_202003.tgz".format(util_dir)
             run_exe(cmd, True)
     if db_type == "novel-species":
-        cmd = "wget --no-check-certificate -nc -P {}/../utils_db/ https://ndownloader.figshare.com/files/22471499".format(util_dir)
+        cmd = "wget --no-check-certificate -nc -O {}/../utils_db/GTDB.msh https://ndownloader.figshare.com/files/22471499".format(util_dir)
         run_exe(cmd, True)
-        cmd = "wget --no-check-certificate -nc -P {}/../utils_db/ https://ndownloader.figshare.com/files/22471505".format(util_dir)
+        cmd = "wget --no-check-certificate -nc -O {}/../utils_db/MAG.msh https://ndownloader.figshare.com/files/22471505".format(util_dir)
         run_exe(cmd, True)
     
 def read_taxonomy_file(genomes_dir, taxonomy, db_genome_dir, genome_list, genome_length):
