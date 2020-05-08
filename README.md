@@ -156,6 +156,7 @@ The generic command to run a OPERA-MS docker container after building:
 [comment]:docker run \
     -v /host/path/to/indata/:/indata/ \
     -v /host/path/to/outdata/:/outdata/ \
+    -v /host/path/to/OPERA-MS/OPERA-MS-DB/:/operams/OPERA-MS-DB/ \
      operams
     --short-read1 /indata/R1.fastq.gz \
     --short-read2 /indata/R2.fastq.gz \
@@ -168,6 +169,7 @@ To process data with the dockerized OPERA-MS, directories for in- and outdata sh
 docker run \
     -v OPERA-MS/test_files/:/sample_files \
     -v OPERA-MS/test_files/RESULTS/:/sample_out \
+    -v OPERA-MS/OPERA-MS-DB/:/operams/OPERA-MS-DB/
      operams --contig-file /sample_files/contigs.fasta \
     --short-read1 /sample_files/R1.fastq.gz \
     --short-read2 /sample_files/R2.fastq.gz \
