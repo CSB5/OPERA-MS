@@ -56,7 +56,7 @@ Alternativelly, a custom database can be generated the using the [**OPERA-MS-UTI
 
 ### Optional arguments 
 
- - **--genome-db** : path to a custom OPERA-MS genome database use during reference level clustering (defaut OPERA-MS-DB)
+ - **--genome-db** : path to a custom OPERA-MS genome database used during reference level clustering (defaut OPERA-MS-DB)
 
 - **--no-ref-clustering**  : disable reference based clustering
 
@@ -94,7 +94,7 @@ Finally, OPERA-MS strain-level clusters (one fasta file per strain) can be found
 
 ### OPERA-MS-UTILS
 
-Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/Utilities) command. We are now providing stream line analysis tools to compute the concordance between the short and long read, to bin contigs, to assess the bin and identify novel species. A complete desctiption of those tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/Utilities).
+Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/Utilities) command. We are now providing streamline analysis tools to compute the concordance between the short and long-read, to bin contigs, to assess the bin quality and identify novel species. A complete description of those tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/Utilities).
 
 This is a work in progress and additional tools will be available as part of the next release. Please contact us if you would like to add your favorite metagenomic analysis tool.
 
