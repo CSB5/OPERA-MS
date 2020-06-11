@@ -39,8 +39,9 @@ To download the precomputed genome database required for the reference based clu
 ```
 perl OPERA-MS.pl install-db
 ```
-The database contains a representative genome of the 23,000 bacteria species from [GTDB](https://gtdb.ecogenomic.org/) and requires 35Gb of free disc space.
-Alternativelly, a custom database can be generated the using the [**OPERA-MS-UTILS opera-db**](https://github.com/CSB5/OPERA-MS/wiki/Utilities#opera-ms-db) command.
+The database contains a representative genome of the 23,000 bacteria species from [**GTDB**](https://gtdb.ecogenomic.org/) and requires 35Gb of free disc space.
+Alternativelly, a custom database can be generated the using the [**opera-ms-db**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS#opera-ms-db) utility command.</br>
+**Database from previous versions are no longer supported.**
 
 # Usage
 
@@ -56,7 +57,7 @@ Alternativelly, a custom database can be generated the using the [**OPERA-MS-UTI
 
 ### Optional arguments 
 
- - **--genome-db** : path to a custom OPERA-MS genome database use during reference level clustering (defaut OPERA-MS-DB)
+ - **--genome-db** : path to a custom OPERA-MS genome database used during reference level clustering (defaut=OPERA-MS-DB)
 
 - **--no-ref-clustering**  : disable reference based clustering
 
@@ -64,9 +65,9 @@ Alternativelly, a custom database can be generated the using the [**OPERA-MS-UTI
 
 - **--polishing** : enable short-read polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contigs.polished.fasta
 
-- **--long-read-mapper** : software used for long-read mapping i.e. blasr (default) or minimap2
+- **--long-read-mapper** : software used for long-read mapping i.e. [blasr](https://github.com/PacificBiosciences/blasr) (default) or [minimap2]( https://github.com/lh3/minimap2) (tested with version 2.11-r797)
 
-- **--short-read-assembler** : software used for short read assembly i.e. megahit (default) or spades
+- **--short-read-assembler** : software used for short read assembly i.e. [megahit](https://github.com/voutcn/megahit) (default) or [spades](https://github.com/ablab/spades)
 
 - **--no-gap-filling** : disable gap-filling stage
 
@@ -90,11 +91,11 @@ The following output files can be found in the specified output directory i.e. *
 The file **contigs.fasta** (and **contigs.polished.fasta** if the assembly has been polished) contains the assembled contigs, **assembly.stats** provides overall assembly statistics (e.g. assembly size, N50, longest contig etc.), and
 [**contig_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Contig-info-file-description) provides detailed overview of the assembled contigs.
 
-Finally, OPERA-MS strain-level clusters (one fasta file per strain) can be found in the directory **RESULTS/opera_ms_clusters/all** and [**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of assembly statistics for these clusters. Note that these clusters are constructed for producing high-quality assemblies and are therefore conservative. They can be binned further using approaches such as [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
+Finally, OPERA-MS strain-level clusters (one fasta file per strain) can be found in the directory **RESULTS/opera_ms_clusters/all** and [**cluster_info.txt**](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description) provides a detailed overview of assembly statistics for these clusters. Note that these clusters are constructed for producing high-quality assemblies and are therefore conservative. Contigs can be binned further using approaches such as [MaxBin2](https://sourceforge.net/projects/maxbin2/) or [MetaBAT2](https://bitbucket.org/berkeleylab/metabat/src/master/).
 
 ### OPERA-MS-UTILS
 
-Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/Utilities) command. We are now providing stream line analysis tools to compute the concordance between the short and long read, to bin contigs, to assess the bin and identify novel species. A complete desctiption of those tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/Utilities).
+Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS) command. We are now providing streamline analysis tools to compute the concordance between the short and long-read, to bin contigs, to assess the bin quality and identify novel species. A complete description of those tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS).
 
 This is a work in progress and additional tools will be available as part of the next release. Please contact us if you would like to add your favorite metagenomic analysis tool.
 
@@ -113,7 +114,7 @@ OPERA-MS is designed to work with deep short-read sequencing, but can work with 
 
 # Dependencies
 
-The only true dependency is `cpanm`, which is used to automatically install Perl modules. All other required programs come either pre-compiled with OPERA-MS or are built during the installation process. Binaries are placed inside the __utils__ folder:
+The only true dependency is **cpanm**, which is used to automatically install Perl modules. All other required programs come either pre-compiled with OPERA-MS or are built during the installation process. Binaries are placed inside the **tools_opera_ms** folder:
 
 1) [MEGAHIT](https://github.com/voutcn/megahit) - (tested with version 1.0.4-beta)
 1) [SPAdes](https://github.com/ablab/spades) - (tested with version 3.13.0)
@@ -126,9 +127,9 @@ The only true dependency is `cpanm`, which is used to automatically install Perl
 8) [MUMmer](http://mummer.sourceforge.net/) - (tested with version 3.23)
 9) [Pilon](https://github.com/broadinstitute/pilon/wiki) - (tested with version 1.22)
 
-If a pre-built program does not work on the user's machine, OPERA-MS will check if the program is present in the user's PATH. However, the version of the program may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the program may be placed in the __utils__ folder.
+If a pre-built program does not work on the user's machine, OPERA-MS will check if the program is present in the user's **PATH**. However, the version of the program may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the program may be placed in the **tools_opera_ms** folder.
 
-OPERA-MS and its dependencies required C++, Java, Python, R and Perl, and use the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
+OPERA-MS and its dependencies required C++ (gcc 4.8.3 and above), Java, Python, R and Perl, and use the following Perl modules (installed using [**cpanm**](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
 
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
 - [File::Which](https://metacpan.org/pod/File::Which)
@@ -137,11 +138,11 @@ OPERA-MS and its dependencies required C++, Java, Python, R and Perl, and use th
 - [Statistics::R](https://metacpan.org/pod/Statistics::R)
 - [Getopt::Long](http://perldoc.perl.org/Getopt/Long.html)
 
-Once cpanm is installed, simply run the following command to install all the perl modules:
+Once **cpanm** is installed, simply run the following command to install all the perl modules:
 ```
 perl utils/install_perl_module.pl
 ```
-If the perl libraries cannot be installed under root, the following line should be added to `.bashrc`:
+If the perl libraries cannot be installed under root, the following line should be added to **.bashrc**:
 ```
 export PERL5LIB="/home/$USER/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}";
 ```
@@ -156,18 +157,20 @@ The generic command to run a OPERA-MS docker container after building:
 [comment]:docker run \
     -v /host/path/to/indata/:/indata/ \
     -v /host/path/to/outdata/:/outdata/ \
+    -v /host/path/to/OPERA-MS/OPERA-MS-DB/:/operams/OPERA-MS-DB/ \
      operams
     --short-read1 /indata/R1.fastq.gz \
     --short-read2 /indata/R2.fastq.gz \
     --long-read /indata/long_read.fastq \
     --out-dir /outdata 
 ```
-To process data with the dockerized OPERA-MS, directories for in- and outdata should be mounted into the container. An example is shown below for running the test dataset. In the below example the repo was cloned to /home/myuser/git/OPERA-MS/). The repo is needed only for the `sample_files` directory and the `sample_config.config` file. If Docker is running in a VM, as is the case for Windows or OSX, but also when deployed on a cloud platform such as AWS or Azure, a minimum of 2 available cores is required.  
+To process data with the dockerized OPERA-MS, directories for in- and outdata should be mounted into the container. An example is shown below for running the test dataset. In the below example the repo was cloned to **/home/myuser/git/OPERA-MS**). The repo is needed only for the **sample_files**. OPERA-MS-DB should be dowloaded using the command described [here](#opera-ms-genome-database). If Docker is running in a VM, as is the case for Windows or OSX, but also when deployed on a cloud platform such as AWS or Azure, a minimum of 2 available cores is required.  
 
 ```
 docker run \
     -v OPERA-MS/test_files/:/sample_files \
     -v OPERA-MS/test_files/RESULTS/:/sample_out \
+    -v OPERA-MS/OPERA-MS-DB/:/operams/OPERA-MS-DB/
      operams --contig-file /sample_files/contigs.fasta \
     --short-read1 /sample_files/R1.fastq.gz \
     --short-read2 /sample_files/R2.fastq.gz \
