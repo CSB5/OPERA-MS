@@ -40,7 +40,7 @@ To download the precomputed genome database required for the reference based clu
 perl OPERA-MS.pl install-db
 ```
 The database contains a representative genome of the 23,000 bacteria species from [**GTDB**](https://gtdb.ecogenomic.org/) and requires 35Gb of free disc space.
-Alternativelly, a custom database can be generated the using the [**opera-ms-db**](https://github.com/CSB5/OPERA-MS/wiki/Utilities#opera-ms-db) utility command.</br>
+Alternativelly, a custom database can be generated the using the [**opera-ms-db**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS#opera-ms-db) utility command.</br>
 **Database from previous versions are no longer supported.**
 
 # Usage
@@ -95,7 +95,7 @@ Finally, OPERA-MS strain-level clusters (one fasta file per strain) can be found
 
 ### OPERA-MS-UTILS
 
-Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/Utilities) command. We are now providing streamline analysis tools to compute the concordance between the short and long-read, to bin contigs, to assess the bin quality and identify novel species. A complete description of those tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/Utilities).
+Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS) command. We are now providing streamline analysis tools to compute the concordance between the short and long-read, to bin contigs, to assess the bin quality and identify novel species. A complete description of those tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS).
 
 This is a work in progress and additional tools will be available as part of the next release. Please contact us if you would like to add your favorite metagenomic analysis tool.
 
