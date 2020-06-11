@@ -40,7 +40,8 @@ To download the precomputed genome database required for the reference based clu
 perl OPERA-MS.pl install-db
 ```
 The database contains a representative genome of the 23,000 bacteria species from [**GTDB**](https://gtdb.ecogenomic.org/) and requires 35Gb of free disc space.
-Alternativelly, a custom database can be generated the using the [**opera-ms-db**](https://github.com/CSB5/OPERA-MS/wiki/Utilities#opera-ms-db) utily command.
+Alternativelly, a custom database can be generated the using the [**opera-ms-db**](https://github.com/CSB5/OPERA-MS/wiki/Utilities#opera-ms-db) utily command.</br>
+**Database from previous versions are no longer supported.**
 
 # Usage
 
