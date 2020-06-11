@@ -57,7 +57,7 @@ Alternativelly, a custom database can be generated the using the [**opera-ms-db*
 
 ### Optional arguments 
 
- - **--genome-db** : path to a custom OPERA-MS genome database used during reference level clustering (defaut OPERA-MS-DB)
+ - **--genome-db** : path to a custom OPERA-MS genome database used during reference level clustering (defaut=OPERA-MS-DB)
 
 - **--no-ref-clustering**  : disable reference based clustering
 
@@ -65,9 +65,9 @@ Alternativelly, a custom database can be generated the using the [**opera-ms-db*
 
 - **--polishing** : enable short-read polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contigs.polished.fasta
 
-- **--long-read-mapper** : software used for long-read mapping i.e. blasr (default) or minimap2
+- **--long-read-mapper** : software used for long-read mapping i.e. [blasr](https://github.com/PacificBiosciences/blasr) (default) or [minimap2]( https://github.com/lh3/minimap2) (tested with version 2.11-r797)
 
-- **--short-read-assembler** : software used for short read assembly i.e. megahit (default) or spades
+- **--short-read-assembler** : software used for short read assembly i.e. [megahit](https://github.com/voutcn/megahit) (default) or [spades](https://github.com/ablab/spades)
 
 - **--no-gap-filling** : disable gap-filling stage
 
@@ -129,7 +129,7 @@ The only true dependency is **cpanm**, which is used to automatically install Pe
 
 If a pre-built program does not work on the user's machine, OPERA-MS will check if the program is present in the user's **PATH**. However, the version of the program may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the program may be placed in the **tools_opera_ms** folder.
 
-OPERA-MS and its dependencies required C++ (gcc 4.8.3 and above), Java, Python, R and Perl, and use the following Perl modules (installed using [cpanm](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
+OPERA-MS and its dependencies required C++ (gcc 4.8.3 and above), Java, Python, R and Perl, and use the following Perl modules (installed using [**cpanm**](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
 
 - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
 - [File::Which](https://metacpan.org/pod/File::Which)
