@@ -45,7 +45,7 @@ def identify_high_medium_bin(binner_dir, eval_file, high_qual_mags, medium_qual_
     OUT = open(binner_dir + "/bin_info.txt", "w")
     bin_id = bin_status = bin_out_dir = ""
     bin_size, bin_nb_contig, bin_longest_contig, bin_n50, bin_contamination, bin_completness = 0, 0, 0, 0, 0, 0
-    OUT.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("ID", "Status", "Completness", "Contamination",  "Size", "#_contigs", "Contig_N50", "Longest_contig"))
+    OUT.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("MAGs_ID", "Quality", "Completness", "Contamination",  "Size", "#_contigs", "Contig_N50", "Longest_contig"))
     for line in FILE:
         #print line
         line_list = re.split(" \s+", line)

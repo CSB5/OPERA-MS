@@ -33,12 +33,14 @@ def download_utils_db(db_type):
         pass
     
     #mash_db = "/home/bertrandd/PROJECT_LINK/OPERA_LG/META_GENOMIC_HYBRID_ASSEMBLY/OPERA-MS-DEV/OPERA-MS/genomeDB_Sketch.msh";
-    if db_type == "kraken2":
-        if  not os.path.exists(("{}/../utils_db/minikraken_8GB_20200312/hash.k2d".format(util_dir))):
+    if db_type == "read-concordance":
+        if  not os.path.exists(("{}/../utils_db/kraken_db/hash.k2d".format(util_dir))):
         
             cmd = "wget -nc -P {}/../utils_db/ ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz".format(util_dir)
             run_exe(cmd, True)
             cmd = "tar -xvzf {}/../utils_db/minikraken_8GB_202003.tgz -C {}/../utils_db".format(util_dir, util_dir)
+            run_exe(cmd, True)
+            cmd = cmd = "mv {}/../utils_db/minikraken_8GB_20200312 {}/../utils_db/kraken_db".format(util_dir, util_dir)
             run_exe(cmd, True)
             cmd = "rm {}/../utils_db/minikraken_8GB_202003.tgz".format(util_dir)
             run_exe(cmd, True)
@@ -136,43 +138,39 @@ def run_circular_sequence_identification(assembly_dir):
 def check_software(cmd, tool):
     try:
         run_exe(cmd, False)
-        
-        print("{} functioning".format(tool))
+        print("{}    functioning".format(tool))
     except Exception as e:
-        print(e)
-        print("{} not functioning".format(tool))
+        print("{}    *** NOT FUNCTIONING ***".format(tool))
         
 def check_installation():
 
-    cmd = "{}/checkm -h > /dev/null".format(util_dir)    
-    check_software(cmd, "CheckM")
-    
     cmd = "{}/metabat -h 2> /dev/null".format(util_dir)    
     check_software(cmd, "MetaBAT2")
-    
-    cmd = "perl {}/maxbin/run_MaxBin.pl -h > /dev/null".format(util_dir)
-    check_software(cmd, "MaxBin2")
 
     cmd = "{}/kraken2/kraken2 -v > /dev/null ".format(util_dir)
     check_software(cmd, "Kraken2")
+        
+    cmd = "{}/checkm -h > /dev/null".format(util_dir)    
+    check_software(cmd, "CheckM")
+    
+    cmd = "perl {}/maxbin2/run_MaxBin.pl -h > /dev/null".format(util_dir)
+    check_software(cmd, "MaxBin2")
+    
     
 def main(args):
     
     command = args.command
     nb_thread = 0
-    if command == "read-concordance" or command == "circular-sequence" or command == "binner" or command == "bin-evaluation" or command == "mash" :
+    if command == "read-concordance" or command == "circular-sequence" or command == "binning" or command == "bin-evaluation" or command == "mash" :
         
         #Parse the config file
         config_dict = read_opera_ms_config_file(args.config)
                         
-        #Set the number of thread
-        nb_thread = config_dict["NUM_PROCESSOR"]
-        
-        if args.thread != None:
-            nb_thread = args.thread
+        #Set the number of thread        
+        nb_thread = args.thread
 
-        if command == "binner":
-            bin_method = args.method
+        if command == "binning":
+            bin_method = args.binner
             
             if args.sample_name == None:                
                 sample_name = os.path.basename(os.path.normpath(config_dict["OUTPUT_DIR"]))                
@@ -232,52 +230,53 @@ if __name__ == "__main__":
     #this
     mandatory = parser.add_argument_group("mandatory arguments")
 
-    #binner
-    binner_parser = subparsers.add_parser('binner', parents=[config_parser.parser], help='Run binner')
-    binner_parser.add_argument("-m", "--method",  required=False, default = "metabat2", choices=["maxbin2", "metabat2"], help='binning method (default: MetaBat2)' )
-    binner_parser.add_argument("-s", "--sample-name",  required=False, help='provide this if the name of the output folder is not the name of the sample')
-            
-    #kraken
-    kraken_parser = subparsers.add_parser('read-concordance', parents=[config_parser.parser], help='Run Kraken2 on the short and long reads and compare the abundance profiles')
-    kraken_parser.add_argument("-a", "--abundance-threshold", default=0.1, help="Lower percentage abundance threshold [default 0.1]", type=float)
-    
-    #checkm
-    checkm_parser = subparsers.add_parser('bin-evaluation', parents=[config_parser.parser], help='Run CheckM on a set of bins')
-    checkm_parser.add_argument("-b", "--binner",  required=False, default = "metabat2", choices=["maxbin2", "metabat2", "opera_ms_clusters"], help = "Bins for evaluation (default: MetaBat2)")
-    checkm_parser.add_argument("-H", "--high-qual-mags",  default="90,5", help = 'Completness and contamination values for high quality genomes (default: 90,5)', type=str)
-    checkm_parser.add_argument("-M", "--medium-qual-mags",  default="50,10", help = 'Completness and contamination values for medium quality genomes (default: 50,10)', type=str)
-
-    #circular identification
-    #circular_sequence_parser = subparsers.add_parser('circular-sequence', parents=[config_parser.parser], help='Identify circular sequences')
-    
-    #novel species
-    novel_species_parser = subparsers.add_parser('novel-species', help='Run novel species identification')
-    mandatory = novel_species_parser.add_argument_group("mandatory arguments")
-    novel_species_parser._action_groups[-1].add_argument("-o", "--out",  required=True, help='Output directory')
-    
-    #
-    novel_species_parser.add_argument("-k", "--known-species",  required=False, default = "{}/../utils_db/MAG.msh".format(util_dir), help=argparse.SUPPRESS)#'Mash sketch of known species reference genomes (default utils_db/small_newgut_segata.msh)')
-    novel_species_parser.add_argument("-x", "--taxonomy-database",  required=False, default = "{}/../utils_db/GTDB.msh".format(util_dir), help=argparse.SUPPRESS) #'Mash sketch of reference genomes with taxonomy info (default utils_db/genomes)')    
-    novel_species_parser.add_argument("-b", "--binner",  required=False, default = "metabat2",  choices=["maxbin2", "metabat2", "opera_ms_clusters"], help='bins for novel analysis (default: MetaBat2)')
-    novel_species_parser.add_argument('configs', metavar='C', nargs='+', help='Path to OPERA-MS configuration file(s)')
-    #
-    novel_species_parser.add_argument("-q", "--mags-qual", help='Quality of the MAGS used (default: high)', choices=["high", "medium"], default="high")
-    novel_species_parser.add_argument("-c", "--cluster-threshold", help='Distance at which the genome will be clustered in the same species (default: 0.05)', default=0.05, type = float)
-    #
-    novel_species_parser.add_argument("-t", "--thread", help='Number of threads [Default 1]', default=1, type = int)
-    
     #opera-db
-    opera_db_parser = subparsers.add_parser('opera-ms-db', help='Create a OPERA-MS genome database')
+    opera_db_parser = subparsers.add_parser('opera-ms-db', help='Generate a custom OPERA-MS genome databasee')
     mandatory = opera_db_parser.add_argument_group("mandatory arguments")
     opera_db_parser._action_groups[-1].add_argument("-g", "--genomes-dir",  required=True, help='Directory that contains genome files')
     opera_db_parser._action_groups[-1].add_argument("-x", "--taxonomy",  required=True, help='Species name of each genomes')
     opera_db_parser._action_groups[-1].add_argument("-d", "--db-name",  required=True, help='Database name')
-    opera_db_parser.add_argument("-t", "--thread", help='Number of threads [Default 2]',  default=2, type = int)
+    opera_db_parser.add_argument("-t", "--thread", help='Number of threads [default: 2]',  default=2, type = int)
+
+    #kraken
+    kraken_parser = subparsers.add_parser('read-concordance', parents=[config_parser.parser], help='Compute the abundance profile correlation between long and short-reads')
+    kraken_parser.add_argument("-a", "--abundance-threshold", default=0.1, help="Lower percentage abundance threshold [default: 0.1]", type=float)
+    kraken_parser.add_argument("-t", "--thread", help='Number of threads [default: 2]', default=2, type = int)
     
+    #binner
+    binner_parser = subparsers.add_parser('binning', parents=[config_parser.parser], help='Streamline binning of OPERA-MS assembled contigs using MetaBAT2 or MaxBin2')
+    binner_parser.add_argument("-b", "--binner",  required=False, default = "metabat2", choices=["maxbin2", "metabat2"], help='binning method [default: metabat2]' )
+    binner_parser.add_argument("-s", "--sample-name",  required=False, help='Sample name [default: OPERA-MS output folder]')
+    binner_parser.add_argument("-t", "--thread", help='Number of threads [default: 2]', default=2, type = int)
+       
+    #checkm
+    checkm_parser = subparsers.add_parser('bin-evaluation', parents=[config_parser.parser], help='Streamline bin evaluation using CheckM')
+    checkm_parser.add_argument("-b", "--binner",  required=False, default = "metabat2", choices=["maxbin2", "metabat2", "opera_ms_clusters"], help = "Bins for evaluation [default: MetaBat2]")
+    checkm_parser.add_argument("-H", "--high-qual-mags",  default="90,5", help = 'High quality bins completeness and contamination thresholds [default: 90,5]', type=str)
+    checkm_parser.add_argument("-M", "--medium-qual-mags",  default="50,10", help = 'Medium quality bins completeness and contamination thresholds [default: 50,10]', type=str)
+    checkm_parser.add_argument("-t", "--thread", help='Number of threads [default: 2]', default=2, type = int)
+    #circular identification
+    #circular_sequence_parser = subparsers.add_parser('circular-sequence', parents=[config_parser.parser], help='Identify circular sequences')
+    
+    #novel species
+    novel_species_parser = subparsers.add_parser('novel-species', help='Identification of OPERA-MS MAGs most closely related species and identification of novel species')
+    mandatory = novel_species_parser.add_argument_group("mandatory arguments")
+    novel_species_parser._action_groups[-1].add_argument("-o", "--out",  required=True, help='Output directory')    
+    #
+    novel_species_parser.add_argument("-k", "--known-species",  required=False, default = "{}/../utils_db/MAG.msh".format(util_dir), help=argparse.SUPPRESS)#'Mash sketch of known species reference genomes (default utils_db/small_newgut_segata.msh)')
+    novel_species_parser.add_argument("-x", "--taxonomy-database",  required=False, default = "{}/../utils_db/GTDB.msh".format(util_dir), help=argparse.SUPPRESS) #'Mash sketch of reference genomes with taxonomy info (default utils_db/genomes)')    
+    novel_species_parser.add_argument("-b", "--binner",  required=False, default = "metabat2",  choices=["maxbin2", "metabat2", "opera_ms_clusters"], help='Bins used for the analysis [default: MetaBat2]')
+    novel_species_parser.add_argument('configs', metavar='C', nargs='+', help='Path to OPERA-MS configuration file(s)')
+    #
+    novel_species_parser.add_argument("-q", "--mags-qual", help='Quality of the MAGS used [default: high]', choices=["high", "medium"], default="high")
+    novel_species_parser.add_argument("-c", "--cluster-threshold", help='Maximum distance at which 2 genomes are considered of the same species [default: 0.05]', default=0.05, type = float)
+    #
+    novel_species_parser.add_argument("-t", "--thread", help='Number of threads [default: 2]', default=2, type = int)
+       
     #utils-db
-    utils_db_parser = subparsers.add_parser('utils-db', help='Download all the data base required by the utils software')
+    utils_db_parser = subparsers.add_parser('utils-db', help=' Download the database required by the utils command')
     mandatory = utils_db_parser.add_argument_group("mandatory arguments")
-    utils_db_parser._action_groups[-1].add_argument("-db", "--dbtype", choices = ["kraken2", "novel-species"], required=True, help='Kraken2 or novel species analysis database')
+    utils_db_parser._action_groups[-1].add_argument("-db", "--dbtype", choices = ["read-concordance", "novel-species"], required=True, help='read-concordance or novel species analysis database')
     
     #check if the utils sofware are functional in the current system
     check_install_parser = subparsers.add_parser('check-dependency', help='Check which OPERA-MS-UTILS software are functional in the current system')   

@@ -8,7 +8,7 @@ def run_maxbin2(contig_file, short_read1, assembly_dir, sample_name, nb_thread):
     create_dir(out_dir)
     out_dir = assembly_dir + "/maxbin2/all"
     create_dir(out_dir)
-    run_exe("perl {}/maxbin/run_MaxBin.pl -min_contig_length 500 -contig {} -reads {} -out {}/{}_bin -thread {}".format(util_dir, contig_file, short_read1, out_dir, sample_name, nb_thread), True)
+    run_exe("perl {}/maxbin2/run_MaxBin.pl -min_contig_length 500 -contig {} -reads {} -out {}/{}_bin -thread {}".format(util_dir, contig_file, short_read1, out_dir, sample_name, nb_thread), True)
 
 
 def run_metabat2(contig_file, short_read1, short_read2, assembly_dir, sample_name, nb_thread):

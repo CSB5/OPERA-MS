@@ -94,8 +94,7 @@ generate_assembly_stats(\%opera_ms_option, \%opera_ms_dependency);
 write_final_assembly(\%opera_ms_option, \%opera_ms_dependency);
 #
 #
-$opera_ms_option{"POLISHING"} = 0;
-#polishing(\%opera_ms_option, \%opera_ms_dependency);
+polishing(\%opera_ms_option, \%opera_ms_dependency);
 
     
 $time = localtime;

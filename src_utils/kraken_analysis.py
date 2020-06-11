@@ -22,7 +22,7 @@ def get_correlation(assembly_dir):
 
     
 def run_kraken2(assembly_dir, read1, read2, long_read, nb_thread, abundance_threshold):
-    kraken_db = util_dir + "/../utils_db/minikraken_8GB_20200312"
+    kraken_db = util_dir + "/../utils_db/kraken_db"
     
     out_dir = assembly_dir + "/read-concordance"
     create_dir(out_dir)
@@ -33,16 +33,16 @@ def run_kraken2(assembly_dir, read1, read2, long_read, nb_thread, abundance_thre
     if(is_zip(read1)):
        compress_format = "--gzip-compressed"
     if not os.path.exists(out_file_report):
-        run_exe(util_dir + "/kraken2/kraken2" + " --db " +  kraken_db + " --threads " + nb_thread + " --paired " + compress_format + " --output " + out_file + " --report " + out_file_report + " " + read1 + " " + read2, True)
+        run_exe(util_dir + "/kraken2/kraken2" + " --db " +  kraken_db + " --threads " + str(nb_thread) + " --paired " + compress_format + " --output " + out_file + " --report " + out_file_report + " " + read1 + " " + read2, True)
     #
     #long read
     out_file = out_dir + "/long_read.out"
     out_file_report = out_file + ".report"
     compress_format = ""
-    if(is_zip(read1)):
+    if(is_zip(long_read)):
         compress_format = "--gzip-compressed"
     if not os.path.exists(out_file_report):
-        run_exe(util_dir + "/kraken2/kraken2" + " --db " +  kraken_db + " --threads " + nb_thread + " " + compress_format + " --output " + out_file + " --report " + out_file_report + " " + long_read, True)
+        run_exe(util_dir + "/kraken2/kraken2" + " --db " +  kraken_db + " --threads " + str(nb_thread) + " " + compress_format + " --output " + out_file + " --report " + out_file_report + " " + long_read, True)
     
     #Comapare the abundance profile
     compare_abundance_profile(out_dir, out_dir + "/short_read.out.report", out_dir + "/long_read.out.report", "S", abundance_threshold)

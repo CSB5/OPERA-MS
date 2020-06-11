@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 #use strict;
 use warnings;
@@ -22,7 +22,7 @@ check_module("Getopt::Long");
 sub check_module{
     my ($module) = @_;
     print STDERR " *** Check perl module $module\n";
-    system("/usr/bin/perl -e 'use $module ' 2> tmp_module.str");
+    system("/usr/bin/env perl -e 'use $module ' 2> tmp_module.str");
     open(F, "tmp_module.str");
     while(<F>){
 	if($_ ne ""){
