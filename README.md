@@ -140,7 +140,7 @@ OPERA-MS and its dependencies required C++ (gcc 4.8.3 and above), Java, Python, 
 
 Once **cpanm** is installed, simply run the following command to install all the perl modules:
 ```
-perl utils/install_perl_module.pl
+perl tools_opera_ms/install_perl_module.pl
 ```
 If the perl libraries cannot be installed under root, the following line should be added to **.bashrc**:
 ```
