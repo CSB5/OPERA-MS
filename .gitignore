@@ -33,6 +33,8 @@ test_novel
 #bin/novel_analysis.py
 #utils_db
 #utils_db/*
+tools_opera_ms/perl
+tools_opera_ms/maxbin2
 
 #utils/kraken2
 tools_opera_ms/maxbin
