@@ -140,7 +140,7 @@ OPERA-MS and its dependencies required C++ (gcc 4.8.3 and above), Java, Python, 
 
 Once **cpanm** is installed, simply run the following command to install all the perl modules:
 ```
-perl utils/install_perl_module.pl
+perl tools_opera_ms/install_perl_module.pl
 ```
 If the perl libraries cannot be installed under root, the following line should be added to **.bashrc**:
 ```
@@ -167,10 +167,18 @@ The generic command to run a OPERA-MS docker container after building:
 To process data with the dockerized OPERA-MS, directories for in- and outdata should be mounted into the container. An example is shown below for running the test dataset. In the below example the repo was cloned to **/home/myuser/git/OPERA-MS**). The repo is needed only for the **sample_files**. OPERA-MS-DB should be dowloaded using the command described [here](#opera-ms-genome-database). If Docker is running in a VM, as is the case for Windows or OSX, but also when deployed on a cloud platform such as AWS or Azure, a minimum of 2 available cores is required.  
 
 ```
+#Build the docker
+docker build -t operams .
+
+#Download OPERA-MS-DB
+mkdir OPERA-MS-DB/ 
+docker run -v OPERA-MS-DB/:/operams/OPERA-MS-DB/ operams install-db
+
+#Run the assembly
 docker run \
-    -v OPERA-MS/test_files/:/sample_files \
-    -v OPERA-MS/test_files/RESULTS/:/sample_out \
-    -v OPERA-MS/OPERA-MS-DB/:/operams/OPERA-MS-DB/
+    -v test_files/:/sample_files \
+    -v test_files/RESULTS/:/sample_out \
+    -v OPERA-MS-DB/:/operams/OPERA-MS-DB/
      operams --contig-file /sample_files/contigs.fasta \
     --short-read1 /sample_files/R1.fastq.gz \
     --short-read2 /sample_files/R2.fastq.gz \
