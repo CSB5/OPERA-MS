@@ -1438,7 +1438,7 @@ sub set_default_value{
     $opera_ms_option->{"STAGE_FOLLOW"} = 0;
     $opera_ms_option->{"MULTI_SAMPLE"} = 0;
     $opera_ms_option->{"REF_REPEAT_DETECTION"} = 0;
-    $opera_ms_option->{"POLISHING"} = 0;
+    $opera_ms_option->{"POLISHING"} = 1;
     $opera_ms_option->{"GAP_FILLING"} = 1;
     $opera_ms_option->{"LONG_READ_MAPPER"} = "blasr";
     $opera_ms_option->{"SHORT_READ_ASSEMBLER"} = "megahit";
