@@ -63,7 +63,7 @@ Alternativelly, a custom database can be generated the using the [**opera-ms-db*
 
 - **--no-strain-clustering** : disable strain level clustering
 
-- **--polishing** : enable short-read polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contigs.polished.fasta
+- **--no-polishing** : disable short-read polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contigs.polished.fasta. For sample with high coverage and/or high complexity this step may take a significant amount of computation time
 
 - **--long-read-mapper** : software used for long-read mapping i.e. [blasr](https://github.com/PacificBiosciences/blasr) (default) or [minimap2]( https://github.com/lh3/minimap2) (tested with version 2.11-r797)
 
