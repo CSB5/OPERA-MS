@@ -129,14 +129,18 @@ The only true dependency is **cpanm**, which is used to automatically install Pe
 
 If a pre-built program does not work on the user's machine, OPERA-MS will check if the program is present in the user's **PATH**. However, the version of the program may be different than the one packaged. Alternatively, to specify a different directory for the dependency, a link to the program may be placed in the **tools_opera_ms** folder.
 
-OPERA-MS and its dependencies required C++ (gcc 4.8.3 and above), Java, Python, R and Perl, and use the following Perl modules (installed using [**cpanm**](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
-
-- [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
-- [File::Which](https://metacpan.org/pod/File::Which)
-- [File::Spec::Functions](https://perldoc.perl.org/File/Spec/Functions.html)
-- [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
-- [Statistics::R](https://metacpan.org/pod/Statistics::R)
-- [Getopt::Long](http://perldoc.perl.org/Getopt/Long.html)
+OPERA-MS and its dependencies required:
+- C++ (gcc 4.8.3 and above)
+- Java (jre-1.7.0 and above)
+- Python (tested with 2.7.14 and 3.6)
+- R  (3.2.0 and above)
+- Perl, and use the following Perl modules (installed using [**cpanm**](https://metacpan.org/pod/distribution/App-cpanminus/bin/cpanm)):
+    - [Switch](http://search.cpan.org/~chorny/Switch-2.17/Switch.pm)
+    - [File::Which](https://metacpan.org/pod/File::Which)
+    - [File::Spec::Functions](https://perldoc.perl.org/File/Spec/Functions.html)
+    - [Statistics::Basic](http://search.cpan.org/~jettero/Statistics-Basic-1.6611/lib/Statistics/Basic.pod)
+    - [Statistics::R](https://metacpan.org/pod/Statistics::R)
+    - [Getopt::Long](http://perldoc.perl.org/Getopt/Long.html)
 
 Once **cpanm** is installed, simply run the following command to install all the perl modules:
 ```
