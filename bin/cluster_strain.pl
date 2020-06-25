@@ -441,14 +441,19 @@ sub compute_mode{
 
     #$window_distrib = [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10];
 
-    #Resolve weird problem
-    my @temp = @{$window_distrib}[0..@{$window_distrib}-2];#NEED TO FIX uninitiallized value push in the array
-    #print STDERR $window_distrib[@{$window_distrib}-1];
-    #@temp = @{$window_distrib};
+    #Resolve weird problem of undefined value NEED TO INVESTIGATE WHY THIS APPENS
+    my $nb_window = @{$window_distrib} + 0;
+    my @temp = ();my $val;
+    for(my $i = 0; $i < $nb_window; $i++){
+	$val = $window_distrib->[$i];
+	if(defined $val){
+	    push(@temp, $val);
+	}
+	else{
+	    print STDERR " *** WARNING undefined value in window_distrib " . $i . "\n";
+	}
+    }
     
-    #foreach $f (@temp){
-    #print STDERR "xx" . $f . "\n";
-    #}
     
     #$R->set( 'values', $window_distrib);
     $R->set( 'values', \@temp);
