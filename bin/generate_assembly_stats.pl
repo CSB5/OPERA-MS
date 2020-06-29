@@ -1,4 +1,4 @@
-#use strict;
+2#use strict;
 use warnings;
 use Statistics::Basic qw(:all);
 
@@ -50,7 +50,7 @@ sub write_assembly_stats{
     my ($scaff_id, $median_cov, $length, $str_scaff);
 
     open (OUTFILE, '>', $outfile) or die;
-    print OUTFILE "SEQ_ID\tLENGTH\tSHORT_READ_COV\tLONG_READ_COV\tCLUSTER\tSPECIES\tNB_STRAIN\tREFERENCE_GENOME\n";
+    print OUTFILE "CONTIG_ID\tLENGTH\tSHORT_READ_COV\tLONG_READ_COV\tCLUSTER\tSPECIES\tNB_STRAIN\tREFERENCE_GENOME\n";
     open (SCAFFOLDS, $scaffold_file) or die;
     
     while(<SCAFFOLDS>){

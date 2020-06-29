@@ -125,7 +125,7 @@ def run_novel_species_analysis(ref_known_species, ref_taxonomy_species, nb_threa
     #Print the final info file
     OUT = open(out+"/MAGs_info.txt", "w")
     print("\n***writing output file...\n")
-    OUT.write("MAGs_ID\tQuality\tCompleteness\tContamination\tSize\t#_contigs\tContig_N50\tLongest_contig\tClosest_GTDB_species\tClosest_GTDB_genome\tDistance_to_closest_GTDB_genome\tClosest_MAGs\tDistance_to_closest_MAGs\tNovel_status\tNovel_species_ID\n")
+    OUT.write("MAG_ID\tQuality\tCompleteness\tContamination\tSize\t#_contigs\tContig_N50\tLongest_contig\tClosest_GTDB_species\tClosest_GTDB_genome\tDistance_to_closest_GTDB_genome\tClosest_MAG\tDistance_to_closest_MAG\tNovel_status\tNovel_species_ID\n")
     for mag in sorted(mag_info, key=lambda x: float(mag_info[x]["INFO"][2]), reverse=True):
         OUT.write(
             "\t".join(mag_info[mag]["INFO"]) + "\t" +

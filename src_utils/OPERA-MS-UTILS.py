@@ -234,7 +234,7 @@ if __name__ == "__main__":
     opera_db_parser = subparsers.add_parser('opera-ms-db', help='Generate a custom OPERA-MS genome databasee')
     mandatory = opera_db_parser.add_argument_group("mandatory arguments")
     opera_db_parser._action_groups[-1].add_argument("-g", "--genomes-dir",  required=True, help='Directory that contains genome files')
-    opera_db_parser._action_groups[-1].add_argument("-x", "--taxonomy",  required=True, help='Species name of each genomes')
+    opera_db_parser._action_groups[-1].add_argument("-x", "--taxonomy",  required=True, help='Species-level taxonomy of genomes')
     opera_db_parser._action_groups[-1].add_argument("-d", "--db-name",  required=True, help='Database name')
     opera_db_parser.add_argument("-t", "--thread", help='Number of threads [default: 2]',  default=2, type = int)
 
@@ -252,8 +252,8 @@ if __name__ == "__main__":
     #checkm
     checkm_parser = subparsers.add_parser('bin-evaluation', parents=[config_parser.parser], help='Streamline bin evaluation using CheckM')
     checkm_parser.add_argument("-b", "--binner",  required=False, default = "metabat2", choices=["maxbin2", "metabat2", "opera_ms_clusters"], help = "Bins for evaluation [default: MetaBat2]")
-    checkm_parser.add_argument("-H", "--high-qual-mags",  default="90,5", help = 'High quality bins completeness and contamination thresholds [default: 90,5]', type=str)
-    checkm_parser.add_argument("-M", "--medium-qual-mags",  default="50,10", help = 'Medium quality bins completeness and contamination thresholds [default: 50,10]', type=str)
+    checkm_parser.add_argument("-H", "--high-qual-mags",  default="90,5", help = 'Completeness and contamination thresholds for high quality bins [default: 90,5]', type=str)
+    checkm_parser.add_argument("-M", "--medium-qual-mags",  default="50,10", help = 'Completeness and contamination thresholds for medium quality bins [default: 50,10]', type=str)
     checkm_parser.add_argument("-t", "--thread", help='Number of threads [default: 2]', default=2, type = int)
     #circular identification
     #circular_sequence_parser = subparsers.add_parser('circular-sequence', parents=[config_parser.parser], help='Identify circular sequences')
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     novel_species_parser.add_argument('configs', metavar='C', nargs='+', help='Path to OPERA-MS configuration file(s)')
     #
     novel_species_parser.add_argument("-q", "--mags-qual", help='Quality of the MAGS used [default: high]', choices=["high", "medium"], default="high")
-    novel_species_parser.add_argument("-c", "--cluster-threshold", help='Maximum distance at which 2 genomes are considered of the same species [default: 0.05]', default=0.05, type = float)
+    novel_species_parser.add_argument("-c", "--cluster-threshold", help='Maximum distance at which 2 genomes are considered to be from the same species [default: 0.05]', default=0.05, type = float)
     #
     novel_species_parser.add_argument("-t", "--thread", help='Number of threads [default: 2]', default=2, type = int)
        
