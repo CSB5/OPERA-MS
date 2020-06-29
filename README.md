@@ -5,7 +5,7 @@ OPERA-MS is a hybrid metagenomic assembler which combines the advantages of shor
 
 OPERA-MS employs a staged assembly strategy that is designed to exploit even low coverage long read data to improve genome assembly. It begins by constructing a short-read metagenomic assembly (default: [MEGAHIT](https://github.com/voutcn/megahit)) that provides a good representation of the underlying sequence in the metagenome but may be fragmented. Long and short reads are then mapped to the assembly to identify connectivity between the contigs and to compute read coverage information. This serves as the basis for the core of the OPERA-MS algorithm which is to exploit coverage as well as connectivity information to accurately cluster contigs into genomes using a Bayesian model based approach. Another important advantage of OPERA-MS is that it can deconvolute strains in the metagenome, optionally using information from reference genomes to support this. This is fundamentally challenging for pipelines that begin with assembly of error-prone long reads. After clustering, individual genomes are further scaffolded and gap-filled using the lightweight and robust scaffolder [OPERA-LG](https://sourceforge.net/p/operasf/wiki/The%20OPERA%20wiki/).
 
-OPERA-MS can assemble near complete genomes from a metagenomic dataset with as little as 9x long-read coverage. OPERA-MS is designed to be conservative and avoid aggresive assembly, a strategy favored by many modern assemblers that aim to report high contiguity. Applied to human gut microbiome data it provides hundreds of high quality draft genomes, a majority of which have  N50 >100kbp. We observed the assembly of complete plasmids, many of which were novel and contain previously unseen resistance gene combinations. In addition, OPERA-MS can very accurately assemble genomes even in the presence of multiple strains of a species in a complex metagenome, allowing us to associate plasmids and host genomes using longitudinal data. For further details about these and other results using nanopore sequencing on stool samples from clinical studies see our [manuscript](https://www.nature.com/articles/s41587-019-0191-2) or [preprint](https://www.biorxiv.org/content/early/2018/10/30/456905). 
+OPERA-MS can assemble near complete genomes from a metagenomic dataset with as little as 9x long-read coverage. It is designed to be conservative and avoid aggresive assembly, a strategy favored by many modern assemblers that aim to report high contiguity statistics. Applied to human gut microbiome data, OPERA-MS provides hundreds of high quality draft genomes, a majority of which have  N50 >100kbp. We observed the assembly of complete plasmids, many of which were novel and contain previously unseen resistance gene combinations. In addition, OPERA-MS can very accurately assemble genomes even in the presence of multiple strains of a species in a complex metagenome, allowing us to associate plasmids and host genomes using longitudinal data. For further details about these and other results using nanopore sequencing on stool samples from clinical studies see our [manuscript](https://www.nature.com/articles/s41587-019-0191-2) or [preprint](https://www.biorxiv.org/content/early/2018/10/30/456905). 
 
 # Installation
 
@@ -41,6 +41,7 @@ perl OPERA-MS.pl install-db
 ```
 The database contains representative genomes for 23k bacterial species from [**GTDB**](https://gtdb.ecogenomic.org/) and requires 35Gb of free disc space.
 Alternatively, a custom database can be generated using the [**opera-ms-db**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS#opera-ms-db) utility command.</br>
+</br>
 **Note: Databases from previous versions are no longer supported.**
 
 # Usage
@@ -67,7 +68,7 @@ Alternatively, a custom database can be generated using the [**opera-ms-db**](ht
 
 - **--long-read-mapper** : software used for long-read mapping i.e. [blasr](https://github.com/PacificBiosciences/blasr) (default) or [minimap2]( https://github.com/lh3/minimap2) (tested with version 2.11-r797)
 
-- **--short-read-assembler** : software used for short read assembly i.e. [megahit](https://github.com/voutcn/megahit) (default) or [spades](https://github.com/ablab/spades)
+- **--short-read-assembler** : software used for short read assembly i.e. [MEGAHIT](https://github.com/voutcn/megahit) (default) or [SPAdes](https://github.com/ablab/spades)
 
 - **--no-gap-filling** : disable gap-filling stage
 
@@ -106,9 +107,9 @@ We typically run OPERA-MS with default parameters using 16 threads on an Intel X
 
 | Dataset  | Short-read data (Gbp) | Long-read data (Gbp) | Running time (hours)  | Peak RAM usage (GB) |
 |:---:                 |:---: |:---:   |:---:   |:---: |
-| CAMI multi-strain mock community (low complexity)  | 3.9  | 2    | 1.4  | 5.5| 
+| CAMI2 multi-strain mock community (low complexity)  | 3.9  | 2    | 1.4  | 5.5| 
 | Human gut microbiome (medium complexity) | 24.4  | 1.6  | 2.7  | 10.2| 
-| CAMI environmental mock community (high complexity)  | 9.9  | 4.8  | 4.5    | 12.8|
+| CAMI2 environmental mock community (high complexity)  | 9.9  | 4.8  | 4.5    | 12.8|
 
 OPERA-MS is designed to work with deep short-read sequencing, but can work with lower coverage in terms of long-read sequencing. In practice, short-read coverage >15x is recommended, while OPERA-MS can use long-read coverage as low as 9x to boost assembly contiguity. Based on this, we recommend at least 9Gbp of short-read data and 3Gbp of long-read data to allow for assembly of bacterial genomes at 1% relative abundance in the metagenome.
 
