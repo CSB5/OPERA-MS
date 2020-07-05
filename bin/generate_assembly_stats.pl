@@ -1,4 +1,4 @@
-2#use strict;
+#use strict;
 use warnings;
 use Statistics::Basic qw(:all);
 
