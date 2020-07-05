@@ -18,7 +18,7 @@ use Getopt::Long qw(GetOptionsFromArray);
 my %opera_ms_option = ();
 my $opera_ms_full_path = dirname(rel2abs($0)) . "/";
 $opera_ms_option{"OPERA_MS_DIR"} = $opera_ms_full_path;
-$opera_ms_option{"VERSION"} = "v1.0.0";
+$opera_ms_option{"VERSION"} = "v0.9.0";
 
 my %opera_ms_dependency = ();
 

@@ -96,7 +96,7 @@ Finally, OPERA-MS strain-level clusters (one fasta file per strain) can be found
 
 ### OPERA-MS-UTILS
 
-Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS) command. We are now providing streamlined analysis tools to compute the concordance in represented taxa between short and long-read sequencing, to bin contigs, to assess bin quality and to identify genomes for novel species from the metagenomic assembly. A complete description of these tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-UTILS).
+Scripts to post-process the assemblies are now availaible using the [**OPERA-MS-UTILS**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-Utilities) command. We are now providing streamlined analysis tools to compute the concordance in represented taxa between short and long-read sequencing, to bin contigs, to assess bin quality and to identify genomes for novel species from the metagenomic assembly. A complete description of these tools can be found in the [the OPERA-MS-UTILS wiki section](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-Utilities).
 
 This is work-in-progress and additional tools will be available as part of the next release. Please contact us if you would like to add your favorite metagenomic analysis tool.
 
@@ -195,7 +195,7 @@ docker run \
 # Contact information
 For additional information, help and bug reports please send an email to: 
 
-- Denis Bertrand <bertrandd@gis.a-star.edu.sg>
+- Denis Bertrand <dbertran78@gmail.com>
 - Chengxuan Tong <Tong_Chengxuan@gis.a-star.edu.sg>
 - Lorenz Gerber (docker related topics): <lorenzottogerber@gmail.com>
 
