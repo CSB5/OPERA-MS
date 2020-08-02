@@ -10,7 +10,7 @@ from collections import defaultdict
 # Function to provide the reverse complement of the input DNA sequence
 def reverse_complement(dna) :
 	# Reverse slice inverts the sequence
-	complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
+	complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A', 'N': 'N'}
 	return ''.join([complement[base] for base in dna[::-1]])
 
 
