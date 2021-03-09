@@ -1670,7 +1670,7 @@ sub read_argument{
 	"contig-len-thr=i"    => \$opera_ms_option{"CONTIG_LEN_THR"},
 	"contig-edge-len=i"   => \$opera_ms_option{"CONTIG_EDGE_LEN"},	
 	"contig-window-len=i" => \$opera_ms_option{"CONTIG_WINDOW_LEN"},
-	"kmer=i"              => \$opera_ms_option{"KMER_SIZE"},	
+	"kmer-size=i"              => \$opera_ms_option{"KMER_SIZE"},	
 	#
 	#
 	
@@ -1686,8 +1686,9 @@ sub read_argument{
 	) or die("Error in command line arguments.\n$help_message");
     
     if($flag_help){
-	print STDERR $help_message;exit(0);
+		print STDERR $help_message;exit(0);
     }
+
 }
 
 
