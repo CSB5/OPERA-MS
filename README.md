@@ -195,8 +195,4 @@ docker run \
 # Contact information
 For additional information, help and bug reports please send an email to: 
 
-- Denis Bertrand <dbertran78@gmail.com>
-- Chengxuan Tong <Tong_Chengxuan@gis.a-star.edu.sg>
-- Lorenz Gerber (docker related topics): <lorenzottogerber@gmail.com>
-
-
+- Jean-Sebastien Gounot <Jean-Sebastien@gis.a-star.edu.sg>
