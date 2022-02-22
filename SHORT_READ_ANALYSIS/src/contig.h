@@ -1,295 +1,189 @@
-#pragma once
+#ifndef CONTIG_H_
+#define CONTIG_H_
 
 #include <string>
-#include <list>
 #include <vector>
-#include <set>
+#include <unordered_map>
 
-class PET;
-#include "PET.h"
-#include "CommonFunction.h"
+class Cluster;
 
-using namespace std;
 
-struct SUBCONTIG{
-	string m_contigName;
-	int m_ori;
-	double m_length;
-	double m_startPos;
-	int m_gapSize;
-	bool m_isRepeat;
-};
-
-class Contig
-{
+/**
+ * @brief A class for representing contigs in the assembly graph.
+ *
+ * Represents a contig in the assembly graph including additional information
+ * obtained from read mapping.
+ */
+class sContig {
 public:
-	Contig(void);
-	Contig( string name, double length, double cov );
-	~Contig(void);
+	/**
+	 * @brief Constructs a contig.
+	 *
+	 * @param id		id
+	 * @param length	length
+	 */
+	sContig(std::string id, int length);
 
-	// Attributes
-private:
-	string m_name;		// contig name
-	double m_length;		// contig length
-	double m_cov;			// contig coverage
-	int m_id;			// contig ID
-	int m_type;                     // the type of the contig: unique, small or repeat
-	list<PET*> *m_leftEdges;		// the left edges, suppose ori is +
-	list<PET*> *m_rightEdges;		// the right edges, suppose ori is +
-	list<Contig*>::iterator m_listPos;		// the list iterator of current contig
-	list<Contig*>::iterator m_borderListPos;		// the border list iterator of current contig
-	bool m_ifInSubgraph;		// the flag to record if this contig is in current subgraph
-	double m_leftDistance;			// the left distance to the scaffold, suppose ori is +
-	double m_rightDistance;		// the right distance to the scaffold, suppose ori is +
-	string m_scaffold;			// the scaffold content of this contig
-	int m_scaffoldID;
-	bool m_isBorderContig;		// flag to record if it is a border contig
-	int m_extentionDirection;		// the direction during extension
+	/**
+	 * @brief Constructs a contig from previously extracted contig information.
+	 *
+	 * @param id			id
+	 * @param length		length
+	 * @param left_edge		starting point of the first window
+	 * @param right_edge	ending point of the last window
+	 * @param num_windows	number of windows
+	 */
+	sContig(std::string id, int length, int left_edge, int right_edge, int num_windows);
 
-	bool m_isRepeat;                // flag if this contig is repeat or not
-	
-	// include gaps
-	double m_lengthWithGap;          // the length of this contig including gap
-	double m_leftDistanceWithGap;
-	double m_rightDistanceWithGap;
-	double m_startPositionWithGap;		// the start position in scaffold with gap
+	~sContig(); /**< Default destructor. */
 
-	// scaffold related
-	int m_ori;			// orientation in scaffold
-	double m_startPosition;			// the startPosition in scaffold without gap
-	list< pair<Contig*, int> >::iterator m_unassignedNodeIter[2];		// iterator in unassigned node set, both plus and minus
-	bool m_isUnassignedNode[2];			// record if it is unassigned node
-	bool m_isInAR;				// recod if it is in active region
-	list< pair<Contig*, int> >::iterator m_endOfList;	
-	//*****unassigned nodes*****
-	int m_unassignedOri;			// the untried orientation in unassigned nodes
-	list< pair<Contig*, int> > *m_emptyList;			// the empty list, used for get end() iterator
-	//*****end of unassigned nodes******
-	//***********gap sizes related
-	int m_scaffoldPos;			// the order in scaffolds
-	int m_gapSize;				// the gap size after this scaffold
-	//***********
+	/**
+	 * @brief Getter for id.
+	 * 
+	 * @return id
+	 */
+	std::string id() const;
 
-	// heuristic parameters
-	int m_step;			// the steps to find this contig
+	/**
+	 * @brief Getter for length.
+	 *
+	 * @return length
+	 */	
+	int length() const;
 
-	// multiple libraries related
-	list<PET*> *m_leftEdgesMultiLib;		// the left edges of all libraries, suppose ori is +
-	list<PET*> *m_rightEdgesMultiLib;		// the right edges of all libraries, suppose ori is +
+	/**
+	 * @brief Getter for modifed length.
+	 *
+	 * @return modifed length
+	 */	
+	int modified_length() const;
 
-	double m_numberOfBases;                   // the number of bases mapped to this contig
+	/**
+	 * @brief Getter for starting point of the first window.
+	 *
+	 * @return starting point of the first window
+	 */	
+	int left_edge() const;
 
-	// calculate the distance from the first contig in the scaffold
-	double m_distance;                       // the distance of this contig to the first contig in the scaffold
-	int m_visitedTime;                         // record how many time this contig has been visited
-	double m_weightedVisitedTime;            // record the weighted visited time
-	int m_oriInExtension;                    // the orientation during extension
-	bool m_ifCalculated;                     // if the distance of this contig has been calculated before
-	
-	// separate the scaffolds into independent components
-	int m_scafID;
+	/**
+	 * @brief Getter for ending point of the last window.
+	 *
+	 * @return ending point of the last window
+	 */	
+	int right_edge() const;
 
-	// properties about the real positons on reference genome
-	string m_referenceGenomeName;            // the reference genome name of this contig
-	int m_referenceStartPos;                 // 
-	int m_referenceEndPos;                   // the start position on reference genome
-	int m_referenceOri;                      // the orientation of this contig on reference genome
-	int m_referenceIndex;                    // the index of this contig on reference genome
+	/**
+	 * @brief Getter for number of windows.
+	 *
+	 * @return number of windows
+	 */	
+	int num_windows() const;
 
-	int m_subgraphReferenceIndex;            // the index of this contig within one subgraph on reference genome
+	/**
+	 * @brief Getter for sum of read counts for all samples.
+	 *
+	 * @return sum of read counts for all samples
+	 */
+	int* sum_read_counts() const;
 
-	// super contig related properties
-	list<SUBCONTIG*> m_subcontigs;           // subcontig information
-	double m_removedDis;                     // record if it need to remove the first contig or not
-	Contig *m_originalRepeat;                // the original repeat contig of this copy
-	set<int> m_scaffoldIDSet;
-	set<int> m_scafIDSet;
+	/**
+	 * @brief Getter for sum of read counts for all windows.
+	 *
+	 * @return sum of read counts for all windows
+	 */
+	int** read_counts() const;
 
-	list<PET*> *m_repeatLeftEdges;		// the left edges of this occurrence, suppose ori is +
-	list<PET*> *m_repeatRightEdges;		// the right edges of this occurrence, suppose ori is +
+	/**
+	 * @brief Getter for cluster containing this contig.
+	 *
+	 * During the construction of clustering trees, this is the root
+	 * cluster containing this contig. After computing models, this is
+	 * the final cluster this contig is assigned to.
+	 *
+	 * @return cluster containing this contig
+	 */
+	Cluster* cluster() const;
 
-	bool m_needToRemove;                    // record if this repeat needs to be removed from the final scaffold
-
-	// for traversing graph
-	int m_setPos;                    // the set containing a connected component
-
-
-	// Methods
-public:
-	void SetName( string name );
-	string GetName();
-	void SetLength( double length );
-	double GetLength();
-	void SetCov( double cov );
-	double GetCov();
-	void SetID( int id );
-	int GetID();
-	void AddEdge( PET *p );			// add a pet cluster of this contig
-	void SetListPos( list<Contig*>::iterator iter );
-	void SetBorderListPos( list<Contig*>::iterator iter );
-	bool IsSingleton();			// check if current contig is a singleton
-	int GetScaffoldID();
-	void SetScaffoldID( int id );
-	list<PET*> * GetLeftEdges();
-	list<PET*> * GetRightEdges();
-	list<Contig*>::iterator GetListPos();
-	list<Contig*>::iterator GetBorderListPos();
-	bool HasEdge();			// check if current contig has any edge
-	bool HasLeftEdge();
-	bool HasRightEdge();
-	bool IsBorderContig();			// check if current contig is a border contig
-	double GetRightDis();
-	double GetLeftDis();
-	double GetRightDisWithGap();
-	double GetLeftDisWithGap();
-	void SetLeftDis( double d );
-	void SetRightDis( double d );
-	void SetLeftDisWithGap( double d );
-	void SetRightDisWithGap( double d );
-	void SetExtensionOri( int ori );
-	int GetExtensionOri();
-	void SetInSubgraph();
-	void SetNotInSubgraph();
-	bool isInSubgraph();
-	void SetOri( int ori );
-	int GetOri();
-	void SetStartPosition( double pos, int gap );
-	void SetStartPositionWithGap( double pos );
-	double GetStartPosition();
-	double GetStartPositionWithGap();
-	list< pair<Contig*, int> >::iterator GetUnassignedNodeIter( int type );
-	void SetUnassignedNodeIter( int type, list< pair<Contig*, int> >::iterator iter );
-	bool IsUnassignedNode( int type );
-	void ClearUnassignedNodeIter( int type );			// set iter to end()
-	void SetIfInAR( bool ar );		// set if it is in active region
-	bool IfInAR();				// check if it is in active region
-	bool IfHasHappyDE( int ori );		// check if it has happy dangling edges in right direction
-	void SetEndOfList( list< pair<Contig*, int> >::iterator iter );
-	// check the number of valid left Edge for certain orientation
-	int GetNumOfValidLeftEdges( int ori );
-	// generate scaffold String with certain orientation
-	string GenScaffoldString( int ori );
-	// set scaffold string
-	void SetScaffoldString( string sca );
-	// get original contig orientation in scaffold
-	int GetContigOriInScaffold( string contigName );
-	// reverse left and right edges
-	void ReverseEdges();
-	// get orientation of complex contig
-	string GetOriOfFirstContig( int ori );
-	string GetNameOfFirstContig();
-	bool CheckOldContigOri( Contig *c );
-	string GetScaffoldString();
-
-	// gap related
-	void SetScaffoldPos( int pos );
-	int GetScaffoldPos();
-	void SetGap( int gap );
-	int GetGap();
-	void SetLengthWithGap( double l );
-	double GetLengthWithGap();
-
-	// heuristic related
-	void SetStep( int s );
-	int GetStep();
-
-	// multiple library related
-	void AddEdgeMultiLib( PET *p );			// add a pet cluster of this contig, from all libraries
-	void RemoveEdgeMultiLib( PET *p, int contigPos );		// remove a pet cluster of this contig, from all libraries
-	void Initialize();						// initialize the attributes
-	bool HasMultiLibEdge();					// check if this contig has multiple libraries edge
-	list<PET*>* GetLeftEdgeMultiLib();		// get the left edge of multiple libraries
-	list<PET*>* GetRightEdgeMultiLib();		// get the right edge of multiple libraries
-
-
-	// dynamically change cluster threshold related functions
-	// remove edge p from graph
-	void RemoveEdge( PET *p );
-
-	// add 1 to the number of reads mapped to this contig
-	void AddOneMappedBases( int bases );
-	// calcuate the coverage using number reads mapped on this contig
-	void CalculateCov();
-
-	// calculate the distance from the first contig in the scaffold
-	void SetDistance( double d, int step );
-	double GetDistance();
-	void SetOriInExtension( int ori );
-	int GetOriInExtension();
-	bool IfCalculated();
-	void SetIfCalculated( bool c );
-	void AddDistance( double dis, int step );
-
-	// separate the scaffolds into independent components
-	void SetScafID( int id );
-	int GetScafID();
-
-	void InitializeDistance();
-
-	int GetVisitedTime();
-	double GetMidPointDistance();        // get the distance of the mid point
-
-	// methods about saving reference genome information
-	void SetReferenceName( string name );
-	string GetReferenceName();
-	void SetReferenceStartPos( int pos );
-	int GetReferenceStartPos();
-	void SetReferenceEndPos( int pos );
-	int GetReferenceEndPos();
-	void SetReferenceOri( int ori );
-	int GetReferenceOri();
-	void SetReferenceIndex( int index );
-	int GetReferenceIndex();
-	void SetSubgraphReferenceIndex( int index );
-	int GetSubgraphReferenceIndex();
-
-	// handle contig type
-	void SetContigType( int type );
-	int GetContigType();
-	void SetIfRepeat( bool type );
-	bool IsRepeat();
-
-	// super contigs related methods
-	void SplitSuperContig( Contig *previousContig );              // split the super contig and gain the individual information
-	bool IsDanglingEdge( Contig *&ARContig, int &disDelta, int &disDeltaWithGap, PET *edge );    // check if this edge with a repeat is still dangling edge or not
-	int GetRemovedDis();                 // get the removed distance due to the repeat at the start of supercontig
-	list<SUBCONTIG*>* GetSubcontigs();   // get all the sub contigs
-	SUBCONTIG* GetLastSubcontigs();
-	SUBCONTIG* GetFirstSubContig();
-	void SetOriginalRepeat( Contig *repeat );
-	Contig* GetOriginalRepeat();
-
-	void AddRepeatEdges( list<PET*> *edges, int type );
-	list<PET*>* GetRepeatEdges( int type );
-
-	void SetIfRemove( bool remove );
-	bool NeedRemove();
-
-	// get the beginning/end subcontig in this super contig
-	SUBCONTIG* GetEndSubContig( int position, bool reverse );
-
-	// delete corresponding repeat edge
-	void RemoveOriginalRepetitiveEdge( PET *edge, int type );
-	// delete corresponding repeat edge (multiple libraries)
-	void RemoveOriginalRepetitiveEdgeMultiLib( PET *edge, int type );
-
-	// traversing graph related methods
-	void SetConnectedSetPos( int setPos );
-	int GetConnectedSetPos();
-
-	// clear the status of edges
-	void ClearStatusOfEdges( list<PET*> *edges );
-
-	void DeleteEdges( list<PET*> *edges );
-	
-	// delete edges for repetitive contigs (no need to check occurrence of edges, directly delete)
-	void DeleteEdgesForRepeat( list<PET*> *edges );
-	void DeleteEdgesForRepeat( int ori );
-
-	// create subcontig for repeat
-	void CreateSubContigForRepeat();
+	/**
+	 * @brief Setter for cluster containing this contig.
+	 *
+	 * @param cluster	cluster containing this contig
+	 */
+	void set_cluster(Cluster* cluster);
 
 private:
-	string toScaffoldString();
-	//inline void DeleteEdges( list<PET*> *edges );
+	std::string id_; /**< Id. */
+	int length_; /**< Length. */
+
+	int modified_length_; /**< Modified length. */
+	int left_edge_; /**< Starting point of the first window. */
+	int right_edge_; /**< Ending point of the last window. */
+	int num_windows_; /**< Number of windows. */
+
+	int* sum_read_counts_; /**< Sum of read counts for all samples. */
+	int** read_counts_; /**< Sum of read counts for all windows. */
+
+	Cluster* cluster_; /**< Cluster containing this contig. */
+
+	/**
+	 * @brief Initializes read counts for all samples and windows to 0.
+	 */
+	void initReadCounts();
 };
+
+
+/** A map with contig ids as keys and pointers to corresponding objects as values. */
+typedef std::unordered_map<std::string, sContig*> ContigMap;
+
+
+/**
+ * @brief Class containing internal contigs IO functions.
+ * 
+ * This class containes internal IO functions for saving and loading
+ * extracted contig and mapping information.
+ */
+class ContigIO {
+public:
+	/**
+	 * @brief Saves extracted contig and mapping information to a file.
+	 *
+	 * @param contigs					map with contig information
+	 * @param sigma_contigs_file_path	path to file for saving contig information
+	 */
+	static void save_contigs(const ContigMap* contigs, const char* sigma_contigs_file_path);
+
+	/**
+	 * @brief Loads extracted contig and mapping information from a file.
+	 *
+	 * @param sigma_contigs_file_path	path to file for loading contig information
+	 * @param contigs					map with contig information
+	 */
+	static void load_contigs(const char* sigma_contigs_file_path, ContigMap* contigs);
+};
+
+
+
+
+/**
+* @brief Computes mode (most frequently occuring value) of a given vector.
+*  
+* @param Rs vector with values
+* @return mode of Rs vector	
+*/
+double compute_mode(std::vector<double> &Rs);
+
+
+
+/**
+ * @brief Computes a global read count dispersion parameter R on contig windows.
+ *
+ * @param contigs	map with contig information
+ * @return read count dispersion parameter on contig windows
+ */
+double compute_R(ContigMap* contigs);
+double compute_R_multi(ContigMap* contigs);
+
+//Compare the R values store in a array contian mean,var,R
+bool sort_contig_R (double* t, double* g);
+
+#endif // CONTIG_H_
