@@ -931,8 +931,8 @@ sub compare_cluster{
     foreach my $genome (@common_genome){
 		
 	$ref_genome_file = "$nucmer_dir/temp_genome/$cluster_pair_name\_$count.fa";
-	$command = "zcat $genome_db/$genome > $ref_genome_file;${mummer_dir}nucmer --maxmatch -c 400 --banded $nucmer_dir/$cluster_pair_name.fa $opera_ms_dir/$ref_genome_file -p $nucmer_dir/$cluster_pair_name\_$count >> $nucmer_dir/LOG.txt;${mummer_dir}show-coords -lrcT $nucmer_dir/$cluster_pair_name\_$count.delta > $nucmer_dir/$cluster_pair_name\_$count.txt;rm $ref_genome_file";
-	
+	$command = "zcat $genome_db/$genome > $ref_genome_file;${mummer_dir}nucmer --maxmatch -c 400 --banded $nucmer_dir/$cluster_pair_name.fa $ref_genome_file -p $nucmer_dir/$cluster_pair_name\_$count >> $nucmer_dir/LOG.txt;${mummer_dir}show-coords -lrcT $nucmer_dir/$cluster_pair_name\_$count.delta > $nucmer_dir/$cluster_pair_name\_$count.txt;rm $ref_genome_file";
+
         $count++;
         print $CMD $command . "\n";
 
