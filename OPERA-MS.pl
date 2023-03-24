@@ -1103,7 +1103,7 @@ sub polishing{
     my $polished_contig = "$final_output_dir/contigs.polished.fasta";
     my $num_processor = $opera_ms_option->{"NUM_PROCESSOR"};
     
-    if($opera_ms_option->{"POLISHING"} || $opera_ms_option->{"STAGE"} eq "POLISHING"){
+    if($opera_ms_option->{"NOPOLISHING"} == 0 || $opera_ms_option->{"STAGE"} eq "POLISHING"){
 	$opera_ms_option->{"STAGE"} = "ALL" if($opera_ms_option->{"STAGE_FOLLOW"} == 1);
 	
 	if(! check_completed("$polished_contig", "Polishing", 9)){
@@ -1438,7 +1438,7 @@ sub set_default_value{
     $opera_ms_option->{"STAGE_FOLLOW"} = 0;
     $opera_ms_option->{"MULTI_SAMPLE"} = 0;
     $opera_ms_option->{"REF_REPEAT_DETECTION"} = 0;
-    $opera_ms_option->{"POLISHING"} = 1;
+    $opera_ms_option->{"NOPOLISHING"} = 0;
     $opera_ms_option->{"GAP_FILLING"} = 1;
     $opera_ms_option->{"LONG_READ_MAPPER"} = "blasr";
     $opera_ms_option->{"SHORT_READ_ASSEMBLER"} = "megahit";
@@ -1472,7 +1472,7 @@ sub update_option{
 	$opera_ms_option->{"NB_TOTAL_STAGE"} = 6;
     }
 
-    $opera_ms_option->{"NB_TOTAL_STAGE"}++ if($opera_ms_option->{"POLISHING"});
+    $opera_ms_option->{"NB_TOTAL_STAGE"}++ if($opera_ms_option->{"NOPOLISHING"} == 0);
 
     if($opera_ms_option->{"OPERA_MS_DB"} eq "NA"){
 	$opera_ms_option->{"OPERA_MS_DB"} = $opera_ms_option->{"OPERA_MS_DIR"}."/OPERA-MS-DB";
@@ -1597,7 +1597,7 @@ sub read_config_file{
 		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
 		}
 		
-		case "POLISHING"{
+		case "NOPOLISHING"{
 		    $opera_ms_option->{$config_option} = 1;
 		    #$REF_REPEAT_DETECTION = 1;
 		    $opera_ms_option->{$config_option} = 0 if( $split_line[1] eq "NO");
@@ -1665,7 +1665,7 @@ sub read_argument{
 	"strain-clustering!"            => \$opera_ms_option{"STRAIN_CLUSTERING"},
 	"ref-clustering!"         => \$opera_ms_option{"REF_CLUSTERING"},
 	"gap-filling!"         => \$opera_ms_option{"GAP_FILLING"},
-	"polishing!"             => \$opera_ms_option{"POLISHING"},
+	"no-polishing!"             => \$opera_ms_option{"NOPOLISHING"},
 	#
 	"contig-len-thr=i"    => \$opera_ms_option{"CONTIG_LEN_THR"},
 	"contig-edge-len=i"   => \$opera_ms_option{"CONTIG_EDGE_LEN"},	
@@ -1694,8 +1694,7 @@ sub read_argument{
 
 sub print_help{
     "OPERA-MS.pl: OPERA-MS " .	$opera_ms_option{"VERSION"} . "
-contacts: Denis Bertrand <bertrandd\@gis.a-star.edu.sg>
-          Chengxuan Tong <Tong_Chengxuan\@gis.a-star.edu.sg>
+contacts: Jean-Sebastien Gounot <jean-sebastien\@gis.a-star.edu.sg>
 
 Usage:
   perl OPERA-MS.pl [options] --illumina-read1 <pe1> --illumina-read2 <pe2> --long-read-file <lr> --output-directory <out_dir>
@@ -1713,7 +1712,7 @@ Optional arguments:
       --no-ref-clustering          disable reference level clustering
       --no-strain-clustering       disable strain level clustering
       --no-gap-filling             disable gap-filling stage
-      --polishing                  enable assembly polishing (currently using Pilon)
+      --no-polishing               disable assembly polishing (currently using Pilon)
       --long-read-mapper     STR   software used for long-read mapping i.e. blasr or minimap2 [blasr]
       --short-read-assembler STR   software used for short-read assembly i.e. megahit or spades [megahit]
       --kmer-size            INT   kmer value used to assemble contigs [60]
@@ -1750,7 +1749,7 @@ sub write_utils_config_file{
 	"LONG_READ",
 	"OUTPUT_DIR",
 	
-	#"POLISHING",
+	#"NOPOLISHING",
 	#"REF_CLUSTERING",
 	#"STRAIN_CLUSTERING",
 	
