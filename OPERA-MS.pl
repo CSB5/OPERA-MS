@@ -1440,7 +1440,7 @@ sub set_default_value{
     $opera_ms_option->{"REF_REPEAT_DETECTION"} = 0;
     $opera_ms_option->{"NOPOLISHING"} = 0;
     $opera_ms_option->{"GAP_FILLING"} = 1;
-    $opera_ms_option->{"LONG_READ_MAPPER"} = "blasr";
+    $opera_ms_option->{"LONG_READ_MAPPER"} = "minimap2";
     $opera_ms_option->{"SHORT_READ_ASSEMBLER"} = "megahit";
     $opera_ms_option->{"CLUSTER_LEN_THRESHOLD"} = 6000000;#Maximal cluster sequence size produce during hierarchical clustering
     #my $genomeDB_kraken = "NULL";
@@ -1713,7 +1713,7 @@ Optional arguments:
       --no-strain-clustering       disable strain level clustering
       --no-gap-filling             disable gap-filling stage
       --no-polishing               disable assembly polishing (currently using Pilon)
-      --long-read-mapper     STR   software used for long-read mapping i.e. blasr or minimap2 [blasr]
+      --long-read-mapper     STR   software used for long-read mapping i.e. blasr or minimap2 [minimap2]
       --short-read-assembler STR   software used for short-read assembly i.e. megahit or spades [megahit]
       --kmer-size            INT   kmer value used to assemble contigs [60]
       --contig-len-thr       INT   contig length threshold for clustering; contigs smaller than the threshold will be filtered out [500]

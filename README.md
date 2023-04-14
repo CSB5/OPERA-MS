@@ -66,7 +66,7 @@ Alternatively, a custom database can be generated using the [**opera-ms-db**](ht
 
 - **--no-polishing** : disable short-read polishing (currently using [Pilon](https://github.com/broadinstitute/pilon/wiki)). The polished contigs can be found in contigs.polished.fasta. For samples with high coverage and/or high complexity this step may take a significant amount of time.
 
-- **--long-read-mapper** : software used for long-read mapping i.e. [blasr](https://github.com/PacificBiosciences/blasr) (default) or [minimap2]( https://github.com/lh3/minimap2) (tested with version 2.11-r797)
+- **--long-read-mapper** : software used for long-read mapping i.e. [blasr](https://github.com/PacificBiosciences/blasr) or [minimap2]( https://github.com/lh3/minimap2) (tested with version 2.11-r797, default)
 
 - **--short-read-assembler** : software used for short read assembly i.e. [MEGAHIT](https://github.com/voutcn/megahit) (default) or [SPAdes](https://github.com/ablab/spades)
 
