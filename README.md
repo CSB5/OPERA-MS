@@ -35,13 +35,15 @@ Note that in the case of interruption during an OPERA-MS run, using the same com
 
 # Reference genome database
 
-To download a precomputed genome database that would enable leveraging this information for reference-based clustering, simply run the following command:
+To download a precomputed genome database that would enable leveraging this information for reference-based clustering, please refer to the [**dedicated wiki page**](https://github.com/CSB5/OPERA-MS/wiki/OPERA%E2%80%90MS%E2%80%90DB-from-GTDB-release) to generate a new database from the last GTDB release or to the [**opera-ms-db**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-Utilities#opera-ms-db) utility command wiki to generate a custom database.
+
+Otherwise, you can download our **old** prepacked database if the previous options do not work with you:
+
 ```
 perl OPERA-MS.pl install-db
 ```
-The database contains representative genomes for 23k bacterial species from [**GTDB**](https://gtdb.ecogenomic.org/) and requires 35Gb of free disc space.
-Alternatively, a custom database can be generated using the [**opera-ms-db**](https://github.com/CSB5/OPERA-MS/wiki/OPERA-MS-Utilities#opera-ms-db) utility command.</br>
-</br>
+The database contains representative genomes for 23k bacterial species from [**GTDB**](https://gtdb.ecogenomic.org/) and requires 35Gb of free disc space. Please be aware that this version has been generated from a very old GTDB release, and GTDB now includes more than 80k bacterial species.
+
 **Note: Databases from previous versions are no longer supported.**
 
 # Usage
