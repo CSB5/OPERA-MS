@@ -1,0 +1,27 @@
+[package]
+name = "opera-ms"
+description = "OPERA-MS: hybrid metagenomic assembler"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "opera-ms"
+path = "src/main.rs"
+
+[dependencies]
+opera-ms-core.workspace = true
+opera-ms-pipeline.workspace = true
+opera-ms-sys.workspace = true
+anyhow.workspace = true
+ctrlc = { version = "3", features = ["termination"] }
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

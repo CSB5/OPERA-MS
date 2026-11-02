@@ -1,0 +1,17 @@
+# Run-time tools of opera-ms: conda env create -f environment.yml
+# samtools is 1.24 because freebayes 1.3.10 needs htslib < 1.25.
+name: opera-ms
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - megahit=1.2.9
+  - minibwa=0.7
+  - samtools=1.24
+  - minimap2=2.31
+  - racon=1.5.0
+  - sylph=1.0.0
+  - skani=0.4.0
+  - freebayes=1.3.10
+  - polypolish=0.7.1
+  - curl

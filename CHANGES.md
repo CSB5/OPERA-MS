@@ -1,0 +1,31 @@
+# Changes
+
+## 2.0.0
+
+A rewrite of OPERA-MS 0.9 in Rust, as a single `opera-ms` executable (the
+C++ of SIGMA and OPERA-LG is compiled in). The algorithm is the same; on
+simulated gut metagenomes (CAMI III) the assembly quality is on par with
+0.9 + Pilon, about 7 times faster with a quarter of the memory.
+
+- **Installation:** `make`; the external tools come from a conda environment
+  (`environment.yml`) instead of being bundled. No Perl, R or Python.
+- **Tools:** minibwa replaces bwa; minimap2 replaces blasr and MUMmer;
+  polishing uses POLCA's method with parallel freebayes (`--polisher
+  polypolish-pypolca`: Polypolish first) instead of Pilon.
+- **Reference genomes:** sylph (`--sylph-db`) and genomes downloaded from
+  NCBI replace the OPERA-MS database (`install-db`, `--genome-db`, Mash);
+  `--genome-cache`, `--prepare-genomes`, `--offline`, `--strict-genomes`,
+  `NCBI_API_KEY`.
+- **New options:** `--opera-lg-timeout` (fallback to OPERA-LG-fast),
+  `--polisher`.
+- **Removed:** the configuration-file mode (and its start-stage argument),
+  `--long-read-mapper` (blasr), `--short-read-assembler` (SPAdes),
+  OPERA-MS-UTILS, the Docker image.
+- **Behaviour:** every command is checked and any failure stops the run;
+  gzipped long reads are accepted; the output doesn't depend on the number
+  of threads (MEGAHIT aside); a run started again in the same output
+  directory resumes at the first incomplete stage; `opera-ms.log` records every command; `benchmark.tsv`
+  gives time and memory per step.
+- **Fixes:** many small bugs of 0.9, e.g. the last read or cluster of a file
+  being ignored, unfilled gaps written as `NA`, divisions by zero on empty
+  clusters.

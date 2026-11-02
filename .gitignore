@@ -1,66 +1,12 @@
-*~
-\#*
+# build output
+/target/
+/opera-ms
+
+# C++ objects of standalone builds
 *.o
-OPERA-LG/bin/OPERA-LG
-SIGMA/sigma.config
-bin/bundler
-bin/sigma
-bin/short_read_analysis
-complete_ref_genomes/
-database_updated
-genomeDB_Sketch.msh
-utils/MUMmer3.23/
-utils/download
-utils/tmp_module.str
-OPERA-LG/bin/OPERA-LG-fast
-OPERA-LG/bin/get_paf_file.pl
-OPERA-MS-1.1
-SIGMA/debug
-bin/OPERA-LG-fast
-database_updated.bk
-utils/perl
-__pycache__
-utils_db/minikraken2_v2_8GB
-TLL*/
-utils
-utils_db
-test_novel
-#Some software that are not ready to be added
-#utils/metabat
-#utils/jgi_summarize_bam_contig_depths
-#utils/clustering.r
-#utils/novel_analysis.py
-#bin/novel_analysis.py
-#utils_db
-#utils_db/*
-tools_opera_ms/perl
-tools_opera_ms/maxbin2
+*.d
+*.a
 
-#utils/kraken2
-tools_opera_ms/maxbin
-tools_opera_ms/checkm
-tools_opera_ms/MUMmer3.23
-
-src_utils_denis/
-OPERA-MS-DB*
-minikraken_8GB*
-#OPERA-MS-UTILS.py
-OPERA-LG/bin/.#OPERA-long-read.pl
-genomes_lists.txt.tar.gz
-log.err
-
-#For the test files
-test_files/OPERA_MS*/
-test_files/sample_output/
-test_files/OUT/
-test_files/RESULTS/
-test_files/log.err
-test_files/OPERA-MS-LOG.tar.gz
-test_files/fna_output/
-test_files/OUTFILE.fa
-test_files/fasta_log.err
-test_files/fasta_results/
-test_files/run.log
-test_files/SINGLE/
-test_files/log.txt
-test_files/RESULTS_NO_REF/
+# editors
+*~
+.vscode/

@@ -1,0 +1,32 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "2.0.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/CSB5/OPERA-MS"
+rust-version = "1.87"
+
+[workspace.dependencies]
+opera-ms-core = { path = "crates/opera-ms-core" }
+opera-ms-io = { path = "crates/opera-ms-io" }
+opera-ms-pipeline = { path = "crates/opera-ms-pipeline" }
+opera-ms-sys = { path = "crates/opera-ms-sys" }
+anyhow = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+clap = { version = "4.5", features = ["derive"] }
+flate2 = { version = "1", default-features = false, features = ["zlib-rs"] }
+libc = "0.2"
+serde_json = "1"
+tempfile = "3"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt"] }
+
+# `unsafe` is forbidden in every crate except opera-ms-sys (each crate's
+# root has #![forbid(unsafe_code)]); these lints apply everywhere.
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"

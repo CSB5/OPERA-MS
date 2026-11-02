@@ -1,0 +1,17 @@
+[package]
+name = "opera-ms-io"
+description = "OPERA-MS file formats: FASTA/FASTQ (plain or gzip)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+flate2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,19 @@
+[package]
+name = "opera-ms-sys"
+description = "The only OPERA-MS crate with unsafe code: libc process calls and the C++ bridge to SIGMA / OPERA-LG"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+links = "opera_ms_cpp"
+
+[dependencies]
+cxx = "1"
+libc.workspace = true
+
+[build-dependencies]
+cc = "1"
+cxx-build = "1"
+
+[lints]
+workspace = true

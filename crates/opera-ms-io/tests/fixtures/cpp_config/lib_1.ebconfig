@@ -1,0 +1,16 @@
+
+samtools_dir=/data/tools/
+
+output_folder=/data/ecoli_run/intermediate_files/lib_1_bundles
+
+contig_file=/data/ecoli_megahit_contigs.fa
+
+[LIB]
+map_file=/data/ecoli_run/intermediate_files/read_mapping/opera.bam
+filter_repeat=no
+
+cluster_threshold=2
+
+cluster_increased_step=5
+
+kmer=60
