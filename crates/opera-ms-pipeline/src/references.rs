@@ -80,22 +80,20 @@ fn accession(genome_file: &str) -> Option<String> {
     matches!(prefix, "GCF" | "GCA").then(|| format!("{prefix}_{number}"))
 }
 
-/// The accessions of a `sylph profile` TSV, in its order (by abundance),
-/// each once.
+/// The accessions of a `sylph profile` TSV, sorted, each once (sylph's row
+/// order varies between runs; the genome files and lists made from them
+/// are then the same from run to run).
 fn profile_accessions(profile: &str) -> Vec<String> {
     let mut lines = profile.lines();
     let header: Vec<&str> = lines.next().unwrap_or("").split('\t').collect();
     let Some(col) = header.iter().position(|h| *h == "Genome_file") else {
         return Vec::new();
     };
-    let mut out: Vec<String> = Vec::new();
-    for line in lines {
-        if let Some(acc) = line.split('\t').nth(col).and_then(accession) {
-            if !out.contains(&acc) {
-                out.push(acc);
-            }
-        }
-    }
+    let mut out: Vec<String> = lines
+        .filter_map(|line| line.split('\t').nth(col).and_then(accession))
+        .collect();
+    out.sort();
+    out.dedup();
     out
 }
 
@@ -491,7 +489,8 @@ pub fn genome_files(out_dir: &str) -> Result<Vec<String>> {
 
 /// `skani dist` of `queries` against the run's genomes, written in the
 /// `mash dist` layout the next steps read (reference, query, distance =
-/// 1 - ANI/100, p-value, shared hashes), at most `top` hits per query.
+/// 1 - ANI/100, p-value, shared hashes), at most `top` hits per query
+/// (the closest; ties to the first genomes by name).
 pub fn skani_as_mash(
     rec: &StepRecorder<'_>,
     skani_dir: &str,
@@ -519,8 +518,6 @@ pub fn skani_as_mash(
         &ref_list,
         "--ql",
         &query_list,
-        "-n",
-        &top.to_string(),
         "-o",
         &tsv,
     ]))
@@ -532,9 +529,10 @@ pub fn skani_as_mash(
     fs::File::open(&tsv)
         .and_then(|mut f| f.read_to_string(&mut text))
         .with_context(|| format!("cannot read {tsv}"))?;
-    // a fixed order (query, distance, genome): skani's threads write tied
-    // hits in any order, and the first genome of a tie can be chosen
-    // downstream
+    // a fixed order (query, distance, genome), then the first `top` hits of
+    // each query: skani's threads write tied hits in any order, and its own
+    // `-n` keeps any `top` of them, so ties are cut here, always to the
+    // first genomes by name
     let mut hits: Vec<(String, String, f64)> = Vec::new();
     for line in text.lines().skip(1) {
         let f: Vec<&str> = line.split('\t').collect();
@@ -544,15 +542,29 @@ pub fn skani_as_mash(
         let ani: f64 = f[2].parse().unwrap_or(0.0);
         hits.push((f[1].to_string(), f[0].to_string(), 1.0 - ani / 100.0));
     }
-    hits.sort_by(|a, b| a.0.cmp(&b.0).then(a.2.total_cmp(&b.2)).then(a.1.cmp(&b.1)));
-    let mut out = String::new();
-    for (query, genome, dist) in hits {
-        let _ = writeln!(out, "{genome}\t{query}\t{dist:.6}\t0\t0/0");
-    }
+    let out = mash_lines(hits, top);
     for path in [&ref_list, &query_list] {
         let _ = fs::remove_file(path);
     }
     Ok(out)
+}
+
+/// skani hits (query, genome, distance) as `mash dist` lines, sorted by
+/// query, distance, genome, at most `top` per query.
+fn mash_lines(mut hits: Vec<(String, String, f64)>, top: usize) -> String {
+    hits.sort_by(|a, b| a.0.cmp(&b.0).then(a.2.total_cmp(&b.2)).then(a.1.cmp(&b.1)));
+    let mut out = String::new();
+    let mut kept = 0;
+    for (i, (query, genome, dist)) in hits.iter().enumerate() {
+        if i == 0 || hits[i - 1].0 != *query {
+            kept = 0;
+        }
+        if kept < top {
+            kept += 1;
+            let _ = writeln!(out, "{genome}\t{query}\t{dist:.6}\t0\t0/0");
+        }
+    }
+    out
 }
 
 #[cfg(test)]
@@ -567,8 +579,30 @@ mod tests {
                        s\tdb/GCF/000/188/175/GCF_000188175.1_genomic.fna.gz\t1\n";
         assert_eq!(
             profile_accessions(profile),
-            vec!["GCF_000188175.1".to_string(), "GCA_900755095.1".to_string()]
+            vec!["GCA_900755095.1".to_string(), "GCF_000188175.1".to_string()]
         );
+    }
+
+    #[test]
+    fn top_hits_cut_ties_by_genome_name() {
+        // skani's order, ties included: 3 genomes at distance 0 for q1
+        let hit = |q: &str, g: &str, d: f64| (q.to_string(), g.to_string(), d);
+        let hits = vec![
+            hit("q2", "g9", 0.05),
+            hit("q1", "gC", 0.0),
+            hit("q1", "gD", 0.01),
+            hit("q1", "gA", 0.0),
+            hit("q2", "g1", 0.05),
+            hit("q1", "gB", 0.0),
+            hit("q2", "g5", 0.02),
+        ];
+        let expected = "gA\tq1\t0.000000\t0\t0/0\ngB\tq1\t0.000000\t0\t0/0\n\
+                        g5\tq2\t0.020000\t0\t0/0\ng1\tq2\t0.050000\t0\t0/0\n";
+        assert_eq!(mash_lines(hits.clone(), 2), expected);
+        let mut reversed = hits;
+        reversed.reverse();
+        assert_eq!(mash_lines(reversed, 2), expected);
+        assert_eq!(mash_lines(Vec::new(), 2), "");
     }
 
     #[test]
