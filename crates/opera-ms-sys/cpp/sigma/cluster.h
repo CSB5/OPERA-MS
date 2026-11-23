@@ -30,6 +30,10 @@ public:
 	/**
 	 * @brief Constructs a cluster node.
 	 *
+	 * The contig array is not built here (that made the construction of a
+	 * tree quadratic in its size): it is NULL until ClusterGraph builds the
+	 * arrays of the roots (ClusterGraph::buildRootContigs).
+	 *
 	 * @param child1	left child
 	 * @param child2	right child
 	 */
@@ -170,6 +174,23 @@ public:
 	void set_ID(std::string* ID);
 	std::string* get_ID()const;
 
+	/**
+	 * @brief Union-find link used while building the trees: the cluster
+	 * this one was merged into, NULL for a current root.
+	 */
+	Cluster* uf_parent() const;
+	void set_uf_parent(Cluster* parent);
+
+	/**
+	 * @brief Window statistics for the fast negative binomial score (one
+	 * sample): sum over the windows of lgamma(R + k) - lgamma(k + 1), number
+	 * of windows and sum of the window read counts k.
+	 */
+	double window_lgamma_sum() const;
+	long long window_num() const;
+	long long window_reads() const;
+	void set_window_stats(double lgamma_sum, long long num, long long reads);
+
 private:
 	sContig** contigs_; /**< Contigs belonging to this cluster. */
 
@@ -189,6 +210,11 @@ private:
 	//std::unordered_set<Cluster*>::iterator it_un_set_;/**iterator to speed up the tree construction**/
 	
 	std::string* cluster_ID;
+
+	Cluster* uf_parent_; /**< Union-find link (tree construction only). */
+	double window_lgamma_sum_; /**< See window_lgamma_sum(). */
+	long long window_num_; /**< See window_num(). */
+	long long window_reads_; /**< See window_reads(). */
 
 };
 

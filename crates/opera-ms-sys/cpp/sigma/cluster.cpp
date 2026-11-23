@@ -24,6 +24,11 @@ Cluster::Cluster() {
 	modeled_ = false;
 	connected_ = false;
 
+	uf_parent_ = NULL;
+	window_lgamma_sum_ = 0.0;
+	window_num_ = 0;
+	window_reads_ = 0;
+
 }
 
 Cluster::Cluster(sContig* contig) {
@@ -53,24 +58,19 @@ Cluster::Cluster(sContig* contig) {
 	modeled_ = false;
 	connected_ = false;
 
+	uf_parent_ = NULL;
+	window_lgamma_sum_ = 0.0;
+	window_num_ = 0;
+	window_reads_ = 0;
+
 	contig->set_cluster(this);
 }
 
 Cluster::Cluster(Cluster* child1, Cluster* child2) {
 	num_contigs_ = child1->num_contigs_ + child2->num_contigs_;
-	contigs_ = new sContig*[num_contigs_];
-	
+	// Built once per root by ClusterGraph (see the constructor's doc).
+	contigs_ = NULL;
 
-	for (int contig_index = 0; contig_index < child1->num_contigs(); ++contig_index) {
-		contigs_[contig_index] = child1->contigs_[contig_index];
-	}
-
-	int contig_index_offset = child1->num_contigs();
-
-	for (int contig_index = 0; contig_index < child2->num_contigs(); ++contig_index) {
-		contigs_[contig_index_offset + contig_index] = child2->contigs_[contig_index];
-	}
-	
 	sum_read_counts_ = new int[Sigma::num_samples];
 	mean_arrival_rates_ = new double[Sigma::num_samples];
 	median_arrival_rates_ = new double[Sigma::num_samples];
@@ -86,12 +86,13 @@ Cluster::Cluster(Cluster* child1, Cluster* child2) {
 	modeled_ = false;
 	connected_ = false;
 
-	for (int contig_index = 0; contig_index < num_contigs_; ++contig_index) {
-		contigs_[contig_index]->set_cluster(this);
-	}
+	uf_parent_ = NULL;
+	window_lgamma_sum_ = 0.0;
+	window_num_ = 0;
+	window_reads_ = 0;
 
-	delete[] child1->contigs_;
-	delete[] child2->contigs_;
+	// The children's arrays are freed by ClusterGraph::buildRootContigs
+	// (a leaf's holds its contig until then; a node's is NULL).
 }
 
 void Cluster::update_cluster_length_read_count(Cluster* child1, Cluster* child2){
@@ -198,7 +199,18 @@ void Cluster::set_cluster(Cluster* c1, Cluster* c2) {
 void Cluster::set_ID(std::string* ID){cluster_ID = ID;}
 std::string* Cluster::get_ID()const{return cluster_ID;}
 
+Cluster* Cluster::uf_parent() const { return uf_parent_; }
+void Cluster::set_uf_parent(Cluster* parent) { uf_parent_ = parent; }
+
+double Cluster::window_lgamma_sum() const { return window_lgamma_sum_; }
+long long Cluster::window_num() const { return window_num_; }
+long long Cluster::window_reads() const { return window_reads_; }
+void Cluster::set_window_stats(double lgamma_sum, long long num, long long reads) {
+	window_lgamma_sum_ = lgamma_sum;
+	window_num_ = num;
+	window_reads_ = reads;
+}
+
 
 //void Cluster::set_iterator_un_set(std::unordered_set<Cluster*>::iterator it){ it_un_set_ = it; }
 //std::unordered_set<Cluster*>::iterator Cluster::get_iterator_un_set()const { return it_un_set_; }
-

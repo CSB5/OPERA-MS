@@ -66,6 +66,32 @@ private:
 	 */
 	void updateClusters();
 
+	/**
+	 * @brief Builds the contig array of each root (child1's contigs, then
+	 * child2's) and links the contigs to their root.
+	 */
+	void buildRootContigs();
+
+	/**
+	 * @brief Current root of a cluster during the tree construction
+	 * (union-find with path compression).
+	 */
+	static Cluster* find_root(Cluster* cluster);
+
+	/**
+	 * @brief Computes the scores of all clusters in time linear in the
+	 * number of clusters: for one sample, windows and the negative binomial,
+	 * the score of a cluster only depends on sums over its windows, which a
+	 * node gets from its children.
+	 */
+	void computeScoresFromWindowStats(const ProbabilityDistribution* prob_dist);
+
+	/**
+	 * @brief Score of a cluster whose window statistics are set; falls back
+	 * to computeClusterScore where the statistics do not apply.
+	 */
+	void computeClusterScoreFromWindowStats(Cluster* cluster, const ProbabilityDistribution* prob_dist);
+
     const static int num_edges_to_resort = 50;
 
 	/**

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 #include <utility>
+#include <limits>
+#include <vector>
 
 #include "cluster_graph.h"
 
@@ -52,14 +54,22 @@ ClusterGraph::ClusterGraph(ContigMap* contigs, EdgeQueue* edges) {
 	}
 	num_windows_ = (double)Sigma::total_assembly_size / (double)Sigma::contig_window_len;
 
+	// Single linkage along the edges. The current root of a contig is found
+	// with a union-find (path compression on Cluster::uf_parent); contig
+	// arrays and contig -> cluster links are set once at the end, which
+	// keeps the construction near linear even for trees of millions of
+	// contigs.
 	while (!edges->empty()) {
 		Edge edge = edges->top();
 
-		Cluster* cluster1 = edge.contig1()->cluster();
-		Cluster* cluster2 = edge.contig2()->cluster();
+		Cluster* cluster1 = find_root(edge.contig1()->cluster());
+		Cluster* cluster2 = find_root(edge.contig2()->cluster());
 
 		if (cluster1 != cluster2) {
-			roots_.insert(new Cluster(cluster1, cluster2));
+			Cluster* merged = new Cluster(cluster1, cluster2);
+			cluster1->set_uf_parent(merged);
+			cluster2->set_uf_parent(merged);
+			roots_.insert(merged);
 
 			roots_.erase(cluster1);
 			roots_.erase(cluster2);
@@ -83,7 +93,55 @@ ClusterGraph::ClusterGraph(ContigMap* contigs, EdgeQueue* edges) {
 		*/
 	}
 
+	buildRootContigs();
 	updateClusters();
+}
+
+Cluster* ClusterGraph::find_root(Cluster* cluster) {
+	Cluster* root = cluster;
+	while (root->uf_parent() != NULL) {
+		root = root->uf_parent();
+	}
+	while (cluster != root) {
+		Cluster* next = cluster->uf_parent();
+		cluster->set_uf_parent(root);
+		cluster = next;
+	}
+	return root;
+}
+
+void ClusterGraph::buildRootContigs() {
+	// The contigs of a root in the order of the former copying merges:
+	// child1's contigs, then child2's, recursively.
+	std::vector<Cluster*> stack;
+	for (auto it = roots_.begin(); it != roots_.end(); ++it) {
+		Cluster* root = *it;
+		if (root->num_contigs() == 1) {
+			continue;
+		}
+
+		sContig** contigs = new sContig*[root->num_contigs()];
+		int contig_index = 0;
+		stack.push_back(root);
+		while (!stack.empty()) {
+			Cluster* cluster = stack.back();
+			stack.pop_back();
+			if (cluster->num_contigs() == 1) {
+				// a leaf: take its contig, free its one-element array
+				contigs[contig_index++] = cluster->contigs()[0];
+				delete[] cluster->contigs();
+				cluster->set_contigs((sContig**) NULL);
+			} else {
+				stack.push_back(cluster->child2());
+				stack.push_back(cluster->child1());
+			}
+		}
+		root->set_contigs(contigs);
+
+		for (int i = 0; i < root->num_contigs(); ++i) {
+			contigs[i]->set_cluster(root);
+		}
+	}
 }
 
 
@@ -272,6 +330,11 @@ void ClusterGraph::computeScores(const ProbabilityDistribution* prob_dist) {
 	output_file_debug = fopen(output_clusters_file_path.c_str(), "w");
 	//fclose(output_file_debug);
 
+	if (Sigma::USE_WINDOW == 1 && Sigma::num_samples == 1 && Sigma::pdist_type == "NegativeBinomial") {
+		computeScoresFromWindowStats(prob_dist);
+		return;
+	}
+
 	std::vector<Cluster*> roots = sortedRoots();
 	for (auto it = roots.begin(); it != roots.end(); ++it) {
 		clusters.push(*it);
@@ -290,6 +353,88 @@ void ClusterGraph::computeScores(const ProbabilityDistribution* prob_dist) {
 	}
 }
 
+
+// With windows, one sample and the negative binomial, computeClusterScore
+// adds for each window w of the cluster (k_w its read count, mu = arrival
+// rate * window length and R the dispersion, the same for all windows):
+//   R log(R / (R + mu)) + lgamma(R + k_w) + k_w log(mu / (R + mu))
+//   - lgamma(k_w + 1) - lgamma(R)
+// which sums to
+//   W (R log(R / (R + mu)) - lgamma(R)) + L + K log(mu / (R + mu))
+// with W the number of windows, K the sum of the k_w and L the sum of
+// lgamma(R + k_w) - lgamma(k_w + 1). W, K and L of a node are the sums of
+// its children's, so each score takes constant time instead of time
+// proportional to the size of the cluster (quadratic over a deep tree).
+// The value only differs from the per-window sum by rounding.
+void ClusterGraph::computeScoresFromWindowStats(const ProbabilityDistribution* prob_dist) {
+	const double R = Sigma::R_VALUE;
+
+	// post-order: children before their parent
+	std::vector<std::pair<Cluster*, bool> > stack;
+	std::vector<Cluster*> roots = sortedRoots();
+	for (auto it = roots.begin(); it != roots.end(); ++it) {
+		stack.push_back(std::make_pair(*it, false));
+	}
+
+	while (!stack.empty()) {
+		Cluster* cluster = stack.back().first;
+		const bool children_done = stack.back().second;
+		stack.pop_back();
+
+		if (cluster->num_contigs() == 1) {
+			sContig* contig = cluster->contigs()[0];
+			double lgamma_sum = 0.0;
+			long long reads = 0;
+			for (int window_index = 0; window_index < contig->num_windows(); ++window_index) {
+				const double k = round((double) contig->read_counts()[0][window_index]);
+				lgamma_sum += lgamma(R + k) - lgamma(k + 1);
+				reads += (long long) k;
+			}
+			cluster->set_window_stats(lgamma_sum, contig->num_windows(), reads);
+		} else if (!children_done) {
+			stack.push_back(std::make_pair(cluster, true));
+			stack.push_back(std::make_pair(cluster->child2(), false));
+			stack.push_back(std::make_pair(cluster->child1(), false));
+			continue;
+		} else {
+			const Cluster* c1 = cluster->child1();
+			const Cluster* c2 = cluster->child2();
+			cluster->set_window_stats(c1->window_lgamma_sum() + c2->window_lgamma_sum(),
+					c1->window_num() + c2->window_num(),
+					c1->window_reads() + c2->window_reads());
+		}
+
+		computeClusterScoreFromWindowStats(cluster, prob_dist);
+	}
+}
+
+void ClusterGraph::computeClusterScoreFromWindowStats(Cluster* cluster, const ProbabilityDistribution* prob_dist) {
+	const double R = Sigma::R_VALUE;
+	const double mu = cluster->arrival_rates()[0] * Sigma::contig_window_len;
+	const long long W = cluster->window_num();
+	const long long K = cluster->window_reads();
+
+	double score;
+	if (W == 0) {
+		score = 0.0;
+	} else if (mu > 0.0 && std::isfinite(mu)) {
+		score = (double) W * (R * log(R / (R + mu)) - lgamma(R))
+				+ cluster->window_lgamma_sum()
+				+ (double) K * log(mu / (R + mu));
+	} else if (mu == 0.0 && K > 0) {
+		// not expected (a zero mean with reads in the windows): the
+		// per-window sum (-inf or NaN depending on the windows)
+		computeClusterScore(cluster, prob_dist);
+		return;
+	} else {
+		// as in computeClusterScore, every window adds NaN: 0 * log(0) for
+		// a zero mean, the log of a negative number or of NaN otherwise
+		score = std::numeric_limits<double>::quiet_NaN();
+	}
+
+	score -= 0.5 * Sigma::num_samples * log(num_windows_);
+	cluster->set_score(score);
+}
 
 void ClusterGraph::output_clusters(Cluster* cluster, double cs, double un_cs) {
 	
