@@ -14,6 +14,16 @@ Version 2 is a rewrite of OPERA-MS 0.9 in Rust; see [CHANGES.md](CHANGES.md).
 Linux x86_64. `opera-ms` is a single executable; the tools it runs come
 from a conda environment.
 
+### With conda (Bioconda)
+
+```
+conda create -n opera-ms -c conda-forge -c bioconda opera-ms
+conda activate opera-ms
+opera-ms check-dependency              # lists the tools found, with their versions
+```
+
+### Installation from source
+
 ```
 git clone https://github.com/CSB5/OPERA-MS.git
 cd OPERA-MS
@@ -25,13 +35,17 @@ make                                   # needs Rust (https://rustup.rs) and a C+
 
 ## Quick test
 
-About a minute with 4 threads (data: `test_files/README.md`):
+About a minute with 4 threads. The test data is in the repository's
+`test_files/` (see its `README.md`), not in the conda package:
 
 ```
-cd test_files
-../opera-ms --contig-file contigs.fasta --short-read1 R1.fastq.gz --short-read2 R2.fastq.gz \
+git clone https://github.com/CSB5/OPERA-MS.git    # if not done already
+cd OPERA-MS/test_files
+opera-ms --contig-file contigs.fasta --short-read1 R1.fastq.gz --short-read2 R2.fastq.gz \
     --long-read long_read.fastq.gz --no-ref-clustering --num-processors 4 --out-dir RESULTS
 ```
+
+With a build from source, use `../opera-ms` instead of `opera-ms`.
 
 ## Reference database
 
