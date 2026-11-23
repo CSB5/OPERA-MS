@@ -7,7 +7,7 @@ coverage, read links and reference genomes, then scaffolds, gap-fills and
 polishes each genome. It can assemble near-complete genomes with as little
 as 9x long-read coverage, and separates strains of the same species.
 
-Version 2 is a rewrite of OPERA-MS 0.9 in Rust; see [CHANGES.md](CHANGES.md).
+**IMPORTANT**. This version is a rewrite of OPERA-MS 0.9 in Rust; see [CHANGES.md](CHANGES.md). **This version is still experimental**. While our tests indicate similar or better results on test datasets, we can't yet confirm performance. If you want to use the previous stable version, please switch to the `Master` release on this GitHub page.
 
 ## Installation
 
