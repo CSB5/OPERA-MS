@@ -19,7 +19,7 @@ use clap::{ArgAction, Parser};
 use opera_ms_core::duration::parse_timeout;
 
 /// Software version printed in the logs.
-pub const VERSION: &str = "v2.0.0";
+pub const VERSION: &str = "v2.0.1-dev";
 
 /// All settings of a run: the defaults, then the options, then `update`.
 #[derive(Debug, Clone, PartialEq)]

@@ -520,7 +520,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "opera-ms"
-version = "2.0.0"
+version = "2.0.1-dev"
 dependencies = [
  "anyhow",
  "ctrlc",
@@ -535,7 +535,7 @@ dependencies = [
 
 [[package]]
 name = "opera-ms-core"
-version = "2.0.0"
+version = "2.0.1-dev"
 dependencies = [
  "chrono",
  "opera-ms-sys",
@@ -546,7 +546,7 @@ dependencies = [
 
 [[package]]
 name = "opera-ms-io"
-version = "2.0.0"
+version = "2.0.1-dev"
 dependencies = [
  "flate2",
  "tempfile",
@@ -555,7 +555,7 @@ dependencies = [
 
 [[package]]
 name = "opera-ms-pipeline"
-version = "2.0.0"
+version = "2.0.1-dev"
 dependencies = [
  "anyhow",
  "clap",
@@ -571,7 +571,7 @@ dependencies = [
 
 [[package]]
 name = "opera-ms-sys"
-version = "2.0.0"
+version = "2.0.1-dev"
 dependencies = [
  "cc",
  "cxx",

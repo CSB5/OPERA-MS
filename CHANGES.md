@@ -1,5 +1,20 @@
 # Changes
 
+## Unreleased (2.0.1-dev)
+
+- **Speed:** the hierarchical clustering of SIGMA (step 4) is near linear
+  in the size of the cluster tree instead of quadratic: hours or days on
+  very large assemblies (millions of contigs, hundreds of genomes), now
+  seconds or minutes. Same outputs.
+- **Fix:** cluster length and read count totals are 64-bit (overflow on
+  very large clusters).
+- **Reproducibility:** the choice of reference genomes for a cluster is
+  now the same from run to run. When more genomes than kept (5) were tied
+  at the same distance, skani chose among them at random between runs;
+  ties now go to the first genomes by accession. Final contigs can differ
+  from 2.0.0 on samples with such ties. Sylph's genomes are also listed in
+  sorted order.
+
 ## 2.0.0
 
 A rewrite of OPERA-MS 0.9 in Rust, as a single `opera-ms` executable (the
