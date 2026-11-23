@@ -11,7 +11,7 @@ Cluster::Cluster() {
 
 	length_ = 0;
 
-	sum_read_counts_ = new int[Sigma::num_samples];
+	sum_read_counts_ = new long long[Sigma::num_samples];
 	mean_arrival_rates_ = new double[Sigma::num_samples];
 	median_arrival_rates_ = new double[Sigma::num_samples];
 
@@ -39,7 +39,7 @@ Cluster::Cluster(sContig* contig) {
 
 	length_ = contig->modified_length();
 
-	sum_read_counts_ = new int[Sigma::num_samples];
+	sum_read_counts_ = new long long[Sigma::num_samples];
 	mean_arrival_rates_ = new double[Sigma::num_samples];
 	median_arrival_rates_ = new double[Sigma::num_samples];
 
@@ -71,7 +71,7 @@ Cluster::Cluster(Cluster* child1, Cluster* child2) {
 	// Built once per root by ClusterGraph (see the constructor's doc).
 	contigs_ = NULL;
 
-	sum_read_counts_ = new int[Sigma::num_samples];
+	sum_read_counts_ = new long long[Sigma::num_samples];
 	mean_arrival_rates_ = new double[Sigma::num_samples];
 	median_arrival_rates_ = new double[Sigma::num_samples];
 	
@@ -131,8 +131,8 @@ void Cluster::set_contigs(std::vector<sContig*> *v_contig){
 }
 
 int Cluster::num_contigs() const { return num_contigs_; }
-int Cluster::length() const { return length_; }
-int* Cluster::sum_read_counts() const { return sum_read_counts_; }
+long long Cluster::length() const { return length_; }
+long long* Cluster::sum_read_counts() const { return sum_read_counts_; }
 //
 double* Cluster::arrival_rates() const { 
 	double* res = NULL;

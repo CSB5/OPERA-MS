@@ -63,14 +63,14 @@ public:
 	 *
 	 * @return total length of contigs belonging to this cluster
 	 */
-	int length() const;
+	long long length() const;
 
 	/**
 	 * @brief Getter for sum of read counts for all samples.
 	 *
 	 * @return sum of read counts for all samples
 	 */
-	int* sum_read_counts() const;
+	long long* sum_read_counts() const;
 
 	/**
 	 * @brief Getter for arrival rates for all samples.
@@ -195,8 +195,8 @@ private:
 	sContig** contigs_; /**< Contigs belonging to this cluster. */
 
 	int num_contigs_; /**< Number of contigs belonging to this cluster. */
-	int length_; /**< Total length of contigs belonging to this cluster. */
-	int* sum_read_counts_; /**< Sum of read counts for all samples. */
+	long long length_; /**< Total length of contigs belonging to this cluster (64-bit: a tree can exceed 2^31 bp). */
+	long long* sum_read_counts_; /**< Sum of read counts for all samples (64-bit, as length_). */
 	double* mean_arrival_rates_; /**< Mean arrival rates over for all samples. */
 	double* median_arrival_rates_; /**< Median contig arrival rates for all samples. */
 
