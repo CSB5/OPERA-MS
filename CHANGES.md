@@ -21,6 +21,10 @@
   The alignments of the linked cluster pairs are kept in memory instead
   of two files per pair in `NUCMER_OUT/` (tens of thousands, never
   removed). Same outputs.
+- **Output:** the per-cluster FASTA files (`opera_ms_clusters/all/`) are
+  only written with the new option `--cluster-fasta`; by default the
+  clusters are given by `contig_info.txt` (column `CLUSTER`) and described
+  in `cluster_info.txt` (unchanged).
 
 ## 2.0.0
 

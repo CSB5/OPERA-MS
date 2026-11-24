@@ -97,10 +97,12 @@ In the output directory:
 - `contigs.polished.fasta`: the assembly (`contigs.fasta` before polishing);
 - `assembly.stats`: assembly size, N50, longest contig, etc.;
 - [`contig_info.txt`](https://github.com/CSB5/OPERA-MS/wiki/Contig-info-file-description): one line per contig;
-- `opera_ms_clusters/all/`: one FASTA per strain-level cluster, described in
-  [`cluster_info.txt`](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description).
-  The clusters are conservative; contigs can be binned further with tools
-  such as MetaBAT2;
+- [`cluster_info.txt`](https://github.com/CSB5/OPERA-MS/wiki/Cluster-info-file-description):
+  one line per strain-level cluster; the cluster of each contig is the
+  `CLUSTER` column of `contig_info.txt`. With `--cluster-fasta`, also
+  `opera_ms_clusters/all/`: one FASTA per cluster (`unclustered.fasta` for
+  the contigs without a cluster). The clusters are conservative; contigs can
+  be binned further with tools such as MetaBAT2;
 - `opera-ms.log`: every step and command; `benchmark.tsv`: time and memory
   per step.
 

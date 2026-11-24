@@ -48,6 +48,10 @@ pub struct Options {
     pub strain_clustering: bool,
     pub gap_filling: bool,
     pub no_polishing: bool,
+    /// `--cluster-fasta`: also write one FASTA per cluster
+    /// (`opera_ms_clusters/all/`); otherwise only `cluster_info.txt` and
+    /// `contig_info.txt`, from which the files can be rebuilt.
+    pub cluster_fasta: bool,
     pub contig_len_thr: i64,
     pub contig_edge_len: i64,
     pub contig_window_len: i64,
@@ -83,6 +87,7 @@ impl Default for Options {
             strain_clustering: true,
             gap_filling: true,
             no_polishing: false,
+            cluster_fasta: false,
             contig_len_thr: 500,
             contig_edge_len: 80,
             contig_window_len: 340,
@@ -182,6 +187,8 @@ struct Cli {
     prepare_genomes: bool,
     #[arg(long = "offline", action = ArgAction::SetTrue)]
     offline: bool,
+    #[arg(long = "cluster-fasta", action = ArgAction::SetTrue)]
+    cluster_fasta: bool,
 
     #[arg(long = "single-genome", action = ArgAction::SetTrue, overrides_with = "no_single_genome")]
     single_genome: bool,
@@ -272,6 +279,7 @@ fn parse_options(args: &[OsString]) -> Result<Invocation, OptionsError> {
         strict_genomes: cli.strict_genomes,
         prepare_genomes: cli.prepare_genomes,
         offline: cli.offline,
+        cluster_fasta: cli.cluster_fasta,
         single_genome: negatable(
             cli.single_genome,
             cli.no_single_genome,
@@ -381,6 +389,7 @@ Optional arguments:
       --prepare-genomes            only find the sample's reference genomes (sylph) and download them into --genome-cache, then stop
                                    (prepares a run on a machine without internet: run it there with the same --genome-cache and --offline)
       --offline                    never download genomes: a genome missing from --genome-cache is skipped (or an error with --strict-genomes)
+      --cluster-fasta              also write one FASTA file per cluster in opera_ms_clusters/all/ (default: only contig_info.txt, column CLUSTER)
       --contig-file          STR   path to the contig file, if the short-reads have been assembled previously [default assembly using MEGAHIT]
       --num-processors       INT   number of processors to use (note that 2 is the minimum) [2]
       --version                    print the version
@@ -501,6 +510,8 @@ mod tests {
         assert!(o.ref_clustering && o.strain_clustering && o.gap_filling && !o.no_polishing);
         assert_eq!(o.sylph_db, None);
         assert!(!o.strict_genomes);
+        assert!(!o.cluster_fasta);
+        assert!(run(&["--cluster-fasta"]).cluster_fasta);
     }
 
     #[test]

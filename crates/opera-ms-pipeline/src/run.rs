@@ -1229,7 +1229,20 @@ impl Run {
             return Ok(());
         }
         let out = self.s.output_dir.clone();
-        let cluster_dir = format!("{out}/opera_ms_clusters/all");
+        // the cluster FASTAs: kept with --cluster-fasta, otherwise
+        // only written for the cluster statistics, then removed (one
+        // file per cluster; contig_info.txt gives them)
+        let user_dir = format!("{out}/opera_ms_clusters/all");
+        let cluster_dir = if self.opt.cluster_fasta {
+            user_dir
+        } else {
+            if exists(&user_dir) {
+                fs::remove_dir_all(&user_dir)
+                    .with_context(|| format!("cannot remove {user_dir}"))?;
+                let _ = fs::remove_dir(format!("{out}/opera_ms_clusters"));
+            }
+            self.dir("cluster_sequences")
+        };
         init_dir(&cluster_dir)?;
         let polished = format!("{out}/contigs.polished.fasta");
         let final_contig = if exists(&polished) {
@@ -1263,7 +1276,12 @@ impl Run {
             }
             let text = crate::final_stats::cluster_info(&out, &cluster_dir)
                 .context("Error during cluster_info")?;
-            write(&format!("{cluster_dir}/../../cluster_info.txt"), &text)?;
+            write(&format!("{out}/cluster_info.txt"), &text)?;
+            if !self.opt.cluster_fasta {
+                for file in glob(&cluster_dir, |n| n.ends_with(".fasta"))? {
+                    fs::remove_file(&file).with_context(|| format!("cannot remove {file}"))?;
+                }
+            }
             Ok(())
         })
     }
