@@ -1038,7 +1038,7 @@ pub fn sequence_similarity_clustering(rec: &StepRecorder<'_>, a: &Args<'_>) -> R
 
     let start = Instant::now();
     let contig_seqs = rec.substep("skani", |sub| run_skani(sub, a, &contigs, counts))?;
-    let long_edges = read(&format!("{}/pairedEdges", a.mapping_dir))?;
+    let long_edges = crate::gz::read(&format!("{}/pairedEdges", a.mapping_dir))?;
     let short_edges = read(&short_edges_file(a.inter_dir)?)?;
     let (edges, edge_seqs) =
         edges_between_clusters(&long_edges, &short_edges, &contigs, &contig_seqs);
@@ -1075,7 +1075,7 @@ pub fn sequence_similarity_clustering(rec: &StepRecorder<'_>, a: &Args<'_>) -> R
             .merge(cluster_of(0), cluster_of(2), &species, &mut log)
             .with_context(|| format!("cannot write {log_path}"))?;
     }
-    let above = read(&format!("{}/pairedEdges_above_thresh", a.mapping_dir))?;
+    let above = crate::gz::read(&format!("{}/pairedEdges_above_thresh", a.mapping_dir))?;
     let mut too_long = 0;
     let sets = recover_edges(&good, &above, &contigs, &merge, &mut too_long)?;
     if too_long > 0 {

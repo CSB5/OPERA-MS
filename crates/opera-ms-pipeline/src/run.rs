@@ -744,8 +744,12 @@ impl Run {
                 .context("Error in during coverage estimation (cov_estimate)")?;
                 r.time_log("cov_estimation", seconds_since(start))?;
                 let start = Instant::now();
-                crate::edge_filter::filter_edge_coverage_ratio(&mapping, &cov_file)
-                    .context("Error in during filter_edge_coverage_ratio")?;
+                crate::edge_filter::filter_edge_coverage_ratio(
+                    &mapping,
+                    &cov_file,
+                    usize::try_from(r.opt.num_processor).unwrap_or(1),
+                )
+                .context("Error in during filter_edge_coverage_ratio")?;
                 r.time_log("cov_filtering", seconds_since(start))?;
                 Ok(())
             },

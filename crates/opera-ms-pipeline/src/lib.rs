@@ -31,6 +31,7 @@ pub mod edge_filter;
 pub mod files;
 pub mod final_stats;
 pub mod gap_filling;
+pub mod gz;
 pub mod long_read;
 pub mod options;
 pub mod polishing;

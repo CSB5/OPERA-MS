@@ -25,6 +25,12 @@
   only written with the new option `--cluster-fasta`; by default the
   clusters are given by `contig_info.txt` (column `CLUSTER`) and described
   in `cluster_info.txt` (unchanged).
+- **Disk:** the large files of `intermediate_files/read_mapping/` are
+  gzipped (`opera.map.sort`, `opera.map.sort.status`, `edge_read_info.dat`,
+  `pairedEdges`, `pairedEdges_above_thresh`, `prefiltered_*`,
+  `below_thresh_*`: up to about 100 GB on large samples), about 3 times
+  smaller, compressed in parallel. A run started with 2.0.0 can be
+  resumed: the plain files are still read.
 
 ## 2.0.0
 

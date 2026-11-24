@@ -432,7 +432,7 @@ fn extract_read_sequence(
     }
     let mut extension_log = String::new();
     let (mut read_to_edge, reference_reads) = read_edges(
-        &read(edge_file)?,
+        &crate::gz::read(edge_file)?,
         &edges,
         &contig_lengths,
         &mut extension_log,

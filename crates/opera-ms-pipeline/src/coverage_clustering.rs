@@ -239,7 +239,7 @@ fn edges_from_matrix(
     write(&format!("{out_dir}/contigs_window_cov"), &window_cov)?;
 
     let mut wrong = String::new();
-    let edges = read(&format!("{inter_dir}/read_mapping/pairedEdges"))?;
+    let edges = crate::gz::read(&format!("{inter_dir}/read_mapping/pairedEdges"))?;
     for line in lines(&edges) {
         let fields: Vec<&str> = line.split('\t').collect();
         let get = |i: usize| fields.get(i).copied().unwrap_or("");

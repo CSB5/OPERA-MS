@@ -132,7 +132,9 @@ pub fn filter_edges(edges_text: &str, coverage: &HashMap<String, f64>) -> Result
 }
 
 /// Filters the edge sets of `mapping_dir` with the coverage of `cov_file`.
-pub fn filter_edge_coverage_ratio(mapping_dir: &str, cov_file: &str) -> Result<()> {
+/// `prefiltered_*`, `below_thresh_*` and `pairedEdges_above_thresh` are
+/// gzipped (`crate::gz`); OPERA-LG reads the filtered `pairedEdges_i*`.
+pub fn filter_edge_coverage_ratio(mapping_dir: &str, cov_file: &str, threads: usize) -> Result<()> {
     let text = fs::read_to_string(cov_file)
         .with_context(|| format!("The file {cov_file} does not exists"))?;
     let coverage = contig_coverage(&text).with_context(|| format!("in {cov_file}"))?;
@@ -141,15 +143,19 @@ pub fn filter_edge_coverage_ratio(mapping_dir: &str, cov_file: &str) -> Result<(
         let old = format!("{mapping_dir}/prefiltered_pairedEdges_i{i}");
         let filtered = format!("{mapping_dir}/pairedEdges_i{i}");
         let below_file = format!("{mapping_dir}/below_thresh_pairedEdges_i{i}");
-        fs::rename(&filtered, &old).with_context(|| format!("cannot move {filtered} to {old}"))?;
-        let edges = fs::read_to_string(&old).with_context(|| format!("cannot read {old}"))?;
+        let edges =
+            fs::read_to_string(&filtered).with_context(|| format!("cannot read {filtered}"))?;
+        crate::gz::write(&old, &edges, threads)?;
         let (kept, below) = filter_edges(&edges, &coverage).with_context(|| format!("in {old}"))?;
         fs::write(&filtered, &kept).with_context(|| format!("cannot write {filtered}"))?;
-        fs::write(&below_file, &below).with_context(|| format!("cannot write {below_file}"))?;
+        crate::gz::write(&below_file, &below, threads)?;
         above.push_str(&kept);
     }
-    let all = format!("{mapping_dir}/pairedEdges_above_thresh");
-    fs::write(&all, above).with_context(|| format!("cannot write {all}"))
+    crate::gz::write(
+        &format!("{mapping_dir}/pairedEdges_above_thresh"),
+        &above,
+        threads,
+    )
 }
 
 #[cfg(test)]

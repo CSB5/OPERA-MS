@@ -1,9 +1,11 @@
 //! Long-read edges: maps the long reads on the contigs (minimap2), keeps
 //! the useful alignments of each read, derives the contig pairs (edges) linked by the reads, bundles them
 //! by orientation and distance, and writes the OPERA-LG inputs:
-//! `opera.map`, `opera.map.sort`, `opera.map.sort.status`, `pairedEdges`,
+//! `opera.map.sort`, `opera.map.sort.status`, `pairedEdges`,
 //! `pairedEdges_i0..5`, `edge_read_info.dat`, `opera.map.cov`, `config`,
-//! `results/contigs`.
+//! `results/contigs`. The large ones (`opera.map.sort`,
+//! `opera.map.sort.status`, `pairedEdges`, `edge_read_info.dat`) are
+//! gzipped (`crate::gz`); OPERA-LG reads the others.
 //!
 //! The behaviour of OPERA-MS 0.9 is kept, including its quirks (see the
 //! comments: the last read of the mapping is never used for edges, a small
@@ -736,8 +738,9 @@ pub fn opera_long_read(rec: &StepRecorder<'_>, a: &Args<'_>) -> Result<()> {
         );
     }
     let file = |name: &str| format!("{out}{name}");
+    let threads: usize = a.nproc.parse().unwrap_or(1);
     let sorted_path = file("opera.map.sort");
-    if !Path::new(&sorted_path).exists() {
+    if !crate::gz::exists(&sorted_path) {
         let raw = file("opera.map.raw");
         let program = format!("{}/minimap2", a.minimap2_dir);
         let args = [
@@ -764,15 +767,17 @@ pub fn opera_long_read(rec: &StepRecorder<'_>, a: &Args<'_>) -> Result<()> {
         drop(raw_text);
         // only the sorted mapping is kept
         fs::remove_file(&raw).with_context(|| format!("cannot remove {raw}"))?;
-        write(&sorted_path, &sort_mapping(&map, numeric_field))?;
+        let sorted = sort_mapping(&map, numeric_field);
+        drop(map);
+        crate::gz::write(&sorted_path, &sorted, threads)?;
     }
-    let sorted =
-        fs::read_to_string(&sorted_path).with_context(|| format!("cannot read {sorted_path}"))?;
+    let sorted = crate::gz::read(&sorted_path)?;
     let (status, paired, edge_read) = check_mapping(&sorted)?;
     drop(sorted);
-    write(&file("opera.map.sort.status"), &status)?;
-    write(&file("pairedEdges"), &paired)?;
-    write(&file("edge_read_info.dat"), &edge_read)?;
+    crate::gz::write(&file("opera.map.sort.status"), &status, threads)?;
+    crate::gz::write(&file("pairedEdges"), &paired, threads)?;
+    crate::gz::write(&file("edge_read_info.dat"), &edge_read, threads)?;
+    drop(edge_read);
     write(&file("opera.map.cov"), &long_read_coverage(&status))?;
     for (i, text) in extract_edges(&paired).iter().enumerate() {
         write(&file(&format!("pairedEdges_i{i}")), text)?;
