@@ -14,6 +14,13 @@
   ties now go to the first genomes by accession. Final contigs can differ
   from 2.0.0 on samples with such ties. Sylph's genomes are also listed in
   sorted order.
+- **Fix:** the reference clustering (step 5) no longer writes one file
+  per cluster all at once (tens of thousands on large assemblies, beyond
+  some file quotas): the cluster files go to skani 1,000 at a time and
+  are removed after each batch; the reference genomes are sketched once.
+  The alignments of the linked cluster pairs are kept in memory instead
+  of two files per pair in `NUCMER_OUT/` (tens of thousands, never
+  removed). Same outputs.
 
 ## 2.0.0
 

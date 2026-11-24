@@ -730,7 +730,47 @@ fn short_edges_file(inter_dir: &str) -> Result<String> {
     }
 }
 
-/// The species of the clusters, with skani: one FASTA per cluster, `skani dist` against the run's
+/// The cluster files of `run_skani` waiting for skani, and the ones done
+/// (their files removed).
+#[derive(Default)]
+struct SkaniQueries {
+    pending: BTreeSet<String>,
+    done: HashSet<String>,
+}
+
+impl SkaniQueries {
+    /// A file just written; returns the number of files pending. A file
+    /// written again (the last contig of the contig file always writes its
+    /// cluster's file) replaces its earlier version, as with one skani
+    /// call on all the files: done already, its hits are dropped and it
+    /// runs again.
+    fn add(&mut self, path: String, skani: &mut crate::references::SkaniBatches) -> usize {
+        if self.done.remove(&path) {
+            skani.forget(&path);
+        }
+        self.pending.insert(path);
+        self.pending.len()
+    }
+
+    fn count(&self) -> usize {
+        self.pending.len() + self.done.len()
+    }
+
+    /// skani on the pending files, then removes them.
+    fn run(&mut self, skani: &mut crate::references::SkaniBatches) -> Result<()> {
+        let queries: Vec<String> = std::mem::take(&mut self.pending).into_iter().collect();
+        skani.dist(&queries)?;
+        for q in queries {
+            fs::remove_file(&q).with_context(|| format!("cannot remove {q}"))?;
+            self.done.insert(q);
+        }
+        Ok(())
+    }
+}
+
+/// The species of the clusters, with skani: one FASTA per cluster
+/// (`INTER_FILES/<cluster>.fa`, at most `SKANI_BATCH` on disk at a time),
+/// `skani dist` against the run's
 /// reference genomes (the ones sylph found), at most `TOP_PREDICTIONS`
 /// per cluster, written in the `mash_dist.dat` layout (distance =
 /// 1 - ANI/100, genomes named `<accession>.fna.gz`). Returns the edge
@@ -745,7 +785,16 @@ fn run_skani(
     remove_dir(&skani_dir)?;
     let inter_fa_dir = format!("{skani_dir}/INTER_FILES/");
     fs::create_dir_all(&inter_fa_dir).with_context(|| format!("cannot create {inter_fa_dir}"))?;
-    let mut queries: Vec<String> = Vec::new();
+    let genomes = crate::references::genome_files(&format!("{}/..", a.genome_dir))?;
+    let mut skani = crate::references::SkaniBatches::new(
+        rec,
+        a.skani_dir,
+        &genomes,
+        a.nproc,
+        &format!("{skani_dir}/clusters"),
+    )?;
+    // the cluster files, `SKANI_BATCH` at a time: written, skani, removed
+    let mut batch = SkaniQueries::default();
     let reader = BufReader::new(
         File::open(a.contig_file)
             .with_context(|| format!("Could not open contigs file {}", a.contig_file))?,
@@ -753,27 +802,18 @@ fn run_skani(
     let contig_seqs = cluster_fastas(reader, contigs, counts, |cluster, text| {
         let path = format!("{inter_fa_dir}/{cluster}.fa");
         write(&path, text)?;
-        if !queries.contains(&path) {
-            queries.push(path);
+        if batch.add(path, &mut skani) == crate::references::SKANI_BATCH {
+            batch.run(&mut skani)?;
         }
         Ok(())
     })?;
     ensure!(
-        !queries.is_empty(),
+        batch.count() > 0,
         "no cluster sequence for skani (empty {})",
         a.contig_file
     );
-    queries.sort();
-    let genomes = crate::references::genome_files(&format!("{}/..", a.genome_dir))?;
-    let dist = crate::references::skani_as_mash(
-        rec,
-        a.skani_dir,
-        &genomes,
-        &queries,
-        TOP_PREDICTIONS,
-        a.nproc,
-        &format!("{skani_dir}/clusters"),
-    )?;
+    batch.run(&mut skani)?;
+    let dist = skani.finish(TOP_PREDICTIONS)?;
     // genomes by file name
     let dist: String = dist
         .lines()
@@ -787,26 +827,26 @@ fn run_skani(
     Ok(contig_seqs)
 }
 
-/// The contig-on-genome alignments of the linked cluster pairs (was
 /// The contigs of each cluster pair on their common genomes: minimap2
 /// (`-cx asm5 -N 50`, secondary alignments kept for repeats), one run per
 /// genome with every contig of the pairs that need
 /// it (an alignment doesn't depend on the other contigs), then each
-/// pair's file `<pair>_<i>.txt` from its own contigs' hits, in the
-/// `show-coords -lrcT` columns that `parse_coords` reads.
+/// pair's hits on its `i`-th common genome (the text of OPERA-MS 0.9's
+/// `<pair>_<i>.txt`, kept in memory: one per pair and genome), in the
+/// `show-coords -lrcT` columns that `parse_coords` reads. Only the
+/// minimap2 logs `genome_<g>.err` stay in `nucmer_dir`.
 fn run_minimap2(
     rec: &StepRecorder<'_>,
     a: &Args<'_>,
     nucmer_dir: &str,
     plan: &NucmerPlan,
-) -> Result<()> {
+) -> Result<HashMap<(String, usize), String>> {
     remove_dir(nucmer_dir)?;
     fs::create_dir_all(nucmer_dir).with_context(|| format!("cannot create {nucmer_dir}"))?;
     // the contigs of each pair (FASTA text), and of each genome
     let mut pair_contigs: HashMap<&str, Vec<String>> = HashMap::new();
     let mut records: HashMap<String, String> = HashMap::new();
     for (pair, seq) in &plan.fastas {
-        write(&format!("{nucmer_dir}/{pair}.fa"), seq)?;
         let mut name = String::new();
         for line in seq.lines() {
             if let Some(h) = line.strip_prefix('>') {
@@ -911,6 +951,7 @@ fn run_minimap2(
     let hits = hits
         .into_inner()
         .map_err(|_| anyhow::anyhow!("lock poisoned"))?;
+    let mut coords: HashMap<(String, usize), String> = HashMap::new();
     let header = "minimap2\nNUCMER\n\n[S1]\t[E1]\t[S2]\t[E2]\t[LEN 1]\t[LEN 2]\t[% IDY]\t[LEN R]\t[LEN Q]\t[COV R]\t[COV Q]\t[TAGS]\n";
     for job in &plan.jobs {
         let wanted: HashSet<&str> = pair_contigs
@@ -924,10 +965,7 @@ fn run_minimap2(
                 text.push_str(row);
             }
         }
-        write(
-            &format!("{nucmer_dir}/{}_{}.txt", job.pair, job.index),
-            &text,
-        )?;
+        coords.insert((job.pair.clone(), job.index), text);
     }
     for g in 0..by_genome.len() {
         for name in [format!("genome_{g}_contigs.fa"), format!("genome_{g}.paf")] {
@@ -935,7 +973,7 @@ fn run_minimap2(
             fs::remove_file(&path).with_context(|| format!("cannot remove {path}"))?;
         }
     }
-    Ok(())
+    Ok(coords)
 }
 
 /// `get_correct_edges`: the edges between clusters confirmed by a genome.
@@ -943,7 +981,7 @@ fn correct_edges(
     edges: &str,
     contigs: &HashMap<String, ContigInfo>,
     plan: &NucmerPlan,
-    nucmer_dir: &str,
+    pair_coords: &HashMap<(String, usize), String>,
 ) -> Result<String> {
     let mut cache: HashMap<(String, usize), Coords> = HashMap::new();
     let mut coords = |pair: &str, i: usize| -> Result<Coords> {
@@ -951,10 +989,12 @@ fn correct_edges(
         if let Some(hits) = cache.get(&key) {
             return Ok(hits.clone());
         }
-        let path = format!("{nucmer_dir}/{pair}_{i}.txt");
-        let hits = std::rc::Rc::new(parse_coords(
-            &read(&path).context("Parsing problem during read rescue using NUCMER mapping")?,
-        ));
+        let text = pair_coords.get(&key).with_context(|| {
+            format!(
+                "Parsing problem during read rescue using NUCMER mapping: no hits of {pair}_{i}"
+            )
+        })?;
+        let hits = std::rc::Rc::new(parse_coords(text));
         cache.insert(key, hits.clone());
         Ok(hits)
     };
@@ -1011,8 +1051,9 @@ pub fn sequence_similarity_clustering(rec: &StepRecorder<'_>, a: &Args<'_>) -> R
     let nucmer_dir = format!("{ref_dir}/NUCMER_OUT/");
     let plan = nucmer_plan(&edges, &contigs, &species, &edge_seqs);
     drop(edge_seqs);
-    rec.substep("minimap2", |sub| run_minimap2(sub, a, &nucmer_dir, &plan))?;
-    let good = correct_edges(&edges, &contigs, &plan, &nucmer_dir)?;
+    let pair_coords = rec.substep("minimap2", |sub| run_minimap2(sub, a, &nucmer_dir, &plan))?;
+    let good = correct_edges(&edges, &contigs, &plan, &pair_coords)?;
+    drop(pair_coords);
     write(&format!("{ref_dir}/edges_between_clusters_good"), &good)?;
     time_log(a.inter_dir, "r_mummer", start)?;
 
@@ -1220,5 +1261,66 @@ mod tests {
             genome_path("/x/OPERA-MS-DB", "genomes_1/g.fna.gz"),
             "/x/OPERA-MS-DB/genomes_1/g.fna.gz"
         );
+    }
+
+    #[test]
+    fn skani_batches_remove_their_files() {
+        // a fake skani: `sketch` makes one empty sketch per genome; `dist`
+        // logs how many query files are on disk and gives each query
+        // ANI = 100 - its number of lines
+        let dir = tempfile::tempdir().unwrap();
+        let d = dir.path().display().to_string();
+        let script = "#!/bin/sh\n\
+            cmd=$1; shift\n\
+            while [ $# -gt 0 ]; do case $1 in -l) list=$2;; -o) out=$2;; --ql) ql=$2;; esac; shift; done\n\
+            if [ $cmd = sketch ]; then mkdir -p $out; while read g; do : > $out/$(basename $g).sketch; done < $list; exit 0; fi\n\
+            ls $(dirname $(head -1 $ql)) | wc -l >> $(dirname $out)/on_disk\n\
+            { printf 'Ref_file\\tQuery_file\\tANI\\n'; while read q; do printf '/g/g.fna.gz\\t%s\\t%s\\n' $q $((100 - $(wc -l < $q))); done < $ql; } > $out\n";
+        let skani = format!("{d}/skani");
+        fs::write(&skani, script).unwrap();
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&skani, fs::Permissions::from_mode(0o755)).unwrap();
+        fs::create_dir(format!("{d}/q")).unwrap();
+        let bench = opera_ms_core::bench::Benchmark::create(format!("{d}/bench.tsv")).unwrap();
+        let out = bench
+            .step("skani", |rec| -> Result<String> {
+                let genomes = vec![format!("{d}/genomes/g.fna.gz")];
+                let mut skani = crate::references::SkaniBatches::new(
+                    rec,
+                    &format!("{d}/"),
+                    &genomes,
+                    1,
+                    &format!("{d}/clusters"),
+                )?;
+                let mut batch = SkaniQueries::default();
+                // batches of 2; `a` written again after its batch ran
+                for (name, lines) in [("a", 1), ("b", 2), ("c", 3), ("a", 4)] {
+                    let path = format!("{d}/q/{name}.fa");
+                    write(&path, &"x\n".repeat(lines))?;
+                    if batch.add(path, &mut skani) == 2 {
+                        batch.run(&mut skani)?;
+                    }
+                }
+                batch.run(&mut skani)?;
+                assert_eq!(batch.count(), 3);
+                skani.finish(5)
+            })
+            .unwrap();
+        assert_eq!(
+            out,
+            format!(
+                "/g/g.fna.gz\t{d}/q/a.fa\t0.040000\t0\t0/0\n\
+                 /g/g.fna.gz\t{d}/q/b.fa\t0.020000\t0\t0/0\n\
+                 /g/g.fna.gz\t{d}/q/c.fa\t0.030000\t0\t0/0\n"
+            )
+        );
+        // never more than a batch on disk, none left
+        assert_eq!(read(&format!("{d}/on_disk")).unwrap(), "2\n2\n");
+        assert_eq!(fs::read_dir(format!("{d}/q")).unwrap().count(), 0);
+        assert!(!Path::new(&format!("{d}/clusters.sketches")).exists());
+        // skani's table: one header, the rows of every batch
+        let table = read(&format!("{d}/clusters.skani.tsv")).unwrap();
+        assert_eq!(table.lines().count(), 5);
+        assert_eq!(table.matches("Ref_file").count(), 1);
     }
 }

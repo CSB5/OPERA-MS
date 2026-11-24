@@ -23,7 +23,7 @@
 use std::collections::HashMap;
 use std::fmt::Write as _;
 use std::fs::{self, OpenOptions};
-use std::io::{BufRead, Read};
+use std::io::{BufRead, Write as _};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
@@ -487,10 +487,177 @@ pub fn genome_files(out_dir: &str) -> Result<Vec<String>> {
     Ok(files)
 }
 
-/// `skani dist` of `queries` against the run's genomes, written in the
-/// `mash dist` layout the next steps read (reference, query, distance =
-/// 1 - ANI/100, p-value, shared hashes), at most `top` hits per query
-/// (the closest; ties to the first genomes by name).
+/// Queries per `skani dist` call: a caller writing one file per query
+/// keeps at most this many of them on disk at a time (a run can have tens
+/// of thousands of clusters, beyond some file quotas).
+pub const SKANI_BATCH: usize = 1000;
+
+/// `skani dist` of queries, a batch at a time, against the run's genomes,
+/// sketched once (`skani sketch`, one sketch per genome). A query's hits
+/// don't depend on the other queries of its batch, so the result is the
+/// one of a single call on all of them. Files under `work`:
+/// `.skani.tsv` (skani's table of all the batches), `.skani.err`.
+pub struct SkaniBatches<'r, 'a> {
+    rec: &'r StepRecorder<'a>,
+    skani: String,
+    nproc: String,
+    work: String,
+    /// List of the genome sketches; `None` without genomes (no hit).
+    ref_list: Option<String>,
+    /// (query, genome, distance)
+    hits: Vec<(String, String, f64)>,
+    header: bool,
+}
+
+impl<'r, 'a> SkaniBatches<'r, 'a> {
+    pub fn new(
+        rec: &'r StepRecorder<'a>,
+        skani_dir: &str,
+        genomes: &[String],
+        nproc: usize,
+        work: &str,
+    ) -> Result<Self> {
+        let mut s = Self {
+            rec,
+            skani: format!("{skani_dir}skani"),
+            nproc: nproc.max(1).to_string(),
+            work: work.to_string(),
+            ref_list: None,
+            hits: Vec::new(),
+            header: false,
+        };
+        let err = format!("{work}.skani.err");
+        fs::write(&err, "").with_context(|| format!("cannot write {err}"))?;
+        let tsv = format!("{work}.skani.tsv");
+        fs::write(&tsv, "").with_context(|| format!("cannot write {tsv}"))?;
+        if genomes.is_empty() {
+            return Ok(s);
+        }
+        let genome_list = format!("{work}.genomes.txt");
+        fs::write(&genome_list, genomes.join("\n") + "\n")
+            .with_context(|| format!("cannot write {genome_list}"))?;
+        let sketch_dir = s.sketch_dir();
+        if Path::new(&sketch_dir).exists() {
+            fs::remove_dir_all(&sketch_dir)
+                .with_context(|| format!("cannot remove {sketch_dir}"))?;
+        }
+        let pipeline = Pipeline::new(Cmd::new(&s.skani).args([
+            "sketch",
+            "-t",
+            &s.nproc,
+            "-l",
+            &genome_list,
+            "-o",
+            &sketch_dir,
+            "--separate-sketches",
+        ]))
+        .stdout(Output::Null)
+        .stderr(Output::Append(err.into()));
+        let report = pipeline.run().context("Error during skani sketch")?;
+        rec.record(&report);
+        let _ = fs::remove_file(&genome_list);
+        // `<file name>.sketch` per genome (the genomes of one folder)
+        let mut sketches = String::new();
+        for g in genomes {
+            let name = g.rsplit('/').next().unwrap_or(g);
+            let sketch = format!("{sketch_dir}/{name}.sketch");
+            if !Path::new(&sketch).exists() {
+                bail!("skani sketch: no {sketch}");
+            }
+            let _ = writeln!(sketches, "{sketch}");
+        }
+        let ref_list = format!("{work}.refs.txt");
+        fs::write(&ref_list, sketches).with_context(|| format!("cannot write {ref_list}"))?;
+        s.ref_list = Some(ref_list);
+        Ok(s)
+    }
+
+    fn sketch_dir(&self) -> String {
+        format!("{}.sketches", self.work)
+    }
+
+    /// Runs one batch: the hits of `queries` (files, read by skani now).
+    pub fn dist(&mut self, queries: &[String]) -> Result<()> {
+        let Some(ref_list) = &self.ref_list else {
+            return Ok(());
+        };
+        if queries.is_empty() {
+            return Ok(());
+        }
+        let work = &self.work;
+        let query_list = format!("{work}.queries.txt");
+        fs::write(&query_list, queries.join("\n") + "\n")
+            .with_context(|| format!("cannot write {query_list}"))?;
+        let batch_tsv = format!("{work}.skani.batch.tsv");
+        let pipeline = Pipeline::new(Cmd::new(&self.skani).args([
+            "dist",
+            "-t",
+            &self.nproc,
+            "--rl",
+            ref_list,
+            "--ql",
+            &query_list,
+            "-o",
+            &batch_tsv,
+        ]))
+        .stdout(Output::Null)
+        .stderr(Output::Append(format!("{work}.skani.err").into()));
+        let report = pipeline.run().context("Error during skani dist")?;
+        self.rec.record(&report);
+        let text =
+            fs::read_to_string(&batch_tsv).with_context(|| format!("cannot read {batch_tsv}"))?;
+        let mut lines = text.split_inclusive('\n');
+        let header = lines.next().unwrap_or("");
+        let tsv = format!("{work}.skani.tsv");
+        let mut all = OpenOptions::new()
+            .append(true)
+            .open(&tsv)
+            .with_context(|| format!("cannot open {tsv}"))?;
+        if !self.header {
+            all.write_all(header.as_bytes())
+                .with_context(|| format!("cannot write {tsv}"))?;
+            self.header = true;
+        }
+        for line in lines {
+            all.write_all(line.as_bytes())
+                .with_context(|| format!("cannot write {tsv}"))?;
+            let f: Vec<&str> = line.trim_end_matches('\n').split('\t').collect();
+            if f.len() < 3 {
+                continue;
+            }
+            let ani: f64 = f[2].parse().unwrap_or(0.0);
+            self.hits
+                .push((f[1].to_string(), f[0].to_string(), 1.0 - ani / 100.0));
+        }
+        for path in [&query_list, &batch_tsv] {
+            let _ = fs::remove_file(path);
+        }
+        Ok(())
+    }
+
+    /// Drops the hits of `query` (its file is rewritten, to run again).
+    pub fn forget(&mut self, query: &str) {
+        self.hits.retain(|h| h.0 != query);
+    }
+
+    /// The hits in the `mash dist` layout the next steps read (reference,
+    /// query, distance = 1 - ANI/100, p-value, shared hashes), at most
+    /// `top` per query (the closest; ties to the first genomes by name).
+    pub fn finish(self, top: usize) -> Result<String> {
+        if let Some(ref_list) = &self.ref_list {
+            let _ = fs::remove_file(ref_list);
+            let dir = self.sketch_dir();
+            fs::remove_dir_all(&dir).with_context(|| format!("cannot remove {dir}"))?;
+        }
+        // a fixed order (query, distance, genome), then the first `top`
+        // hits of each query: skani's threads write tied hits in any
+        // order, so ties are cut here, always to the first genomes by name
+        Ok(mash_lines(self.hits, top))
+    }
+}
+
+/// `skani dist` of `queries` (files) against the run's genomes, in
+/// batches of `SKANI_BATCH`, as `SkaniBatches::finish` lines.
 pub fn skani_as_mash(
     rec: &StepRecorder<'_>,
     skani_dir: &str,
@@ -500,53 +667,11 @@ pub fn skani_as_mash(
     nproc: usize,
     work: &str,
 ) -> Result<String> {
-    if genomes.is_empty() || queries.is_empty() {
-        return Ok(String::new());
+    let mut skani = SkaniBatches::new(rec, skani_dir, genomes, nproc, work)?;
+    for batch in queries.chunks(SKANI_BATCH) {
+        skani.dist(batch)?;
     }
-    let ref_list = format!("{work}.refs.txt");
-    let query_list = format!("{work}.queries.txt");
-    fs::write(&ref_list, genomes.join("\n") + "\n")
-        .with_context(|| format!("cannot write {ref_list}"))?;
-    fs::write(&query_list, queries.join("\n") + "\n")
-        .with_context(|| format!("cannot write {query_list}"))?;
-    let tsv = format!("{work}.skani.tsv");
-    let pipeline = Pipeline::new(Cmd::new(format!("{skani_dir}skani")).args([
-        "dist",
-        "-t",
-        &nproc.max(1).to_string(),
-        "--rl",
-        &ref_list,
-        "--ql",
-        &query_list,
-        "-o",
-        &tsv,
-    ]))
-    .stdout(Output::Null)
-    .stderr(Output::File(format!("{work}.skani.err").into()));
-    let report = pipeline.run().context("Error during skani dist")?;
-    rec.record(&report);
-    let mut text = String::new();
-    fs::File::open(&tsv)
-        .and_then(|mut f| f.read_to_string(&mut text))
-        .with_context(|| format!("cannot read {tsv}"))?;
-    // a fixed order (query, distance, genome), then the first `top` hits of
-    // each query: skani's threads write tied hits in any order, and its own
-    // `-n` keeps any `top` of them, so ties are cut here, always to the
-    // first genomes by name
-    let mut hits: Vec<(String, String, f64)> = Vec::new();
-    for line in text.lines().skip(1) {
-        let f: Vec<&str> = line.split('\t').collect();
-        if f.len() < 3 {
-            continue;
-        }
-        let ani: f64 = f[2].parse().unwrap_or(0.0);
-        hits.push((f[1].to_string(), f[0].to_string(), 1.0 - ani / 100.0));
-    }
-    let out = mash_lines(hits, top);
-    for path in [&ref_list, &query_list] {
-        let _ = fs::remove_file(path);
-    }
-    Ok(out)
+    skani.finish(top)
 }
 
 /// skani hits (query, genome, distance) as `mash dist` lines, sorted by
