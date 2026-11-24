@@ -1,7 +1,10 @@
 #include "Contig.h"
 
+long long Contig::s_nextSerial = 0;
+
 Contig::Contig(void)
 {
+	m_serial = s_nextSerial++;
 	m_leftEdges = new list<PET*>;
 	m_rightEdges = new list<PET*>;
 	m_ifInSubgraph = false;
@@ -66,6 +69,7 @@ void Contig::InitializeDistance(){
 
 
 Contig::Contig( string name, double length, double cov ){
+	m_serial = s_nextSerial++;
 	this->m_name = name;
 	this->m_length = length;
 	this->m_lengthWithGap = length;

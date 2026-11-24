@@ -19,6 +19,11 @@ public:
 	PET( Contig *c1, int o1, Contig *c2, int o2, int dis, int std, int size );
 	PET( Contig *c1, int o1, Contig *c2, int o2, int dis, int std, int size, PET *edge );
 	~PET(void);
+	// creation number, unique: orders sets of edges deterministically
+	// (an order by address would depend on the heap: see PetLess)
+	long long GetSerial() const { return m_serial; }
+	PET( const PET& ) = delete;
+	PET& operator=( const PET& ) = delete;
 
 	// Method
 public:
@@ -121,6 +126,8 @@ public:
 	// Attributes
 private:
 	int m_id;
+	long long m_serial;		// creation number (GetSerial)
+	static long long s_nextSerial;
 	Contig *m_startContig;
 	int m_startContigOri;
 	Contig *m_endContig;
@@ -161,4 +168,11 @@ private:
 	Contig *m_endContigOriginal;
 	int m_endContigOriOriginal;
 	int m_distanceOriginal;
+};
+
+// Orders edge pointers by creation instead of address (see ContigLess).
+struct PetLess {
+	bool operator()( const PET *a, const PET *b ) const {
+		return a->GetSerial() < b->GetSerial();
+	}
 };

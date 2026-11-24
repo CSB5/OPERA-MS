@@ -147,7 +147,7 @@ private:
 	void GenUnassigndNodesForInitialScaffold( StartPoint **allStart, int numOfStarts );
 	// traverse edge and find unassigned node
 	void TraverseEdges( Contig *c, list<PET*> *edges, list< pair<Contig*, int> > *&possibleContig,
-			    set<Contig*> *&unassignedNodes, set<PET*> *&visitedEdges, int direction, bool isStart, bool ifRecalculate );
+			    set<Contig*, ContigLess> *&unassignedNodes, set<PET*, PetLess> *&visitedEdges, int direction, bool isStart, bool ifRecalculate );
 	// add one contig to partial scaffold
 	bool AddContigToScaffold( PartialScaffold *&p, int maxUnhappyEdge, Contig *newContig, int newContigOri );
 	// check edges of newly added contig
@@ -168,7 +168,7 @@ private:
 	inline void AddToList( list<StartPoint*> *borderContigs, list<StartPoint*> *allContigs, Contig *c, int ori );
 	// check edges to find start point
 	inline void CheckEdgesForStartPoint( list<StartPoint*> *borderContigs, list<StartPoint*> *allContigs, 
-		Contig *c, list<PET*> *edges, set<Contig*> *visitedContigs, list<Contig*> *possibleContigs );
+		Contig *c, list<PET*> *edges, set<Contig*, ContigLess> *visitedContigs, list<Contig*> *possibleContigs );
 	// Break scaffold
 	void BreakScaffold( PartialScaffold *&p, int maxUnhappyEdges );
 	// generate results of scaffold
@@ -219,7 +219,7 @@ private:
 
 	// check edges to find all unused contigs
 	void CheckEdgesForUnusedContigs( list<Contig*> *subgraph, Contig *c, list<PET*> *edges, 
-					 set<Contig*> *visitedContigs, list<Contig*> *possibleContigs );
+					 set<Contig*, ContigLess> *visitedContigs, list<Contig*> *possibleContigs );
 
 	// check if a repeat can be removed from the active region without introducing any discordant edges
 	bool BringDiscordantEdgeByRemoving( Contig *c, int ori, list<Contig*> erasedContigs, PartialScaffold *p, int sizeOfActiveRegion );

@@ -1,7 +1,10 @@
 #include "PET.h"
 
+long long PET::s_nextSerial = 0;
+
 PET::PET(void)
 {
+	m_serial = s_nextSerial++;
 	m_originalClusters = new list<PET*>;
 	m_repetitiveEdge = NULL;
 	m_uniqueEdge = NULL;
@@ -30,6 +33,7 @@ PET::~PET(void)
 }
 
 PET::PET( Contig *c1, int o1, Contig *c2, int o2, int dis, int std, int size ){
+	m_serial = s_nextSerial++;
 	//cerr<<c1->GetName()<<" "<<o1<<" "<<c2->GetName()<<" "<<dis<<" "<<std<<" "<<size<<"\n";
 	//cerr<<" "<<o1<<" "<<" "<<dis<<" "<<std<<" "<<size<<"\n";
 	m_startContig = c1;
@@ -73,6 +77,7 @@ PET::PET( Contig *c1, int o1, Contig *c2, int o2, int dis, int std, int size ){
 }
 
 PET::PET( Contig *c1, int o1, Contig *c2, int o2, int dis, int std, int size, PET *edge ){
+	m_serial = s_nextSerial++;
 	m_startContig = c1;
 	m_startContigOri = o1;
 	m_endContig = c2;

@@ -788,8 +788,8 @@ void opera::GenUnassigndNodesForInitialScaffold( StartPoint **allStart, int numO
 	
 		// check new unassigned nodes
 		list< pair<Contig*, int> > *possibleContig = new list< pair<Contig*, int> >;	// int is the extension direction
-		set<Contig*> *newUnassignedNodes = new set<Contig*>;
-		set<PET*> *visitedEdge = new set<PET*>;
+		set<Contig*, ContigLess> *newUnassignedNodes = new set<Contig*, ContigLess>;
+		set<PET*, PetLess> *visitedEdge = new set<PET*, PetLess>;
 		
 		// deal with all contigs in active region
 		Contig *firstContig = allStart[ 0 ]->GetContig();
@@ -846,7 +846,7 @@ void opera::GenUnassigndNodesForInitialScaffold( StartPoint **allStart, int numO
 		StartPoint **allStarts;
 		int num = 0;
 		allStarts = new StartPoint*[ newUnassignedNodes->size() * 2 ];
-		for( set<Contig*>::iterator iter = newUnassignedNodes->begin(); iter != newUnassignedNodes->end(); iter++ ){
+		for( set<Contig*, ContigLess>::iterator iter = newUnassignedNodes->begin(); iter != newUnassignedNodes->end(); iter++ ){
 			allStarts[ num++ ] = new StartPoint( *iter, PLUS );
 			allStarts[ num++ ] = new StartPoint( *iter, MINUS );
 		}
@@ -998,12 +998,12 @@ void opera::SeparateScaffolds( list<Contig*> *subgraph, int &numberOfScaf, vecto
 #endif
 
 	// traverse graph and label the scaffold ID for each contig
-	set<Contig*> *visitedContig = new set<Contig*>;
+	set<Contig*, ContigLess> *visitedContig = new set<Contig*, ContigLess>;
 	list<Contig*> *queue = new list<Contig*>;
 	int scafID = -1;
 	
 	// save unhappy edges information
-	set<PET*> *unhappyEdges = new set<PET*>;
+	set<PET*, PetLess> *unhappyEdges = new set<PET*, PetLess>;
 
 	/*for( list<Contig*>::iterator graphIter = newSubgraph.begin(); graphIter != newSubgraph.end(); graphIter++ ){
 		Contig *newContig = *graphIter;
@@ -1075,14 +1075,14 @@ void opera::SeparateScaffolds( list<Contig*> *subgraph, int &numberOfScaf, vecto
 #endif
 	//cerr<<"Traversing graph\n";
 	// new traversing to handle uniqe edges (single direction edge)
-	vector<set<Contig*>* > scafSets;
+	vector<set<Contig*, ContigLess>* > scafSets;
 	for( list<Contig*>::iterator graphIter = newSubgraph.begin(); graphIter != newSubgraph.end(); graphIter++ ){
 		Contig *newContig = *graphIter;
 		//cerr<<"node: "<<newContig->GetName()<<endl;
 		if( !newContig->IsRepeat() && visitedContig->find( newContig ) == visitedContig->end() ){
 			// this node is unique and has not been visited, start traverse the graph to find the connected component
 			//cerr<<"one graph\n";
-			set<Contig*> *newSet = new set<Contig*>;
+			set<Contig*, ContigLess> *newSet = new set<Contig*, ContigLess>;
 			scafSets.push_back( newSet );
 
 			queue->push_back( newContig );
@@ -1166,9 +1166,9 @@ void opera::SeparateScaffolds( list<Contig*> *subgraph, int &numberOfScaf, vecto
 							// combine two sets
 							//cerr<<"combine two sets\n";
 							//cerr<<"old set id is "<<nextContig->GetConnectedSetPos()<<endl;
-							set<Contig*> *combinedSet = scafSets.at( nextContig->GetConnectedSetPos() );
+							set<Contig*, ContigLess> *combinedSet = scafSets.at( nextContig->GetConnectedSetPos() );
 							//cerr<<"number of nodes in combined set: "<<combinedSet->size()<<endl;
-							for( set<Contig*>::iterator tempSetIter = newSet->begin(); tempSetIter != newSet->end(); tempSetIter++ ){
+							for( set<Contig*, ContigLess>::iterator tempSetIter = newSet->begin(); tempSetIter != newSet->end(); tempSetIter++ ){
 								//cerr<<"add: "<<(*tempSetIter)->GetName()<<endl;
 								(*tempSetIter)->SetScafID( nextContig->GetConnectedSetPos() );
 								(*tempSetIter)->SetScaffoldID( nextContig->GetConnectedSetPos() );
@@ -1198,7 +1198,7 @@ void opera::SeparateScaffolds( list<Contig*> *subgraph, int &numberOfScaf, vecto
 	for( int i = 0; i < (int) scafSets.size(); i++ ){
 		if( scafSets.at( i )->size() > 0 ){
 			scafID++;
-			for( set<Contig*>::iterator tempIter = scafSets.at( i )->begin(); tempIter != scafSets.at( i )->end(); tempIter++ ){
+			for( set<Contig*, ContigLess>::iterator tempIter = scafSets.at( i )->begin(); tempIter != scafSets.at( i )->end(); tempIter++ ){
 				(*tempIter)->SetScafID( scafID );
 				(*tempIter)->SetScaffoldID( scafID );
 				(*tempIter)->SetConnectedSetPos( scafID );
@@ -1216,7 +1216,7 @@ void opera::SeparateScaffolds( list<Contig*> *subgraph, int &numberOfScaf, vecto
 #endif
 	//cerr<<"finish reindexing\n";
 
-	for( set<PET*>::iterator iter = unhappyEdges->begin(); iter != unhappyEdges->end(); iter++ ){
+	for( set<PET*, PetLess>::iterator iter = unhappyEdges->begin(); iter != unhappyEdges->end(); iter++ ){
 		//cout<<(*iter)->GetOriString()<<endl;
 		m_unhappyEdgeString->push_back( (*iter)->GetOriString() );
 	}
@@ -1746,7 +1746,7 @@ void opera::CreateNewScaffold(){
 	list<Contig*> *subgraph = new list<Contig*>;
 
 	// traverse
-	set<Contig*> *visitedContigs = new set<Contig*>;
+	set<Contig*, ContigLess> *visitedContigs = new set<Contig*, ContigLess>;
 	list<Contig*> *possibleContigs = new list<Contig*>;
 		// start with unhappy dangling edges
 	for( list<PET*>::iterator iter = m_unhappyDanglingEdges->begin();
@@ -1848,7 +1848,7 @@ StartPoint* opera::FindStartOfNewScaffold(){
 	StartPoint *result = NULL;
 
 	// traverse
-	set<Contig*> *visitedContigs = new set<Contig*>;
+	set<Contig*, ContigLess> *visitedContigs = new set<Contig*, ContigLess>;
 	list<Contig*> *possibleContigs = new list<Contig*>;
 		// start with unhappy dangling edges
 	for( list<PET*>::iterator iter = m_unhappyDanglingEdges->begin();
@@ -1906,7 +1906,7 @@ StartPoint* opera::FindStartOfNewScaffold(){
 
 // check edges to find all unused contigs
 void opera::CheckEdgesForUnusedContigs( list<Contig*> *subgraph, Contig *c, list<PET*> *edges, 
-					set<Contig*> *visitedContigs, list<Contig*> *possibleContigs ){
+					set<Contig*, ContigLess> *visitedContigs, list<Contig*> *possibleContigs ){
 	for( list<PET*>::iterator iter = edges->begin(); iter != edges->end(); iter++ ){
 		PET *edge = *iter;
 		if( edge->isInSubgraph() && !edge->IsDE() && !edge->IfUnhappy() ){
@@ -1922,7 +1922,7 @@ void opera::CheckEdgesForUnusedContigs( list<Contig*> *subgraph, Contig *c, list
 
 // check edges to find start point
 void opera::CheckEdgesForStartPoint( list<StartPoint*> *borderContigs, list<StartPoint*> *allContigs, 
-									Contig *c, list<PET*> *edges, set<Contig*> *visitedContigs,
+									Contig *c, list<PET*> *edges, set<Contig*, ContigLess> *visitedContigs,
 									list<Contig*> *possibleContigs ){
 	for( list<PET*>::iterator iter = edges->begin(); iter != edges->end(); iter++ ){
 		PET *edge = *iter;
@@ -1959,8 +1959,8 @@ void opera::GenUnassigndNodes( PartialScaffold *p, bool isStart, bool ifRecalcul
 
 	// check new unassigned nodes
 	list< pair<Contig*, int> > *possibleContig = new list< pair<Contig*, int> >;	// int is the extension direction
-	set<Contig*> *newUnassignedNodes = new set<Contig*>;
-	set<PET*> *visitedEdge = new set<PET*>;
+	set<Contig*, ContigLess> *newUnassignedNodes = new set<Contig*, ContigLess>;
+	set<PET*, PetLess> *visitedEdge = new set<PET*, PetLess>;
 
 	// deal with all contigs in active region
 	//if( m_isSpecialGraph)
@@ -2108,7 +2108,7 @@ void opera::GenUnassigndNodes( PartialScaffold *p, bool isStart, bool ifRecalcul
 	}
 		
 	// find added unassigned nodes
-	for( set<Contig*>::iterator iter = newUnassignedNodes->begin(); iter != newUnassignedNodes->end(); iter++ ){
+	for( set<Contig*, ContigLess>::iterator iter = newUnassignedNodes->begin(); iter != newUnassignedNodes->end(); iter++ ){
 		if( !(*iter)->IsUnassignedNode( PLUS ) ){
 			// not an unassigned nodes before
 			p->AddAddedUnassignedNodes( *iter, PLUS );
@@ -2139,7 +2139,7 @@ void opera::GenUnassigndNodes( PartialScaffold *p, bool isStart, bool ifRecalcul
 		// find added unassigned nodes
 		bool ifPrint = false;
 		int num = 0;
-		for( set<Contig*>::iterator iter = newUnassignedNodes->begin(); iter != newUnassignedNodes->end(); iter++ ){
+		for( set<Contig*, ContigLess>::iterator iter = newUnassignedNodes->begin(); iter != newUnassignedNodes->end(); iter++ ){
 			if( Configure::QUICK_MODE ){
 				num++;
 				if( num > Configure::TOP_VALUE )
@@ -2206,7 +2206,7 @@ void opera::InsertContigIntoUnassignedNodeSet( pair<Contig*, int> pa ){
 
 // traverse edge and find unassigned node
 void opera::TraverseEdges( Contig *c, list<PET*> *edges, list< pair<Contig*, int> > *&possibleContig,
-			   set<Contig*> *&unassignedNodes, set<PET*> *&visitedEdges, int direction, bool isStart, bool ifRecalculate ){
+			   set<Contig*, ContigLess> *&unassignedNodes, set<PET*, PetLess> *&visitedEdges, int direction, bool isStart, bool ifRecalculate ){
 	list<PET*>::iterator iter;
 	for( iter = edges->begin(); iter != edges->end(); iter++ ){
 		if( !(*iter)->isInSubgraph() || (*iter)->IfUnhappy() || (*iter)->IsDE() ){
@@ -3252,7 +3252,7 @@ bool opera::CheckActiveRegionConnectivity( Contig *c ){
 		return true;
 	}
 
-	set<Contig*> *visitedContigs = new set<Contig*>;
+	set<Contig*, ContigLess> *visitedContigs = new set<Contig*, ContigLess>;
 	list<Contig*> *possibleContigs = new list<Contig*>;
 
 	possibleContigs->push_back( c );
@@ -3943,7 +3943,7 @@ void opera::CalculateGap( vector<Contig*> *contigs, int numberOfGaps ){
 
 	string constraintsStr = ""; 
 	int numberOfEdges = 0;      // the number of all concordant edges
-	set<PET*> *visitedEdges = new set<PET*>;
+	set<PET*, PetLess> *visitedEdges = new set<PET*, PetLess>;
 	for( vector<Contig*>::iterator contigIter = contigs->begin(); contigIter!= contigs->end(); contigIter++ ){
 		Contig *contig = *contigIter;
 		//cerr<<"calculate gap: "<<contig->GetName()<<endl;

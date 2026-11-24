@@ -929,7 +929,7 @@ string MapConverter::BundleOneSuperCluster( multiset<PET*, less_std> *group, Pet
 		//PET *superCluster = new PET();
 		
 		// get all edges in same bundle
-		set<PET*> *subset = new set<PET*>;
+		set<PET*, PetLess> *subset = new set<PET*, PetLess>;
 		multiset<PET*, less_std>::iterator iter = group->begin();
 		while( iter != group->end() ){
 			//cerr<<(*iter)->GetOriString()<<endl;
@@ -955,7 +955,7 @@ string MapConverter::BundleOneSuperCluster( multiset<PET*, less_std> *group, Pet
 			//cout<<"Warning: There is a small super cluster between a pair of contigs: "<<biggestPet->GetStartContig()->GetName()
 			//    <<"\t"<<biggestPet->GetEndContig()->GetName()<<endl;
 			//cout<<"size: "<<size<<" total size: "<<totalSize<<endl;
-			set<PET*>::iterator  iter = subset->begin();
+			set<PET*, PetLess>::iterator  iter = subset->begin();
 			while( iter != subset->end() ){
 				conflictingEdges->push_back( (*iter)->GetOriString() );
 				delete *iter;
@@ -967,7 +967,7 @@ string MapConverter::BundleOneSuperCluster( multiset<PET*, less_std> *group, Pet
 			size = 0;
 			PET *superCluster = new PET();
 			//cout<<"There is only one super cluster\n";
-			set<PET*>::iterator iter = subset->begin();
+			set<PET*, PetLess>::iterator iter = subset->begin();
 			Contig* startContig = (*iter)->GetStartContig();
 			Contig* endContig = (*iter)->GetEndContig();
 			int startOri = (*iter)->GetStartContigOri();

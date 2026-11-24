@@ -26,6 +26,11 @@ public:
 	Contig(void);
 	Contig( string name, double length, double cov );
 	~Contig(void);
+	// creation number, unique: orders sets of contigs deterministically
+	// (an order by address would depend on the heap: see ContigLess)
+	long long GetSerial() const { return m_serial; }
+	Contig( const Contig& ) = delete;
+	Contig& operator=( const Contig& ) = delete;
 
 	// Attributes
 private:
@@ -33,6 +38,8 @@ private:
 	double m_length;		// contig length
 	double m_cov;			// contig coverage
 	int m_id;			// contig ID
+	long long m_serial;		// creation number (GetSerial)
+	static long long s_nextSerial;
 	int m_type;                     // the type of the contig: unique, small or repeat
 	list<PET*> *m_leftEdges;		// the left edges, suppose ori is +
 	list<PET*> *m_rightEdges;		// the right edges, suppose ori is +
@@ -292,4 +299,13 @@ public:
 private:
 	string toScaffoldString();
 	//inline void DeleteEdges( list<PET*> *edges );
+};
+
+// Orders contig pointers by creation instead of address. Sets of contigs
+// are iterated where the order matters (it reaches the scaffolds), and
+// addresses depend on the allocator and on every earlier allocation.
+struct ContigLess {
+	bool operator()( const Contig *a, const Contig *b ) const {
+		return a->GetSerial() < b->GetSerial();
+	}
 };

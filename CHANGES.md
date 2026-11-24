@@ -31,6 +31,12 @@
   `below_thresh_*`: up to about 100 GB on large samples), about 3 times
   smaller, compressed in parallel. A run started with 2.0.0 can be
   resumed: the plain files are still read.
+- **Reproducibility:** OPERA-LG no longer depends on memory addresses. Sets
+  of contigs and edges were ordered by address and iterated where the order
+  reaches the scaffolds, so on ties the results could depend on the memory
+  allocator, the C library or the memory layout (reversing that order
+  changed a test's scaffolds). They are ordered by creation now, which
+  gives the same results as 2.0.0 on the samples tested.
 
 ## 2.0.0
 
