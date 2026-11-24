@@ -1988,7 +1988,7 @@ void opera::GenUnassigndNodes( PartialScaffold *p, bool isStart, bool ifRecalcul
 			if( !(*edgeIter)->IfUnhappy() && (*edgeIter)->isInSubgraph() && (*edgeIter)->IsDE() ){
 				// only consider happy edge
 				PET *edge = *edgeIter;
-				visitedEdge->insert( edge );
+				// (visitedEdge is never read: not recorded)
 				int ori = edge->GetOrientationOfContig( contig );
 				Contig *otherContig = edge->GetOtherContig( contig );
 				int otherOri = edge->GetOrientationOfContig( otherContig );
@@ -2218,7 +2218,8 @@ void opera::TraverseEdges( Contig *c, list<PET*> *edges, list< pair<Contig*, int
 		*/
 
 		else{
-			visitedEdges->insert(*iter);
+			// (visitedEdges is never read: the edges are not recorded, an
+			// insert per traversed edge was most of this function's cost)
 			Contig *otherContig = (*iter)->GetOtherContig( c );
 			int ori = (*iter)->GetOrientationOfContig( c );
 			int otherPos = (*iter)->GetPositionOfContig( otherContig );
@@ -3309,16 +3310,29 @@ bool opera::CheckActiveRegionConnectivity( Contig *c ){
 }
 
 // recover unassigned nodes
-void opera::RecoverUnassignedNodes( list< pair<Contig*, int> > *nodes ){
+void opera::RecoverUnassignedNodes( vector< pair<Contig*, int> > *nodes ){
 	for( list< pair<Contig*, int> >::iterator iter = m_unassignedNodes->begin(); iter != m_unassignedNodes->end(); iter++ ){
 		(*iter).first->ClearUnassignedNodeIter( (*iter).second );
 	}
 
-	m_unassignedNodes->clear();
-	
-	for( list< pair<Contig*, int> >::reverse_iterator iter = nodes->rbegin(); iter != nodes->rend(); iter++ ){
-		m_unassignedNodes->push_front( *iter );
-		(*iter).first->SetUnassignedNodeIter( (*iter).second, m_unassignedNodes->begin() );
+	// the list becomes a copy of nodes, reusing its list nodes instead of
+	// freeing and allocating one per element (on every trace back)
+	size_t n = nodes->size();
+	while( m_unassignedNodes->size() > n )
+		m_unassignedNodes->pop_back();
+	while( m_unassignedNodes->size() < n )
+		m_unassignedNodes->push_back( pair<Contig*, int>( NULL, 0 ) );
+	list< pair<Contig*, int> >::iterator iter = m_unassignedNodes->begin();
+	for( size_t i = 0; i < n; i++, iter++ )
+		*iter = (*nodes)[ i ];
+
+	// the contigs' iterators set from the last node to the first, as
+	// before (the first occurrence wins)
+	list< pair<Contig*, int> >::reverse_iterator rIter = m_unassignedNodes->rbegin();
+	for( ; rIter != m_unassignedNodes->rend(); rIter++ ){
+		list< pair<Contig*, int> >::iterator pos = rIter.base();
+		pos--;
+		(*rIter).first->SetUnassignedNodeIter( (*rIter).second, pos );
 	}
 }
 

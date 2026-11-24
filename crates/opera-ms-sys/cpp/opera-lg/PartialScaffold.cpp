@@ -22,7 +22,7 @@ PartialScaffold::PartialScaffold(void)
 
 	m_isFirstScaffold = false;
 	m_ifModifyOrderOfUnassignedNodes = false;
-	m_unassignedNodes = new list< pair<Contig*, int> >;
+	m_unassignedNodes = new vector< pair<Contig*, int> >;
 	
 	m_posOfUnassignedNode = 0;
 
@@ -49,7 +49,7 @@ PartialScaffold::PartialScaffold( PartialScaffold *p ){
 	m_isMannualEmptyScaffold = false;
 	m_isFirstScaffold = false;
 	m_ifModifyOrderOfUnassignedNodes = false;
-	m_unassignedNodes = new list< pair<Contig*, int> >;
+	m_unassignedNodes = new vector< pair<Contig*, int> >;
 	m_posOfUnassignedNode = 0;
 
 	m_addedContigIsRepeat = false;
@@ -281,13 +281,10 @@ bool PartialScaffold::IsFirstScaffold(){
 // about saving the previous unassigned contigs order
 void PartialScaffold::SavePreviousUnassignedNodesOrder( list< pair<Contig*, int> > *order ){
 	m_ifModifyOrderOfUnassignedNodes = true;
-	m_unassignedNodes->clear();
-	for( list< pair<Contig*, int> >::iterator iter = order->begin(); iter != order->end(); iter++ ){
-		m_unassignedNodes->push_back( *iter );
-	}
+	m_unassignedNodes->assign( order->begin(), order->end() );
 }
 
-list< pair<Contig*, int> > * PartialScaffold::GetPreviousUnassignedNodesOrder(){
+vector< pair<Contig*, int> > * PartialScaffold::GetPreviousUnassignedNodesOrder(){
 	return m_unassignedNodes;
 }
 

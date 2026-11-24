@@ -2,6 +2,7 @@
 
 // the class of partial scaffold, including active region and dangling edges
 #include <list>
+#include <vector>
 #include <string>
 #include <utility>
 #include "Contig.h"
@@ -50,7 +51,9 @@ private:
 
 	// record the previous unassigned nodes order
 	bool m_ifModifyOrderOfUnassignedNodes;
-	list< pair<Contig*, int> > *m_unassignedNodes;
+	// the unassigned nodes before adding the contig (a copy: an array, one
+	// allocation instead of one per node, on every trial)
+	vector< pair<Contig*, int> > *m_unassignedNodes;
 
 	// record the position of the used unassigned node
 	int m_posOfUnassignedNode;
@@ -130,7 +133,7 @@ public:
 
 	// about saving the previous unassigned contigs order
 	void SavePreviousUnassignedNodesOrder( list< pair<Contig*, int> > *order );
-	list< pair<Contig*, int> > *GetPreviousUnassignedNodesOrder();
+	vector< pair<Contig*, int> > *GetPreviousUnassignedNodesOrder();
 	bool IfRecalculatdUnassignedNodes();
 
 	void IncreasePosOfUnassignedNode();

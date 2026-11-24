@@ -201,7 +201,7 @@ private:
 	void GenerateResults( vector<vector<Contig*>*> *scafs, ScaffoldResult **&results );
 
 	// recover unassigned nodes
-	void RecoverUnassignedNodes( list< pair<Contig*, int> > *nodes );
+	void RecoverUnassignedNodes( vector< pair<Contig*, int> > *nodes );
 	
 	// generate the graph file for certain subgraph
 	void GenerateDotFile( list<Contig*> *subgraph, int id );

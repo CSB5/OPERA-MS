@@ -37,6 +37,12 @@
   allocator, the C library or the memory layout (reversing that order
   changed a test's scaffolds). They are ordered by creation now, which
   gives the same results as 2.0.0 on the samples tested.
+- **Speed:** OPERA-LG's scaffolding search (steps 6 and 7) is about 1.7
+  times faster: a contig's scaffold text is no longer parsed again on each
+  search step, the unassigned contigs are saved and restored without one
+  allocation per contig, and a set that was filled but never read is gone.
+  Same outputs. A search that hits the time limit (`--opera-lg-timeout`)
+  goes further before it.
 
 ## 2.0.0
 

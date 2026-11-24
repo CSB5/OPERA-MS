@@ -20,6 +20,16 @@ struct SUBCONTIG{
 	bool m_isRepeat;
 };
 
+// One line of a contig's scaffold text ("name\tBE|EB\tlength\tgap"),
+// parsed as SplitSuperContig parsed it on every call.
+struct ScaffoldLine{
+	string m_name;
+	bool m_isBE;
+	double m_length;		// atof of the length column
+	int m_lengthInt;		// atoi of the length column
+	int m_gapSize;			// atoi of the gap column
+};
+
 class Contig
 {
 public:
@@ -49,6 +59,10 @@ private:
 	double m_leftDistance;			// the left distance to the scaffold, suppose ori is +
 	double m_rightDistance;		// the right distance to the scaffold, suppose ori is +
 	string m_scaffold;			// the scaffold content of this contig
+	// m_scaffold parsed (ScaffoldLines), valid until m_scaffold changes
+	vector<ScaffoldLine> m_scaffoldLines;
+	bool m_scaffoldLinesValid;
+	const vector<ScaffoldLine>& ScaffoldLines();
 	int m_scaffoldID;
 	bool m_isBorderContig;		// flag to record if it is a border contig
 	int m_extentionDirection;		// the direction during extension

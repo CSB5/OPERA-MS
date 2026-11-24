@@ -10,6 +10,7 @@ Contig::Contig(void)
 	m_ifInSubgraph = false;
 	m_gapSize = 0;
 	m_scaffold = toScaffoldString();
+	m_scaffoldLinesValid = false;
 	m_isBorderContig = false;
 	m_extentionDirection = NEITHER;
 	m_emptyList = new list< pair<Contig*, int> >;
@@ -81,6 +82,7 @@ Contig::Contig( string name, double length, double cov ){
 	m_ifInSubgraph = false;
 	m_gapSize = 0;
 	m_scaffold = toScaffoldString();
+	m_scaffoldLinesValid = false;
 	m_isBorderContig = false;
 	m_extentionDirection = NEITHER;
 	m_emptyList = new list< pair<Contig*, int> >;
@@ -601,6 +603,30 @@ void Contig::SetScaffoldID( int id ){
 // set scaffold string
 void Contig::SetScaffoldString( string sca ){
 	m_scaffold = sca;
+	m_scaffoldLinesValid = false;
+}
+
+// the lines of m_scaffold, parsed once per value of m_scaffold (it only
+// changes when contigs are merged, SplitSuperContig runs on every trial)
+const vector<ScaffoldLine>& Contig::ScaffoldLines(){
+	if( !m_scaffoldLinesValid ){
+		m_scaffoldLines.clear();
+		vector<string> lines;
+		Split( m_scaffold, "\n", &lines );
+		for( int i = 0; i < (int) lines.size(); i++ ){
+			vector<string> columns;
+			Split( lines.at( i ), "\t", &columns );
+			ScaffoldLine l;
+			l.m_name = columns.at( 0 );
+			l.m_isBE = columns.at( 1 ) == "BE";
+			l.m_length = atof( columns.at( 2 ).c_str() );
+			l.m_gapSize = atoi( columns.at( 3 ).c_str() );
+			l.m_lengthInt = atoi( columns.at( 2 ).c_str() );
+			m_scaffoldLines.push_back( l );
+		}
+		m_scaffoldLinesValid = true;
+	}
+	return m_scaffoldLines;
 }
 
 void Contig::SetNotInSubgraph(){
@@ -942,28 +968,28 @@ void Contig::SplitSuperContig( Contig *previousContig ){
 		}
 	}
 
-	vector<string> lines;
-	Split( m_scaffold, "\n", &lines );
+	// the parsed lines of m_scaffold (ScaffoldLines: same values as
+	// parsing the text here)
+	const vector<ScaffoldLine> &lines = ScaffoldLines();
 	
 	m_removedDis = 0;
 	if( m_ori == PLUS ){
 		for( int i = 0; i < (int) lines.size(); i++ ){
-			vector<string> columns;
-			Split( lines.at( i ), "\t", &columns );
+			const ScaffoldLine &line = lines[ i ];
 			SUBCONTIG *newSubcontig = new SUBCONTIG;
 				
-			newSubcontig->m_contigName = columns.at( 0 );
-			if( columns.at( 1 ) == "BE" )
+			newSubcontig->m_contigName = line.m_name;
+			if( line.m_isBE )
 				newSubcontig->m_ori = PLUS;
 			else
 				newSubcontig->m_ori = MINUS;
 			
-			newSubcontig->m_length = atof( columns.at( 2 ).c_str() );
-			newSubcontig->m_gapSize = atoi( columns.at( 3 ).c_str() );
+			newSubcontig->m_length = line.m_length;
+			newSubcontig->m_gapSize = line.m_gapSize;
 
-			if( previousContig != NULL && i == 0 && lastContigOri == newSubcontig->m_ori && lastContigName == columns.at( 0 ) ){
+			if( previousContig != NULL && i == 0 && lastContigOri == newSubcontig->m_ori && lastContigName == line.m_name ){
 				// remove the first contig
-				m_removedDis = atoi( columns.at( 2 ).c_str() );
+				m_removedDis = line.m_lengthInt;
 				delete newSubcontig;
 				continue;
 			}
@@ -974,25 +1000,24 @@ void Contig::SplitSuperContig( Contig *previousContig ){
 	else{
 		// reverse the scaffolds
 		for( int i = lines.size() - 1; i >= 0; i-- ){
-			vector<string> columns;
-			Split( lines.at( i ), "\t", &columns );
+			const ScaffoldLine &line = lines[ i ];
 			SUBCONTIG *newSubcontig = new SUBCONTIG;
 				
-			newSubcontig->m_contigName = columns.at( 0 );
-			if( columns.at( 1 ) == "BE" )
+			newSubcontig->m_contigName = line.m_name;
+			if( line.m_isBE )
 				newSubcontig->m_ori = MINUS;
 			else
 				newSubcontig->m_ori = PLUS;
 			
-			newSubcontig->m_length = atof( columns.at( 2 ).c_str() );
-			newSubcontig->m_gapSize = atoi( columns.at( 3 ).c_str() );
+			newSubcontig->m_length = line.m_length;
+			newSubcontig->m_gapSize = line.m_gapSize;
 
 			if( previousContig != NULL 
 			    && i == (int) lines.size() - 1 
 			    && lastContigOri != newSubcontig->m_ori 
-			    && lastContigName == columns.at( 0 ) ){
+			    && lastContigName == line.m_name ){
 				// remove the first contig
-				m_removedDis = atoi( columns.at( 2 ).c_str() );
+				m_removedDis = line.m_lengthInt;
 				delete newSubcontig;
 				continue;
 			}
