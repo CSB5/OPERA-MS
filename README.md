@@ -105,6 +105,11 @@ In the output directory:
   be binned further with tools such as MetaBAT2;
 - `opera-ms.log`: every step and command; `benchmark.tsv`: time and memory
   per step.
+- `intermediate_files/`: the files of each step. Some are removed once
+  used; `--keep-intermediate` keeps them, for inspection: all the files of
+  the strains' OPERA-LG runs (`strain_analysis/*/STRAIN_<n>/`, otherwise
+  only the scaffolds, contigs and logs) and the polishing alignments
+  (`polished_assembly/assembly.bam`).
 
 ## Resources
 

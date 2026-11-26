@@ -192,6 +192,45 @@ fn run(rec: &StepRecorder<'_>, pipeline: Pipeline) -> Result<(), RunError> {
     }
 }
 
+/// The stdout and stderr of a strain's OPERA-LG and OPERA-LG-fast runs.
+const STRAIN_LOGS: [&str; 4] = [
+    "log.txt",
+    "opera_lg.err",
+    "log_fast.txt",
+    "opera_lg_fast.err",
+];
+
+/// The files of a strain directory read after its OPERA-LG run: the
+/// scaffolds and contig lengths (gap filling), `contigs.fa` (the strain
+/// count of the assembly stats).
+const STRAIN_OUTPUTS: [&str; 4] = [
+    "scaffolds.scaf",
+    "scaffoldSeq.fasta",
+    "contigs",
+    "contigs.fa",
+];
+
+/// Removes everything of a strain directory but its outputs and logs (the
+/// OPERA-LG inputs, graph and statistics files; kept with
+/// `--keep-intermediate`).
+fn prune_strain_dir(dir: &str) -> Result<()> {
+    for entry in fs::read_dir(dir).with_context(|| format!("cannot list {dir}"))? {
+        let entry = entry.with_context(|| format!("cannot list {dir}"))?;
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if STRAIN_OUTPUTS.contains(&name.as_str()) || STRAIN_LOGS.contains(&name.as_str()) {
+            continue;
+        }
+        let path = entry.path();
+        if entry.file_type().is_ok_and(|t| t.is_dir()) {
+            fs::remove_dir_all(&path)
+        } else {
+            fs::remove_file(&path)
+        }
+        .with_context(|| format!("cannot remove {}", path.display()))?;
+    }
+    Ok(())
+}
+
 fn seconds_since(start: Instant) -> u64 {
     start.elapsed().as_secs()
 }
@@ -906,11 +945,10 @@ impl Run {
                                     sub,
                                     &dir,
                                     &format!("{dir}/opera.config"),
-                                    ["log.txt", "opera_lg.err", "log_fast.txt", "opera_lg_fast.err"],
+                                    STRAIN_LOGS,
                                 )?;
-                                for file in crate::cluster_strain::strain_edge_files(&dir) {
-                                    fs::remove_file(&file)
-                                        .with_context(|| format!("cannot remove {file}"))?;
+                                if !run_ref.opt.keep_intermediate {
+                                    prune_strain_dir(&dir)?;
                                 }
                             }
                             Ok(())
@@ -1327,6 +1365,7 @@ impl Run {
                         samtools_dir: &t.samtools,
                         freebayes_dir: &t.freebayes,
                         polypolish_dir: &t.polypolish,
+                        keep_intermediate: r.opt.keep_intermediate,
                     },
                 )
                 .context("Error in during polishing")?;
@@ -1356,6 +1395,39 @@ mod tests {
         assert_eq!(perl_float("abc"), 0.0);
         assert_eq!(absolute("/cwd/", "out"), "/cwd/out");
         assert_eq!(absolute("/cwd/", "/abs"), "/abs");
+    }
+
+    #[test]
+    fn strain_dir_keeps_outputs_and_logs() {
+        let dir = tempfile::tempdir().unwrap();
+        let d = dir.path().to_str().unwrap();
+        let kept = [
+            "scaffolds.scaf",
+            "scaffoldSeq.fasta",
+            "contigs",
+            "contigs.fa",
+            "log.txt",
+            "opera_lg.err",
+        ];
+        for name in kept.iter().chain(&[
+            "statistics",
+            "discardEdges",
+            "opera.config",
+            "pairedEdges_i0",
+        ]) {
+            fs::write(format!("{d}/{name}"), "x").unwrap();
+        }
+        fs::create_dir(format!("{d}/sub")).unwrap();
+        fs::write(format!("{d}/sub/f"), "x").unwrap();
+        prune_strain_dir(d).unwrap();
+        let mut left: Vec<String> = fs::read_dir(d)
+            .unwrap()
+            .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+            .collect();
+        left.sort();
+        let mut expected: Vec<String> = kept.iter().map(|s| s.to_string()).collect();
+        expected.sort();
+        assert_eq!(left, expected);
     }
 
     #[test]

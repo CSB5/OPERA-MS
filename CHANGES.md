@@ -38,6 +38,11 @@
   a strain's edge files are written directly in `STRAIN_<n>/`, without the
   empty `lib.txt`, and removed once OPERA-LG has run: about half the files
   of `strain_analysis/`. Same outputs.
+- **Output:** of a strain's OPERA-LG run (`strain_analysis/*/STRAIN_<n>/`)
+  only the scaffolds, contigs and logs are kept (6 files instead of about
+  20, read by no later step). The new option `--keep-intermediate` keeps
+  them all, and the polishing alignments (`polished_assembly/assembly.bam`,
+  its index and assembly), otherwise removed.
 - **Fix:** the gap filling (step 8) no longer makes a directory per
   scaffold for the whole step (tens of thousands of files on large
   samples, beyond some file quotas): the read pools go to at most 256

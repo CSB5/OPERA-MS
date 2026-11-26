@@ -70,6 +70,10 @@ pub struct Args<'a> {
     pub samtools_dir: &'a str,
     pub freebayes_dir: &'a str,
     pub polypolish_dir: &'a str,
+    /// `--keep-intermediate`: keep the alignments (`assembly.bam`, its
+    /// index, the assembly they are on and its `.fai`) and the per-group
+    /// targets and variants.
+    pub keep_intermediate: bool,
 }
 
 /// minibwa's index files of `asm` (`<asm>.l2b`, `<asm>.mbw`).
@@ -379,14 +383,16 @@ fn pypolca(rec: &StepRecorder<'_>, a: &Args<'_>, input: &str) -> Result<(String,
     }
     // keep the variants (small), remove the rest
     write(&format!("{d}/polishing.vcf"), &vcf_all)?;
-    for g in 0..groups.len() {
-        remove(&format!("{d}/group_{g}.bed"))?;
-        remove(&format!("{d}/group_{g}.vcf"))?;
+    if !a.keep_intermediate {
+        for g in 0..groups.len() {
+            remove(&format!("{d}/group_{g}.bed"))?;
+            remove(&format!("{d}/group_{g}.vcf"))?;
+        }
+        for path in [bam.clone(), format!("{bam}.bai"), format!("{asm}.fai")] {
+            remove(&path)?;
+        }
+        remove(&asm)?;
     }
-    for path in [bam.clone(), format!("{bam}.bai"), format!("{asm}.fai")] {
-        remove(&path)?;
-    }
-    remove(&asm)?;
     for path in index_files(&asm) {
         remove(&path)?;
     }

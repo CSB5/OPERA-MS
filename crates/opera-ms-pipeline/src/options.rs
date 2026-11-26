@@ -52,6 +52,11 @@ pub struct Options {
     /// (`opera_ms_clusters/all/`); otherwise only `cluster_info.txt` and
     /// `contig_info.txt`, from which the files can be rebuilt.
     pub cluster_fasta: bool,
+    /// `--keep-intermediate`: keep the intermediate files otherwise removed
+    /// once used: every file of the strains' OPERA-LG runs
+    /// (`strain_analysis/*/STRAIN_<n>/`; otherwise only the scaffolds,
+    /// contigs and logs) and the polishing alignments (`assembly.bam`).
+    pub keep_intermediate: bool,
     pub contig_len_thr: i64,
     pub contig_edge_len: i64,
     pub contig_window_len: i64,
@@ -88,6 +93,7 @@ impl Default for Options {
             gap_filling: true,
             no_polishing: false,
             cluster_fasta: false,
+            keep_intermediate: false,
             contig_len_thr: 500,
             contig_edge_len: 80,
             contig_window_len: 340,
@@ -189,6 +195,8 @@ struct Cli {
     offline: bool,
     #[arg(long = "cluster-fasta", action = ArgAction::SetTrue)]
     cluster_fasta: bool,
+    #[arg(long = "keep-intermediate", action = ArgAction::SetTrue)]
+    keep_intermediate: bool,
 
     #[arg(long = "single-genome", action = ArgAction::SetTrue, overrides_with = "no_single_genome")]
     single_genome: bool,
@@ -280,6 +288,7 @@ fn parse_options(args: &[OsString]) -> Result<Invocation, OptionsError> {
         prepare_genomes: cli.prepare_genomes,
         offline: cli.offline,
         cluster_fasta: cli.cluster_fasta,
+        keep_intermediate: cli.keep_intermediate,
         single_genome: negatable(
             cli.single_genome,
             cli.no_single_genome,
@@ -390,6 +399,8 @@ Optional arguments:
                                    (prepares a run on a machine without internet: run it there with the same --genome-cache and --offline)
       --offline                    never download genomes: a genome missing from --genome-cache is skipped (or an error with --strict-genomes)
       --cluster-fasta              also write one FASTA file per cluster in opera_ms_clusters/all/ (default: only contig_info.txt, column CLUSTER)
+      --keep-intermediate          keep intermediate files otherwise removed once used, for inspection: all OPERA-LG files of the strains
+                                   (strain_analysis/*/STRAIN_<n>/) and the polishing alignments (polished_assembly/assembly.bam); applies to the steps run with it
       --contig-file          STR   path to the contig file, if the short-reads have been assembled previously [default assembly using MEGAHIT]
       --num-processors       INT   number of processors to use (note that 2 is the minimum) [2]
       --version                    print the version
@@ -512,6 +523,8 @@ mod tests {
         assert!(!o.strict_genomes);
         assert!(!o.cluster_fasta);
         assert!(run(&["--cluster-fasta"]).cluster_fasta);
+        assert!(!o.keep_intermediate);
+        assert!(run(&["--keep-intermediate"]).keep_intermediate);
     }
 
     #[test]

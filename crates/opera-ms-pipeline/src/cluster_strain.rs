@@ -39,9 +39,9 @@ pub fn edge_set(line: &str) -> Option<usize> {
     EDGE_MEANS.iter().position(|&mean| length < f64::from(mean))
 }
 
-/// The edge files of a strain directory, given to OPERA-LG; removed once it
-/// has run (they are rebuilt from the species' `pairedEdges.gz`).
-pub fn strain_edge_files(dir: &str) -> Vec<String> {
+/// The edge files of a strain directory, given to OPERA-LG (they can be
+/// rebuilt from the species' `pairedEdges.gz`).
+fn strain_edge_files(dir: &str) -> Vec<String> {
     (0..EDGE_MEANS.len())
         .map(|i| format!("{dir}/pairedEdges_i{i}"))
         .collect()
