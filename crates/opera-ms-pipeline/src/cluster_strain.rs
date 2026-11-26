@@ -1,7 +1,7 @@
 //! Strain clustering (stage 6, per species): finds the
 //! coverage modes of the species' windows, assigns contigs to strains, and
 //! writes each strain's OPERA-LG input (`STRAIN_<n>/opera.config`,
-//! `contigs.fa`, `pairedEdges_i<n>/`), `strain_cluster.dat`,
+//! `contigs.fa`, `pairedEdges_i<n>`), `strain_cluster.dat`,
 //! `window_distibution.dat` and `excluded_contigs.fa`. OPERA-LG itself is
 //! run by `run.rs` (timeout and fallback).
 //!
@@ -31,6 +31,21 @@ const CLUSTER_SIZE_THRESHOLD_LOW: f64 = 100_000.0;
 const CLUSTER_SIZE_THRESHOLD_HIGH: f64 = 500_000.0;
 const MAX_CONTIG_COV: f64 = 100_000.0;
 const EDGE_MEANS: [u32; 6] = [300, 1000, 2000, 5000, 15000, 40000];
+
+/// The distance set of an edge line (`pairedEdges` format): the first whose
+/// mean is above the edge's distance (field 5), `None` from 40 kb.
+pub fn edge_set(line: &str) -> Option<usize> {
+    let length = perl_value(line.split('\t').nth(4).unwrap_or(""));
+    EDGE_MEANS.iter().position(|&mean| length < f64::from(mean))
+}
+
+/// The edge files of a strain directory, given to OPERA-LG; removed once it
+/// has run (they are rebuilt from the species' `pairedEdges.gz`).
+pub fn strain_edge_files(dir: &str) -> Vec<String> {
+    (0..EDGE_MEANS.len())
+        .map(|i| format!("{dir}/pairedEdges_i{i}"))
+        .collect()
+}
 
 /// A contig of the species (`contigs_window_cov`).
 #[derive(Debug, Clone)]
@@ -337,6 +352,13 @@ fn header_name(line: &str) -> Option<&str> {
 /// strain clustering writes before running OPERA-LG, and `excluded_contigs.fa`).
 pub fn write_strains(species_dir: &str, species: &Species, strains: &[usize]) -> Result<()> {
     let contigs_fa = read_if_exists(&format!("{species_dir}/contigs.fa"))?;
+    let species_edges = crate::gz::read(&format!("{species_dir}/pairedEdges"))?;
+    let mut edge_sets: [String; EDGE_MEANS.len()] = Default::default();
+    for line in species_edges.split_inclusive('\n') {
+        if let Some(set) = edge_set(line) {
+            edge_sets[set].push_str(line);
+        }
+    }
     for &id in strains {
         let dir = format!("{species_dir}/STRAIN_{id}");
         fs::create_dir_all(&dir).with_context(|| format!("cannot create {dir}"))?;
@@ -344,21 +366,13 @@ pub fn write_strains(species_dir: &str, species: &Species, strains: &[usize]) ->
             "output_folder={dir}\ncontig_file={dir}/contigs.fa\nkeep_repeat=yes\nfilter_repeat=no\n\
              cluster_threshold=1\ncluster_increased_step=5\nkmer=60\n"
         );
-        for (i, mean) in EDGE_MEANS.iter().enumerate() {
-            let edge_dir = format!("{dir}/pairedEdges_i{i}");
-            fs::create_dir_all(&edge_dir).with_context(|| format!("cannot create {edge_dir}"))?;
-            let edge_file = format!("{edge_dir}/pairedEdges_i{i}");
-            let edges =
-                read_if_exists(&format!("{species_dir}/pairedEdges_i{i}/pairedEdges_i{i}"))?;
-            write(&edge_file, &strain_edges(species, &edges, id))?;
-            let lib = format!("{edge_dir}/lib.txt");
-            if !Path::new(&lib).exists() {
-                write(&lib, "")?;
-            }
+        let files = strain_edge_files(&dir);
+        for ((edge_file, mean), edges) in files.iter().zip(EDGE_MEANS).zip(&edge_sets) {
+            write(edge_file, &strain_edges(species, edges, id))?;
             let _ = write!(
                 config,
                 "[LIB]\nmap_type=opera\nmap_file={edge_file}\nlib_mean={mean}\nlib_std={}\n",
-                perl_format(f64::from(*mean) / 10.0)
+                perl_format(f64::from(mean) / 10.0)
             );
         }
         write(&format!("{dir}/opera.config"), &config)?;

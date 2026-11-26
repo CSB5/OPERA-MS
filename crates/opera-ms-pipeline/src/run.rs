@@ -908,6 +908,10 @@ impl Run {
                                     &format!("{dir}/opera.config"),
                                     ["log.txt", "opera_lg.err", "log_fast.txt", "opera_lg_fast.err"],
                                 )?;
+                                for file in crate::cluster_strain::strain_edge_files(&dir) {
+                                    fs::remove_file(&file)
+                                        .with_context(|| format!("cannot remove {file}"))?;
+                                }
                             }
                             Ok(())
                         })

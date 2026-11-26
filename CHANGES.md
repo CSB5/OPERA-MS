@@ -31,6 +31,13 @@
   `below_thresh_*`: up to about 100 GB on large samples), about 3 times
   smaller, compressed in parallel. A run started with 2.0.0 can be
   resumed: the plain files are still read.
+- **Disk:** the strain clustering (step 6) no longer writes `wrong` per
+  species (the edges outside the species, never read: about the size of
+  `pairedEdges` each time, hundreds of GB on large samples). A species'
+  edges are one gzipped file (`pairedEdges.gz`) instead of six directories;
+  a strain's edge files are written directly in `STRAIN_<n>/`, without the
+  empty `lib.txt`, and removed once OPERA-LG has run: about half the files
+  of `strain_analysis/`. Same outputs.
 - **Reproducibility:** OPERA-LG no longer depends on memory addresses. Sets
   of contigs and edges were ordered by address and iterated where the order
   reaches the scaffolds, so on ties the results could depend on the memory

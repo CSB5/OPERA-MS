@@ -2,7 +2,7 @@
 //! than 1 Mbp, writes `reference_length.dat` (species, reference genome
 //! length, length of its contigs, reference genome) and, per species, the
 //! files the strain clustering reads (`matrix`, `contigs_window_cov`,
-//! `pairedEdges_i<n>/pairedEdges_i<n>`, `contigs.fa`, `wrong`); then the
+//! `pairedEdges.gz`, `contigs.fa`); then the
 //! clusters and contigs of the other species (`clusters_single_strain`,
 //! `single_strain_species.fa` in the reference clustering directory).
 //!
@@ -26,7 +26,6 @@ use crate::ref_clustering::species_name;
 const MIN_CONTIG_LENGTH: f64 = 500.0;
 const MIN_SPECIES_LENGTH: f64 = 1_000_000.0;
 const DEFAULT_GENOME_LENGTH: &str = "3500000";
-const EDGE_SETS: usize = 6;
 
 /// Arguments of the coverage clustering.
 pub struct Args<'a> {
@@ -215,12 +214,6 @@ fn edges_from_matrix(
         })
         .map(|(c, _)| c.as_str())
         .collect();
-    let mut sets: [String; EDGE_SETS] = Default::default();
-    for i in 0..EDGE_SETS {
-        let dir = format!("{out_dir}/pairedEdges_i{i}");
-        fs::create_dir_all(&dir).with_context(|| format!("cannot create {dir}"))?;
-    }
-
     let windows = read(&windows_file(inter_dir)?)?;
     let mut window_cov = String::new();
     let mut it = windows.split_inclusive('\n');
@@ -238,35 +231,24 @@ fn edges_from_matrix(
     }
     write(&format!("{out_dir}/contigs_window_cov"), &window_cov)?;
 
-    let mut wrong = String::new();
+    // The species' edges (weight >= 2, both contigs in the species, in one
+    // of the strain clustering's distance sets), split into the sets by
+    // `cluster_strain`.
+    let mut species_edges = String::new();
     let edges = crate::gz::read(&format!("{inter_dir}/read_mapping/pairedEdges"))?;
     for line in lines(&edges) {
         let fields: Vec<&str> = line.split('\t').collect();
         let get = |i: usize| fields.get(i).copied().unwrap_or("");
-        if perl_value(get(6)) < 2.0 {
-            continue;
-        }
-        if species.contains(get(0)) && species.contains(get(2)) {
-            let length = perl_value(get(4));
-            if let Some(set) = [300.0, 1000.0, 2000.0, 5000.0, 15000.0, 40000.0]
-                .iter()
-                .position(|&limit| length < limit)
-            {
-                sets[set].push_str(line);
-                sets[set].push('\n');
-            }
-        } else {
-            wrong.push_str(line);
-            wrong.push('\n');
+        if perl_value(get(6)) >= 2.0
+            && species.contains(get(0))
+            && species.contains(get(2))
+            && crate::cluster_strain::edge_set(line).is_some()
+        {
+            species_edges.push_str(line);
+            species_edges.push('\n');
         }
     }
-    for (i, text) in sets.iter().enumerate() {
-        write(
-            &format!("{out_dir}/pairedEdges_i{i}/pairedEdges_i{i}"),
-            text,
-        )?;
-    }
-    write(&format!("{out_dir}/wrong"), &wrong)?;
+    crate::gz::write(&format!("{out_dir}/pairedEdges"), &species_edges, 1)?;
 
     let path = format!("{out_dir}/contigs.fa");
     let mut out = std::io::BufWriter::new(
