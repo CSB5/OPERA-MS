@@ -38,6 +38,11 @@
   a strain's edge files are written directly in `STRAIN_<n>/`, without the
   empty `lib.txt`, and removed once OPERA-LG has run: about half the files
   of `strain_analysis/`. Same outputs.
+- **Fix:** the gap filling (step 8) no longer makes a directory per
+  scaffold for the whole step (tens of thousands of files on large
+  samples, beyond some file quotas): the read pools go to at most 256
+  files (`READ_POOLS/`), the pre-consensus sequences to one file, and a
+  scaffold's directory only exists while its racon job runs. Same outputs.
 - **Reproducibility:** OPERA-LG no longer depends on memory addresses. Sets
   of contigs and edges were ordered by address and iterated where the order
   reaches the scaffolds, so on ties the results could depend on the memory

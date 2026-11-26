@@ -1,10 +1,12 @@
 //! Gap filling (stage 8).
 //!
-//! 1. The scaffolds with several contigs above the length threshold get a
-//!    directory; the long reads of their edges are pooled there
-//!    (`POOL.fastq.gz`) and a pre-consensus is made from the contigs and the
-//!    read sequence of each gap (`extract_read_sequence`).
-//! 2. minimap2 + racon polish each pre-consensus (`scaffold_racon`).
+//! 1. For the scaffolds with several contigs above the length threshold,
+//!    the long reads of their edges are pooled (`READ_POOLS/`, a bounded
+//!    number of files) and a pre-consensus is made from the contigs and the
+//!    read sequence of each gap (`pre_consensus.fa`, all scaffolds;
+//!    `extract_read_sequence`).
+//! 2. minimap2 + racon polish each pre-consensus (`scaffold_racon`), in a
+//!    directory per scaffold that only exists while its job runs.
 //! 3. Two tilings: the contigs are mapped on the consensus with minimap2 and
 //!    the contig sequences put back in place of the consensus (`remap`).
 //! 4. `scaffoldSeq.fasta.filled`: filled scaffolds, the others unchanged.
@@ -15,12 +17,12 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::Write as _;
 use std::fs::{self, OpenOptions};
-use std::io::{BufRead, Write};
+use std::io::{BufRead, BufWriter, Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::sync::Mutex;
 use std::time::Instant;
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result, bail, ensure};
 use flate2::Compression;
 use flate2::write::GzEncoder;
 use opera_ms_core::bench::StepRecorder;
@@ -89,21 +91,6 @@ fn split_ws(text: &str) -> Vec<&str> {
     fields
 }
 
-/// The entries of a directory in file-system order (without `.` and `..`).
-fn dir_entries(dir: &str) -> Result<Vec<String>> {
-    let mut names = Vec::new();
-    for entry in fs::read_dir(dir).with_context(|| format!("cannot list {dir}"))? {
-        names.push(
-            entry
-                .with_context(|| format!("cannot list {dir}"))?
-                .file_name()
-                .to_string_lossy()
-                .into_owned(),
-        );
-    }
-    Ok(names)
-}
-
 fn time_log(path: &str, step: &str, start: Instant) -> Result<()> {
     append(
         path,
@@ -145,11 +132,11 @@ fn reverse_complement(seq: &str) -> String {
 // ---- split_scaffold_file ------------------------------------------------------
 
 /// The scaffolds: order, the ones to fill (several contigs, longer than
-/// the threshold) with their `.scaf` text.
+/// the threshold).
 struct Scaffolds {
     order: Vec<String>,
     multi: HashSet<String>,
-    to_fill: Vec<(String, String)>,
+    to_fill: Vec<String>,
 }
 
 fn split_scaffold_file(text: &str, threshold: f64) -> Scaffolds {
@@ -158,12 +145,10 @@ fn split_scaffold_file(text: &str, threshold: f64) -> Scaffolds {
         multi: HashSet::new(),
         to_fill: Vec::new(),
     };
-    let (mut nb_contig, mut name, mut length, mut block) =
-        (0usize, String::new(), 0.0, String::new());
-    let close = |s: &mut Scaffolds, nb_contig: usize, name: &str, length: f64, block: &str| {
-        if nb_contig > 1 && length > threshold {
-            s.to_fill.push((name.to_string(), block.to_string()));
-            s.multi.insert(name.to_string());
+    let (mut nb_contig, mut name, mut length) = (0usize, String::new(), 0.0);
+    let close = |s: &mut Scaffolds, nb_contig: usize, name: &str, length: f64| {
+        if nb_contig > 1 && length > threshold && s.multi.insert(name.to_string()) {
+            s.to_fill.push(name.to_string());
         }
     };
     let mut started = false;
@@ -172,23 +157,19 @@ fn split_scaffold_file(text: &str, threshold: f64) -> Scaffolds {
         match body.strip_prefix('>').filter(|r| !r.is_empty()) {
             Some(rest) => {
                 if started && nb_contig > 0 {
-                    close(&mut s, nb_contig, &name, length, &block);
+                    close(&mut s, nb_contig, &name, length);
                 }
                 started = true;
-                block = line.to_string();
                 let fields = split_ws(rest);
                 name = fields.first().copied().unwrap_or("").to_string();
                 length = perl_value(fields.get(2).copied().unwrap_or(""));
                 s.order.push(name.clone());
                 nb_contig = 0;
             }
-            None => {
-                nb_contig += 1;
-                block.push_str(line);
-            }
+            None => nb_contig += 1,
         }
     }
-    close(&mut s, nb_contig, &name, length, &block);
+    close(&mut s, nb_contig, &name, length);
     s
 }
 
@@ -339,11 +320,22 @@ fn read_edges(
 /// the long reads' uncompressed size; minimap2 and racon read it directly.
 const POOL: &str = "POOL.fastq.gz";
 
-/// Read pools per scaffold, written in batches: each batch is a gzip
-/// member appended to the pool (a multi-member gzip file), the scaffolds
-/// of a batch compressed in parallel.
+/// The directory of the read pools, in the gap-filling directory.
+const POOL_DIR: &str = "READ_POOLS";
+
+/// The read pools of the scaffolds, written in batches: each batch of a
+/// scaffold is one gzip member (compressed in parallel). The members go to
+/// a bounded number of bucket files (`READ_POOLS/pool_<n>.fastq.gz`, a
+/// scaffold always in the same bucket) instead of one file per scaffold;
+/// a scaffold's pool is the concatenation of its members in order, the
+/// bytes a pool file of its own would have.
 struct Pools {
     dir: String,
+    bucket_of: HashMap<String, usize>,
+    /// The size of each bucket file.
+    ends: Vec<u64>,
+    /// Per scaffold, its members: (bucket, offset, length).
+    members: HashMap<String, Vec<(usize, u64, u64)>>,
     buffers: HashMap<String, Vec<u8>>,
     size: usize,
     threads: usize,
@@ -351,6 +343,37 @@ struct Pools {
 
 impl Pools {
     const FLUSH_SIZE: usize = 256 << 20;
+    const MAX_BUCKETS: usize = 256;
+
+    /// The pools of `scaffolds` (the scaffolds to fill, in order), in
+    /// `<ana_dir>/READ_POOLS`.
+    fn new(ana_dir: &str, scaffolds: &[String], threads: usize) -> Result<Self> {
+        let dir = format!("{ana_dir}/{POOL_DIR}");
+        remove_if_exists(&dir)?;
+        fs::create_dir_all(&dir).with_context(|| format!("cannot create {dir}"))?;
+        let buckets = (threads.max(1) * 4)
+            .min(Self::MAX_BUCKETS)
+            .min(scaffolds.len())
+            .max(1);
+        let bucket_of = scaffolds
+            .iter()
+            .enumerate()
+            .map(|(i, name)| (name.clone(), i % buckets))
+            .collect();
+        Ok(Self {
+            dir,
+            bucket_of,
+            ends: vec![0; buckets],
+            members: HashMap::new(),
+            buffers: HashMap::new(),
+            size: 0,
+            threads,
+        })
+    }
+
+    fn bucket_path(&self, bucket: usize) -> String {
+        format!("{}/pool_{bucket}.fastq.gz", self.dir)
+    }
 
     fn add(&mut self, scaff: &str, record: &str) -> Result<()> {
         self.buffers
@@ -364,32 +387,124 @@ impl Pools {
         Ok(())
     }
 
+    /// Appends one member per buffered scaffold to its bucket.
     fn flush(&mut self) -> Result<()> {
-        let dir = &self.dir;
-        let jobs: Vec<_> = self
-            .buffers
-            .drain()
-            .map(|(scaff, data)| move || append_gzip(&format!("{dir}/{scaff}/{POOL}"), &data))
+        let mut per_bucket: Vec<Vec<(String, Vec<u8>)>> = vec![Vec::new(); self.ends.len()];
+        for (scaff, data) in self.buffers.drain() {
+            let bucket = *self
+                .bucket_of
+                .get(&scaff)
+                .with_context(|| format!("no read pool for {scaff}"))?;
+            per_bucket[bucket].push((scaff, data));
+        }
+        let jobs: Vec<_> = per_bucket
+            .into_iter()
+            .enumerate()
+            .filter(|(_, list)| !list.is_empty())
+            .map(|(bucket, mut list)| {
+                list.sort_by(|a, b| a.0.cmp(&b.0));
+                let path = self.bucket_path(bucket);
+                move || -> Result<(usize, Vec<(String, u64)>)> {
+                    let file = OpenOptions::new()
+                        .create(true)
+                        .append(true)
+                        .open(&path)
+                        .with_context(|| format!("cannot append to {path}"))?;
+                    let mut out = BufWriter::new(file);
+                    let mut lengths = Vec::with_capacity(list.len());
+                    for (scaff, data) in list {
+                        let member = gzip_member(&data)
+                            .with_context(|| format!("cannot compress the reads of {scaff}"))?;
+                        out.write_all(&member)
+                            .with_context(|| format!("cannot append to {path}"))?;
+                        lengths.push((scaff, member.len() as u64));
+                    }
+                    out.flush()
+                        .with_context(|| format!("cannot append to {path}"))?;
+                    Ok((bucket, lengths))
+                }
+            })
             .collect();
-        run_parallel(jobs, self.threads)
+        let written = run_parallel(jobs, self.threads)
             .map_err(|e| anyhow::anyhow!("cannot write the read pools: {e}"))?;
+        for (bucket, lengths) in written {
+            for (scaff, length) in lengths {
+                let offset = self.ends[bucket];
+                self.members
+                    .entry(scaff)
+                    .or_default()
+                    .push((bucket, offset, length));
+                self.ends[bucket] += length;
+            }
+        }
         self.size = 0;
         Ok(())
     }
+
+    /// The size of a scaffold's pool (0: no reads).
+    fn pool_size(&self, scaff: &str) -> u64 {
+        self.members
+            .get(scaff)
+            .map_or(0, |m| m.iter().map(|&(_, _, length)| length).sum())
+    }
+
+    /// Writes a scaffold's pool to `path`; false (nothing written) if it
+    /// has no reads.
+    fn write_pool(&self, scaff: &str, path: &str) -> Result<bool> {
+        let Some(members) = self.members.get(scaff) else {
+            return Ok(false);
+        };
+        let mut out =
+            BufWriter::new(fs::File::create(path).with_context(|| format!("cannot write {path}"))?);
+        for &(bucket, offset, length) in members {
+            let source = self.bucket_path(bucket);
+            let mut file =
+                fs::File::open(&source).with_context(|| format!("cannot read {source}"))?;
+            file.seek(SeekFrom::Start(offset))
+                .with_context(|| format!("cannot read {source}"))?;
+            let copied = std::io::copy(&mut file.take(length), &mut out)
+                .with_context(|| format!("cannot copy {source} to {path}"))?;
+            ensure!(copied == length, "{source}: truncated read pool of {scaff}");
+        }
+        out.flush()
+            .with_context(|| format!("cannot write {path}"))?;
+        Ok(true)
+    }
+
+    /// Removes the bucket files.
+    fn remove(&self) -> Result<()> {
+        remove_if_exists(&self.dir)
+    }
 }
 
-/// Appends `data` to `path` as one gzip member (fast compression).
-fn append_gzip(path: &str, data: &[u8]) -> Result<()> {
-    let file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(path)
-        .with_context(|| format!("cannot append to {path}"))?;
-    let mut gz = GzEncoder::new(std::io::BufWriter::new(file), Compression::fast());
-    gz.write_all(data)
-        .and_then(|()| gz.finish())
-        .and_then(|mut w| w.flush())
-        .with_context(|| format!("cannot append to {path}"))
+/// `data` as one gzip member (fast compression).
+fn gzip_member(data: &[u8]) -> std::io::Result<Vec<u8>> {
+    let mut gz = GzEncoder::new(Vec::with_capacity(data.len() / 3), Compression::fast());
+    gz.write_all(data)?;
+    gz.finish()
+}
+
+/// The pre-consensus of the scaffolds to fill, in one FASTA file
+/// (`pre_consensus.fa`) with the place of each record.
+struct PreConsensus {
+    path: String,
+    records: HashMap<String, (u64, usize)>,
+}
+
+impl PreConsensus {
+    /// The record of a scaffold, if it has one.
+    fn get(&self, scaff: &str) -> Result<Option<Vec<u8>>> {
+        let Some(&(offset, length)) = self.records.get(scaff) else {
+            return Ok(None);
+        };
+        let mut file =
+            fs::File::open(&self.path).with_context(|| format!("cannot read {}", self.path))?;
+        let mut data = vec![0; length];
+        file.seek(SeekFrom::Start(offset))
+            .and_then(|_| file.read_exact(&mut data))
+            .with_context(|| format!("cannot read {}", self.path))?;
+        Ok(Some(data))
+    }
 }
 
 /// The read pools and the pre-consensus of every scaffold to fill.
@@ -399,8 +514,9 @@ fn extract_read_sequence(
     opera_lr_dir: &str,
     read_file: &str,
     ana_dir: &str,
+    to_fill: &[String],
     threads: usize,
-) -> Result<()> {
+) -> Result<(Pools, PreConsensus)> {
     if !Path::new(contig_file).exists() {
         bail!("CONTIG FILE NOT FOUND {contig_file}");
     }
@@ -439,22 +555,13 @@ fn extract_read_sequence(
     );
     write(&format!("{ana_dir}/contig_extention.log"), &extension_log)?;
 
-    // the scaffolds to fill: the directories of the working directory
     let edge_err_path = format!("{ana_dir}/edge_err");
     write(&edge_err_path, "")?;
-    let scaff_to_fill: HashSet<String> = dir_entries(ana_dir)?
-        .into_iter()
-        .chain([".".into(), "..".into()])
-        .collect();
+    let scaff_to_fill: HashSet<String> = to_fill.iter().cloned().collect();
 
     let mut edge_err = String::new();
     let mut pure_gap: HashMap<String, HashMap<String, f64>> = HashMap::new();
-    let mut pools = Pools {
-        dir: ana_dir.to_string(),
-        buffers: HashMap::new(),
-        size: 0,
-        threads,
-    };
+    let mut pools = Pools::new(ana_dir, to_fill, threads)?;
     let mut process = |name: &str,
                        seq: &str,
                        quality: &str,
@@ -562,7 +669,7 @@ fn extract_read_sequence(
     pools.flush()?;
     write(&edge_err_path, &edge_err)?;
 
-    write_filled_gap_scaffold(
+    let pre = write_filled_gap_scaffold(
         contig_file,
         &scaf,
         &edges,
@@ -570,11 +677,12 @@ fn extract_read_sequence(
         &reference_reads,
         &scaff_to_fill,
         ana_dir,
-    )
+    )?;
+    Ok((pools, pre))
 }
 
-/// `write_filled_gap_scaffold`: `pre_consensus.fa` of each scaffold to
-/// fill, `gap_size.dat`.
+/// `write_filled_gap_scaffold`: `pre_consensus.fa` (the pre-consensus of
+/// the scaffolds to fill), `gap_size.dat`.
 fn write_filled_gap_scaffold(
     contig_file: &str,
     scaf: &str,
@@ -583,7 +691,7 @@ fn write_filled_gap_scaffold(
     reference_reads: &HashMap<String, String>,
     scaff_to_fill: &HashSet<String>,
     ana_dir: &str,
-) -> Result<()> {
+) -> Result<PreConsensus> {
     // contig name: the [\w|/.] characters after '>'
     let mut contigs: HashMap<String, String> = HashMap::new();
     let (mut name, mut seq) = (String::new(), String::new());
@@ -619,12 +727,24 @@ fn write_filled_gap_scaffold(
     let mut gap_length = String::new();
     let mut trimming = 0.0;
     let mut lines = raw_lines(scaf);
-    let write_pre = |scaff: &str, scaff_seq: &str, c2: &str, o2: &str| -> Result<()> {
+    let pre_path = format!("{ana_dir}/pre_consensus.fa");
+    let mut pre_file = BufWriter::new(
+        fs::File::create(&pre_path).with_context(|| format!("cannot write {pre_path}"))?,
+    );
+    let mut pre = PreConsensus {
+        path: pre_path.clone(),
+        records: HashMap::new(),
+    };
+    let mut pre_end = 0u64;
+    let mut write_pre = |scaff: &str, scaff_seq: &str, c2: &str, o2: &str| -> Result<()> {
         if scaff_to_fill.contains(scaff) && !c2.is_empty() {
-            write(
-                &format!("{ana_dir}/{scaff}/pre_consensus.fa"),
-                &format!(">{scaff}\n{scaff_seq}{}\n", contig_seq(c2, o2)),
-            )?;
+            let record = format!(">{scaff}\n{scaff_seq}{}\n", contig_seq(c2, o2));
+            pre_file
+                .write_all(record.as_bytes())
+                .with_context(|| format!("cannot write {pre_path}"))?;
+            pre.records
+                .insert(scaff.to_string(), (pre_end, record.len()));
+            pre_end += record.len() as u64;
         }
         Ok(())
     };
@@ -699,7 +819,12 @@ fn write_filled_gap_scaffold(
         gap_length = fields.get(3).copied().unwrap_or("").to_string();
     }
     write_pre(&scaff, &scaff_seq, &c2, &o2)?;
-    write(&format!("{ana_dir}/gap_size.dat"), &gap_size)
+    pre_file
+        .flush()
+        .with_context(|| format!("cannot write {}", pre.path))?;
+    drop(pre_file);
+    write(&format!("{ana_dir}/gap_size.dat"), &gap_size)?;
+    Ok(pre)
 }
 
 // ---- tiling alignment -----------------------------------------------------
@@ -1260,39 +1385,52 @@ fn space_warning(wd: &str, read_file: &str) -> Option<String> {
     })
 }
 
-/// The number of read pools and their total size.
-fn pool_usage(wd: &str) -> Result<(usize, u64)> {
-    let mut count = 0;
-    let mut bytes = 0;
-    for name in dir_entries(wd)? {
-        if let Ok(meta) = fs::metadata(format!("{wd}/{name}/{POOL}")) {
-            count += 1;
-            bytes += meta.len();
-        }
-    }
-    Ok((count, bytes))
-}
-
 /// The racon jobs: the scaffolds by decreasing work (the size of
 /// their read pool), largest first, and each with
 /// ceil(work / (total work / threads)) threads, at most `nproc`: a scaffold
 /// bigger than a thread's fair share gets several threads instead of
 /// running alone at the end. minimap2 and racon results don't depend on
 /// their thread count.
-fn racon_plan(dirs: &[String], nproc: usize) -> Vec<(String, usize)> {
-    let work = |dir: &str| fs::metadata(format!("{dir}/{POOL}")).map_or(0, |m| m.len());
-    let mut jobs: Vec<(String, u64)> = dirs.iter().map(|d| (d.clone(), work(d))).collect();
+fn racon_plan(work: Vec<(String, u64)>, nproc: usize) -> Vec<(String, usize)> {
+    let mut jobs = work;
     jobs.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
     let total: u64 = jobs.iter().map(|j| j.1).sum();
     let share = (total / nproc as u64).max(1);
     jobs.into_iter()
-        .map(|(dir, w)| {
+        .map(|(name, w)| {
             let threads = usize::try_from(w.div_ceil(share))
                 .unwrap_or(nproc)
                 .clamp(1, nproc);
-            (dir, threads)
+            (name, threads)
         })
         .collect()
+}
+
+/// The racon job of a scaffold: its pre-consensus and read pool are put in
+/// `<wd>/<scaff>/` (`scaffold_racon`'s inputs), and the directory removed
+/// once `racon.fa` is read; it is left for inspection on errors.
+#[allow(clippy::too_many_arguments)]
+fn racon_job(
+    rec: &StepRecorder<'_>,
+    wd: &str,
+    scaff: &str,
+    pools: &Pools,
+    pre: &PreConsensus,
+    a: &Args<'_>,
+    threads: usize,
+) -> Result<(String, String)> {
+    let dir = format!("{wd}/{scaff}");
+    remove_if_exists(&dir)?;
+    fs::create_dir_all(&dir).with_context(|| format!("cannot create {dir}"))?;
+    if let Some(record) = pre.get(scaff)? {
+        let path = format!("{dir}/pre_consensus.fa");
+        fs::write(&path, record).with_context(|| format!("cannot write {path}"))?;
+    }
+    pools.write_pool(scaff, &format!("{dir}/{POOL}"))?;
+    scaffold_racon(rec, &dir, a.racon_dir, a.minimap2_dir, threads)?;
+    let racon = read(&format!("{dir}/racon.fa"))?;
+    remove_if_exists(&dir)?;
+    Ok((scaff.to_string(), racon))
 }
 
 /// `racon.fa` of a scaffold.
@@ -1369,6 +1507,7 @@ fn tiling(
     dir_res: &str,
     name: &str,
     only_scaffold_contigs: bool,
+    pre: &PreConsensus,
     log: &Mutex<String>,
 ) -> Result<String> {
     let tilling_dir = format!("{}/TILLING", a.working_dir);
@@ -1408,12 +1547,11 @@ fn tiling(
     // rescue the pre-consensus of the scaffolds without tiling
     for line in raw_lines(&rescue) {
         let scaff = chop(line);
-        let pre = format!("{}/{scaff}/pre_consensus.fa", a.working_dir);
-        match fs::read(&pre) {
-            Ok(data) => append(&remapped_path, &data)?,
-            Err(_) => {
+        match pre.get(scaff)? {
+            Some(data) => append(&remapped_path, &data)?,
+            None => {
                 if let Ok(mut log) = log.lock() {
-                    let _ = writeln!(log, "no {pre} to rescue");
+                    let _ = writeln!(log, "no pre-consensus of {scaff} to rescue");
                 }
             }
         }
@@ -1439,79 +1577,83 @@ fn gap_filling_steps(rec: &StepRecorder<'_>, a: &Args<'_>, log: &Mutex<String>) 
     let mut start = Instant::now();
     let scaf = read(&format!("{opera_lr_dir}/scaffolds.scaf"))?;
     let scaffolds = split_scaffold_file(&scaf, perl_value(a.scaffold_length_threshold));
-    for (name, text) in &scaffolds.to_fill {
-        let dir = format!("{wd}/{name}");
-        fs::create_dir_all(&dir).with_context(|| format!("cannot create {dir}"))?;
-        write(&format!("{dir}/scaffolds.scaf"), text)?;
-    }
+    let to_fill = &scaffolds.to_fill;
     time_log(&time_path, "g_dir_construction", start)?;
     if let Some(warning) = space_warning(wd, a.read_file) {
         opera_ms_core::note!("{warning}");
     }
 
     start = Instant::now();
-    rec.substep("extract_read_sequence", |_| {
+    let (pools, pre) = rec.substep("extract_read_sequence", |_| {
         extract_read_sequence(
             &format!("{}/edge_read_info.dat", a.read_mapping_dir),
             a.contig_file,
             &opera_lr_dir,
             a.read_file,
             wd,
+            to_fill,
             a.nproc.max(1),
         )
         .context("Error in during read sequence extraction")
     })?;
     time_log(&time_path, "g_extract_read", start)?;
-    let (count, bytes) = pool_usage(wd)?;
+    let bytes: u64 = to_fill.iter().map(|n| pools.pool_size(n)).sum();
     opera_ms_core::log::file_only(&format!(
-        " *** gap filling: {count} read pools, {} MB (gzipped)",
+        " *** gap filling: {} read pools, {} MB (gzipped)",
+        pools.members.len(),
         bytes / 1_000_000
     ));
 
-    // consensus of each scaffold (directory order)
+    // consensus of each scaffold
     start = Instant::now();
-    let mut dirs = Vec::new();
-    for name in dir_entries(wd)? {
-        if !Path::new(&format!("{wd}/{name}/scaffolds.scaf")).exists() {
-            continue;
-        }
-        dirs.push(format!("{wd}/{name}/"));
-    }
-    let plan = racon_plan(&dirs, a.nproc.max(1));
-    rec.substep("racon", |sub| {
+    let work = to_fill
+        .iter()
+        .map(|n| (n.clone(), pools.pool_size(n)))
+        .collect();
+    let plan = racon_plan(work, a.nproc.max(1));
+    let racon: HashMap<String, String> = rec.substep("racon", |sub| {
+        let (pools, pre) = (&pools, &pre);
         let jobs: Vec<_> = plan
             .iter()
-            .map(|(dir, threads)| {
-                move || scaffold_racon(sub, dir, a.racon_dir, a.minimap2_dir, *threads)
-            })
+            .map(|(name, threads)| move || racon_job(sub, wd, name, pools, pre, a, *threads))
             .collect();
         run_parallel(jobs, a.nproc.max(1))
+            .map(|results| results.into_iter().collect())
             .map_err(|e| anyhow::anyhow!("Error during consensus sequence generation: {e}"))
     })?;
+    pools.remove()?;
     let tilling_dir = format!("{wd}/TILLING");
     fs::create_dir_all(&tilling_dir).with_context(|| format!("cannot create {tilling_dir}"))?;
     let consensus = format!("{tilling_dir}/consensus.fa");
     let mut text = String::new();
-    let mut names: Vec<String> = dir_entries(wd)?
-        .into_iter()
-        .filter(|n| {
-            !n.starts_with('.')
-                && n.contains("opera_scaffold_")
-                && Path::new(&format!("{wd}/{n}/racon.fa")).exists()
-        })
+    let mut names: Vec<&String> = racon
+        .keys()
+        .filter(|n| !n.starts_with('.') && n.contains("opera_scaffold_"))
         .collect();
     names.sort();
-    for n in &names {
-        for line in raw_lines(&read(&format!("{wd}/{n}/racon.fa"))?) {
+    for n in names {
+        for line in raw_lines(&racon[n]) {
             text.push_str(&line.replacen("Consensus_", "", 1));
         }
     }
+    drop(racon);
     write(&consensus, &text)?;
+    drop(text);
     time_log(&time_path, "g_racon", start)?;
 
     start = Instant::now();
     let first = rec.substep("tiling_1", |sub| {
-        tiling(sub, a, &scaf, &consensus, wd, "first_tilling", true, log)
+        tiling(
+            sub,
+            a,
+            &scaf,
+            &consensus,
+            wd,
+            "first_tilling",
+            true,
+            &pre,
+            log,
+        )
     })?;
     time_log(&time_path, "g_tilling_1", start)?;
     start = Instant::now();
@@ -1524,16 +1666,13 @@ fn gap_filling_steps(rec: &StepRecorder<'_>, a: &Args<'_>, log: &Mutex<String>) 
             &format!("{tilling_dir}/"),
             "second_tilling",
             false,
+            &pre,
             log,
         )
     })?;
     time_log(&time_path, "g_tilling_2", start)?;
+    remove_if_exists(&pre.path)?;
 
-    for name in dir_entries(wd)? {
-        if !name.starts_with('.') && name.contains("opera_scaffold_") {
-            remove_if_exists(&format!("{wd}/{name}"))?;
-        }
-    }
     let filled = merge_contig_from_scaf(
         &read(&second)?,
         &read(&format!("{opera_lr_dir}/scaffoldSeq.fasta"))?,
@@ -1564,6 +1703,48 @@ mod tests {
         for (o, l, expected) in cases {
             assert_eq!(perl_substr("abc", o, l), expected, "({o}, {l})");
         }
+    }
+
+    /// A scaffold's pool, rebuilt from the buckets, has the bytes a pool
+    /// file of its own had (one member per flush), and the reads in order.
+    #[test]
+    fn read_pools_in_buckets() {
+        let dir = tempfile::tempdir().unwrap();
+        let wd = dir.path().to_str().unwrap();
+        let names: Vec<String> = (0..5).map(|i| format!("opera_scaffold_{i}")).collect();
+        let mut pools = Pools::new(wd, &names, 1).unwrap();
+        assert_eq!(pools.ends.len(), 4);
+        let mut expected: HashMap<&str, Vec<u8>> = HashMap::new();
+        for round in 0..3 {
+            for (i, name) in names.iter().enumerate().take(4) {
+                let record = format!("@r{round}_{i}\nACGT\n+\nIIII\n");
+                pools.add(name, &record).unwrap();
+                expected
+                    .entry(name)
+                    .or_default()
+                    .extend(gzip_member(record.as_bytes()).unwrap());
+            }
+            pools.flush().unwrap();
+        }
+        let out = format!("{wd}/pool.fastq.gz");
+        for name in &names[..4] {
+            assert!(pools.write_pool(name, &out).unwrap());
+            assert_eq!(fs::read(&out).unwrap(), expected[name.as_str()]);
+            assert_eq!(pools.pool_size(name), expected[name.as_str()].len() as u64);
+        }
+        let mut text = String::new();
+        flate2::read::MultiGzDecoder::new(fs::File::open(&out).unwrap())
+            .read_to_string(&mut text)
+            .unwrap();
+        assert_eq!(text.lines().filter(|l| l.starts_with('@')).count(), 3);
+        assert!(text.starts_with("@r0_3\n") && text.contains("@r2_3\n"));
+        // no reads: no pool
+        assert!(!pools.write_pool(&names[4], &format!("{wd}/none")).unwrap());
+        assert_eq!(pools.pool_size(&names[4]), 0);
+        // 5 scaffolds, 4 bucket files
+        assert_eq!(fs::read_dir(format!("{wd}/{POOL_DIR}")).unwrap().count(), 4);
+        pools.remove().unwrap();
+        assert!(!Path::new(&format!("{wd}/{POOL_DIR}")).exists());
     }
 
     #[test]
